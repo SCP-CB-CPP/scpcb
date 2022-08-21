@@ -964,15 +964,12 @@ Function UpdateMainMenu()
 						Framelimit% = 19+(CurrFrameLimit*100.0)
 						Color 255,255,0
 						Text(x + 25 * MenuScale, y + 25 * MenuScale, Framelimit%+" FPS")
+						If MouseOn(x+150*MenuScale,y+30*MenuScale,100*MenuScale+14,20)
+							DrawOptionsTooltip(tx,ty,tw,th,"framelimit",Framelimit)
+						EndIf
 					Else
 						CurrFrameLimit# = 0.0
 						Framelimit = 0
-					EndIf
-					If MouseOn(x+310*MenuScale,y+MenuScale,20*MenuScale,20*MenuScale)
-						DrawOptionsTooltip(tx,ty,tw,th,"framelimit",Framelimit)
-					EndIf
-					If MouseOn(x+150*MenuScale,y+30*MenuScale,100*MenuScale+14,20)
-						DrawOptionsTooltip(tx,ty,tw,th,"framelimit",Framelimit)
 					EndIf
 					;[End Block]
 				EndIf
