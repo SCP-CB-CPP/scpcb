@@ -1094,7 +1094,7 @@ Function UpdateLauncher()
 	MenuWhite = LoadImage_Strict("GFX\menu\menuwhite.jpg")
 	MenuBlack = LoadImage_Strict("GFX\menu\menublack.jpg")	
 	MaskImage MenuBlack, 255,255,0
-	LauncherIMG = LoadImage_Strict("GFX\menu\launcher.jpg")
+	Local LauncherIMG% = LoadImage_Strict("GFX\menu\launcher.jpg")
 	Local i%	
 	
 	For i = 0 To 3
@@ -1119,6 +1119,8 @@ Function UpdateLauncher()
 	BlinkMeterIMG% = LoadImage_Strict("GFX\blinkmeter.jpg")
 	
 	AppTitle "SCP - Containment Breach Launcher"
+	
+	Local quit% = False
 	
 	Repeat
 		
@@ -1234,7 +1236,7 @@ Function UpdateLauncher()
 			Exit
 		EndIf
 		
-		If DrawButton(LauncherWidth - 30 - 90, LauncherHeight - 50, 100, 30, "EXIT", False, False, False) Then End
+		If DrawButton(LauncherWidth - 30 - 90, LauncherHeight - 50, 100, 30, "EXIT", False, False, False) Then quit = True : Exit
 		Flip
 	Forever
 	
@@ -1267,6 +1269,9 @@ Function UpdateLauncher()
 		PutINIValue(OptionFile, "options", "check for updates", "false")
 	EndIf
 	
+	FreeImage(LauncherIMG) : LauncherIMG = 0
+	
+	If quit Then End
 End Function
 
 
