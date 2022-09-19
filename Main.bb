@@ -1082,13 +1082,7 @@ Function UpdateConsole()
 					;[End Block]
 				Case "stopsound", "stfu"
 					;[Block]
-					For snd.Sound = Each Sound
-						For i = 0 To 31
-							If snd\channels[i]<>0 Then
-								StopChannel snd\channels[i]
-							EndIf
-						Next
-					Next
+					KillSounds()
 					
 					For e.Events = Each Events
 						If e\EventName = "alarm" Then 
