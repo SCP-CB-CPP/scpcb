@@ -2760,7 +2760,7 @@ Repeat
 	ElapsedTime = (CurTime - PrevTime) / 1000.0
 	PrevTime = CurTime
 	PrevFPSFactor = FPSfactor
-	FPSfactor = Max(Min(ElapsedTime * 70, 5.0), 0.2)
+	FPSfactor = Min(ElapsedTime * 70, 5.0)
 	FPSfactor2 = FPSfactor
 	
 	If MenuOpen Or InvOpen Or OtherOpen<>Null Or ConsoleOpen Or SelectedDoor <> Null Or SelectedScreen <> Null Or Using294 Then FPSfactor = 0
