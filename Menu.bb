@@ -1222,12 +1222,6 @@ Function UpdateLauncher()
 			EndIf
 		EndIf
 		
-		UpdateCheckEnabled = DrawTick(LauncherWidth - 275, LauncherHeight - 50, UpdateCheckEnabled)
-		Color 255,255,255
-		Text LauncherWidth-250,LauncherHeight-70,"Check for"
-		Text LauncherWidth-250,LauncherHeight-50,"updates on"
-		Text LauncherWidth-250,LauncherHeight-30,"launch"
-		
 		If DrawButton(LauncherWidth - 30 - 90, LauncherHeight - 50 - 55, 100, 30, "LAUNCH", False, False, False) Then
 			GraphicWidth = GfxModeWidths(SelectedGFXMode)
 			GraphicHeight = GfxModeHeights(SelectedGFXMode)
@@ -1263,11 +1257,6 @@ Function UpdateLauncher()
 		PutINIValue(OptionFile, "options", "16bit", "false")
 	EndIf
 	PutINIValue(OptionFile, "options", "gfx driver", SelectedGFXDriver)
-	If UpdateCheckEnabled Then
-		PutINIValue(OptionFile, "options", "check for updates", "true")
-	Else
-		PutINIValue(OptionFile, "options", "check for updates", "false")
-	EndIf
 	
 	FreeImage(LauncherIMG) : LauncherIMG = 0
 	
