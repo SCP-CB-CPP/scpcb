@@ -51,209 +51,6 @@ Function LoadMaterials(file$)
 	CatchErrors("LoadMaterials")
 End Function
 
-Function LoadWorld(file$, rt.RoomTemplates)
-	Local map=LoadAnimMesh_Strict(file)
-	If Not map Then Return
-	
-	Local x#,y#,z#,i%,c%
-	Local mat.Materials
-	
-	Local world=CreatePivot()
-	Local meshes=CreatePivot(world)
-	Local renderbrushes=CreateMesh(world)
-	Local collisionbrushes=CreatePivot(world)
-	;Local pointentities=CreatePivot(world)
-	;Local solidentities=CreatePivot(world)
-	EntityType collisionbrushes,HIT_MAP
-	
-	For c=1 To CountChildren(map)
-		
-		Local node=GetChild(map,c)	
-		Local classname$=Lower(KeyValue(node,"classname"))
-		
-		Select classname
-				
-			;===============================================================================
-			;Map Geometry
-			;===============================================================================
-				
-			Case "mesh"
-				EntityParent node,meshes
-				
-				If KeyValue(node,"disablecollisions")<>1 Then
-					EntityType node,HIT_MAP
-					EntityPickMode node, 2					
-				EndIf
-				
-				c=c-1
-				;EntityType node,HIT_MAP
-				
-			Case "brush"
-				RotateMesh node,EntityPitch(node),EntityYaw(node),EntityRoll(node)
-				PositionMesh node,EntityX(node),EntityY(node),EntityZ(node)
-				
-				AddMesh node,renderbrushes	
-				
-				EntityAlpha node,0
-				EntityType node,HIT_MAP
-				EntityAlpha node,0
-				EntityParent node,collisionbrushes
-				EntityPickMode node, 2
-				
-				c=c-1
-				
-			;===============================================================================
-			;Solid Entities
-			;===============================================================================
-			Case "item"
-				;name$ = KeyValue(node,"name","")
-				;tempname$ = KeyValue(node,"tempname","")				
-				;CreateItem(name,tempname,EntityX(node)*RoomScale,EntityY(node)*RoomScale,EntityZ(node)*RoomScale)
-			Case "screen"
-				
-				x# = EntityX(node)*RoomScale
-				y# = EntityY(node)*RoomScale
-				z# = EntityZ(node)*RoomScale
-				
-				If x<>0 Or y<>0 Or z<>0 Then 
-					Local ts.TempScreens = New TempScreens	
-					ts\x = x
-					ts\y = y
-					ts\z = z
-					ts\imgpath = KeyValue(node,"imgpath","")
-					ts\roomtemplate = rt
-				EndIf
-				
-			Case "waypoint"
-				x# = EntityX(node)*RoomScale
-				y# = EntityY(node)*RoomScale
-				z# = EntityZ(node)*RoomScale				
-				Local w.TempWayPoints = New TempWayPoints
-				w\roomtemplate = rt
-				w\x = x
-				w\y = y
-				w\z = z
-				;EntityParent (w\obj, collisionbrushes)
-				
-			Case "light"
-				x# = EntityX(node)*RoomScale
-				y# = EntityY(node)*RoomScale
-				z# = EntityZ(node)*RoomScale
-				
-				If x<>0 Or y<>0 Or z<>0 Then 
-					range# = Float(KeyValue(node,"range","1"))/2000.0
-					lcolor$=KeyValue(node,"color","255 255 255")
-					intensity# = Min(Float(KeyValue(node,"intensity","1.0"))*0.8,1.0)
-					r=Int(Piece(lcolor,1," "))*intensity
-					g=Int(Piece(lcolor,2," "))*intensity
-					b=Int(Piece(lcolor,3," "))*intensity
-					
-					AddTempLight(rt, x,y,z, 2, range, r,g,b)
-				EndIf
-			Case "spotlight"	
-				x# = EntityX(node)*RoomScale
-				y# = EntityY(node)*RoomScale
-				z# = EntityZ(node)*RoomScale
-				If x<>0 Or y<>0 Or z<>0 Then 
-					range# = Float(KeyValue(node,"range","1"))/700.0
-					lcolor$=KeyValue(node,"color","255 255 255")
-					intensity# = Min(Float(KeyValue(node,"intensity","1.0"))*0.8,1.0)
-					r=Int(Piece(lcolor,1," "))*intensity
-					g=Int(Piece(lcolor,2," "))*intensity
-					b=Int(Piece(lcolor,3," "))*intensity
-					
-					Local lt.LightTemplates = AddTempLight(rt, x,y,z, 3, range, r,g,b)
-					angles$=KeyValue(node,"angles","0 0 0")
-					pitch#=Piece(angles,1," ")
-					yaw#=Piece(angles,2," ")
-					lt\pitch = pitch
-					lt\yaw = yaw
-					
-					lt\innerconeangle = Int(KeyValue(node,"innerconeangle",""))
-					lt\outerconeangle = Int(KeyValue(node,"outerconeangle",""))	
-				EndIf
-			Case "soundemitter"
-				For i = 0 To 3
-					If rt\TempSoundEmitter[i]=0 Then
-						rt\TempSoundEmitterX[i]=EntityX(node)*RoomScale
-						rt\TempSoundEmitterY[i]=EntityY(node)*RoomScale
-						rt\TempSoundEmitterZ[i]=EntityZ(node)*RoomScale
-						rt\TempSoundEmitter[i]=Int(KeyValue(node,"sound","0"))
-						
-						rt\TempSoundEmitterRange[i]=Float(KeyValue(node,"range","1"))
-						Exit
-					EndIf
-				Next
-				
-			;Invisible collision brush
-			Case "field_hit"
-				EntityParent node,collisionbrushes
-				EntityType node,HIT_MAP
-				EntityAlpha node,0
-				c=c-1
-				
-			;===============================================================================
-			;Point Entities
-			;===============================================================================
-				
-			;Camera start position point entity
-			Case "playerstart"
-				angles$=KeyValue(node,"angles","0 0 0")
-				pitch#=Piece(angles,1," ")
-				yaw#=Piece(angles,2," ")
-				roll#=Piece(angles,3," ")
-				If cam Then
-					PositionEntity cam,EntityX(node),EntityY(node),EntityZ(node)
-					RotateEntity cam,pitch,yaw,roll
-				EndIf
-				
-		End Select
-	Next
-	
-	;If BumpEnabled Then 
-	;	
-	;	For i = 1 To CountSurfaces(renderbrushes)
-	;		sf = GetSurface(renderbrushes,i)
-	;		b = GetSurfaceBrush( sf )
-	;		t = GetBrushTexture(b, 1)
-	;		texname$ =  StripPath(TextureName(t))
-	;		
-	;		For mat.Materials = Each Materials
-	;			If texname = mat\name Then
-	;				If mat\Bump <> 0 Then 
-	;					t1 = GetBrushTexture(b,0)
-	;					
-	;					BrushTexture b, t1, 0, 0 ;light map
-	;					BrushTexture b, mat\Bump, 0, 1 ;bump
-	;					BrushTexture b, t, 0, 2 ;diff
-	;					
-	;					PaintSurface sf,b
-	;					
-	;					If StripPath(TextureName(t1)) <> "" Then FreeTexture t1
-	;					
-	;					;If t1<>0 Then FreeTexture t1
-	;					;If t2 <> 0 Then FreeTexture t2						
-	;				EndIf
-	;				Exit
-	;			EndIf 
-	;		Next
-	;		
-	;		FreeTexture t
-	;		FreeBrush b
-	;		
-	;	Next
-	;	
-	;EndIf
-	
-	EntityFX renderbrushes, 1
-	
-	FreeEntity map
-	
-	Return world	
-	
-	
-End Function
-
 ;RMESH STUFF;;;;
 
 Function StripFilename$(file$)
@@ -1705,10 +1502,8 @@ End Function
 
 Function LoadRoomMesh(rt.RoomTemplates)
 	
-	If Instr(rt\objPath,".rmesh")<>0 Then ;file is roommesh
+	If Instr(rt\objPath,".rmesh")<>0 Then
 		rt\obj = LoadRMesh(rt\objPath, rt)
-	Else ;file is b3d
-		If rt\objPath <> "" Then rt\obj = LoadWorld(rt\objPath, rt) Else rt\obj = CreatePivot()
 	EndIf
 	
 	If (Not rt\obj) Then RuntimeError "Failed to load map file "+Chr(34)+mapfile+Chr(34)+"."
@@ -1727,10 +1522,8 @@ Function LoadRoomMeshes()
 	
 	Local i = 0
 	For rt.RoomTemplates = Each RoomTemplates
-		If Instr(rt\objpath,".rmesh")<>0 Then ;file is roommesh
+		If Instr(rt\objpath,".rmesh")<>0 Then
 			rt\obj = LoadRMesh(rt\objPath, rt)
-		Else ;file is b3d
-			If rt\objpath <> "" Then rt\obj = LoadWorld(rt\objPath, rt) Else rt\obj = CreatePivot()
 		EndIf
 		If (Not rt\obj) Then RuntimeError "Failed to load map file "+Chr(34)+mapfile+Chr(34)+"."
 		
