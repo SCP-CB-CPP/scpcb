@@ -373,21 +373,23 @@ Function UpdateMainMenu()
 				
 				If DrawButton(x + 420 * MenuScale, y + height + 20 * MenuScale, 160 * MenuScale, 70 * MenuScale, "START", False) Then
 					If CurrSave = "" Then CurrSave = "untitled"
+					Local SaveName$ = CurrSave
+					
+					Local SameFound% = 1
+
+					For i% = 1 To SaveGameAmount
+						If SaveGames(i - 1) = CurrSave Then
+							SameFound = SameFound + 1
+							i = 0
+							CurrSave = SaveName + " (" + Str(SameFound) + ")"
+						EndIf
+					Next
 					
 					If RandomSeed = "" Then
 						RandomSeed = Abs(MilliSecs())
 					EndIf
 					
 					SeedRnd GenerateSeedNumber(RandomSeed)
-					
-					Local SameFound% = False
-					
-					For  i% = 1 To SaveGameAmount
-						If SaveGames(i - 1) = CurrSave Then SameFound = SameFound + 1
-					Next
-						
-					If SameFound > 0 Then CurrSave = CurrSave + " (" + (SameFound + 1) + ")"
-					
 					LoadEntities()
 					LoadAllSounds()
 					InitNewGame()

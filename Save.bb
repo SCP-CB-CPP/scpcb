@@ -2001,7 +2001,7 @@ Function LoadSaveGames()
 	Repeat 
 		file$=NextFile$(myDir) 
 		If file$="" Then Exit 
-		If FileType(SavePath+"\"+file$+".cbsav") = 1 Then 
+		If FileType(SavePath+"\"+file$) = 1 And Instr(file, ".cbsav") = Len(file) - 5 Then 
 			SaveGameAmount=SaveGameAmount+1
 		End If 
 	Forever 
@@ -2014,8 +2014,8 @@ Function LoadSaveGames()
 	Repeat 
 		file$=NextFile$(myDir) 
 		If file$="" Then Exit 
-		If FileType(SavePath+"\"+file$+".cbsav") = 1 Then 
-			SaveGames(i) = file
+		If FileType(SavePath+"\"+file$) = 1 And Instr(file, ".cbsav") = Len(file) - 5 Then 
+			SaveGames(i) = Left(file, Len(file) - 6)
 			i=i+1
 		End If 
 	Forever 
