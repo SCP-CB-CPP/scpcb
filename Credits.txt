@@ -127,7 +127,7 @@ by "far2"
 by "Lee Byron"
 
 		SCP-012 is based on "SCP-012 - A Bad Composition",
-author unknown
+by "ITIFAMCO"
 
 		SCP-035 is based on "SCP-035 - Possessive Mask",
 by "Kain Pathos Crow"
