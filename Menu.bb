@@ -1223,6 +1223,16 @@ Function UpdateLauncher()
 				Text(40+ 260 + 65, 262 - 55 + 180, G_viewport_width + "x" + G_viewport_height + ",32)")
 			EndIf
 		EndIf
+
+		If DrawButton(LauncherWidth - 30 - 90 - 130 - 15, LauncherHeight - 50 - 55, 130, 30, "MAP CREATOR", False, False, False) Then
+			ExecFile(Chr(34)+"Map Creator\StartMapCreator.bat"+Chr(34))
+			quit = True
+			Exit
+		EndIf
+
+		If DrawButton(LauncherWidth - 30 - 90 - 130 - 15, LauncherHeight - 50, 130, 30, "DISCORD", False, False, False) Then
+			ExecFile("https://discord.gg/guqwRtQPdq")
+		EndIf
 		
 		If DrawButton(LauncherWidth - 30 - 90, LauncherHeight - 50 - 55, 100, 30, "LAUNCH", False, False, False) Then
 			GraphicWidth = GfxModeWidths(SelectedGFXMode)
