@@ -37,13 +37,20 @@ AchvLocked = ResizeImage2(AchvLocked,ImageWidth(AchvLocked)*GraphicHeight/768.0,
 Function GiveAchievement(achvname%, showMessage%=True)
 	If Achievements(achvname)<>True Then
 		Achievements(achvname)=True
+		Local loc2% = -1
 		If AchvMSGenabled And showMessage Then
-			Local loc2% = GetINISectionLocation("Data\achievementstrings.ini", "s"+achvname)
+			loc2% = GetINISectionLocation("Data\achievementstrings.ini", "s"+achvname)
 			Local AchievementName$ = GetINIString2("Data\achievementstrings.ini", loc2, "string1")
 			;Msg = "Achievement Unlocked - "+AchievementName
 			;MsgTimer=70*7
 			CreateAchievementMsg(achvname,AchievementName)
 		EndIf
+		; The "Fair Play" achievement cannot be found on Steam because every achievement there requires the console to not be used.
+		If SteamActive And (Not UsedConsole) And achvname<>AchvConsole Then
+			If loc2 = -1 Then loc2 = GetINISectionLocation("Data\achievementstrings.ini", "s"+achvname)
+			Local AchievementKey$ = GetINIString2("Data\achievementstrings.ini", loc2, "image")
+			Steam_Achieve(AchievementKey)
+		End If
 	EndIf
 End Function
 

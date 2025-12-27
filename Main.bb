@@ -14,6 +14,9 @@ If Len(InitErrorStr)>0 Then
 	RuntimeError "The following DLLs were not found in the game directory:"+Chr(13)+Chr(10)+Chr(13)+Chr(10)+InitErrorStr
 EndIf
 
+Global SteamActive = Steam_Init() = 0
+If SteamActive <> 1 Then RuntimeError("Steam failed to initialize")
+
 Include "StrictLoads.bb"
 Include "KeyName.bb"
 
@@ -2751,7 +2754,7 @@ Global I_Zone.MapZones = New MapZones
 ;----------------------------------------------------------------------------------------------------------------------------------------------------
 
 Repeat
-	
+
 	Cls
 	
 	CurTime = MilliSecs()
@@ -3296,13 +3299,17 @@ Repeat
 	EntityAlpha fresize_image,1.0
 	
 	CatchErrors("Main loop / uncaught")
-	
+
+	If SteamActive Then Steam_Update()
+
 	If Vsync = 0 Then
 		Flip 0
 	Else 
 		Flip 1
 	EndIf
 Forever
+
+Steam_Shutdown()
 
 ;----------------------------------------------------------------------------------------------------------------------------------------------------
 ;----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -7059,13 +7066,15 @@ Function DrawMenu()
 	CatchErrors("Uncaught (DrawMenu)")
 	
 	Local x%, y%, width%, height%
-	If api_GetFocus() = 0 Then ;Game is out of focus -> pause the game
+	Local steamOverlayActive = Steam_GetOverlayState()
+	If api_GetFocus() = 0 Lor steamOverlayActive Then ;Game is out of focus -> pause the game
 		If (Not Using294) Then
 			MenuOpen = True
 			PauseSounds()
 		EndIf
-        Delay 1000 ;Reduce the CPU take while game is not in focus
-    EndIf
+		;Reduce the CPU take while game is not in focus, unless Steam overlay is active
+		If Not steamOverlayActive Then Delay 1000
+	EndIf
 	If MenuOpen Then
 		
 		;DebugLog AchievementsMenu+"|"+OptionsMenu+"|"+QuitMSG
