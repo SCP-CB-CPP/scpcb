@@ -1365,7 +1365,10 @@ Function DrawLoading(percent%, shortloading=False)
 		temp = Rand(1,LoadingScreenAmount)
 		For ls.loadingscreens = Each LoadingScreens
 			If ls\id = temp Then
-				If ls\img=0 Then ls\img = LoadImage_Strict("Loadingscreens\"+ls\imgpath)
+				If ls\img=0 Then
+					ls\img = LoadImage_Strict("Loadingscreens\"+ls\imgpath)
+					MaskImage(ls\img, 0, 0, 0)
+				EndIf
 				SelectedLoadingScreen = ls 
 				Exit
 			EndIf
