@@ -19,9 +19,7 @@ Include "KeyName.bb"
 
 Global OptionFile$ = "options.ini"
 
-Include "Blitz_Basic_Bank.bb"
 Include "Blitz_File_FileName.bb"
-Include "Blitz_File_ZipApi.bb"
 
 Include "DevilParticleSystem.bb"
 
