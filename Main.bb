@@ -7455,6 +7455,15 @@ Function DrawMenu()
 					EndIf
 					
 					y = y + 50*MenuScale
+
+					Color 255,255,255
+					Text(x, y, "Use launcher:")
+					LauncherEnabled% = DrawTick(x + 270 * MenuScale, y, LauncherEnabled%)
+					If MouseOn(x+270*MenuScale,y+MenuScale,20*MenuScale,20*MenuScale)
+						DrawOptionsTooltip(tx,ty,tw,th,"launcher")
+					EndIf
+					
+					y = y + 50*MenuScale
 					
 					Color 255,255,255
 					Text(x, y, "Show FPS:")
@@ -11051,6 +11060,7 @@ Function SaveOptionsINI()
 	PutINIValue(OptionFile, "options", "show FPS", ShowFPS)
 	PutINIValue(OptionFile, "options", "framelimit", Framelimit%)
 	PutINIValue(OptionFile, "options", "achievement popup enabled", AchvMSGenabled%)
+	PutINIValue(OptionFile, "launcher", "launcher enabled", LauncherEnabled%)
 	PutINIValue(OptionFile, "options", "room lights enabled", EnableRoomLights%)
 	PutINIValue(OptionFile, "options", "texture details", TextureDetails%)
 	PutINIValue(OptionFile, "console", "enabled", CanOpenConsole%)

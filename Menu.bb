@@ -904,7 +904,7 @@ Function UpdateMainMenu()
 					;[End Block]
 				ElseIf MainMenuTab = 7 ;Advanced
 					;[Block]
-					height = 320 * MenuScale
+					height = 370 * MenuScale
 					DrawFrame(x, y, width, height)	
 					
 					y = y + 20*MenuScale
@@ -941,6 +941,15 @@ Function UpdateMainMenu()
 					AchvMSGenabled% = DrawTick(x + 310 * MenuScale, y + MenuScale, AchvMSGenabled%)
 					If MouseOn(x+310*MenuScale,y+MenuScale,20*MenuScale,20*MenuScale)
 						DrawOptionsTooltip(tx,ty,tw,th,"achpopup")
+					EndIf
+
+					y = y + 50*MenuScale
+
+					Color 255,255,255
+					Text(x + 20 * MenuScale, y, "Use launcher:")
+					LauncherEnabled% = DrawTick(x + 310 * MenuScale, y + MenuScale, LauncherEnabled%)
+					If MouseOn(x+310*MenuScale,y+MenuScale,20*MenuScale,20*MenuScale)
+						DrawOptionsTooltip(tx,ty,tw,th,"launcher")
 					EndIf
 					
 					y = y + 50*MenuScale
@@ -2076,6 +2085,8 @@ Function DrawOptionsTooltip(x%,y%,width%,height%,option$,value#=0,ingame%=False)
 			txt = Chr(34)+"Open console on error"+Chr(34)+" is self-explanatory."
 		Case "achpopup"
 			txt = "Displays a pop-up notification when an achievement is unlocked."
+		Case "launcher"
+			txt = "Allows re-enabling the launcher if it has been disabled."
 		Case "showfps"
 			txt = "Displays the frames per second counter at the top left-hand corner."
 		Case "framelimit"
