@@ -2081,6 +2081,8 @@ Function DrawOptionsTooltip(x%,y%,width%,height%,option$,value#=0,ingame%=False)
 			txt = "Display the blink and stamina meters."
 		Case "consoleenable"
 			txt = "Toggles the use of the developer console. Can be used in-game by pressing " + KeyName(KEY_CONSOLE) + "."
+			R = 255
+			txt2 = "Using the console will disable Steam achievements."
 		Case "consoleerror"
 			txt = Chr(34)+"Open console on error"+Chr(34)+" is self-explanatory."
 		Case "achpopup"
