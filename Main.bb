@@ -203,7 +203,7 @@ Global BlinkMeterIMG% = LoadImage_Strict("GFX\blinkmeter.jpg")
 DrawLoading(0, True)
 
 ; - -Viewport.
-Global viewport_center_x% = GraphicWidth / 2, viewport_center_y% = GraphicHeight / 2
+Global viewport_center_x% = RealGraphicWidth / 2, viewport_center_y% = RealGraphicHeight / 2
 
 ; -- Mouselook.
 Global mouselook_x_inc# = 0.3 ; This sets both the sensitivity and direction (+/-) of the mouse on the X axis.
