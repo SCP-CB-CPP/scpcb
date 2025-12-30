@@ -5897,7 +5897,7 @@ Function DrawGUI()
 								Color 255,255,255
 								SetBuffer BackBuffer()
 							Case "Document SCP-372"
-								SelectedItem\itemtemplate\img = LoadImage_Strict(SelectedItem\itemtemplate\imgpath)	
+								SelectedItem\itemtemplate\img = LoadImage_Strict(SelectedItem\itemtemplate\imgpath)
 								SelectedItem\itemtemplate\img = ResizeImage2(SelectedItem\itemtemplate\img, ImageWidth(SelectedItem\itemtemplate\img) * MenuScale, ImageHeight(SelectedItem\itemtemplate\img) * MenuScale)
 								
 								SetBuffer ImageBuffer(SelectedItem\itemtemplate\img)
@@ -5910,7 +5910,7 @@ Function DrawGUI()
 								SetBuffer BackBuffer()
 							Case "Movie Ticket"
 								;don't resize because it messes up the masking
-								SelectedItem\itemtemplate\img=LoadImage_Strict(SelectedItem\itemtemplate\imgpath)	
+								SelectedItem\itemtemplate\img=LoadImage_Strict(SelectedItem\itemtemplate\imgpath)
 								
 								If (SelectedItem\state = 0) Then
 									Msg = Chr(34)+"Hey, I remember this movie!"+Chr(34)
@@ -5918,8 +5918,11 @@ Function DrawGUI()
 									PlaySound_Strict LoadTempSound("SFX\SCP\1162\NostalgiaCancer"+Rand(1,5)+".ogg")
 									SelectedItem\state = 1
 								EndIf
+							Case "Leaflet"
+								;don't resize because it messes up the masking
+								SelectedItem\itemtemplate\img=LoadImage_Strict(SelectedItem\itemtemplate\imgpath)
 							Default 
-								SelectedItem\itemtemplate\img=LoadImage_Strict(SelectedItem\itemtemplate\imgpath)	
+								SelectedItem\itemtemplate\img=LoadImage_Strict(SelectedItem\itemtemplate\imgpath)
 								SelectedItem\itemtemplate\img = ResizeImage2(SelectedItem\itemtemplate\img, ImageWidth(SelectedItem\itemtemplate\img) * MenuScale, ImageHeight(SelectedItem\itemtemplate\img) * MenuScale)
 						End Select
 						
