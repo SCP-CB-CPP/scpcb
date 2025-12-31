@@ -6,9 +6,12 @@
 		Jesse Ludtke ("MonocleBios")
 		Juan Pablo Arce ("Juanjpro")
 		Luggs123
+		Nikita Sidorov ("Jabka")
 		Ryan Stillings ("Risingstar64")
 		Sam Lynch ("InnocentSam")
 		Shaun Gaylard ("ENDSHN")
+		Stefan Koch ("Salvage")
+		TheHappyJammer
 
 
 *3D Modellers
@@ -75,6 +78,7 @@
 		Brokami
 		Caleb Yu ("Omniary")
 		KyoteeWilliams
+		Nick Ward ("Inward 3D")
 		Orgil Pount ("Destructoid")
 		Pavel Lvovich Gorfunkel ("-Mark-")
 		Shadowscale48
@@ -108,11 +112,11 @@
 *Others
 
 		Agent G
+		Euclid Labs
 		Gage Allen ("Lotims")
 		Haversine
 		Max Taylor
 		Meow :3
-		Nikita Sidorov ("Jabka")
 		Turtle Sandwich/Catnipbuddy
 		/v/ and everyone in the SCP-CB forum
 
