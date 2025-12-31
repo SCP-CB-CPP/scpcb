@@ -14,9 +14,6 @@ If Len(InitErrorStr)>0 Then
 	RuntimeError "The following DLLs were not found in the game directory:"+Chr(13)+Chr(10)+Chr(13)+Chr(10)+InitErrorStr
 EndIf
 
-Global SteamActive = Steam_Init() = 0
-If SteamActive <> 1 Then RuntimeError("Steam failed to initialize")
-
 Include "StrictLoads.bb"
 Include "KeyName.bb"
 
@@ -32,6 +29,11 @@ While FileType(ErrorFile+Str(ErrorFileInd)+".txt")<>0
 	ErrorFileInd = ErrorFileInd+1
 Wend
 ErrorFile = ErrorFile+Str(ErrorFileInd)+".txt"
+
+Global SteamActive% = GetINIInt(OptionFile, "options", "enable steam")
+If SteamActive Then
+	If Steam_Init() <> 0 Then RuntimeError("Steam failed to initialize")
+EndIf
 
 Global UpdaterFont%
 Global Font1%, Font2%, Font3%, Font4%, Font5%
@@ -3309,7 +3311,7 @@ Repeat
 	EndIf
 Forever
 
-Steam_Shutdown()
+If SteamActive Then Steam_Shutdown()
 
 ;----------------------------------------------------------------------------------------------------------------------------------------------------
 ;----------------------------------------------------------------------------------------------------------------------------------------------------
