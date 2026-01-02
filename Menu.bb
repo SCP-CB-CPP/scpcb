@@ -17,7 +17,10 @@ For i = 0 To 3
 	HandleImage(ArrowIMG(i), 0, 0)
 Next
 
-Global RandomSeed$
+Global RandomSeed$, RandomSeedNumeric%, HasNumericSeed%
+Function GetRandomSeed%()
+	If HasNumericSeed Then Return RandomSeedNumeric Else Return GenerateSeedNumber(RandomSeed)
+End Function
 
 Dim MenuBlinkTimer%(2), MenuBlinkDuration%(2)
 MenuBlinkTimer%(0) = 1
@@ -145,49 +148,53 @@ Function UpdateMainMenu()
 			Select i
 				Case 0
 					txt = "NEW GAME"
-					RandomSeed = ""
-					If temp Then 
-						If Rand(15)=1 Then 
-							Select Rand(13)
-								Case 1 
-									RandomSeed = "NIL"
-								Case 2
-									RandomSeed = "NO"
-								Case 3
-									RandomSeed = "d9341"
-								Case 4
-									RandomSeed = "5CP_I73"
-								Case 5
-									RandomSeed = "DONTBLINK"
-								Case 6
-									RandomSeed = "CRUNCH"
-								Case 7
-									RandomSeed = "die"
-								Case 8
-									RandomSeed = "HTAED"
-								Case 9
-									RandomSeed = "rustledjim"
-								Case 10
-									RandomSeed = "larry"
-								Case 11
-									RandomSeed = "JORGE"
-								Case 12
-									RandomSeed = "dirtymetal"
-								Case 13
-									RandomSeed = "whatpumpkin"
-							End Select
+					If temp Then
+						HasNumericSeed = UseNumericSeeds
+						If HasNumericSeed Then
+							RandomSeedNumeric = MilliSecs()
 						Else
-							n = Rand(4,8)
-							For i = 1 To n
-								If Rand(3)=1 Then
-									RandomSeed = RandomSeed + Rand(0,9)
-								Else
-									RandomSeed = RandomSeed + Chr(Rand(97,122))
-								EndIf
-							Next							
+							RandomSeed = ""
+							If Rand(15)=1 Then 
+								Select Rand(13)
+									Case 1 
+										RandomSeed = "NIL"
+									Case 2
+										RandomSeed = "NO"
+									Case 3
+										RandomSeed = "d9341"
+									Case 4
+										RandomSeed = "5CP_I73"
+									Case 5
+										RandomSeed = "DONTBLINK"
+									Case 6
+										RandomSeed = "CRUNCH"
+									Case 7
+										RandomSeed = "die"
+									Case 8
+										RandomSeed = "HTAED"
+									Case 9
+										RandomSeed = "rustledjim"
+									Case 10
+										RandomSeed = "larry"
+									Case 11
+										RandomSeed = "JORGE"
+									Case 12
+										RandomSeed = "dirtymetal"
+									Case 13
+										RandomSeed = "whatpumpkin"
+								End Select
+							Else
+								n = Rand(4,8)
+								For i = 1 To n
+									If Rand(3)=1 Then
+										RandomSeed = RandomSeed + Rand(0,9)
+									Else
+										RandomSeed = RandomSeed + Chr(Rand(97,122))
+									EndIf
+								Next							
+							EndIf
 						EndIf
 						
-						;RandomSeed = MilliSecs()
 						MainMenuTab = 1
 					EndIf
 				Case 1
@@ -289,7 +296,16 @@ Function UpdateMainMenu()
 				Color 255,255,255
 				If SelectedMap = "" Then
 					Text (x + 20 * MenuScale, y + 60 * MenuScale, "Map seed:")
-					RandomSeed = Left(InputBox(x+150*MenuScale, y+55*MenuScale, 200*MenuScale, 30*MenuScale, RandomSeed, 3),15)	
+					If HasNumericSeed Then
+						Local inputBoxSeed$ = InputBox(x+150*MenuScale, y+55*MenuScale, 200*MenuScale, 30*MenuScale, Str(RandomSeedNumeric), 3)
+						If Instr(inputBoxSeed, "-", 2) <> 0 Then
+							RandomSeedNumeric = -RandomSeedNumeric
+						Else
+							RandomSeedNumeric = Int(inputBoxSeed)
+						EndIf
+					Else
+						RandomSeed = Left(InputBox(x+150*MenuScale, y+55*MenuScale, 200*MenuScale, 30*MenuScale, RandomSeed, 3),15)
+					EndIf
 				Else
 					Text (x + 20 * MenuScale, y + 60 * MenuScale, "Selected map:")
 					Color (255, 255, 255)
@@ -385,11 +401,12 @@ Function UpdateMainMenu()
 						EndIf
 					Next
 					
-					If RandomSeed = "" Then
+					If (Not HasNumericSeed) And RandomSeed = "" Then
 						RandomSeed = Abs(MilliSecs())
 					EndIf
 					
-					SeedRnd GenerateSeedNumber(RandomSeed)
+					SeedRnd GetRandomSeed()
+
 					LoadEntities()
 					LoadAllSounds()
 					InitNewGame()
@@ -470,7 +487,7 @@ Function UpdateMainMenu()
 						If i <= SaveGameAmount Then
 							DrawFrame(x,y,540* MenuScale, 70* MenuScale)
 							
-							If SaveGameVersion(i - 1) <> CompatibleNumber And SaveGameVersion(i - 1) <> "1.3.10" Then
+							If SaveGameVersion(i - 1) <> CompatibleNumber Then
 								Color 255,0,0
 							Else
 								Color 255,255,255
@@ -482,7 +499,7 @@ Function UpdateMainMenu()
 							Text(x + 20 * MenuScale, y + (10+36) * MenuScale, SaveGameVersion(i - 1))
 							
 							If SaveMSG = "" Then
-								If SaveGameVersion(i - 1) <> CompatibleNumber And SaveGameVersion(i - 1) <> "1.3.10" Then
+								If SaveGameVersion(i - 1) <> CompatibleNumber Then
 									DrawFrame(x + 280 * MenuScale, y + 20 * MenuScale, 100 * MenuScale, 30 * MenuScale)
 									Color(255, 0, 0)
 									Text(x + 330 * MenuScale, y + 34 * MenuScale, "Load", True, True)
@@ -504,7 +521,7 @@ Function UpdateMainMenu()
 								EndIf
 							Else
 								DrawFrame(x + 280 * MenuScale, y + 20 * MenuScale, 100 * MenuScale, 30 * MenuScale)
-								If SaveGameVersion(i - 1) <> CompatibleNumber And SaveGameVersion(i - 1) <> "1.3.10" Then
+								If SaveGameVersion(i - 1) <> CompatibleNumber Then
 									Color(255, 0, 0)
 								Else
 									Color(100, 100, 100)
@@ -931,6 +948,15 @@ Function UpdateMainMenu()
 					ConsoleOpening = DrawTick(x + 310 * MenuScale, y + MenuScale, ConsoleOpening)
 					If MouseOn(x+310*MenuScale,y+MenuScale,20*MenuScale,20*MenuScale)
 						DrawOptionsTooltip(tx,ty,tw,th,"consoleerror")
+					EndIf
+
+					y = y + 30*MenuScale
+
+					Color 255,255,255
+					Text(x + 20 * MenuScale, y, "Use numeric seeds:")
+					UseNumericSeeds = DrawTick(x + 310 * MenuScale, y + MenuScale, UseNumericSeeds)
+					If MouseOn(x+310*MenuScale,y+MenuScale,20*MenuScale,20*MenuScale)
+						DrawOptionsTooltip(tx,ty,tw,th,"numericseeds")
 					EndIf
 					
 					y = y + 50*MenuScale
@@ -2084,6 +2110,9 @@ Function DrawOptionsTooltip(x%,y%,width%,height%,option$,value#=0,ingame%=False)
 			txt2 = "Using the console will disable Steam achievements."
 		Case "consoleerror"
 			txt = Chr(34)+"Open console on error"+Chr(34)+" is self-explanatory."
+		Case "numericseeds"
+			txt = "Allows seeds to be entered as integers, which will be used to directly seed the game's internal random number generator."
+			txt = txt + " When no seed is entered, the elapsed millseconds since the computer started is used."
 		Case "achpopup"
 			txt = "Displays a pop-up notification when an achievement is unlocked."
 		Case "launcher"
