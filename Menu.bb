@@ -1113,6 +1113,8 @@ Function UpdateMainMenu()
 	SetFont Font1
 End Function
 
+Dim GfxDrivers$(0)
+
 Function UpdateLauncher()
 	MenuScale = 1
 	
@@ -1151,11 +1153,17 @@ Function UpdateLauncher()
 			GFXModes=GFXModes+1 
 		End If
 	Next
+
+	Local gfxDriverCount = CountGfxDrivers()
+	Dim GfxDrivers$(gfxDriverCount + 1)
+	For i = 1 To gfxDriverCount
+		GfxDrivers(i) = GfxDriverName(i)
+	Next
 	
 	BlinkMeterIMG% = LoadImage_Strict("GFX\blinkmeter.jpg")
 	
 	AppTitle "SCP - Containment Breach Launcher"
-	
+
 	Local quit% = False
 	
 	Repeat
@@ -1196,11 +1204,10 @@ Function UpdateLauncher()
 		Text(x - 10, y - 25, "Graphics:")
 		
 		y=y+10
-		For i = 1 To CountGfxDrivers()
+		For i = 1 To gfxDriverCount
 			Color 0, 0, 0
 			If SelectedGFXDriver = i Then Rect(x - 1, y - 1, 290, 20, False)
-			;text(x, y, bbGfxDriverName(i))
-			LimitText(GfxDriverName(i), x, y, 290, False)
+			LimitText(GfxDrivers(i), x, y, 290, False)
 			If MouseOn(x - 1, y - 1, 290, 20) Then
 				Color 100, 100, 100
 				Rect(x - 1, y - 1, 290, 20, False)
