@@ -1602,13 +1602,13 @@ Function InputBox$(x%, y%, width%, height%, Txt$, ID% = 0)
 	
 	If (Not MouseOnBox) And MouseHit1 And SelectedInputBox = ID Then SelectedInputBox = 0
 	
-	If SelectedInputBox = ID Then
-		Txt = TextInput(Txt)
-		If (MilliSecs() Mod 800) < 400 Then Rect (x + width / 2 + StringWidth(Txt) / 2 + 2, y + height / 2 - 5, 2, 12)
-	EndIf	
-	
 	Text(x + width / 2, y + height / 2, Txt, True, True)
-	
+
+	If SelectedInputBox = ID Then
+		If (MilliSecs() Mod 800) < 400 Then Rect (x + width / 2 + StringWidth(Txt) / 2 + 2, y + height / 2 - 5, 2, 12)
+		Txt = TextInput(Txt)
+	EndIf
+		
 	Return Txt
 End Function
 
