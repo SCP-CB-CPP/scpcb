@@ -7071,7 +7071,7 @@ Function DrawMenu()
 	CatchErrors("Uncaught (DrawMenu)")
 	
 	Local x%, y%, width%, height%
-	Local steamOverlayActive = Steam_GetOverlayState()
+	Local steamOverlayActive = SteamActive And Steam_GetOverlayState()
 	If api_GetFocus() = 0 Lor steamOverlayActive Then ;Game is out of focus -> pause the game
 		If (Not Using294) Then
 			MenuOpen = True
