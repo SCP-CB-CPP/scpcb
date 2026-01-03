@@ -600,6 +600,7 @@ Function UpdateConsole()
 							CreateConsoleMsg("- playmusic [clip + .wav/.ogg]")
 							CreateConsoleMsg("- notarget")
 							CreateConsoleMsg("- unlockexits")
+							CreateConsoleMsg("- omni")
 						Case "asd"
 							CreateConsoleMsg("HELP - asd")
 							CreateConsoleMsg("******************************")
@@ -703,6 +704,19 @@ Function UpdateConsole()
 							CreateConsoleMsg("******************************")
 							CreateConsoleMsg("Will play tracks in .ogg/.wav format")
 							CreateConsoleMsg("from "+Chr(34)+"SFX\Music\Custom\"+Chr(34)+".")
+							CreateConsoleMsg("******************************")
+						Case "omni"
+							CreateConsoleMsg("HELP - omni")
+							CreateConsoleMsg("******************************")
+							CreateConsoleMsg("Toggles getting guaranteed Key Card Omnis")
+							CreateConsoleMsg("from SCP-914, unless a valid parameter")
+							CreateConsoleMsg("is specified (on/off).")
+							CreateConsoleMsg("A Key Card Omni can be obtained from SCP-914")
+							CreateConsoleMsg("by refining a Level 5 Key Card on Fine")
+							CreateConsoleMsg("or any Key Card on Very Fine.")
+							CreateConsoleMsg("By default, the chance of success is random")
+							CreateConsoleMsg("and relies on the amount of achievements")
+							CreateConsoleMsg("unlocked in the current save.")
 							CreateConsoleMsg("******************************")
 							
 						Default
@@ -1398,6 +1412,23 @@ Function UpdateConsole()
 					BlinkEffectTimer = Float(Right(args, Len(args) - Instr(args, " ")))
 					CreateConsoleMsg("Set BlinkEffect to: " + BlinkEffect + "and BlinkEffect timer: " + BlinkEffectTimer)
 					;[End Block]
+				Case "omni"
+					StrTemp$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
+					
+					Select StrTemp
+						Case "on", "1", "true"
+							GuaranteedOmni% = True						
+						Case "off", "0", "false"
+							GuaranteedOmni% = False	
+						Default
+							GuaranteedOmni% = Not GuaranteedOmni%
+					End Select
+					
+					If GuaranteedOmni% Then
+						CreateConsoleMsg("GUARANTEED KEY CARD OMNI ON")	
+					Else
+						CreateConsoleMsg("GUARANTEED KEY CARD OMNI OFF")
+					EndIf
 				Case "jorge"
 					;[Block]	
 					CreateConsoleMsg(Chr(74)+Chr(79)+Chr(82)+Chr(71)+Chr(69)+Chr(32)+Chr(72)+Chr(65)+Chr(83)+Chr(32)+Chr(66)+Chr(69)+Chr(69)+Chr(78)+Chr(32)+Chr(69)+Chr(88)+Chr(80)+Chr(69)+Chr(67)+Chr(84)+Chr(73)+Chr(78)+Chr(71)+Chr(32)+Chr(89)+Chr(79)+Chr(85)+Chr(46))
@@ -1684,6 +1715,8 @@ Global MonitorTimer# = 0.0, MonitorTimer2# = 0.0, UpdateCheckpoint1%, UpdateChec
 Global PlayerDetected%
 Global PrevInjuries#,PrevBloodloss#
 Global NoTarget% = False
+
+Global GuaranteedOmni% = False
 
 Global NVGImages = LoadAnimImage("GFX\battery.png",64,64,0,2)
 MaskImage NVGImages,255,0,255
@@ -8860,6 +8893,8 @@ Function NullGame(playbuttonsfx%=True)
 	DeafPlayer% = False
 	DeafTimer# = 0.0
 	
+	GuaranteedOmni% = False
+
 	IsZombie% = False
 	
 	Delete Each AchievementMsg
@@ -9651,19 +9686,19 @@ Function Use914(item.Items, setting$, x#, y#, z#)
 							
 							Select SelectedDifficulty\otherFactors
 								Case EASY
-									If Rand(0,((MAXACHIEVEMENTS-1)*3)-((CurrAchvAmount-1)*3))=0
+									If GuaranteedOmni Lor Rand(0,((MAXACHIEVEMENTS-1)*3)-((CurrAchvAmount-1)*3))=0
 										it2 = CreateItem("Key Card Omni", "key6", x, y, z)
 									Else
 										it2 = CreateItem("Mastercard", "misc", x, y, z)
 									EndIf
 								Case NORMAL
-									If Rand(0,((MAXACHIEVEMENTS-1)*4)-((CurrAchvAmount-1)*3))=0
+									If GuaranteedOmni Lor Rand(0,((MAXACHIEVEMENTS-1)*4)-((CurrAchvAmount-1)*3))=0
 										it2 = CreateItem("Key Card Omni", "key6", x, y, z)
 									Else
 										it2 = CreateItem("Mastercard", "misc", x, y, z)
 									EndIf
 								Case HARD
-									If Rand(0,((MAXACHIEVEMENTS-1)*5)-((CurrAchvAmount-1)*3))=0
+									If GuaranteedOmni Lor Rand(0,((MAXACHIEVEMENTS-1)*5)-((CurrAchvAmount-1)*3))=0
 										it2 = CreateItem("Key Card Omni", "key6", x, y, z)
 									Else
 										it2 = CreateItem("Mastercard", "misc", x, y, z)
@@ -9682,19 +9717,19 @@ Function Use914(item.Items, setting$, x#, y#, z#)
 					
 					Select SelectedDifficulty\otherFactors
 						Case EASY
-							If Rand(0,((MAXACHIEVEMENTS-1)*3)-((CurrAchvAmount-1)*3))=0
+							If GuaranteedOmni Lor Rand(0,((MAXACHIEVEMENTS-1)*3)-((CurrAchvAmount-1)*3))=0
 								it2 = CreateItem("Key Card Omni", "key6", x, y, z)
 							Else
 								it2 = CreateItem("Mastercard", "misc", x, y, z)
 							EndIf
 						Case NORMAL
-							If Rand(0,((MAXACHIEVEMENTS-1)*4)-((CurrAchvAmount-1)*3))=0
+							If GuaranteedOmni Lor Rand(0,((MAXACHIEVEMENTS-1)*4)-((CurrAchvAmount-1)*3))=0
 								it2 = CreateItem("Key Card Omni", "key6", x, y, z)
 							Else
 								it2 = CreateItem("Mastercard", "misc", x, y, z)
 							EndIf
 						Case HARD
-							If Rand(0,((MAXACHIEVEMENTS-1)*5)-((CurrAchvAmount-1)*3))=0
+							If GuaranteedOmni Lor Rand(0,((MAXACHIEVEMENTS-1)*5)-((CurrAchvAmount-1)*3))=0
 								it2 = CreateItem("Key Card Omni", "key6", x, y, z)
 							Else
 								it2 = CreateItem("Mastercard", "misc", x, y, z)

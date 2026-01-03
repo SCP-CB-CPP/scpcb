@@ -1276,6 +1276,7 @@ Function LoadGameQuick(file$)
 	GameSaved = True
 	NoTarget = False
 	InfiniteStamina = False
+	GuaranteedOmni = False
 	IsZombie% = False
 	DeafPlayer% = False
 	DeafTimer# = 0.0
