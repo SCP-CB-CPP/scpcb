@@ -4820,27 +4820,28 @@ Function DrawGUI()
 					offset = offset + 1
 				EndIf
 			Next
+			x = x + 500 * MenuScale
 			If PlayerRoom\RoomTemplate\Name$ = "dimension1499"
-				Text x + 350, 50, "Current Chunk X/Z: ("+(Int((EntityX(Collider)+20)/40))+", "+(Int((EntityZ(Collider)+20)/40))+")"
+				Text x, 50, "Current Chunk X/Z: ("+(Int((EntityX(Collider)+20)/40))+", "+(Int((EntityZ(Collider)+20)/40))+")"
 				Local CH_Amount% = 0
 				For ch.Chunk = Each Chunk
 					CH_Amount = CH_Amount + 1
 				Next
-				Text x + 350, 70, "Current Chunk Amount: "+CH_Amount
+				Text x, 70, "Current Chunk Amount: "+CH_Amount
 			Else
-				Text x + 350, 50, "Current Room Position: ("+PlayerRoom\x+", "+PlayerRoom\y+", "+PlayerRoom\z+")"
+				Text x, 50, "Current Room Position: ("+PlayerRoom\x+", "+PlayerRoom\y+", "+PlayerRoom\z+")"
 			EndIf
-			Text x + 350, 90, "Triangles rendered: "+CurrTrisAmount
-			Text x + 350, 110, "Active textures: "+ActiveTextures()
-			Text x + 350, 130, "SCP-427 state (secs): "+Int(I_427\Timer/70.0)
-			Text x + 350, 150, "SCP-008 infection: "+Infect
+			Text x, 90, "Triangles rendered: "+CurrTrisAmount
+			Text x, 110, "Active textures: "+ActiveTextures()
+			Text x, 130, "SCP-427 state (secs): "+Int(I_427\Timer/70.0)
+			Text x, 150, "SCP-008 infection: "+Infect
 			For i = 0 To 5
-				Text x + 350, 170+(20*i), "SCP-1025 State "+i+": "+SCP1025state[i]
+				Text x, 170+(20*i), "SCP-1025 State "+i+": "+SCP1025state[i]
 			Next
 			If SelectedMonitor <> Null Then
-				Text x + 350, 310, "Current monitor: "+SelectedMonitor\ScrObj
+				Text x, 310, "Current monitor: "+SelectedMonitor\ScrObj
 			Else
-				Text x + 350, 310, "Current monitor: NULL"
+				Text x, 310, "Current monitor: NULL"
 			EndIf
 			
 			SetFont Font1

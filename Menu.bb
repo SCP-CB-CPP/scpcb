@@ -1638,7 +1638,7 @@ Function InputBox$(x%, y%, width%, height%, Txt$, ID% = 0)
 	Text(x + width / 2, y + height / 2, Txt, True, True)
 
 	If SelectedInputBox = ID Then
-		If (MilliSecs() Mod 800) < 400 Then Rect (x + width / 2 + StringWidth(Txt) / 2 + 2, y + height / 2 - 5, 2, 12)
+		If (MilliSecs() Mod 800) < 400 Then Rect (x + width / 2 + StringWidth(Txt) / 2 + 2, y + height / 2 - 17 * MenuScale / 2, 2, 17 * MenuScale)
 		Txt = TextInput(Txt)
 	EndIf
 		
