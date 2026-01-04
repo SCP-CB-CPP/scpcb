@@ -1737,7 +1737,6 @@ Global QuitMSG% = 0
 
 Global InFacility% = True
 
-Global PrevMusicVolume# = MusicVolume#
 Global PrevSFXVolume# = SFXVolume#
 Global DeafPlayer% = False
 Global DeafTimer# = 0.0
@@ -8881,7 +8880,6 @@ Function NullGame(playbuttonsfx%=True)
 	QuitMSG% = -1
 	AchievementsMenu% = -1
 	
-	MusicVolume# = PrevMusicVolume
 	SFXVolume# = PrevSFXVolume
 	DeafPlayer% = False
 	DeafTimer# = 0.0
