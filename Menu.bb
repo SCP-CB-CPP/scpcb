@@ -2153,15 +2153,13 @@ Function DrawOptionsTooltip(x%,y%,width%,height%,option$,value#=0,ingame%=False)
 		Color R,G,B
 		RowText(txt2,fx,(fy+(StringHeight(txt)*lines)+(5+lines)*MenuScale),fw,fh)
 	EndIf
-	If usetestimg
-		MidHandle Menu_TestIMG
-		If txt2$ = ""
-			DrawImage Menu_TestIMG,x+(width/2),y+100*MenuScale+((StringHeight(txt)*lines)+(10+lines)*MenuScale)
-		Else
-			DrawImage Menu_TestIMG,x+(width/2),y+100*MenuScale+(((StringHeight(txt)*lines)+(10+lines)*MenuScale)+(StringHeight(txt2)*lines2)+(10+lines2)*MenuScale)
-		EndIf
-	EndIf
-	
+End Function
+
+Function DrawFramedRowText(txt$, x%, y%, width%)
+	Local fw% = width - 12*MenuScale
+	Local lines% = GetLineAmount(txt, fw, 0)
+	DrawFrame(x, y, width, ((StringHeight(txt)*lines)+(10+lines)*MenuScale), 0, 0, False)
+	RowText(txt, x + 6*MenuScale, y + 6*MenuScale, fw, 0)
 End Function
 
 Function DrawMapCreatorTooltip(x%,y%,width%,height%,mapname$)
