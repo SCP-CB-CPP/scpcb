@@ -7,13 +7,6 @@
 
 ;    See Credits.txt for a list of contributors
 
-Local InitErrorStr$ = ""
-If FileSize("zlibwapi.dll")=0 Then InitErrorStr=InitErrorStr+ "zlibwapi.dll"+Chr(13)+Chr(10)
-
-If Len(InitErrorStr)>0 Then
-	RuntimeError "The following DLLs were not found in the game directory:"+Chr(13)+Chr(10)+Chr(13)+Chr(10)+InitErrorStr
-EndIf
-
 Include "StrictLoads.bb"
 Include "KeyName.bb"
 
