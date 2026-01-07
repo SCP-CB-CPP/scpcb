@@ -5279,7 +5279,7 @@ Function UpdateMTFUnit(n.NPCs)
 			Case NPCtype1499
 				realType = "1499-1"
 		End Select
-		RuntimeError "Called UpdateMTFUnit on "+realType
+		RuntimeErrorExt "Called UpdateMTFUnit on "+realType
 	EndIf
 	;[End Block]
 	
@@ -7177,7 +7177,7 @@ Function ManipulateNPCBones()
 			If bonename$<>""
 				pvt% = CreatePivot()
 				bone% = FindChild(n\obj,bonename$)
-				If bone% = 0 Then RuntimeError "ERROR: NPC bone "+Chr(34)+bonename$+Chr(34)+" does not exist."
+				If bone% = 0 Then RuntimeErrorExt "ERROR: NPC bone "+Chr(34)+bonename$+Chr(34)+" does not exist."
 				PositionEntity pvt%,EntityX(bone%,True),EntityY(bone%,True),EntityZ(bone%,True)
 				Select n\ManipulationType
 					Case 0 ;<--- looking at player

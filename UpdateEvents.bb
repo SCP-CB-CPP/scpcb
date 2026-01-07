@@ -3293,7 +3293,7 @@ Function UpdateEvents()
 						Next
 						
 						If lastX=firstX And lastY=firstY Then
-							RuntimeError("The maintenance tunnels could not be generated properly!")
+							RuntimeErrorExt("The maintenance tunnels could not be generated properly!")
 						EndIf
 						
 						;place the tunnels

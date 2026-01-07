@@ -168,14 +168,14 @@ Function LoadRMesh(file$,rt.RoomTemplates)
 			Exit
 		EndIf
 	Next
-	If f=0 Then RuntimeError "Error reading file "+Chr(34)+file+Chr(34)
+	If f=0 Then RuntimeErrorExt "Error reading file "+Chr(34)+file+Chr(34)
 	Local isRMesh$ = ReadString(f)
 	If isRMesh$="RoomMesh"
 		;Continue
 	ElseIf isRMesh$="RoomMesh.HasTriggerBox"
 		hasTriggerBox% = True
 	Else
-		RuntimeError Chr(34)+file+Chr(34)+" is Not RMESH ("+isRMesh+")"
+		RuntimeErrorExt Chr(34)+file+Chr(34)+" is Not RMESH ("+isRMesh+")"
 	EndIf
 	
 	file=StripFilename(file)
@@ -1520,7 +1520,7 @@ Function LoadRoomMesh(rt.RoomTemplates)
 		rt\obj = LoadRMesh(rt\objPath, rt)
 	EndIf
 	
-	If (Not rt\obj) Then RuntimeError "Failed to load map file "+Chr(34)+mapfile+Chr(34)+"."
+	If (Not rt\obj) Then RuntimeErrorExt "Failed to load map file "+Chr(34)+mapfile+Chr(34)+"."
 	
 	CalculateRoomTemplateExtents(rt)
 	
@@ -1539,7 +1539,7 @@ Function LoadRoomMeshes()
 		If Instr(rt\objpath,".rmesh")<>0 Then
 			rt\obj = LoadRMesh(rt\objPath, rt)
 		EndIf
-		If (Not rt\obj) Then RuntimeError "Failed to load map file "+Chr(34)+mapfile+Chr(34)+"."
+		If (Not rt\obj) Then RuntimeErrorExt "Failed to load map file "+Chr(34)+mapfile+Chr(34)+"."
 		
 		HideEntity(rt\obj)
 		DrawLoading(Int(30 + (15.0 / temp)*i))
@@ -7614,16 +7614,16 @@ Function load_terrain(hmap,yscale#=0.7,t1%,t2%,mask%)
 	DebugLog "load_terrain: "+hmap
 	
 	; load the heightmap
-	If hmap = 0 Then RuntimeError "Heightmap image "+hmap+" does not exist."
+	If hmap = 0 Then RuntimeErrorExt "Heightmap image "+hmap+" does not exist."
 	
 	; store heightmap dimensions
 	Local x = ImageWidth(hmap)-1, y = ImageHeight(hmap)-1
 	Local lx,ly,index
 	
 	; load texture and lightmaps
-	If t1 = 0 Then RuntimeError "load_terrain error: invalid texture 1"
-	If t2 = 0 Then RuntimeError "load_terrain error: invalid texture 2"
-	If mask = 0 Then RuntimeError "load_terrain error: invalid texture mask"
+	If t1 = 0 Then RuntimeErrorExt "load_terrain error: invalid texture 1"
+	If t2 = 0 Then RuntimeErrorExt "load_terrain error: invalid texture 2"
+	If mask = 0 Then RuntimeErrorExt "load_terrain error: invalid texture mask"
 	
 	; auto scale the textures to the right size
 	If t1 Then ScaleTexture t1,x/4,y/4

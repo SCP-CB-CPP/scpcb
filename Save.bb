@@ -604,7 +604,7 @@ Function LoadGame(file$)
 		Next
 	Next
 	
-	If ReadInt(f) <> 113 Then RuntimeError("Couldn't load the game, save file corrupted (error 2.5)")
+	If ReadInt(f) <> 113 Then RuntimeErrorExt("Couldn't load the game, save file corrupted (error 2.5)")
 	
 	temp = ReadInt(f)
 	For i = 1 To temp
@@ -710,7 +710,7 @@ Function LoadGame(file$)
 		MTFroomState[i]=ReadInt(f)
 	Next
 	
-	If ReadInt(f) <> 632 Then RuntimeError("Couldn't load the game, save file corrupted (error 1)")
+	If ReadInt(f) <> 632 Then RuntimeErrorExt("Couldn't load the game, save file corrupted (error 1)")
 	
 	room2gw_brokendoor = ReadInt(f)
 	room2gw_x = ReadFloat(f)
@@ -843,7 +843,7 @@ Function LoadGame(file$)
 		EndIf
 	Next
 	
-	If ReadInt(f) <> 954 Then RuntimeError("Couldn't load the game, save file may be corrupted (error 2)")
+	If ReadInt(f) <> 954 Then RuntimeErrorExt("Couldn't load the game, save file may be corrupted (error 2)")
 	
 	Local spacing# = 8.0
 	Local zone%,shouldSpawnDoor%
@@ -977,7 +977,7 @@ Function LoadGame(file$)
 	
 	InitWayPoints()
 	
-	If ReadInt(f) <> 1845 Then RuntimeError("Couldn't load the game, save file corrupted (error 3)")
+	If ReadInt(f) <> 1845 Then RuntimeErrorExt("Couldn't load the game, save file corrupted (error 3)")
 	
 	Local d.Decals
 	For d.Decals = Each Decals
@@ -1173,7 +1173,7 @@ Function LoadGame(file$)
 		EndIf
 	Next
 	
-	;If ReadInt(f) <> 994 Then RuntimeError("Couldn't load the game, save file corrupted (error 4)")
+	;If ReadInt(f) <> 994 Then RuntimeErrorExt("Couldn't load the game, save file corrupted (error 4)")
 	
 	If ReadInt(f)<>994
 		UsedConsole = True
@@ -1436,7 +1436,7 @@ Function LoadGameQuick(file$)
 		Next
 	Next
 	
-	If ReadInt(f) <> 113 Then RuntimeError("Couldn't load the game, save file corrupted (error 2.5)")
+	If ReadInt(f) <> 113 Then RuntimeErrorExt("Couldn't load the game, save file corrupted (error 2.5)")
 	
 	For n.NPCs = Each NPCs
 		RemoveNPC(n)
@@ -1544,7 +1544,7 @@ Function LoadGameQuick(file$)
 		MTFroomState[i]=ReadInt(f)
 	Next
 	
-	If ReadInt(f) <> 632 Then RuntimeError("Couldn't load the game, save file corrupted (error 1)")
+	If ReadInt(f) <> 632 Then RuntimeErrorExt("Couldn't load the game, save file corrupted (error 1)")
 	
 	room2gw_brokendoor = ReadInt(f)
 	room2gw_x = ReadFloat(f)
@@ -1658,7 +1658,7 @@ Function LoadGameQuick(file$)
 	
 	;InitWayPoints()
 	
-	If ReadInt(f) <> 954 Then RuntimeError("Couldn't load the game, save file may be corrupted (error 2)")
+	If ReadInt(f) <> 954 Then RuntimeErrorExt("Couldn't load the game, save file may be corrupted (error 2)")
 	
 	temp = ReadInt (f)
 	
@@ -1707,7 +1707,7 @@ Function LoadGameQuick(file$)
 		Next		
 	Next
 	
-	If ReadInt(f) <> 1845 Then RuntimeError("Couldn't load the game, save file corrupted (error 3)")
+	If ReadInt(f) <> 1845 Then RuntimeErrorExt("Couldn't load the game, save file corrupted (error 3)")
 	
 	Local d.Decals
 	For d.Decals = Each Decals
@@ -1886,7 +1886,7 @@ Function LoadGameQuick(file$)
 		EndIf
 	Next
 	
-	;If ReadInt(f) <> 994 Then RuntimeError("Couldn't load the game, save file corrupted (error 4)")
+	;If ReadInt(f) <> 994 Then RuntimeErrorExt("Couldn't load the game, save file corrupted (error 4)")
 	
 	If ReadInt(f)<>994
 		UsedConsole = True
@@ -1997,7 +1997,7 @@ End Function
 Function LoadSaveGames()
 	CatchErrors("Uncaught (LoadSaveGames)")
 	SaveGameAmount = 0
-	If FileType(SavePath)=1 Then RuntimeError "Can't create dir "+Chr(34)+SavePath+Chr(34)
+	If FileType(SavePath)=1 Then RuntimeErrorExt "Can't create dir "+Chr(34)+SavePath+Chr(34)
 	If FileType(SavePath)=0 Then CreateDir(SavePath)
 	myDir=ReadDir(SavePath) 
 	Repeat 
