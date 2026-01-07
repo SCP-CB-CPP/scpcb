@@ -657,10 +657,10 @@ Function UpdateMainMenu()
 					y=y+30*MenuScale
 					
 					;Local prevGamma# = ScreenGamma
-					ScreenGamma = (SlideBar(x + 310*MenuScale, y+6*MenuScale, 150*MenuScale, ScreenGamma*50.0)/50.0)
+					ScreenGamma = (SlideBar(x + 310*MenuScale, y+6*MenuScale, 150*MenuScale, ScreenGamma*50.0, 1)/50.0)
 					Color 255,255,255
 					Text(x + 20 * MenuScale, y, "Screen gamma")
-					If MouseOn(x+310*MenuScale,y+6*MenuScale,150*MenuScale+14,20) And OnSliderID=0
+					If (MouseOn(x+310*MenuScale,y+6*MenuScale,150*MenuScale+14,20) And OnSliderID=0) Lor OnSliderID=1
 						DrawOptionsTooltip(tx,ty,tw,th,"gamma",ScreenGamma)
 					EndIf
 					
@@ -712,21 +712,21 @@ Function UpdateMainMenu()
 					
 					y = y + 20*MenuScale
 					
-					MusicVolume = (SlideBar(x + 310*MenuScale, y-4*MenuScale, 150*MenuScale, MusicVolume*100.0)/100.0)
+					MusicVolume = (SlideBar(x + 310*MenuScale, y-4*MenuScale, 150*MenuScale, MusicVolume*100.0, 1)/100.0)
 					Color 255,255,255
 					Text(x + 20 * MenuScale, y, "Music volume:")
-					If MouseOn(x+310*MenuScale,y-4*MenuScale,150*MenuScale+14,20)
+					If (MouseOn(x+310*MenuScale,y-4*MenuScale,150*MenuScale+14,20) And OnSliderID=0) Lor OnSliderID=1
 						DrawOptionsTooltip(tx,ty,tw,th,"musicvol",MusicVolume)
 					EndIf
 					
 					y = y + 40*MenuScale
 					
 					;SFXVolume = (SlideBar(x + 310*MenuScale, y-4*MenuScale, 150*MenuScale, SFXVolume*100.0)/100.0)
-					PrevSFXVolume = (SlideBar(x + 310*MenuScale, y-4*MenuScale, 150*MenuScale, SFXVolume*100.0)/100.0)
+					PrevSFXVolume = (SlideBar(x + 310*MenuScale, y-4*MenuScale, 150*MenuScale, SFXVolume*100.0, 2)/100.0)
 					SFXVolume = PrevSFXVolume
 					Color 255,255,255
 					Text(x + 20 * MenuScale, y, "Sound volume:")
-					If MouseOn(x+310*MenuScale,y-4*MenuScale,150*MenuScale+14,20)
+					If (MouseOn(x+310*MenuScale,y-4*MenuScale,150*MenuScale+14,20) And OnSliderID=0) Lor OnSliderID=2
 						DrawOptionsTooltip(tx,ty,tw,th,"soundvol",PrevSFXVolume)
 					EndIf
 					;If MouseDown1 Then
@@ -767,7 +767,7 @@ Function UpdateMainMenu()
 						EndIf
 						EnableSFXRelease_Prev% = EnableSFXRelease
 					EndIf
-					If MouseOn(x+310*MenuScale,y+MenuScale,20*MenuScale,20*MenuScale)
+					If MouseOn(x+310*MenuScale,y+MenuScale,20*MenuScale,20*MenuScale) And OnSliderID=0
 						DrawOptionsTooltip(tx,ty,tw,th+220*MenuScale,"sfxautorelease")
 					EndIf
 					y = y + 30*MenuScale
@@ -775,7 +775,7 @@ Function UpdateMainMenu()
 					Color 255,255,255
 					Text x + 20 * MenuScale, y, "Enable user tracks:"
 					EnableUserTracks = DrawTick(x + 310 * MenuScale, y + MenuScale, EnableUserTracks)
-					If MouseOn(x+310*MenuScale,y+MenuScale,20*MenuScale,20*MenuScale)
+					If MouseOn(x+310*MenuScale,y+MenuScale,20*MenuScale,20*MenuScale) And OnSliderID=0
 						DrawOptionsTooltip(tx,ty,tw,th,"usertrack")
 					EndIf
 					
@@ -789,7 +789,7 @@ Function UpdateMainMenu()
 						Else
 							Text x + 350 * MenuScale, y + MenuScale, "Random"
 						EndIf
-						If MouseOn(x+310*MenuScale,y+MenuScale,20*MenuScale,20*MenuScale)
+						If MouseOn(x+310*MenuScale,y+MenuScale,20*MenuScale,20*MenuScale) And OnSliderID=0
 							DrawOptionsTooltip(tx,ty,tw,th,"usertrackmode")
 						EndIf
 						If DrawButton(x + 20 * MenuScale, y + 30 * MenuScale, 190 * MenuScale, 25 * MenuScale, "Scan for User Tracks",False)
@@ -815,7 +815,7 @@ Function UpdateMainMenu()
 							
 							DebugLog "User Tracks Check Ended"
 						EndIf
-						If MouseOn(x+20*MenuScale,y+30*MenuScale,190*MenuScale,25*MenuScale)
+						If MouseOn(x+20*MenuScale,y+30*MenuScale,190*MenuScale,25*MenuScale) And OnSliderID=0
 							DrawOptionsTooltip(tx,ty,tw,th,"usertrackscan")
 						EndIf
 						If UserTrackCheck%>0
@@ -832,10 +832,10 @@ Function UpdateMainMenu()
 					
 					y = y + 20*MenuScale
 					
-					MouseSens = (SlideBar(x + 310*MenuScale, y-4*MenuScale, 150*MenuScale, (MouseSens+0.5)*100.0)/100.0)-0.5
+					MouseSens = (SlideBar(x + 310*MenuScale, y-4*MenuScale, 150*MenuScale, (MouseSens+0.5)*100.0, 1)/100.0)-0.5
 					Color(255, 255, 255)
 					Text(x + 20 * MenuScale, y, "Mouse sensitivity:")
-					If MouseOn(x+310*MenuScale,y-4*MenuScale,150*MenuScale+14,20)
+					If (MouseOn(x+310*MenuScale,y-4*MenuScale,150*MenuScale+14,20) And OnSliderID=0) Lor OnSliderID=1
 						DrawOptionsTooltip(tx,ty,tw,th,"mousesensitivity",MouseSens)
 					EndIf
 					
@@ -844,16 +844,16 @@ Function UpdateMainMenu()
 					Color(255, 255, 255)
 					Text(x + 20 * MenuScale, y, "Invert mouse Y-axis:")
 					InvertMouse = DrawTick(x + 310 * MenuScale, y + MenuScale, InvertMouse)
-					If MouseOn(x+310*MenuScale,y+MenuScale,20*MenuScale,20*MenuScale)
+					If MouseOn(x+310*MenuScale,y+MenuScale,20*MenuScale,20*MenuScale) And OnSliderID=0
 						DrawOptionsTooltip(tx,ty,tw,th,"mouseinvert")
 					EndIf
 					
 					y = y + 40*MenuScale
 					
-					MouseSmooth = (SlideBar(x + 310*MenuScale, y-4*MenuScale, 150*MenuScale, (MouseSmooth)*50.0)/50.0)
+					MouseSmooth = (SlideBar(x + 310*MenuScale, y-4*MenuScale, 150*MenuScale, (MouseSmooth)*50.0, 2)/50.0)
 					Color(255, 255, 255)
 					Text(x + 20 * MenuScale, y, "Mouse smoothing:")
-					If MouseOn(x+310*MenuScale,y-4*MenuScale,150*MenuScale+14,20)
+					If (MouseOn(x+310*MenuScale,y-4*MenuScale,150*MenuScale+14,20) And OnSliderID=0) Lor OnSliderID=2
 						DrawOptionsTooltip(tx,ty,tw,th,"mousesmoothing",MouseSmooth)
 					EndIf
 					
@@ -885,7 +885,7 @@ Function UpdateMainMenu()
 					Text(x + 280 * MenuScale, y + 100 * MenuScale, "Open/Close Console")
 					InputBox(x + 470 * MenuScale, y + 100 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_CONSOLE,210)),12)
 					
-					If MouseOn(x+20*MenuScale,y,width-40*MenuScale,120*MenuScale)
+					If MouseOn(x+20*MenuScale,y,width-40*MenuScale,120*MenuScale) And OnSliderID=0
 						DrawOptionsTooltip(tx,ty,tw,th,"controls")
 					EndIf
 					
@@ -928,7 +928,7 @@ Function UpdateMainMenu()
 					Color 255,255,255				
 					Text(x + 20 * MenuScale, y, "Show HUD:")	
 					HUDenabled = DrawTick(x + 310 * MenuScale, y + MenuScale, HUDenabled)
-					If MouseOn(x+310*MenuScale,y+MenuScale,20*MenuScale,20*MenuScale)
+					If MouseOn(x+310*MenuScale,y+MenuScale,20*MenuScale,20*MenuScale) And OnSliderID=0
 						DrawOptionsTooltip(tx,ty,tw,th,"hud")
 					EndIf
 					
@@ -937,7 +937,7 @@ Function UpdateMainMenu()
 					Color 255,255,255
 					Text(x + 20 * MenuScale, y, "Enable console:")
 					CanOpenConsole = DrawTick(x + 310 * MenuScale, y + MenuScale, CanOpenConsole)
-					If MouseOn(x+310*MenuScale,y+MenuScale,20*MenuScale,20*MenuScale)
+					If MouseOn(x+310*MenuScale,y+MenuScale,20*MenuScale,20*MenuScale) And OnSliderID=0
 						DrawOptionsTooltip(tx,ty,tw,th,"consoleenable")
 					EndIf
 					
@@ -946,7 +946,7 @@ Function UpdateMainMenu()
 					Color 255,255,255
 					Text(x + 20 * MenuScale, y, "Open console on error:")
 					ConsoleOpening = DrawTick(x + 310 * MenuScale, y + MenuScale, ConsoleOpening)
-					If MouseOn(x+310*MenuScale,y+MenuScale,20*MenuScale,20*MenuScale)
+					If MouseOn(x+310*MenuScale,y+MenuScale,20*MenuScale,20*MenuScale) And OnSliderID=0
 						DrawOptionsTooltip(tx,ty,tw,th,"consoleerror")
 					EndIf
 
@@ -955,7 +955,7 @@ Function UpdateMainMenu()
 					Color 255,255,255
 					Text(x + 20 * MenuScale, y, "Use numeric seeds:")
 					UseNumericSeeds = DrawTick(x + 310 * MenuScale, y + MenuScale, UseNumericSeeds)
-					If MouseOn(x+310*MenuScale,y+MenuScale,20*MenuScale,20*MenuScale)
+					If MouseOn(x+310*MenuScale,y+MenuScale,20*MenuScale,20*MenuScale) And OnSliderID=0
 						DrawOptionsTooltip(tx,ty,tw,th,"numericseeds")
 					EndIf
 					
@@ -964,7 +964,7 @@ Function UpdateMainMenu()
 					Color 255,255,255
 					Text(x + 20 * MenuScale, y, "Achievement popups:")
 					AchvMSGenabled% = DrawTick(x + 310 * MenuScale, y + MenuScale, AchvMSGenabled%)
-					If MouseOn(x+310*MenuScale,y+MenuScale,20*MenuScale,20*MenuScale)
+					If MouseOn(x+310*MenuScale,y+MenuScale,20*MenuScale,20*MenuScale) And OnSliderID=0
 						DrawOptionsTooltip(tx,ty,tw,th,"achpopup")
 					EndIf
 
@@ -973,7 +973,7 @@ Function UpdateMainMenu()
 					Color 255,255,255
 					Text(x + 20 * MenuScale, y, "Use launcher:")
 					LauncherEnabled% = DrawTick(x + 310 * MenuScale, y + MenuScale, LauncherEnabled%)
-					If MouseOn(x+310*MenuScale,y+MenuScale,20*MenuScale,20*MenuScale)
+					If MouseOn(x+310*MenuScale,y+MenuScale,20*MenuScale,20*MenuScale) And OnSliderID=0
 						DrawOptionsTooltip(tx,ty,tw,th,"launcher")
 					EndIf
 					
@@ -982,7 +982,7 @@ Function UpdateMainMenu()
 					Color 255,255,255
 					Text(x + 20 * MenuScale, y, "Show FPS:")
 					ShowFPS% = DrawTick(x + 310 * MenuScale, y + MenuScale, ShowFPS%)
-					If MouseOn(x+310*MenuScale,y+MenuScale,20*MenuScale,20*MenuScale)
+					If MouseOn(x+310*MenuScale,y+MenuScale,20*MenuScale,20*MenuScale) And OnSliderID=0
 						DrawOptionsTooltip(tx,ty,tw,th,"showfps")
 					EndIf
 					
@@ -992,20 +992,23 @@ Function UpdateMainMenu()
 					Text(x + 20 * MenuScale, y, "Framelimit:")
 					Color 255,255,255
 					If DrawTick(x + 310 * MenuScale, y, CurrFrameLimit > 0.0) Then
-						;CurrFrameLimit# = (SlideBar(x + 150*MenuScale, y+30*MenuScale, 100*MenuScale, CurrFrameLimit#*50.0)/50.0)
+						;CurrFrameLimit# = (SlideBar(x + 150*MenuScale, y+30*MenuScale, 100*MenuScale, CurrFrameLimit#*50.0, 1)/50.0)
 						;CurrFrameLimit = Max(CurrFrameLimit, 0.1)
 						;Framelimit% = CurrFrameLimit#*100.0
-						CurrFrameLimit# = (SlideBar(x + 150*MenuScale, y+30*MenuScale, 100*MenuScale, CurrFrameLimit#*99.0)/99.0)
+						CurrFrameLimit# = (SlideBar(x + 150*MenuScale, y+30*MenuScale, 100*MenuScale, CurrFrameLimit#*99.0, 1)/99.0)
 						CurrFrameLimit# = Max(CurrFrameLimit, 0.01)
 						Framelimit% = 19+(CurrFrameLimit*100.0)
 						Color 255,255,0
 						Text(x + 25 * MenuScale, y + 25 * MenuScale, Framelimit%+" FPS")
-						If MouseOn(x+150*MenuScale,y+30*MenuScale,100*MenuScale+14,20)
+						If (MouseOn(x+150*MenuScale,y+30*MenuScale,100*MenuScale+14,20) And OnSliderID=0) Lor OnSliderID=1
 							DrawOptionsTooltip(tx,ty,tw,th,"framelimit",Framelimit)
 						EndIf
 					Else
 						CurrFrameLimit# = 0.0
 						Framelimit = 0
+					EndIf
+					If MouseOn(x+310*MenuScale,y+MenuScale,20*MenuScale,20*MenuScale) And OnSliderID=0
+						DrawOptionsTooltip(tx,ty,tw,th,"framelimit",Framelimit)
 					EndIf
 					;[End Block]
 				EndIf
@@ -1732,17 +1735,21 @@ Function DrawTick%(x%, y%, selected%, locked% = False)
 	Return selected
 End Function
 
-Function SlideBar#(x%, y%, width%, value#)
+Function SlideBar#(x%, y%, width%, value#, ID%)
 	
 	If MouseDown1 And OnSliderID=0 Then
 		If ScaledMouseX() >= x And ScaledMouseX() <= x + width + 14 And ScaledMouseY() >= y And ScaledMouseY() <= y + 20 Then
-			value = Min(Max((ScaledMouseX() - x) * 100 / width, 0), 100)
+			OnSliderID = ID
 		EndIf
 	EndIf
-	
+
+	If ID = OnSliderID Then
+		value = Min(Max((ScaledMouseX() - x) * 100 / width, 0), 100)
+	EndIf
+
 	Color 255,255,255
 	Rect(x, y, width + 14, 20,False)
-	
+
 	DrawImage(BlinkMeterIMG, x + width * value / 100.0 +3, y+3)
 	
 	Color 170,170,170 
@@ -2255,7 +2262,7 @@ Global OnSliderID% = 0
 
 Function Slider3(x%,y%,width%,value%,ID%,val1$,val2$,val3$)
 	
-	If MouseDown1 Then
+	If MouseDown1 And OnSliderID = 0 Then
 		If (ScaledMouseX() >= x) And (ScaledMouseX() <= x+width+14) And (ScaledMouseY() >= y-8) And (ScaledMouseY() <= y+10)
 			OnSliderID = ID
 		EndIf
@@ -2307,7 +2314,7 @@ End Function
 
 Function Slider4(x%,y%,width%,value%,ID%,val1$,val2$,val3$,val4$)
 	
-	If MouseDown1 Then
+	If MouseDown1 And OnSliderID = 0 Then
 		If (ScaledMouseX() >= x) And (ScaledMouseX() <= x+width+14) And (ScaledMouseY() >= y-8) And (ScaledMouseY() <= y+10)
 			OnSliderID = ID
 		EndIf
@@ -2366,7 +2373,7 @@ End Function
 
 Function Slider5(x%,y%,width%,value%,ID%,val1$,val2$,val3$,val4$,val5$)
 	
-	If MouseDown1 Then
+	If MouseDown1 And OnSliderID = 0 Then
 		If (ScaledMouseX() >= x) And (ScaledMouseX() <= x+width+14) And (ScaledMouseY() >= y-8) And (ScaledMouseY() <= y+10)
 			OnSliderID = ID
 		EndIf
@@ -2432,7 +2439,7 @@ End Function
 
 Function Slider7(x%,y%,width%,value%,ID%,val1$,val2$,val3$,val4$,val5$,val6$,val7$)
 	
-	If MouseDown1 Then
+	If MouseDown1 And OnSliderID = 0 Then
 		If (ScaledMouseX() >= x) And (ScaledMouseX() <= x+width+14) And (ScaledMouseY() >= y-8) And (ScaledMouseY() <= y+10)
 			OnSliderID = ID
 		EndIf
