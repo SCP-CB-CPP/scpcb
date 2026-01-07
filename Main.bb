@@ -137,7 +137,7 @@ Else
 	GraphicHeight = GfxModeHeights(SelectedGFXMode)
 EndIf
 SetGfxDriver(SelectedGFXDriver)
-Global GFXDriverName$ = GFXDriverName(SelectedGFXDriver)
+Global GfxDriverName$ = GfxDriverName(SelectedGFXDriver)
 	
 ;New "fake fullscreen" - ENDSHN Psst, it's called borderless windowed mode --Love Mark,
 If BorderlessWindowed
@@ -342,6 +342,7 @@ Global ConsoleFlush%
 Global ConsoleFlushSnd% = 0, ConsoleMusFlush% = 0, ConsoleMusPlay% = 0
 
 Global InfiniteStamina% = False
+Global NoBlinking% = False
 Global NVBlink%
 Global IsNVGBlinking% = False
 
@@ -581,6 +582,7 @@ Function UpdateConsole()
 							CreateConsoleMsg("- infect [value]")
 							CreateConsoleMsg("- heal")
 							CreateConsoleMsg("- infinitestamina")
+							CreateConsoleMsg("- noblink")
 							CreateConsoleMsg("- sanic")
 							CreateConsoleMsg("- notarget")
 							CreateConsoleMsg("- teleport [room name] [index]")
@@ -1227,10 +1229,29 @@ Function UpdateConsole()
 						CreateConsoleMsg("INFINITE STAMINA OFF")	
 					EndIf
 					;[End Block]
+				Case "noblinking", "noblink"
+					;[Block]
+					StrTemp$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
+					
+					Select StrTemp
+						Case "on", "1", "true"
+							NoBlinking% = True						
+						Case "off", "0", "false"
+							NoBlinking% = False
+						Default
+							NoBlinking% = Not NoBlinking%
+					End Select	
+					If NoBlinking Then
+						CreateConsoleMsg("NO BLINK ON")
+					Else
+						CreateConsoleMsg("NO BLINK OFF")	
+					EndIf
+					;[End Block]
 				Case "asd2"
 					;[Block]
 					GodMode = 1
 					InfiniteStamina = 1
+					NoBlinking = 1
 					Curr173\Idle = 3
 					Curr106\Idle = True
 					Curr106\State = 200000
@@ -2821,7 +2842,7 @@ Global TotalVidMem = TotalVidMem()
 Global TotalPhysMem = TotalPhys()
 
 While IsRunning
-	SetErrorMsg(5, "GPU: " + GFXDriverName + " (" + (TotalVidMem - (AvailVidMem() / 1024)) + "MB/" + TotalVidMem + " MB)")
+	SetErrorMsg(5, "GPU: " + GfxDriverName + " (" + (TotalVidMem - (AvailVidMem() / 1024)) + "MB/" + TotalVidMem + " MB)")
 	SetErrorMsg(6, "Global memory status: (" + (TotalPhysMem - (AvailPhys() / 1024)) + "MB/" + TotalPhysMem + " MB)")
 
 	Cls
@@ -3017,7 +3038,8 @@ While IsRunning
 			EndIf
 		EndIf
 		
-		If InfiniteStamina% Then Stamina = Min(100, Stamina + (100.0-Stamina)*0.01*FPSfactor)
+		If InfiniteStamina% Then Stamina = 100
+		If NoBlinking% Then BlinkTimer = BLINKFREQ
 		
 		If FPSfactor=0
 			UpdateWorld(0)
@@ -8862,6 +8884,7 @@ Function NullGame(playbuttonsfx%=True)
 	SoundTransmission = False
 	
 	InfiniteStamina% = False
+	NoBlinking% = False
 	
 	Msg = ""
 	MsgTimer = 0
@@ -12086,6 +12109,5 @@ End Function
 
 
 ;~IDEal Editor Parameters:
-;~F#39#D8#DCD#162D#242C#2B2A
-;~B#11E0#145E#1C07
+;~B#11F6#1474#1C1D
 ;~C#Blitz3D
