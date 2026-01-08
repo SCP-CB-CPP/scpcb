@@ -159,7 +159,7 @@ Global MenuScale# = (GraphicHeight / 1024.0)
 SetBuffer(BackBuffer())
 
 Global CurTime%, PrevTime%, LoopDelay%, FPSfactor#, FPSfactor2#, PrevFPSFactor#
-Local CheckFPS%, ElapsedLoops%, FPS%, ElapsedTime#
+Local CheckFPS%, ElapsedLoops%, FPS%
 
 Global Framelimit% = GetINIInt(OptionFile, "options", "framelimit")
 Global Vsync% = GetINIInt(OptionFile, "options", "vsync")
@@ -236,6 +236,7 @@ Global KEY_INV = GetINIInt(OptionFile, "binds", "Inventory key")
 Global KEY_CROUCH = GetINIInt(OptionFile, "binds", "Crouch key")
 Global KEY_SAVE = GetINIInt(OptionFile, "binds", "Save key")
 Global KEY_CONSOLE = GetINIInt(OptionFile, "binds", "Console key")
+Global KEY_STOP_TIMER = GetINIInt(OptionFile, "binds", "Stop timer key")
 
 Global MouseSmooth# = GetINIFloat(OptionFile,"options", "mouse smoothing", 1.0)
 
@@ -327,7 +328,8 @@ Dim RadioCHN%(8)
 
 Dim OldAiPics%(5)
 
-Global PlayTime%
+Global SpeedRunMode% = GetINIInt(OptionFile, "options", "speed run mode")
+Global PlayTime%, TimerStopped% = True
 Global ConsoleFlush%
 Global ConsoleFlushSnd% = 0, ConsoleMusFlush% = 0, ConsoleMusPlay% = 0
 
@@ -2848,11 +2850,15 @@ Repeat
 	Cls
 	
 	CurTime = MilliSecs()
-	ElapsedTime = (CurTime - PrevTime) / 1000.0
+
+	Local ElapsedTime% = CurTime - PrevTime
 	PrevTime = CurTime
+	If (SpeedRunMode Lor (Not (MainMenuOpen Lor MenuOpen))) And (KillTimer >= 0 Lor (Not MenuOpen)) And SelectedEnding="" Then PlayTime = PlayTime + ElapsedTime
 	PrevFPSFactor = FPSfactor
-	FPSfactor = Min(ElapsedTime * 70, 5.0)
+	FPSfactor = Min(ElapsedTime / 1000.0 * 70, 5.0)
 	FPSfactor2 = FPSfactor
+
+	If KeyHit(KEY_STOP_TIMER) Then TimerStopped = True
 	
 	If MenuOpen Or InvOpen Or OtherOpen<>Null Or ConsoleOpen Or SelectedDoor <> Null Or SelectedScreen <> Null Or Using294 Then FPSfactor = 0
 	
@@ -3849,11 +3855,13 @@ Function DrawEnding()
 						achievementsUnlocked = achievementsUnlocked + Achievements(i)
 					Next
 					
-					Text x, y, "SCPs encountered: " +scpsEncountered
-					Text x, y+20*MenuScale, "Achievements unlocked: " + achievementsUnlocked+"/"+(MAXACHIEVEMENTS)
-					Text x, y+40*MenuScale, "Rooms found: " + roomsfound+"/"+roomamount
-					Text x, y+60*MenuScale, "Documents discovered: " +docsfound+"/"+docamount
-					Text x, y+80*MenuScale, "Items refined in SCP-914: " +RefinedItems			
+					Text x, y, "Ending: " + Upper(SelectedEnding)
+					Text x, y+20*MenuScale, "Time played: " +FormatDuration(PlayTime, SpeedRunMode)
+					Text x, y+40*MenuScale, "SCPs encountered: " +scpsEncountered
+					Text x, y+60*MenuScale, "Achievements unlocked: " + achievementsUnlocked+"/"+(MAXACHIEVEMENTS)
+					Text x, y+80*MenuScale, "Rooms found: " + roomsfound+"/"+roomamount
+					Text x, y+100*MenuScale, "Documents discovered: " +docsfound+"/"+docamount
+					Text x, y+120*MenuScale, "Items refined in SCP-914: " +RefinedItems			
 					
 					x = GraphicWidth / 2 - width / 2
 					y = GraphicHeight / 2 - height / 2
@@ -3887,6 +3895,7 @@ Function DrawEnding()
 						SetStreamVolume_Strict(MusicCHN,1.0*MusicVolume)
 						FlushKeys()
 						EndingTimer=-2000
+						TimerStopped = True
 						InitCredits()
 					EndIf
 				Else
@@ -4029,6 +4038,7 @@ Function DrawCredits()
         MenuOpen = False
         MainMenuOpen = True
         MainMenuTab = 0
+		PrevSave = ""
         CurrSave = ""
         FlushKeys()
 	EndIf
@@ -4787,8 +4797,9 @@ Function DrawGUI()
 	
 	If Using294 Then Use294()
 	
-	If HUDenabled Then 
-		
+	If HUDenabled Then
+		If SpeedRunMode Then DrawTimer()
+
 		Local width% = 204, height% = 20
 		x% = 80
 		y% = GraphicHeight - 95
@@ -4828,7 +4839,7 @@ Function DrawGUI()
 		Else
 			DrawImage SprintIcon, x - 50, y
 		EndIf
-		
+
 		If DebugHUD Then
 			Color 255, 255, 255
 			SetFont ConsoleFont
@@ -7157,6 +7168,63 @@ Function DrawGUI()
 	CatchErrors("DrawGUI")
 End Function
 
+Function DrawTimer()
+	SetFont(Font2)
+	Local durText$
+	If Not TimerStopped Then
+		durText$ = FormatDuration(PlayTime)
+	Else If TimerStopped = 1 Then
+		durText = "Timer stopped"
+	Else
+		durText$ = "Pre-made save loaded"
+	EndIf
+	Local x% = GraphicWidth - StringWidth(durText) - 24
+	Local y% = 24
+	Color 0, 0, 0
+	Text(x + 3 * MenuScale, y + 3 * MenuScale, durText)
+	If TimerStopped Then
+		Color 255, 0, 0
+	Else
+		If UsedConsole
+			Color 150, 150, 150
+		Else
+			Color 255, 255, 255
+		EndIf
+	EndIf
+	Text(x, y, durText)
+	SetFont(Font1)
+End Function
+
+Function PadLeft$(txt$, padding$, targetLen%)
+	Local req% = (targetLen - Len(txt)) / Len(padding)
+	Return String(padding, req) + txt
+End Function
+
+Function FormatDuration$(totalMillis%, highPrecision%=True)
+	Local ret$
+	Local millis% = totalMillis Mod 1000
+	Local totalSeconds% = totalMillis / 1000
+	Local seconds% = totalSeconds Mod 60
+	Local totalMinutes% = totalSeconds / 60
+	Local minutes = totalMinutes Mod 60
+	Local totalHours% = totalMinutes / 60
+	Local hours% = totalHours Mod 24
+	Local totalDays% = totalHours / 24
+	If totalDays > 0 Then
+		ret = ret + Str(totalDays) + ":"
+	EndIf
+	If totalHours > 0 Lor (Not highPrecision) Then
+		ret = ret + PadLeft(Str(hours), "0", 2) + ":"
+		hadLarger = True
+	EndIf
+	ret = ret + PadLeft(Str(minutes), "0", 2) + ":" + PadLeft(Str(seconds), "0", 2)
+	If highPrecision Then
+		Return ret + "." + PadLeft(Str(millis), "0", 3)
+	Else
+		Return ret
+	EndIf
+End Function
+
 Function DrawMenu()
 	CatchErrors("Uncaught (DrawMenu)")
 	
@@ -7466,7 +7534,7 @@ Function DrawMenu()
 					
 					y = y + 30*MenuScale
 					Text(x, y, "Control configuration:")
-					y = y + 10*MenuScale
+					y = y + 2*MenuScale
 					
 					Text(x, y + 20 * MenuScale, "Move Forward")
 					InputBox(x + 200 * MenuScale, y + 20 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_UP,210)),5)		
@@ -7490,6 +7558,11 @@ Function DrawMenu()
 					Text(x, y + 200 * MenuScale, "Open/Close Console")
 					InputBox(x + 200 * MenuScale, y + 200 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_CONSOLE,210)),12)
 					
+					If SpeedRunMode Then
+						Text(x, y + 220 * MenuScale, "Stop Timer")
+						InputBox(x + 200 * MenuScale, y + 220 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_STOP_TIMER,210)),13)
+					EndIf
+
 					If MouseOn(x,y,300*MenuScale,220*MenuScale) And OnSliderID=0
 						DrawOptionsTooltip(tx,ty,tw,th,"controls")
 					EndIf
@@ -7519,6 +7592,8 @@ Function DrawMenu()
 								KEY_SAVE = key
 							Case 12
 								KEY_CONSOLE = key
+							Case 13
+								KEY_STOP_TIMER = key
 						End Select
 						SelectedInputBox = 0
 					EndIf
@@ -7551,6 +7626,15 @@ Function DrawMenu()
 					ConsoleOpening = DrawTick(x + 270 * MenuScale, y + MenuScale, ConsoleOpening)
 					If MouseOn(x+270*MenuScale,y+MenuScale,20*MenuScale,20*MenuScale) And OnSliderID=0
 						DrawOptionsTooltip(tx,ty,tw,th,"consoleerror")
+					EndIf
+
+					y = y + 30*MenuScale
+
+					Color 255,255,255
+					Text(x, y, "Speed run mode:")
+					SpeedRunMode = DrawTick(x + 270 * MenuScale, y + MenuScale, SpeedRunMode)
+					If MouseOn(x+270*MenuScale,y+MenuScale,20*MenuScale,20*MenuScale) And OnSliderID=0
+						DrawOptionsTooltip(tx,ty,tw,th,"speedrunmode")
 					EndIf
 					
 					y = y + 30*MenuScale
@@ -7632,6 +7716,7 @@ Function DrawMenu()
 						MenuOpen = False
 						MainMenuOpen = True
 						MainMenuTab = 0
+						PrevSave = CurrSave
 						CurrSave = ""
 						FlushKeys()
 					EndIf
@@ -7643,6 +7728,7 @@ Function DrawMenu()
 				MenuOpen = False
 				MainMenuOpen = True
 				MainMenuTab = 0
+				PrevSave = CurrSave
 				CurrSave = ""
 				FlushKeys()
 			EndIf
@@ -7818,7 +7904,9 @@ Function DrawMenu()
 					MenuOpen = False
 					MainMenuOpen = True
 					MainMenuTab = 0
+					PrevSave = CurrSave
 					CurrSave = ""
+					TimerStopped = True
 					FlushKeys()
 				EndIf
 				y= y + 80*MenuScale
@@ -8429,6 +8517,9 @@ Function InitNewGame()
 
 	DrawLoading(45)
 	
+	PlayTime = 0
+	TimerStopped = False
+
 	HideDistance# = 15.0
 	
 	HeartBeatRate = 70
@@ -8711,6 +8802,8 @@ Function NullGame(playbuttonsfx%=True)
 	
 	ClearTextureCache
 	
+	If Not SpeedRunMode Then PlayTime = 0
+
 	DebugHUD = False
 	
 	UnableToMove% = False
@@ -11198,6 +11291,7 @@ Function SaveOptionsINI()
 	PutINIValue(OptionFile, "options", "texture details", TextureDetails%)
 	PutINIValue(OptionFile, "console", "enabled", CanOpenConsole%)
 	PutINIValue(OptionFile, "console", "auto opening", ConsoleOpening%)
+	PutINIValue(OptionFile, "options", "speed run mode", SpeedRunMode%)
 	PutINIValue(OptionFile, "options", "numeric seeds", UseNumericSeeds%)
 	PutINIValue(OptionFile, "options", "particle amount", ParticleAmount)
 	PutINIValue(OptionFile, "options", "enable vram", EnableVRam)
@@ -11219,6 +11313,7 @@ Function SaveOptionsINI()
 	PutINIValue(OptionFile, "binds", "Crouch key", KEY_CROUCH)
 	PutINIValue(OptionFile, "binds", "Save key", KEY_SAVE)
 	PutINIValue(OptionFile, "binds", "Console key", KEY_CONSOLE)
+	PutINIValue(OptionFile, "binds", "Stop timer key", KEY_STOP_TIMER)
 	
 End Function
 

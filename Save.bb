@@ -483,12 +483,19 @@ Function LoadGame(file$)
 	GameSaved = True
 	
 	Local x#, y#, z#, i%, temp%, strtemp$, r.Rooms, id%, n.NPCs, do.Doors
-	Local f% = ReadFile(file + ".cbsav")
+	Local f% = ReadFile(SavePath + file + ".cbsav")
 	
 	strtemp = ReadString(f)
 	strtemp = ReadString(f)
 	
-	PlayTime = ReadInt(f)
+	Local playedTime = ReadInt(f)
+	If SpeedRunMode Then
+		If PrevSave <> file Then
+			TimerStopped = 2
+		EndIf
+	Else
+		PlayTime = playedTime
+	EndIf
 	
 	x = ReadFloat(f)
 	y = ReadFloat(f)
@@ -1313,7 +1320,10 @@ Function LoadGameQuick(file$)
 	GodMode = 0
 	NoClip = 0
 	
-	PlayTime = ReadInt(f)
+	Local playedTime = ReadInt(f)
+	If Not SpeedRunMode Then
+		PlayTime = playedTime
+	EndIf
 	
 	;HideEntity Head
 	HideEntity Collider
@@ -2026,13 +2036,14 @@ Function LoadSaveGames()
 	Dim SaveGameTime$(SaveGameAmount + 1)
 	Dim SaveGameDate$(SaveGameAmount + 1)
 	Dim SaveGameVersion$(SaveGameAmount + 1)
+	Dim SaveGamePlayTime$(SaveGameAmount + 1)
 	For i = 1 To SaveGameAmount
 		DebugLog (SavePath + SaveGames(i - 1))
 		Local f% = ReadFile(SavePath + SaveGames(i - 1) + ".cbsav")
 		SaveGameTime(i - 1) = ReadString(f)
 		SaveGameDate(i - 1) = ReadString(f)
+		SaveGamePlayTime(i - 1) = ReadInt(f)
 		;Skip all data until the CompatibleVersion number
-		ReadInt(f)
 		For j = 0 To 5
 			ReadFloat(f)
 		Next

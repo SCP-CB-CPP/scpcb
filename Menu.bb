@@ -39,13 +39,14 @@ Global SavePath$ = "Saves\"
 Global SaveMSG$
 
 ;nykyisen tallennuksen nimi ja samalla missä kansiossa tallennustiedosto sijaitsee saves-kansiossa
-Global CurrSave$
+Global PrevSave$, CurrSave$
 
 Global SaveGameAmount%
 Dim SaveGames$(SaveGameAmount+1) 
 Dim SaveGameTime$(SaveGameAmount + 1)
 Dim SaveGameDate$(SaveGameAmount + 1)
 Dim SaveGameVersion$(SaveGameAmount + 1)
+Dim SaveGamePlayTime$(SaveGameAmount + 1)
 
 Global SavedMapsAmount% = 0
 Dim SavedMaps$(SavedMapsAmount+1)
@@ -496,7 +497,7 @@ Function UpdateMainMenu()
 							Text(x + 20 * MenuScale, y + 10 * MenuScale, SaveGames(i - 1))
 							Text(x + 20 * MenuScale, y + (10+18) * MenuScale, SaveGameTime(i - 1)) ;y + (10+23) * MenuScale
 							Text(x + 120 * MenuScale, y + (10+18) * MenuScale, SaveGameDate(i - 1))
-							Text(x + 20 * MenuScale, y + (10+36) * MenuScale, SaveGameVersion(i - 1))
+							Text(x + 20 * MenuScale, y + (10+36) * MenuScale, SaveGameVersion(i - 1) + RSet(FormatDuration(SaveGamePlayTime(i - 1), False), 14))
 							
 							If SaveMSG = "" Then
 								If SaveGameVersion(i - 1) <> CompatibleNumber Then
@@ -507,7 +508,7 @@ Function UpdateMainMenu()
 									If DrawButton(x + 280 * MenuScale, y + 20 * MenuScale, 100 * MenuScale, 30 * MenuScale, "Load", False) Then
 										LoadEntities()
 										LoadAllSounds()
-										LoadGame(SavePath + SaveGames(i - 1))
+										LoadGame(SaveGames(i - 1))
 										CurrSave = SaveGames(i - 1)
 										InitLoadGame()
 										MainMenuOpen = False
@@ -828,6 +829,7 @@ Function UpdateMainMenu()
 				ElseIf MainMenuTab = 6 ;Controls
 					;[Block]
 					height = 270 * MenuScale
+					If SpeedRunMode Then height = height + 20 * MenuScale
 					DrawFrame(x, y, width, height)	
 					
 					y = y + 20*MenuScale
@@ -874,6 +876,11 @@ Function UpdateMainMenu()
 					Text(x + 20 * MenuScale, y + 100 * MenuScale, "Quick Save")
 					InputBox(x + 160 * MenuScale, y + 100 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_SAVE,210)),11)
 					
+					If SpeedRunMode Then
+						Text(x + 20 * MenuScale, y + 120 * MenuScale, "Stop Timer")
+						InputBox(x + 160 * MenuScale, y + 120 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_STOP_TIMER,210)),13)
+					EndIf
+
 					Text(x + 280 * MenuScale, y + 20 * MenuScale, "Manual Blink")
 					InputBox(x + 470 * MenuScale, y + 20 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_BLINK,210)),7)				
 					Text(x + 280 * MenuScale, y + 40 * MenuScale, "Sprint")
@@ -914,6 +921,8 @@ Function UpdateMainMenu()
 								KEY_SAVE = key
 							Case 12
 								KEY_CONSOLE = key
+							Case 13
+								KEY_STOP_TIMER = key
 						End Select
 						SelectedInputBox = 0
 					EndIf
@@ -948,6 +957,15 @@ Function UpdateMainMenu()
 					ConsoleOpening = DrawTick(x + 310 * MenuScale, y + MenuScale, ConsoleOpening)
 					If MouseOn(x+310*MenuScale,y+MenuScale,20*MenuScale,20*MenuScale) And OnSliderID=0
 						DrawOptionsTooltip(tx,ty,tw,th,"consoleerror")
+					EndIf
+
+					y = y + 30*MenuScale
+
+					Color 255,255,255
+					Text(x + 20 * MenuScale, y, "Speed run mode:")
+					SpeedRunMode = DrawTick(x + 310 * MenuScale, y + MenuScale, SpeedRunMode)
+					If MouseOn(x+310*MenuScale,y+MenuScale,20*MenuScale,20*MenuScale) And OnSliderID=0
+						DrawOptionsTooltip(tx,ty,tw,th,"speedrunmode")
 					EndIf
 
 					y = y + 30*MenuScale
@@ -1105,6 +1123,10 @@ Function UpdateMainMenu()
 		
 	End If
 	
+	If SpeedRunMode And (Not TimerStopped) Then
+		DrawTimer()
+	EndIf
+
 	Color 255,255,255
 	SetFont ConsoleFont
 	Text 20,GraphicHeight-30,"v"+VersionNumber
@@ -1550,6 +1572,10 @@ Function DrawLoading(percent%, shortloading=False)
 			SetFont Font1
 			RowText(SelectedLoadingScreen\txt[LoadingScreenText], GraphicWidth / 2-200, GraphicHeight / 2 +120,400,300,True)
 			
+		EndIf
+
+		If SpeedRunMode And (Not TimerStopped) And PlayTime > 0 Then
+			DrawTimer()
 		EndIf
 		
 		Color 0,0,0
@@ -2124,6 +2150,8 @@ Function DrawOptionsTooltip(x%,y%,width%,height%,option$,value#=0,ingame%=False)
 			txt2 = "Using the console will disable Steam achievements."
 		Case "consoleerror"
 			txt = Chr(34)+"Open console on error"+Chr(34)+" is self-explanatory."
+		Case "speedrunmode"
+			txt = "Displays a timer and changes how play time is tracked to conform to the requirements of speed running. Timer can be stopped by pressing " + KeyName(KEY_STOP_TIMER) + "."
 		Case "numericseeds"
 			txt = "Allows seeds to be entered as integers, which will be used to directly seed the game's internal random number generator."
 			txt = txt + " When no seed is entered, the elapsed millseconds since the computer started is used."
