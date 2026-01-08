@@ -2853,7 +2853,7 @@ Repeat
 
 	Local ElapsedTime% = CurTime - PrevTime
 	PrevTime = CurTime
-	If (SpeedRunMode Lor (Not (MainMenuOpen Lor MenuOpen))) And (KillTimer >= 0 Lor (Not MenuOpen)) And SelectedEnding="" Then PlayTime = PlayTime + ElapsedTime
+	If (SpeedRunMode Lor (Not (MainMenuOpen Lor MenuOpen))) And SelectedEnding="" Then PlayTime = PlayTime + ElapsedTime
 	PrevFPSFactor = FPSfactor
 	FPSfactor = Min(ElapsedTime / 1000.0 * 70, 5.0)
 	FPSfactor2 = FPSfactor
