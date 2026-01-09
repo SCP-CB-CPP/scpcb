@@ -1766,9 +1766,16 @@ Function InputBox$(x%, y%, width%, height%, Txt$, ID% = 0)
 
 	If SelectedInputBox = ID Then
 		If (MilliSecs() Mod 800) < 400 Then Rect (x + width / 2 + StringWidth(Txt) / 2 + 2, y + height / 2 - 17 * MenuScale / 2, 2, 17 * MenuScale)
-		Txt = TextInput(Txt)
+		Local key% = GetKey()
+		If key = 22 Then
+			Txt = Txt + GetClipboardContents()
+		Else If key = 3 Then
+			SetClipboardContents(Txt)
+		Else
+			Txt = TextInput(Txt)
+		EndIf
 	EndIf
-		
+
 	Return Txt
 End Function
 
