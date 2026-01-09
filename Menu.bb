@@ -1606,7 +1606,7 @@ Function DrawLoading(percent%, shortloading=False)
 			strtemp$ = ""
 			temp = Rand(2,9)
 			For i = 0 To temp
-				strtemp$ = STRTEMP + Chr(Rand(48,122))
+				strtemp$ = STRTEMP + RandomDefaultWidthChar(48,122,"?")
 			Next
 			Text(GraphicWidth / 2, GraphicHeight / 2 + 80, strtemp, True, True)
 			
@@ -1651,7 +1651,7 @@ Function DrawLoading(percent%, shortloading=False)
 			strtemp$ = SelectedLoadingScreen\txt[0]
 			temp = Int(Len(SelectedLoadingScreen\txt[0])-Rand(5))
 			For i = 0 To Rand(10,15);temp
-				strtemp$ = Replace(SelectedLoadingScreen\txt[0],Mid(SelectedLoadingScreen\txt[0],Rand(1,Len(strtemp)-1),1),Chr(Rand(130,250)))
+				strtemp$ = Replace(SelectedLoadingScreen\txt[0],Mid(SelectedLoadingScreen\txt[0],Rand(1,Len(strtemp)-1),1),RandomDefaultWidthChar(130,250,"?"))
 			Next		
 			SetFont Font1
 			RowText(strtemp, GraphicWidth / 2-200, GraphicHeight / 2 +120,400,300,True)		
@@ -1741,6 +1741,11 @@ Function DrawLoading(percent%, shortloading=False)
 		
 	Until (GetKey()<>0 Or MouseHit(1))
 	Cls
+End Function
+
+Function RandomDefaultWidthChar$(min%, max%, def$)
+	Local c$ = Chr(Rand(min%, max%))
+	If StringWidth(c) <> StringWidth("L") Then Return def Else Return c
 End Function
 
 Function InputBox$(x%, y%, width%, height%, Txt$, ID% = 0)
