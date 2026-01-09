@@ -1643,6 +1643,7 @@ Function DrawLoading(percent%, shortloading=False)
 		If percent <> 100 Then Exit
 		
 	Until (GetKey()<>0 Or MouseHit(1))
+	Cls
 End Function
 
 Function InputBox$(x%, y%, width%, height%, Txt$, ID% = 0)
