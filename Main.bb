@@ -66,12 +66,13 @@ Global LauncherWidth%= Min(GetINIInt(OptionFile, "launcher", "launcher width"), 
 Global LauncherHeight% = Min(GetINIInt(OptionFile, "launcher", "launcher height"), 768)
 Global LauncherEnabled% = GetINIInt(OptionFile, "launcher", "launcher enabled")
 
-Global GraphicWidth% = GetINIInt(OptionFile, "options", "width")
-Global GraphicHeight% = GetINIInt(OptionFile, "options", "height")
+Global GraphicWidth% = GetINIInt(OptionFile, "options", "width"), GraphicHeight% = GetINIInt(OptionFile, "options", "height")
+If GraphicWidth <= 0 Then GraphicWidth = DesktopWidth()
+If GraphicHeight <= 0 Then GraphicHeight = DesktopHeight()
+
 Global Depth% = 0, Fullscreen% = GetINIInt(OptionFile, "options", "fullscreen")
 
-Global SelectedGFXMode%
-Global SelectedGFXDriver% = Max(GetINIInt(OptionFile, "options", "gfx driver"), 1)
+Global SelectedGFXDriver% = Min(Max(GetINIInt(OptionFile, "options", "gfx driver"), 1), CountGfxDrivers())
 
 Global fresize_image%, fresize_texture%, fresize_texture2%
 Global fresize_cam%
@@ -112,22 +113,17 @@ Global Bit16Mode = GetINIInt(OptionFile, "options", "16bit")
 If LauncherEnabled Then 
 	AspectRatioRatio = 1.0
 	UpdateLauncher()
-Else
-	For i% = 1 To TotalGFXModes
-		Local samefound% = False
-		For  n% = 0 To TotalGFXModes - 1
-			If GfxModeWidths(n) = GfxModeWidth(i) And GfxModeHeights(n) = GfxModeHeight(i) Then samefound = True : Exit
-		Next
-		If samefound = False Then
-			If GraphicWidth = GfxModeWidth(i) And GraphicHeight = GfxModeHeight(i) Then SelectedGFXMode = GFXModes
-			GfxModeWidths(GFXModes) = GfxModeWidth(i)
-			GfxModeHeights(GFXModes) = GfxModeHeight(i)
-			GFXModes=GFXModes+1
-		End If
+Else If Fullscreen
+	Local TotalGfxModes% = CountGfxModes3D()
+	Local samefound% = False
+	For i% = 1 To TotalGfxModes
+		If GraphicWidth = GfxModeWidth(i) And GraphicHeight = GfxModeHeight(i) Then samefound = True : Exit
 	Next
-	
-	GraphicWidth = GfxModeWidths(SelectedGFXMode)
-	GraphicHeight = GfxModeHeights(SelectedGFXMode)
+	If Not samefound Then
+		; Exclusive fullscreen ONLY supports the reported resolutions
+		AspectRatioRatio = 1.0
+		UpdateLauncher()
+	End If
 EndIf
 SetGfxDriver(SelectedGFXDriver)
 Global GFXDriverName$ = GFXDriverName(SelectedGFXDriver)

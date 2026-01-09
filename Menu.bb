@@ -1139,6 +1139,9 @@ Function UpdateMainMenu()
 End Function
 
 Dim GfxDrivers$(0)
+Dim AspectRatioWidths%(0), AspectRatioHeights%(0)
+Dim GfxModeCountPerAspectRatio%(0)
+Dim GfxModeWidthsByAspectRatio%(0, 0), GfxModeHeightsByAspectRatio%(0, 0)
 
 Function UpdateLauncher()
 	MenuScale = 1
@@ -1151,7 +1154,22 @@ Function UpdateLauncher()
 	
 	RealGraphicWidth = GraphicWidth
 	RealGraphicHeight = GraphicHeight
+
+	Local TotalGfxModes% = CountGfxModes3D()
+
+	Local selectedGdc% = GreatestCommonDivsior(GraphicWidth, GraphicHeight)
+	Local SelectedAspectRatioWidth% = GraphicWidth / selectedGdc, SelectedAspectRatioHeight% = GraphicHeight / selectedGdc
 	
+	Local SelectedGfxMode% = -1, AspectRatioCount%
+	Local SelectedAspectRatio% = -1
+	Local nativeGdc% = GreatestCommonDivsior(DesktopWidth(), DesktopHeight())
+	Local NativeAspectRatioWidth = DesktopWidth() / nativeGdc : NativeAspectRatioHeight = DesktopHeight() / nativeGdc
+	Local nativeAspectRatio%, nativeGfxMode
+
+	Dim AspectRatioWidths%(TotalGfxModes), AspectRatioHeights%(TotalGfxModes)
+	Dim GfxModeCountPerAspectRatio%(TotalGfxModes)
+	Dim GfxModeWidthsByAspectRatio%(TotalGfxModes, TotalGfxModes), GfxModeHeightsByAspectRatio%(TotalGfxModes, TotalGfxModes)
+
 	Font1 = LoadFont_Strict("GFX\font\cour\Courier New.ttf", 18)
 	SetFont Font1
 	MenuWhite = LoadImage_Strict("GFX\menu\menuwhite.jpg")
@@ -1166,18 +1184,36 @@ Function UpdateLauncher()
 		HandleImage(ArrowIMG(i), 0, 0)
 	Next
 	
-	For i% = 1 To TotalGFXModes
-		Local samefound% = False
-		For  n% = 0 To TotalGFXModes - 1
-			If GfxModeWidths(n) = GfxModeWidth(i) And GfxModeHeights(n) = GfxModeHeight(i) Then samefound = True : Exit
-		Next
-		If samefound = False Then
-			If GraphicWidth = GfxModeWidth(i) And GraphicHeight = GfxModeHeight(i) Then SelectedGFXMode = GFXModes
-			GfxModeWidths(GFXModes) = GfxModeWidth(i)
-			GfxModeHeights(GFXModes) = GfxModeHeight(i)
-			GFXModes=GFXModes+1 
-		End If
+	For i% = 1 To TotalGfxModes
+		Local w% = GfxModeWidth(i), h% = GfxModeHeight(i)
+		Local gdc% = GreatestCommonDivsior(w, h)
+		Local aw% = w / gdc, ah% = h / gdc
+		If (aw < 50 And ah < 50) Lor (aw = NativeAspectRatioWidth And ah = NativeAspectRatioHeight) Lor (aw = SelectedAspectRatioWidth And ah = SelectedAspectRatioHeight) Then
+			Local ai% = -1
+			For n% = 0 To AspectRatioCount - 1
+				If AspectRatioWidths(n) = aw And AspectRatioHeights(n) = ah Then ai = n : Exit
+			Next
+			If ai = -1 Then
+				ai = AspectRatioCount
+				AspectRatioWidths(ai) = aw : AspectRatioHeights(ai) = ah
+				AspectRatioCount = AspectRatioCount + 1
+			EndIf
+			Local sameFound% = False
+			Local lai% = GfxModeCountPerAspectRatio(ai)
+			For n = 0 To lai-1
+				If GfxModeWidthsByAspectRatio(ai, n) = w And GfxModeHeightsByAspectRatio(ai, n) = h Then sameFound = True : Exit
+			Next
+			If Not sameFound
+				GfxModeWidthsByAspectRatio(ai, lai) = w : GfxModeHeightsByAspectRatio(ai, lai) = h
+				GfxModeCountPerAspectRatio(ai) = GfxModeCountPerAspectRatio(ai) + 1
+
+				If GraphicWidth = w And GraphicHeight = h Then SelectedGfxMode = lai : SelectedAspectRatio = ai
+				If DesktopWidth() = w And DesktopHeight() = h Then nativeGfxMode = lai : nativeAspectRatio = ai
+			EndIf
+		EndIf
 	Next
+
+	If SelectedGfxMode = -1 Then SelectedGfxMode = nativeGfxMode : SelectedAspectRatio = nativeAspectRatio
 
 	Local gfxDriverCount = CountGfxDrivers()
 	Dim GfxDrivers$(gfxDriverCount + 1)
@@ -1190,9 +1226,10 @@ Function UpdateLauncher()
 	AppTitle "SCP - Containment Breach Launcher"
 
 	Local quit% = False
+
+	Local height% = 18
 	
 	Repeat
-		
 		;Cls
 		Color 0,0,0
 		Rect 0,0,LauncherWidth,LauncherHeight,True
@@ -1202,23 +1239,63 @@ Function UpdateLauncher()
 		Color 255, 255, 255
 		DrawImage(LauncherIMG, 0, 0)
 		
-		Text(20, 240 - 65, "Resolution: ")
-		
-		Local x% = 40
-		Local y% = 270 - 65
-		For i = 0 To (GFXModes - 1)
+		Local x% = 20
+		Local y% = 240 - 65
+
+		Text(x, y, "Resolution: ")
+
+		x = x + 130
+		y = y - 5
+
+		Color 255, 255, 255
+		Rect(x, y, 400, 20)
+		For i = 0 To (AspectRatioCount - 1)
 			Color 0, 0, 0
-			If SelectedGFXMode = i Then Rect(x - 1, y - 1, 100, 20, False)
-			
-			Text(x, y, (GfxModeWidths(i) + "x" + GfxModeHeights(i)))
-			If MouseOn(x - 1, y - 1, 100, 20) Then
+			Local txt$ = Str(AspectRatioWidths(i)) + ":" + Str(AspectRatioHeights(i))
+			Local txtW% = StringWidth(txt)
+			Text(x + 5, y + 5, txt)
+			Local temp% = False
+			If SelectedAspectRatio = i Then temp = True
+			If MouseOn(x + 1, y + 1, txtW + 8, height) Then
 				Color 100, 100, 100
-				Rect(x - 1, y - 1, 100, 20, False)
-				If MouseHit1 Then SelectedGFXMode = i
+				temp = True
+				If MouseHit1 Then SelectedAspectRatio = i : SelectedGfxMode = Min(GfxModeCountPerAspectRatio(i) - 1, SelectedGfxMode)
+			EndIf
+			If temp Then Rect(x + 1, y + 1, txtW + 8, height, False)
+			If nativeAspectRatio = i Then
+				Color 0, 255, 0
+				Rect(x + 0, y + 0, txtW + 10, height + 2, False)
+			EndIf
+			x = x + txtW + 15
+		Next
+
+		x% = 40
+		y% = 270 - 65
+
+		For i = 0 To (GfxModeCountPerAspectRatio(SelectedAspectRatio) - 1)
+			Color 0, 0, 0
+
+			Local gfxWidth% = GfxModeWidthsByAspectRatio(SelectedAspectRatio, i), gfxHeight% = GfxModeHeightsByAspectRatio(SelectedAspectRatio, i)
+			txt$ = gfxWidth + "x" + gfxHeight
+			txtW% = StringWidth(txt)
+
+			If SelectedGfxMode = i Then Rect(x - 4, y - 4, txtW + 8, height, False)
+
+			Text(x, y, txt)
+
+			If gfxWidth = DesktopWidth() And gfxHeight = DesktopHeight() Then
+				Color 0, 255, 0
+				Rect(x - 5, y - 5, txtW + 10, height + 2, False)
+			EndIf
+
+			If MouseOn(x - 4, y - 4, txtW + 8, height) Then
+				Color 100, 100, 100
+				Rect(x - 4, y - 4, txtW + 8, height, False)
+				If MouseHit1 Then SelectedGfxMode = i
 			EndIf
 			
 			y=y+20
-			If y >= 250 - 65 + (LauncherHeight - 80 - 260) Then y = 270 - 65 : x=x+100
+			If y >= 250 - 65 + (LauncherHeight - 80 - 260) Then y = 270 - 65 : x=x+105
 		Next
 		
 		;-----------------------------------------------------------------
@@ -1231,11 +1308,13 @@ Function UpdateLauncher()
 		y=y+10
 		For i = 1 To gfxDriverCount
 			Color 0, 0, 0
-			If SelectedGFXDriver = i Then Rect(x - 1, y - 1, 290, 20, False)
-			LimitText(GfxDrivers(i), x, y, 290, False)
-			If MouseOn(x - 1, y - 1, 290, 20) Then
+			txt$ = EllipsisLeft(GfxDrivers(i), 30)
+			txtW% = StringWidth(txt)
+			If SelectedGFXDriver = i Then Rect(x - 4, y - 4, txtW + 8, height, False)
+			Text(x, y, txt)
+			If MouseOn(x - 4, y - 4, txtW + 8, height) Then
 				Color 100, 100, 100
-				Rect(x - 1, y - 1, 290, 20, False)
+				Rect(x - 4, y - 4, txtW + 8, height, False)
 				If MouseHit1 Then SelectedGFXDriver = i
 			EndIf
 			
@@ -1273,21 +1352,12 @@ Function UpdateLauncher()
 		Color 255, 255, 255
 		Text(40 + 430 + 15, 262 - 55 + 95 + 8, "Use launcher")
 		
-		If (Not BorderlessWindowed)
-			If Fullscreen
-				Text(40+ 260 + 15, 262 - 55 + 140, "Current Resolution: "+(GfxModeWidths(SelectedGFXMode) + "x" + GfxModeHeights(SelectedGFXMode) + "," + (16+(16*(Not Bit16Mode)))))
-			Else
-				Text(40+ 260 + 15, 262 - 55 + 140, "Current Resolution: "+(GfxModeWidths(SelectedGFXMode) + "x" + GfxModeHeights(SelectedGFXMode) + ",32"))
-			EndIf
+		gfxWidth% = GfxModeWidthsByAspectRatio(SelectedAspectRatio, SelectedGfxMode) : gfxHeight% = GfxModeHeightsByAspectRatio(SelectedAspectRatio, SelectedGfxMode)
+
+		If Fullscreen
+			Text(260 + 15, 262 - 55 + 140, "Current Resolution: "+gfxWidth + "x" + gfxHeight + "," + (16+(16*(Not Bit16Mode))))
 		Else
-			Text(40+ 260 + 15, 262 - 55 + 140, "Current Resolution: "+GfxModeWidths(SelectedGFXMode) + "x" + GfxModeHeights(SelectedGFXMode) + ",32")
-			If GfxModeWidths(SelectedGFXMode)<G_viewport_width Then
-				Text(40+ 260 + 65, 262 - 55 + 160, "(upscaled to")
-				Text(40+ 260 + 65, 262 - 55 + 180, G_viewport_width + "x" + G_viewport_height + ",32)")
-			ElseIf GfxModeWidths(SelectedGFXMode)>G_viewport_width Then
-				Text(40+ 260 + 65, 262 - 55 + 160, "(downscaled to")
-				Text(40+ 260 + 65, 262 - 55 + 180, G_viewport_width + "x" + G_viewport_height + ",32)")
-			EndIf
+			Text(260 + 15, 262 - 55 + 140, "Current Resolution: "+gfxWidth + "x" + gfxHeight + ",32")
 		EndIf
 
 		If DrawButton(LauncherWidth - 30 - 90 - 130 - 15, LauncherHeight - 50 - 55, 130, 30, "MAP CREATOR", False, False, False) Then
@@ -1300,9 +1370,9 @@ Function UpdateLauncher()
 			ExecFile("https://discord.gg/guqwRtQPdq")
 		EndIf
 		
-		If DrawButton(LauncherWidth - 30 - 90, LauncherHeight - 50 - 55, 100, 30, "LAUNCH", False, False, False) Then
-			GraphicWidth = GfxModeWidths(SelectedGFXMode)
-			GraphicHeight = GfxModeHeights(SelectedGFXMode)
+		If DrawButton(LauncherWidth - 30 - 90, LauncherHeight - 50 - 55, 100, 30, "LAUNCH", False, False) Then
+			GraphicWidth = gfxWidth
+			GraphicHeight = gfxHeight
 			RealGraphicWidth = GraphicWidth
 			RealGraphicHeight = GraphicHeight
 			Exit
@@ -1312,8 +1382,8 @@ Function UpdateLauncher()
 		Flip
 	Forever
 	
-	PutINIValue(OptionFile, "options", "width", GfxModeWidths(SelectedGFXMode))
-	PutINIValue(OptionFile, "options", "height", GfxModeHeights(SelectedGFXMode))
+	PutINIValue(OptionFile, "options", "width", GfxModeWidthsByAspectRatio(SelectedAspectRatio, SelectedGfxMode))
+	PutINIValue(OptionFile, "options", "height", GfxModeHeightsByAspectRatio(SelectedAspectRatio, SelectedGfxMode))
 	If Fullscreen Then
 		PutINIValue(OptionFile, "options", "fullscreen", "true")
 	Else
@@ -1339,6 +1409,33 @@ Function UpdateLauncher()
 	FreeImage(LauncherIMG) : LauncherIMG = 0
 	
 	If quit Then End
+
+	Dim AspectRatioWidths%(0), AspectRatioHeights%(0)
+	Dim GfxModeCountPerAspectRatio%(0)
+	Dim GfxModeWidthsByAspectRatio%(0, 0), GfxModeHeightsByAspectRatio%(0, 0)
+End Function
+
+Function GreatestCommonDivsior(u%, v%)
+	If u <= 0 Lor v <= 0 Then Return 1
+
+	Local k% = 0, t% = u Or v, d
+
+	While (t And 1) = 0
+		k = k + 1
+		t = t Shr 1
+	Wend
+
+	v = v Shr k
+	u = u Shr k
+
+	If (u And 1) = 0 Then d = (u Shr 1) Else If (v And 1) = 0 Then d = -(v Shr 1) Else d = (u Shr 1) - (v Shr 1)
+	While d <> 0
+		While (d And 1) = 0 d = d / 2 Wend
+		If d > 0 Then u = d Else v = -d
+		d = (u Shr 1) - (v Shr 1)
+	Wend
+	
+	Return u Shl k
 End Function
 
 
@@ -1962,35 +2059,6 @@ Function GetLineAmount2(A$, W, H, Leading#=1)
 	
 	Return LinesShown+1
 	
-End Function
-
-Function LimitText%(txt$, x%, y%, width%, usingAA%=True)
-	Local TextLength%
-	Local UnFitting%
-	Local LetterWidth%
-	If usingAA Then
-		If txt = "" Or width = 0 Then Return 0
-		TextLength = StringWidth(txt)
-		UnFitting = TextLength - width
-		If UnFitting <= 0 Then ;mahtuu
-			Text(x, y, txt)
-		Else ;ei mahdu
-			LetterWidth = TextLength / Len(txt)
-			
-			Text(x, y, Left(txt, Max(Len(txt) - UnFitting / LetterWidth - 4, 1)) + "...")
-		End If
-	Else
-		If txt = "" Or width = 0 Then Return 0
-		TextLength = StringWidth(txt)
-		UnFitting = TextLength - width
-		If UnFitting <= 0 Then ;mahtuu
-			Text(x, y, txt)
-		Else ;ei mahdu
-			LetterWidth = TextLength / Len(txt)
-			
-			Text(x, y, Left(txt, Max(Len(txt) - UnFitting / LetterWidth - 4, 1)) + "...")
-		End If
-	EndIf
 End Function
 
 Function DrawTooltip(message$)
