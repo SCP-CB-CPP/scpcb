@@ -389,6 +389,8 @@ Function UpdateMainMenu()
 				SetFont Font2
 				
 				If DrawButton(x + 420 * MenuScale, y + height + 20 * MenuScale, 160 * MenuScale, 70 * MenuScale, "START", False) Then
+					TimerStopped = True
+
 					If CurrSave = "" Then CurrSave = "untitled"
 					Local SaveName$ = CurrSave
 					
@@ -405,8 +407,10 @@ Function UpdateMainMenu()
 					If (Not HasNumericSeed) And RandomSeed = "" Then
 						RandomSeed = Abs(MilliSecs())
 					EndIf
-					
+
 					SeedRnd GetRandomSeed()
+
+					SetUpSeedErrorInfo()
 
 					LoadEntities()
 					LoadAllSounds()
@@ -829,7 +833,6 @@ Function UpdateMainMenu()
 				ElseIf MainMenuTab = 6 ;Controls
 					;[Block]
 					height = 270 * MenuScale
-					If SpeedRunMode Then height = height + 20 * MenuScale
 					DrawFrame(x, y, width, height)	
 					
 					y = y + 20*MenuScale
@@ -875,11 +878,6 @@ Function UpdateMainMenu()
 					InputBox(x + 160 * MenuScale, y + 80 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_RIGHT,210)),4)	
 					Text(x + 20 * MenuScale, y + 100 * MenuScale, "Quick Save")
 					InputBox(x + 160 * MenuScale, y + 100 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_SAVE,210)),11)
-					
-					If SpeedRunMode Then
-						Text(x + 20 * MenuScale, y + 120 * MenuScale, "Stop Timer")
-						InputBox(x + 160 * MenuScale, y + 120 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_STOP_TIMER,210)),13)
-					EndIf
 
 					Text(x + 280 * MenuScale, y + 20 * MenuScale, "Manual Blink")
 					InputBox(x + 470 * MenuScale, y + 20 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_BLINK,210)),7)				
@@ -921,8 +919,6 @@ Function UpdateMainMenu()
 								KEY_SAVE = key
 							Case 12
 								KEY_CONSOLE = key
-							Case 13
-								KEY_STOP_TIMER = key
 						End Select
 						SelectedInputBox = 0
 					EndIf
@@ -1125,6 +1121,11 @@ Function UpdateMainMenu()
 	
 	If SpeedRunMode And (Not TimerStopped) Then
 		DrawTimer()
+		If MainMenuOpen Then
+			If DrawButton(GraphicWidth - 150 * MenuScale - 24, 60 * MenuScale + 24, 150 * MenuScale, 30 * MenuScale, "Stop timer", False) Then
+				TimerStopped = True
+			EndIf
+		EndIf
 	EndIf
 
 	Color 255,255,255

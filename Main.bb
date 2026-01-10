@@ -232,7 +232,6 @@ Global KEY_INV = GetINIInt(OptionFile, "binds", "Inventory key")
 Global KEY_CROUCH = GetINIInt(OptionFile, "binds", "Crouch key")
 Global KEY_SAVE = GetINIInt(OptionFile, "binds", "Save key")
 Global KEY_CONSOLE = GetINIInt(OptionFile, "binds", "Console key")
-Global KEY_STOP_TIMER = GetINIInt(OptionFile, "binds", "Stop timer key")
 
 Global MouseSmooth# = GetINIFloat(OptionFile,"options", "mouse smoothing", 1.0)
 
@@ -7530,7 +7529,7 @@ Function DrawMenu()
 					
 					y = y + 30*MenuScale
 					Text(x, y, "Control configuration:")
-					y = y + 2*MenuScale
+					y = y + 10*MenuScale
 					
 					Text(x, y + 20 * MenuScale, "Move Forward")
 					InputBox(x + 200 * MenuScale, y + 20 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_UP,210)),5)		
@@ -7553,11 +7552,6 @@ Function DrawMenu()
 					InputBox(x + 200 * MenuScale, y + 180 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_SAVE,210)),11)	
 					Text(x, y + 200 * MenuScale, "Open/Close Console")
 					InputBox(x + 200 * MenuScale, y + 200 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_CONSOLE,210)),12)
-					
-					If SpeedRunMode Then
-						Text(x, y + 220 * MenuScale, "Stop Timer")
-						InputBox(x + 200 * MenuScale, y + 220 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_STOP_TIMER,210)),13)
-					EndIf
 
 					If MouseOn(x,y,300*MenuScale,220*MenuScale) And OnSliderID=0
 						DrawOptionsTooltip(tx,ty,tw,th,"controls")
@@ -7588,8 +7582,6 @@ Function DrawMenu()
 								KEY_SAVE = key
 							Case 12
 								KEY_CONSOLE = key
-							Case 13
-								KEY_STOP_TIMER = key
 						End Select
 						SelectedInputBox = 0
 					EndIf
@@ -8508,8 +8500,6 @@ End Function
 Function InitNewGame()
 	CatchErrors("Uncaught (InitNewGame)")
 	Local i%, de.Decals, d.Doors, it.Items, r.Rooms, sc.SecurityCams, e.Events
-	
-	SetUpSeedErrorInfo()
 
 	DrawLoading(45)
 	
@@ -8683,8 +8673,6 @@ End Function
 Function InitLoadGame()
 	CatchErrors("Uncaught (InitLoadGame)")
 	Local d.Doors, sc.SecurityCams, rt.RoomTemplates, e.Events
-	
-	SetUpSeedErrorInfo()
 
 	DrawLoading(80)
 	
@@ -11309,7 +11297,6 @@ Function SaveOptionsINI()
 	PutINIValue(OptionFile, "binds", "Crouch key", KEY_CROUCH)
 	PutINIValue(OptionFile, "binds", "Save key", KEY_SAVE)
 	PutINIValue(OptionFile, "binds", "Console key", KEY_CONSOLE)
-	PutINIValue(OptionFile, "binds", "Stop timer key", KEY_STOP_TIMER)
 	
 End Function
 
