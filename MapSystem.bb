@@ -574,6 +574,7 @@ Function Piece$(s$,entry,char$=" ")
 	Wend
 	For n=1 To entry-1
 		p=Instr(s,char)
+		If p=0 Then Return ""
 		s=Right(s,Len(s)-p)
 	Next
 	p=Instr(s,char)
