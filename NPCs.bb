@@ -1499,13 +1499,13 @@ Function UpdateNPCs()
 						If n\State=1 Then ; get up
 							If n\Frame<312
 								AnimateNPC(n,193,311,0.3,False)
-								If n\Frame > 310.9 Then n\State = 2 : n\Frame = 737
+								If n\Frame > 310.9 Then n\State = 2 : n\Frame = 737 
 							ElseIf n\Frame>=312 And n\Frame<=422
 								AnimateNPC(n,312,422,0.3,False)
 								If n\Frame > 421.9 Then n\Frame = 677
 							Else
 								AnimateNPC(n,677,736,0.3,False)
-								If n\Frame > 735.9 Then n\State = 2 : n\Frame = 737
+								If n\Frame > 735.9 Then n\State = 2 : n\Frame = 737 
 							EndIf
 							;If n\Frame>1085 Then
 							;	AnimateNPC(n, 1085, 1412, 0.3,False)
@@ -1515,8 +1515,8 @@ Function UpdateNPCs()
 							;	If n\Frame > 423.9 Then n\State = 2 : n\Frame = 892
 							;EndIf
 						ElseIf n\State=2
-							AnimateNPC(n,737,822,0.3,False)
-							If n\Frame=>822 Then n\State=3 : n\State2=0
+							AnimateNPC(n,677,737,0.3,False)
+							If n\Frame=>737 Then n\State=3 : n\State2=0
 							;AnimateNPC(n, 833, 972, 0.3, False)
 							;If n\Frame=>972 Then n\State = 3 : n\State2=0
 						ElseIf n\State=3
