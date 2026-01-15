@@ -113,6 +113,10 @@ Global Bit16Mode = GetINIInt(OptionFile, "options", "16bit")
 If LauncherEnabled Then 
 	AspectRatioRatio = 1.0
 	UpdateLauncher()
+Else If Fullscreen And (Not GfxModeExists(GraphicWidth, GraphicHeight, 32-16*Bit16Mode)) Then
+	; Exclusive fullscreen ONLY supports the reported resolutions
+	AspectRatioRatio = 1.0
+	UpdateLauncher()
 Else If Fullscreen
 	Local TotalGfxModes% = CountGfxModes3D()
 	Local samefound% = False
