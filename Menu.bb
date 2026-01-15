@@ -341,11 +341,12 @@ Function UpdateMainMenu()
 				DrawFrame(x + 150 * MenuScale,y + 155 * MenuScale, 410*MenuScale, 150*MenuScale)
 				
 				If SelectedDifficulty\customizable Then
-					SelectedDifficulty\permaDeath =  DrawTick(x + 160 * MenuScale, y + 165 * MenuScale, (SelectedDifficulty\permaDeath))
+					SelectedDifficulty\permaDeath =  DrawTick(x + 160 * MenuScale, y + 165 * MenuScale, SelectedDifficulty\permaDeath)
 					Text(x + 200 * MenuScale, y + 165 * MenuScale, "Permadeath")
 					
-					If DrawTick(x + 160 * MenuScale, y + 195 * MenuScale, SelectedDifficulty\saveType = SAVEANYWHERE And (Not SelectedDifficulty\permaDeath), SelectedDifficulty\permaDeath) Then 
+					If DrawTick(x + 160 * MenuScale, y + 195 * MenuScale, SelectedDifficulty\saveType = SAVEANYWHERE And (Not SelectedDifficulty\permaDeath)) Then 
 						SelectedDifficulty\saveType = SAVEANYWHERE
+						SelectedDifficulty\permaDeath = False
 					Else
 						SelectedDifficulty\saveType = SAVEONSCREENS
 					EndIf
