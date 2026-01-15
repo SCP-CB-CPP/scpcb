@@ -379,7 +379,7 @@ Function UpdateMainMenu()
 							Text(x + 200 * MenuScale, y + 255 * MenuScale, "Other difficulty factors: Hard")
 					End Select
 				Else
-					RowText(SelectedDifficulty\description, x+160*MenuScale, y+160*MenuScale, (410-20)*MenuScale, 200)					
+					RowText(SelectedDifficulty\description, x+160*MenuScale, y+165*MenuScale, (410-20)*MenuScale, 130*MenuScale)					
 				EndIf
 				
 				If DrawButton(x, y + height + 20 * MenuScale, 160 * MenuScale, 70 * MenuScale, "Load map", False) Then
