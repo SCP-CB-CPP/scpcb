@@ -10775,69 +10775,6 @@ Function WrapAngle#(angle#)
 	Return angle
 End Function
 
-Function GetAngle#(x1#, y1#, x2#, y2#)
-	Return ATan2( y2 - y1, x2 - x1 )
-End Function
-
-Function CircleToLineSegIsect% (cx#, cy#, r#, l1x#, l1y#, l2x#, l2y#)
-	
-	;Palauttaa:
-	;  True (1) kun:
-	;      Ympyrä [keskipiste = (cx, cy): säde = r]
-	;      leikkaa janan, joka kulkee pisteiden (l1x, l1y) & (l2x, l2y) kaitta
-	;  False (0) muulloin
-	
-	;Ympyrän keskipisteen ja (ainakin toisen) janan päätepisteen etäisyys < r
-	;-> leikkaus
-	If Distance(cx, cy, l1x, l1y) <= r Then
-		Return True
-	EndIf
-	
-	If Distance(cx, cy, l2x, l2y) <= r Then
-		Return True
-	EndIf	
-	
-	;Vektorit (janan vektori ja vektorit janan päätepisteistä ympyrän keskipisteeseen)
-	Local SegVecX# = l2x - l1x
-	Local SegVecY# = l2y - l1y
-	
-	Local PntVec1X# = cx - l1x
-	Local PntVec1Y# = cy - l1y
-	
-	Local PntVec2X# = cx - l2x
-	Local PntVec2Y# = cy - l2y
-	
-	;Em. vektorien pistetulot
-	Local dp1# = SegVecX * PntVec1X + SegVecY * PntVec1Y
-	Local dp2# = -SegVecX * PntVec2X - SegVecY * PntVec2Y
-	
-	;Tarkistaa onko toisen pistetulon arvo 0
-	;tai molempien merkki sama
-	If dp1 = 0 Or dp2 = 0 Then
-	ElseIf (dp1 > 0 And dp2 > 0) Or (dp1 < 0 And dp2 < 0) Then
-	Else
-		;Ei kumpikaan -> ei leikkausta
-		Return False
-	EndIf
-	
-	;Janan päätepisteiden kautta kulkevan suoran ;yhtälö; (ax + by + c = 0)
-	Local a# = (l2y - l1y) / (l2x - l1x)
-	Local b# = -1
-	Local c# = -(l2y - l1y) / (l2x - l1x) * l1x + l1y
-	
-	;Ympyrän keskipisteen etäisyys suorasta
-	Local d# = Abs(a * cx + b * cy + c) / Sqr(a * a + b * b)
-	
-	;Ympyrä on liian kaukana
-	;-> ei leikkausta
-	If d > r Then Return False
-	
-	;Local kateetin_pituus# = Cos(angle) * hyp
-	
-	;Jos päästään tänne saakka, ympyrä ja jana leikkaavat (tai ovat sisäkkäin)
-	Return True
-End Function
-
 Function point_direction#(x1#,z1#,x2#,z2#)
 	Local dx#, dz#
 	dx = x1 - x2
@@ -10863,23 +10800,6 @@ Function angleDist#(a0#,a1#)
 		bb = b
 	EndIf
 	Return bb
-End Function
-
-Function Inverse#(number#)
-	
-	Return Float(1.0-number#)
-	
-End Function
-
-Function Rnd_Array#(numb1#,numb2#,Array1#,Array2#)
-	Local whatarray% = Rand(1,2)
-	
-	If whatarray% = 1
-		Return Rnd(Array1#,numb1#)
-	Else
-		Return Rnd(numb2#,Array2#)
-	EndIf
-	
 End Function
 
 ;--------------------------------------- decals -------------------------------------------------------
@@ -11945,46 +11865,6 @@ Function PlayStartupVideos()
 
 End Function
 
-Function ProjectImage(img, w#, h#, Quad%, Texture%)
-	
-	Local img_w# = ImageWidth(img)
-	Local img_h# = ImageHeight(img)
-	If img_w > 2048 Then img_w = 2048
-	If img_h > 2048 Then img_h = 2048
-	If img_w < 1 Then img_w = 1
-	If img_h < 1 Then img_h = 1
-	
-	If w > 2048 Then w = 2048
-	If h > 2048 Then h = 2048
-	If w < 1 Then w = 1
-	If h < 1 Then h = 1
-	
-	Local w_rel# = w# / img_w#
-	Local h_rel# = h# / img_h#
-	Local g_rel# = 2048.0 / Float(RealGraphicWidth)
-	Local dst_x = 1024 - (img_w / 2.0)
-	Local dst_y = 1024 - (img_h / 2.0)
-	CopyRect 0, 0, img_w, img_h, dst_x, dst_y, ImageBuffer(img), TextureBuffer(Texture)
-	ScaleEntity Quad, w_rel * g_rel, h_rel * g_rel, 0.0001
-	RenderWorld()
-	
-End Function
-
-Function CreateQuad()
-	
-	mesh = CreateMesh()
-	surf = CreateSurface(mesh)
-	v0 = AddVertex(surf,-1.0, 1.0, 0, 0, 0)
-	v1 = AddVertex(surf, 1.0, 1.0, 0, 1, 0)
-	v2 = AddVertex(surf, 1.0,-1.0, 0, 1, 1)
-	v3 = AddVertex(surf,-1.0,-1.0, 0, 0, 1)
-	AddTriangle(surf, v0, v1, v2)
-	AddTriangle(surf, v0, v2, v3)
-	UpdateNormals mesh
-	Return mesh
-	
-End Function
-
 Function CanUseItem(canUseWithHazmat%, canUseWithGasMask%, canUseWithEyewear%)
 	If (canUseWithHazmat = False And WearingHazmat) Then
 		Msg = "You can't use that item while wearing a hazmat suit."
@@ -12073,21 +11953,6 @@ Function Update096ElevatorEvent#(e.Events,EventState#,d.Doors,elevatorobj%)
 		EventState = EventState + FPSfactor * 1.4
 	EndIf
 	Return EventState
-	
-End Function
-
-Function RotateEntity90DegreeAngles(entity%)
-	Local angle = WrapAngle(entity)
-	
-	If angle < 45.0 Then
-		Return 0
-	ElseIf angle >= 45.0 And angle < 135 Then
-		Return 90
-	ElseIf angle >= 135 And angle < 225 Then
-		Return 180
-	Else
-		Return 270
-	EndIf
 	
 End Function
 

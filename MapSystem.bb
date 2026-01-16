@@ -7756,7 +7756,7 @@ Function UpdateRoomLights(cam%)
 									
 									dist# = (EntityDistance(cam%,r\LightSpritesPivot[i])+0.5)/7.5
 									dist# = Max(Min(dist#,1.0),0.0)
-									alpha# = Float(Inverse(dist#))
+									alpha# = Float(1.0 - dist)
 									
 									If alpha# > 0.0 Then
 										EntityAlpha r\LightSprites2[i],Max(3*(Brightness/255)*(r\LightIntensity[i]/2),1)*alpha#
