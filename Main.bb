@@ -31,13 +31,41 @@ End Function
 Include "StrictLoads.bb"
 Include "KeyName.bb"
 
-Global OptionFile$ = "options.ini"
+Global OptionFile$ = InitOptionsDir()
+Const OptionDefaultFile$ = "defaults.ini"
+
+Function InitOptionsDir$()
+	Local dir$ = GetEnv("AppData") + "\Undertow Games"
+	If FileType(dir) <> 2 Then CreateDir(dir)
+	dir = dir + "\SCP - Containment Breach"
+	If FileType(dir) <> 2 Then CreateDir(dir)
+	dir = dir + "\options.ini"
+	If FileType(dir) <> 1 Then
+		Local f% = WriteFile(dir)
+		CloseFile(f)
+	EndIf
+	Return dir
+End Function
+
+Function GetOptionString$(section$, key$)
+	Local opt$ = GetINIString(OptionFile, section, key)
+	If opt = "" Then Return GetINIString(OptionDefaultFile, section, key)
+	Return opt
+End Function
+
+Function GetOptionInt%(section$, key$)
+	Return ParseINIInt(GetOptionString(section, key))
+End Function
+
+Function GetOptionFloat#(section$, key$)
+	Return Float(GetOptionString(section, key))
+End Function
 
 Include "Blitz_File_FileName.bb"
 
 Include "DevilParticleSystem.bb"
 
-Global SteamActive% = GetINIInt(OptionFile, "options", "enable steam")
+Global SteamActive% = GetOptionInt("options", "enable steam")
 If SteamActive Then
 	If Steam_Init() <> 0 Then RuntimeErrorExt("Steam failed to initialize")
 EndIf
@@ -51,47 +79,44 @@ Global CompatibleNumber$ = "1.3.11" ;Only change this if the version given isn't
 Global MenuWhite%, MenuBlack%
 Global ButtonSFX% = LoadSound_Strict("SFX\Interact\Button.ogg")
 
-Global EnableSFXRelease% = GetINIInt(OptionFile, "audio", "sfx release")
+Global EnableSFXRelease% = GetOptionInt("audio", "sfx release")
 Global EnableSFXRelease_Prev% = EnableSFXRelease%
 
-Global CanOpenConsole% = GetINIInt(OptionFile, "console", "enabled")
+Global CanOpenConsole% = GetOptionInt("console", "enabled")
 
-Global UseNumericSeeds% = GetINIInt(OptionFile, "options", "numeric seeds")
+Global UseNumericSeeds% = GetOptionInt("options", "numeric seeds")
 
 Dim ArrowIMG(4)
 
 ;[Block]
 
-Global LauncherWidth%= Min(GetINIInt(OptionFile, "launcher", "launcher width"), 1024)
-Global LauncherHeight% = Min(GetINIInt(OptionFile, "launcher", "launcher height"), 768)
-Global LauncherEnabled% = GetINIInt(OptionFile, "launcher", "launcher enabled")
+Global LauncherWidth%= Min(GetOptionInt("launcher", "launcher width"), 1024)
+Global LauncherHeight% = Min(GetOptionInt("launcher", "launcher height"), 768)
+Global LauncherEnabled% = GetOptionInt("launcher", "launcher enabled")
 
-Global GraphicWidth% = GetINIInt(OptionFile, "options", "width"), GraphicHeight% = GetINIInt(OptionFile, "options", "height")
+Global GraphicWidth% = GetOptionInt("options", "width"), GraphicHeight% = GetOptionInt("options", "height")
 If GraphicWidth <= 0 Then GraphicWidth = DesktopWidth()
 If GraphicHeight <= 0 Then GraphicHeight = DesktopHeight()
 
-Global Depth% = 0, Fullscreen% = GetINIInt(OptionFile, "options", "fullscreen")
+Global Depth% = 0, Fullscreen% = GetOptionInt("options", "fullscreen")
 
-Global SelectedGFXDriver% = Min(Max(GetINIInt(OptionFile, "options", "gfx driver"), 1), CountGfxDrivers())
+Global SelectedGFXDriver% = Min(Max(GetOptionInt("options", "gfx driver"), 1), CountGfxDrivers())
 
 Global fresize_image%, fresize_texture%, fresize_texture2%
 Global fresize_cam%
 
-Global ShowFPS = GetINIInt(OptionFile, "options", "show FPS")
+Global ShowFPS = GetOptionInt("options", "show FPS")
 
 Global WireframeState
 Global HalloweenTex
 
-Global TotalGFXModes% = CountGfxModes3D(), GFXModes%
-Dim GfxModeWidths%(TotalGFXModes), GfxModeHeights%(TotalGFXModes)
-
-Global BorderlessWindowed% = GetINIInt(OptionFile, "options", "borderless windowed")
+Global BorderlessWindowed% = GetOptionInt("options", "borderless windowed")
 Global RealGraphicWidth%,RealGraphicHeight%
 Global AspectRatioRatio#
 
-Global EnableRoomLights% = GetINIInt(OptionFile, "options", "room lights enabled")
+Global EnableRoomLights% = GetOptionInt("options", "room lights enabled")
 
-Global TextureDetails% = GetINIInt(OptionFile, "options", "texture details")
+Global TextureDetails% = GetOptionInt("options", "texture details")
 Global TextureFloat#
 Select TextureDetails%
 	Case 0
@@ -105,10 +130,10 @@ Select TextureDetails%
 	Case 4
 		TextureFloat# = -0.8
 End Select
-Global ConsoleOpening% = GetINIInt(OptionFile, "console", "auto opening")
-Global SFXVolume# = GetINIFloat(OptionFile, "audio", "sound volume")
+Global ConsoleOpening% = GetOptionInt("console", "auto opening")
+Global SFXVolume# = GetOptionFloat("audio", "sound volume")
 
-Global Bit16Mode = GetINIInt(OptionFile, "options", "16bit")
+Global Bit16Mode = GetOptionInt("options", "16bit")
 
 If LauncherEnabled Then 
 	AspectRatioRatio = 1.0
@@ -161,14 +186,14 @@ SetBuffer(BackBuffer())
 Global CurTime%, PrevTime%, LoopDelay%, FPSfactor#, FPSfactor2#, PrevFPSFactor#
 Local CheckFPS%, ElapsedLoops%, FPS%
 
-Global Framelimit% = GetINIInt(OptionFile, "options", "framelimit")
-Global Vsync% = GetINIInt(OptionFile, "options", "vsync")
+Global Framelimit% = GetOptionInt("options", "framelimit")
+Global Vsync% = GetOptionInt("options", "vsync")
 
-Global Opt_AntiAlias = GetINIInt(OptionFile, "options", "antialias")
+Global Opt_AntiAlias = GetOptionInt("options", "antialias")
 
 Global CurrFrameLimit# = (Framelimit%-19)/100.0
 
-Global ScreenGamma# = GetINIFloat(OptionFile, "options", "screengamma")
+Global ScreenGamma# = GetOptionFloat("options", "screengamma")
 ;If Fullscreen Then UpdateScreenGamma()
 
 Const HIT_MAP% = 1, HIT_PLAYER% = 2, HIT_ITEM% = 3, HIT_APACHE% = 4, HIT_178% = 5, HIT_DEAD% = 6
@@ -225,19 +250,19 @@ Global mouse_left_limit% = 250, mouse_right_limit% = GraphicsWidth () - 250
 Global mouse_top_limit% = 150, mouse_bottom_limit% = GraphicsHeight () - 150 ; As above.
 Global mouse_x_speed_1#, mouse_y_speed_1#
 
-Global KEY_RIGHT = GetINIInt(OptionFile, "binds", "Right key")
-Global KEY_LEFT = GetINIInt(OptionFile, "binds", "Left key")
-Global KEY_UP = GetINIInt(OptionFile, "binds", "Up key")
-Global KEY_DOWN = GetINIInt(OptionFile, "binds", "Down key")
+Global KEY_RIGHT = GetOptionInt("binds", "Right key")
+Global KEY_LEFT = GetOptionInt("binds", "Left key")
+Global KEY_UP = GetOptionInt("binds", "Up key")
+Global KEY_DOWN = GetOptionInt("binds", "Down key")
 
-Global KEY_BLINK = GetINIInt(OptionFile, "binds", "Blink key")
-Global KEY_SPRINT = GetINIInt(OptionFile, "binds", "Sprint key")
-Global KEY_INV = GetINIInt(OptionFile, "binds", "Inventory key")
-Global KEY_CROUCH = GetINIInt(OptionFile, "binds", "Crouch key")
-Global KEY_SAVE = GetINIInt(OptionFile, "binds", "Save key")
-Global KEY_CONSOLE = GetINIInt(OptionFile, "binds", "Console key")
+Global KEY_BLINK = GetOptionInt("binds", "Blink key")
+Global KEY_SPRINT = GetOptionInt("binds", "Sprint key")
+Global KEY_INV = GetOptionInt("binds", "Inventory key")
+Global KEY_CROUCH = GetOptionInt("binds", "Crouch key")
+Global KEY_SAVE = GetOptionInt("binds", "Save key")
+Global KEY_CONSOLE = GetOptionInt("binds", "Console key")
 
-Global MouseSmooth# = GetINIFloat(OptionFile,"options", "mouse smoothing", 1.0)
+Global MouseSmooth# = GetOptionFloat("options", "mouse smoothing")
 
 Const NAN# = (-1.0) ^ (0.5)
 
@@ -283,7 +308,7 @@ Global PlayerZone%, PlayerRoom.Rooms
 
 Global GrabbedEntity%
 
-Global InvertMouse% = GetINIInt(OptionFile, "options", "invert mouse y")
+Global InvertMouse% = GetOptionInt("options", "invert mouse y")
 Global MouseHit1%, MouseDown1%, MouseHit2%, DoubleClick%, LastMouseHit1%, MouseUp1%
 
 Global GodMode%, NoClip%, NoClipSpeed# = 2.0
@@ -327,7 +352,7 @@ Dim RadioCHN%(8)
 
 Dim OldAiPics%(5)
 
-Global SpeedRunMode% = GetINIInt(OptionFile, "options", "speed run mode")
+Global SpeedRunMode% = GetOptionInt("options", "speed run mode")
 Global PlayTime%, TimerStopped% = True
 Global ConsoleFlush%
 Global ConsoleFlushSnd% = 0, ConsoleMusFlush% = 0, ConsoleMusPlay% = 0
@@ -1568,8 +1593,8 @@ Global BlurVolume#, BlurTimer#
 
 Global LightBlink#, LightFlash#
 
-Global BumpEnabled% = GetINIInt("options.ini", "options", "bump mapping enabled")
-Global HUDenabled% = GetINIInt("options.ini", "options", "HUD enabled")
+Global BumpEnabled% = GetOptionInt("options", "bump mapping enabled")
+Global HUDenabled% = GetOptionInt("options", "HUD enabled")
 
 Global Camera%, CameraShake#, CurrCameraZoom#
 
@@ -1579,9 +1604,9 @@ Global CameraFogFar# = GetINIFloat("options.ini", "options", "camera fog far")
 
 Global StoredCameraFogFar# = CameraFogFar
 
-Global MouseSens# = GetINIFloat("options.ini", "options", "mouse sensitivity")
+Global MouseSens# = GetOptionFloat("options", "mouse sensitivity")
 
-Global EnableVRam% = GetINIInt("options.ini", "options", "enable vram")
+Global EnableVRam% = GetOptionInt("options", "enable vram")
 
 Include "dreamfilter.bb"
 
@@ -1625,7 +1650,7 @@ Music(23) = "Ending"
 Music(24) = "Credits"
 Music(25) = "SaveMeFrom"
 
-Global MusicVolume# = GetINIFloat(OptionFile, "audio", "music volume")
+Global MusicVolume# = GetOptionFloat("audio", "music volume")
 ;Global MusicCHN% = StreamSound_Strict("SFX\Music\"+Music(2)+".ogg", MusicVolume, CurrMusicStream)
 
 Global CurrMusicStream, MusicCHN
@@ -1776,8 +1801,8 @@ MaskImage NVGImages,255,0,255
 Global Wearing1499% = False
 Global AmbientLightRoomTex%, AmbientLightRoomVal%
 
-Global EnableUserTracks% = GetINIInt(OptionFile, "audio", "enable user tracks")
-Global UserTrackMode% = GetINIInt(OptionFile, "audio", "user track setting")
+Global EnableUserTracks% = GetOptionInt("audio", "enable user tracks")
+Global UserTrackMode% = GetOptionInt("audio", "user track setting")
 Global UserTrackCheck% = 0, UserTrackCheck2% = 0
 Global UserTrackMusicAmount% = 0, CurrUserTrack%, UserTrackFlag% = False
 Dim UserTrackName$(256)
@@ -1809,9 +1834,7 @@ Global room2gw_z# = 0.0
 Global Menu_TestIMG
 Global menuroomscale# = 8.0 / 2048.0
 
-Global CurrMenu_TestIMG$ = ""
-
-Global ParticleAmount% = GetINIInt(OptionFile,"options","particle amount")
+Global ParticleAmount% = GetOptionInt("options","particle amount")
 
 Dim NavImages(5)
 For i = 0 To 3
@@ -11301,8 +11324,8 @@ Function Graphics3DExt%(width%,height%,depth%=32,mode%=2)
 	Graphics3D width,height,depth,mode
 	InitFastResize()
 	;InitExt()
-	AntiAlias GetINIInt(OptionFile,"options","antialias")
-	;TextureAnisotropy% (GetINIInt(OptionFile,"options","anisotropy"),-1)
+	AntiAlias GetOptionInt("options","antialias")
+	;TextureAnisotropy% (GetOptionInt("options","anisotropy"),-1)
 End Function
 
 Function ResizeImage2(image%,width%,height%)
@@ -11858,7 +11881,7 @@ End Function
 
 Function PlayStartupVideos()
 
-	If GetINIInt("options.ini","options","play startup video")=0 Then Return
+	If GetOptionInt("options","play startup video") = 0 Lor IsRestart Then Return
 
 	PlayMovie("GFX\menu\startup_Undertow")
 	PlayMovie("GFX\menu\startup_TSS")

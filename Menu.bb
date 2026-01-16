@@ -31,7 +31,7 @@ Global MenuStr$, MenuStrX%, MenuStrY%
 Global MainMenuTab%
 
 
-Global IntroEnabled% = GetINIInt(OptionFile, "options", "intro enabled")
+Global IntroEnabled% = GetOptionInt("options", "intro enabled")
 
 Global SelectedInputBox%
 
