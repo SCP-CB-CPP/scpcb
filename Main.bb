@@ -1079,7 +1079,8 @@ Function UpdateConsole()
 					NoClip = 0
 					
 					ShowEntity Collider
-					TranslateEntity Collider, 0, 0.5, 0
+					TranslateEntity Collider, 0, 1.5, 0
+					RotateEntity Collider, EntityPitch(Collider), EntityYaw(Collider), 0
 					
 					KillTimer = 0
 					KillAnim = 0
