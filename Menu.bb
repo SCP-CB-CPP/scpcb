@@ -1323,20 +1323,16 @@ Function UpdateLauncher()
 			y=y+20
 		Next
 		
-		Fullscreen = DrawTick(40 + 430 - 15, 260 - 55 + 5 - 8, Fullscreen, BorderlessWindowed)
+		Fullscreen = DrawTick(40 + 430 - 15, 260 - 55 + 5 - 8, Fullscreen)
+		If Fullscreen Then BorderlessWindowed = False
 		BorderlessWindowed = DrawTick(40 + 430 - 15, 260 - 55 + 35, BorderlessWindowed)
+		If BorderlessWindowed Then Fullscreen = False
+
 		lock% = False
 
 		If BorderlessWindowed Or (Not Fullscreen) Then lock% = True
 		Bit16Mode = DrawTick(40 + 430 - 15, 260 - 55 + 65 + 8, Bit16Mode,lock%)
 		LauncherEnabled = DrawTick(40 + 430 - 15, 260 - 55 + 95 + 8, LauncherEnabled)
-
-		If BorderlessWindowed
- 		   Color 255, 0, 0
- 		   Fullscreen = False
-		Else
-  		  Color 255, 255, 255
-		EndIf
 
 		Text(40 + 430 + 15, 262 - 55 + 5 - 8, "Fullscreen")
 		Color 255, 255, 255
