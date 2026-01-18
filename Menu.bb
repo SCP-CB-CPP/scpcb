@@ -206,7 +206,7 @@ Function UpdateMainMenu()
 					EndIf
 				Case 2
 					txt = "OPTIONS"
-					If temp Then MainMenuTab = 3
+					If temp Then MainMenuTab = 3 : OnSliderID = 66
 				Case 3
 					txt = "QUIT"
 					If temp Then
