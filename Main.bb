@@ -452,12 +452,7 @@ Function UpdateConsole()
 			EndIf
 		EndIf
 		
-		mouseScroll = MouseZSpeed()
-		If mouseScroll=1 Then
-			ConsoleScroll = ConsoleScroll - 15*MenuScale
-		ElseIf mouseScroll=-1 Then
-			ConsoleScroll = ConsoleScroll + 15*MenuScale
-		EndIf
+		ConsoleScroll = ConsoleScroll - 15*MenuScale * MouseZSpeed()
 		
 		Local reissuePos%
 		If KeyHit(200) Then
@@ -1538,13 +1533,13 @@ Function UpdateConsole()
 				If TempY >= y And TempY < y + height - 20*MenuScale Then
 					If cm=ConsoleReissue Then
 						Color cm\r/4,cm\g/4,cm\b/4
-						Rect x,TempY-2*MenuScale,width-30*MenuScale,24*MenuScale,True
+						Rect x+3*MenuScale,TempY-2*MenuScale,width-30*MenuScale,24*MenuScale,True
 					EndIf
 					Color cm\r,cm\g,cm\b
 					If cm\isCommand Then
-						Text(x + 20*MenuScale, TempY, "> "+cm\txt)
+						Text(x + 20*MenuScale, TempY+5*MenuScale, "> "+cm\txt)
 					Else
-						Text(x + 20*MenuScale, TempY, cm\txt)
+						Text(x + 20*MenuScale, TempY+5*MenuScale, cm\txt)
 					EndIf
 				EndIf
 				TempY = TempY - 15*MenuScale
