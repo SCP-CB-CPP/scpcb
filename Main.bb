@@ -1864,8 +1864,6 @@ Global HandIcon2%
 
 Global StaminaMeterIMG%
 
-Global KeypadHUD
-
 Global Panel294, Using294%, Input294$
 
 DrawLoading(35, True)
@@ -4967,8 +4965,8 @@ Function DrawGUI()
 			CameraProject(Camera, EntityX(ClosestButton,True),EntityY(ClosestButton,True)-MeshHeight(ButtonOBJ)*0.015,EntityZ(ClosestButton,True))
 			scale# = (ProjectedY()-projy)/462.0
 			
-			x = GraphicWidth/2-ImageWidth(KeypadHUD)*scale/2
-			y = GraphicHeight/2-ImageHeight(KeypadHUD)*scale/2		
+			x = GraphicWidth/2-317*scale/2
+			y = GraphicHeight/2-462*scale/2
 			
 			SetFont Font3
 			If KeypadMSG <> "" Then 
@@ -7973,9 +7971,6 @@ Function LoadEntities()
 	HandIcon2% = LoadImage_Strict("GFX\handsymbol2.png")
 
 	StaminaMeterIMG% = LoadImage_Strict("GFX\staminameter.jpg")
-
-	KeypadHUD =  LoadImage_Strict("GFX\keypadhud.jpg")
-	MaskImage(KeypadHUD, 255,0,255)
 
 	Panel294 = LoadImage_Strict("GFX\294panel.jpg")
 	MaskImage(Panel294, 255,0,255)
