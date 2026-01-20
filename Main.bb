@@ -73,9 +73,6 @@ EndIf
 Global Font1%, Font2%, Font3%, Font4%, Font5%
 Global ConsoleFont%
 
-Global VersionNumber$ = "1.3.11"
-Global CompatibleNumber$ = "1.3.11" ;Only change this if the version given isn't working with the current build version - ENDSHN
-
 Global MenuWhite%, MenuBlack%
 Global ButtonSFX% = LoadSound_Strict("SFX\Interact\Button.ogg")
 
@@ -231,7 +228,7 @@ Font5% = LoadFont_Strict("GFX\font\Journal\Journal.ttf", Int(58 * (GraphicHeight
 
 Global CreditsFont%,CreditsFont2%
 
-ConsoleFont% = LoadFont_Strict("GFX\font\cour\Courier New.ttf", Int(20 * (GraphicHeight / 1024.0)))
+ConsoleFont% = Font1
 
 SetFont Font2
 
