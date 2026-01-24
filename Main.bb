@@ -10936,20 +10936,13 @@ Function ReadINILine$(file.INIFile)
 	Return retStr
 End Function
 
-Function UpdateINIFile$(filename$)
-	Local file.INIFile = Null
-	For k.INIFile = Each INIFile
-		If k\name = Lower(filename) Then
-			file = k
-		EndIf
-	Next
-	
-	If file=Null Then Return
-	
+Function UpdateINIFile$(filename$, file.INIFile)
+	CatchErrors("Uncaught (UpdateINIFile) " + filename)
+
 	If file\bank<>0 Then FreeBank file\bank
-	Local f% = ReadFile(file\name)
+	Local f% = ReadFile(filename)
 	Local fleSize% = 1
-	While fleSize<FileSize(file\name)
+	While fleSize<FileSize(filename)
 		fleSize=fleSize*2
 	Wend
 	file\bank = CreateBank(fleSize)
@@ -10959,14 +10952,17 @@ Function UpdateINIFile$(filename$)
 		file\size=file\size+1
 	Wend
 	CloseFile(f)
+
+	CatchErrors("UpdateINIFile " + filename)
 End Function
 
 Function GetINIString$(file$, section$, parameter$, defaultvalue$="")
 	Local TemporaryString$ = ""
 	
+	Local fileLower$ = Lower(file)
 	Local lfile.INIFile = Null
 	For k.INIFile = Each INIFile
-		If k\name = Lower(file) Then
+		If k\name = fileLower Then
 			lfile = k
 		EndIf
 	Next
@@ -10974,9 +10970,9 @@ Function GetINIString$(file$, section$, parameter$, defaultvalue$="")
 	If lfile = Null Then
 		DebugLog "CREATE BANK FOR "+file
 		lfile = New INIFile
-		lfile\name = Lower(file)
+		lfile\name = fileLower
 		lfile\bank = 0
-		UpdateINIFile(lfile\name)
+		UpdateINIFile(file, lfile)
 	EndIf
 	
 	lfile\bankOffset = 0
