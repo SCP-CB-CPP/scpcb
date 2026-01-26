@@ -411,7 +411,7 @@ Function UpdateMainMenu()
 
 					SeedRnd GetRandomSeed()
 
-					SetUpSeedErrorInfo()
+					SetErrorMsg(7, GetSeedString())
 
 					LoadEntities()
 					LoadAllSounds()

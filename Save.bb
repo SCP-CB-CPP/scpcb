@@ -591,7 +591,7 @@ Function LoadGame(file$)
 		RandomSeed = ReadString(f)
 	EndIf
 
-	SetUpSeedErrorInfo()
+	SetErrorMsg(7, GetSeedString())
 	
 	SecondaryLightOn = ReadFloat(f)
 	PrevSecondaryLightOn = ReadFloat(f)
