@@ -1,6 +1,7 @@
 .lib "BlitzSteamworks.dll"
 
 Steam_Init%():"_Init@0"
+Steam_RestartAppIfNecessary%(appID%):"_RestartAppIfNecessary@4"
 Steam_Update():"_Update@0"
 Steam_Shutdown():"_Shutdown@0"
 
