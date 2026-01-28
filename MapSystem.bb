@@ -4536,49 +4536,6 @@ Function FillRoom(r.Rooms)
 			sc\turn = 45
 			TurnEntity(sc\CameraObj, 20, 0, 0)
 			;[End Block]
-		Case "room2test1074"
-			;[Block]
-			r\RoomDoors[0] = CreateDoor(r\zone,r\x,r\y,r\z,0,r,False,False,False,"")
-			r\RoomDoors[0]\locked = True
-			r\RoomDoors[1] = CreateDoor(r\zone,r\x + 336.0 * RoomScale,r\y,r\z + 671.0 * RoomScale,90,r,True,False,3)
-			r\RoomDoors[1]\AutoClose = False
-			r\RoomDoors[2] = CreateDoor(r\zone,r\x + 336.0 * RoomScale,r\y,r\z - 800.0 * RoomScale,90,r,True,False,3)
-			r\RoomDoors[2]\AutoClose = False
-			r\RoomDoors[3] = CreateDoor(r\zone,r\x + 672.0 * RoomScale,r\y,r\z,0,r,False,False)
-			
-			r\Textures[0] = LoadTexture("GFX\map\1074tex0.jpg") ;blank texture (ripped from official article), seen when you put on 714
-			r\Textures[1] = LoadTexture("GFX\map\1074tex1.jpg") ;texture depicting subject D-9341 (the player)
-			TextureBlend r\Textures[0], 5 ;texture
-			TextureBlend r\Textures[1], 5 ;blends
-			
-			it = CreateItem("Document SCP-1074","paper",r\x + 300.0 * RoomScale,r\y+20.0*RoomScale,r\z + 671.0*RoomScale)
-			EntityParent(it\collider, r\obj)
-			
-			r\Objects[0] = CreatePivot() ;painting pivot: the player will be attracted when it sees this.
-			PositionEntity r\Objects[0],r\x + 835.0 * RoomScale,r\y + 165.0 * RoomScale,r\z + 540.0 * RoomScale, True
-			EntityParent r\Objects[0],r\obj
-			r\Objects[1] = CreatePivot() ;floor pivot: the player will walk to this point when it sees the painting pivot.
-			PositionEntity r\Objects[1],r\x + 835.0 * RoomScale,r\y + 10.0 * RoomScale,r\z + 300.0 * RoomScale, True
-			EntityParent r\Objects[1],r\obj
-			;Local sf,b,t,msh
-			msh% = GetChild(r\obj,2) ;the second child is the rendered mesh
-			r\NonFreeAble[0] = GetSurface(msh,1) ;a failsafe if the correct surface isn't found
-			For tempint = 1 To CountSurfaces(msh)
-				sf% = GetSurface(msh,tempint)
-				b% = GetSurfaceBrush( sf )
-				t% = GetBrushTexture(b, 1)
-				texname$ = StripPath(TextureName(t))
-				DebugLog "texname: "+texname
-				If Lower(texname) = "1074tex1.jpg" Then
-					r\NonFreeAble[0] = sf ;the surface holding 1074's texture
-					FreeTexture t
-					FreeBrush b
-					Exit
-				EndIf
-				If texname<>"" Then FreeTexture t
-				FreeBrush b
-			Next
-			;[End Block]
 		Case "room1123"
 			;[Block]
 			it = CreateItem("Document SCP-1123", "paper", r\x + 511.0 * RoomScale, r\y + 125.0 * RoomScale, r\z - 936.0 * RoomScale)
