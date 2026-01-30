@@ -1594,9 +1594,9 @@ Global HUDenabled% = GetOptionInt("options", "HUD enabled")
 
 Global Camera%, CameraShake#, CurrCameraZoom#
 
-Global Brightness% = GetINIFloat("options.ini", "options", "brightness")
-Global CameraFogNear# = GetINIFloat("options.ini", "options", "camera fog near")
-Global CameraFogFar# = GetINIFloat("options.ini", "options", "camera fog far")
+Global Brightness%
+Global CameraFogNear#
+Global CameraFogFar#
 
 Global StoredCameraFogFar# = CameraFogFar
 
