@@ -12,7 +12,7 @@ Const CompatibleNumber$ = "1.3.11" ;Only change this if the version given isn't 
 
 InitErrorMsgs(10, True)
 SetErrorMsg(0, "An error occured in SCP - Containment Breach v" + VersionNumber)
-SetErrorMsg(1, "Please take a screenshot of this and send it to us!") 
+SetErrorMsg(1, "Please send us the generated minidump along with a screenshot of this window!")
 SetErrorMsg(2, "---------------------------------------------------")
 SetErrorMsg(3, "OS: " + SystemProperty("os") + " " + (32 + (GetEnv("ProgramFiles(X86)") <> 0) * 32) + " Bit (Build: " + SystemProperty("osbuild") + ")")
 SetErrorMsg(4, "CPU: " + Trim(SystemProperty("cpuname")) + " (Arch: " + SystemProperty("cpuarch") + ", " + GetEnv("NUMBER_OF_PROCESSORS") + " Threads)")
