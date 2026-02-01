@@ -476,6 +476,8 @@ Function LoadGame(file$)
 	CatchErrors("Uncaught (LoadGame)")
 	DebugLog "---------------------------------------------------------------------------"
 	
+	DrawLoading(45)
+
 	DropSpeed=0.0
 	
 	DebugHUD = False
@@ -734,8 +736,11 @@ Function LoadGame(file$)
 		I_Zone\HasCustomMT = ReadByte(f)
 	EndIf
 	
+	DrawLoading(50)
+
 	temp = ReadInt(f)
 	For i = 1 To temp
+		DrawLoading(50 + Float(i) / temp * 19)
 		Local roomtemplateID% = ReadInt(f)
 		Local angle% = ReadInt(f)
 		x = ReadFloat(f)
@@ -845,6 +850,8 @@ Function LoadGame(file$)
 		
 	Next
 	
+	DrawLoading(70)
+
 	For r.Rooms = Each Rooms
 		If r\x = r1499_x# And r\z = r1499_z#
 			NTF_1499PrevRoom = r
@@ -984,7 +991,7 @@ Function LoadGame(file$)
 		Next		
 	Next
 	
-	InitWayPoints()
+	InitWayPoints(71, 9)
 	
 	If ReadInt(f) <> 1845 Then RuntimeErrorExt("Couldn't load the game, save file corrupted (error 3)")
 	
@@ -2118,7 +2125,7 @@ Function LoadSavedMaps()
 	CatchErrors("LoadSavedMaps")
 End Function
 
-Function LoadMap(file$)
+Function LoadMap(file$, loadingstart, loadingcount#)
 	CatchErrors("Uncaught (LoadMap)")
 	Local f%, x%, y%, name$, angle%, prob#
 	Local r.Rooms, rt.RoomTemplates, e.Events
@@ -2160,6 +2167,8 @@ Function LoadMap(file$)
 		
 		;Facility rooms
 		For i = 0 To roomamount-1
+			DrawLoading(loadingstart + Float(i) / (roomamount-1) * loadingcount)
+
 			x = ReadByte(f)
 			y = ReadByte(f)
 			name$ = Lower(ReadString(f))

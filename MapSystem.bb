@@ -1654,25 +1654,6 @@ Function LoadRoomMesh(rt.RoomTemplates)
 	
 End Function
 
-Function LoadRoomMeshes()
-	Local temp% = 0
-	For rt.RoomTemplates = Each RoomTemplates
-		temp=temp+1
-	Next	
-	
-	Local i = 0
-	For rt.RoomTemplates = Each RoomTemplates
-		If Instr(rt\objpath,".rmesh")<>0 Then
-			rt\obj = LoadRMesh(rt\objPath, rt)
-		EndIf
-		If (Not rt\obj) Then RuntimeErrorExt "Failed to load map file "+Chr(34)+mapfile+Chr(34)+"."
-		
-		HideEntity(rt\obj)
-		DrawLoading(Int(30 + (15.0 / temp)*i))
-		i=i+1
-	Next
-End Function
-
 
 Const ROOMS_DATA_PATH$ = "Data\rooms.ini"
 
@@ -5838,7 +5819,7 @@ Function CreateWaypoint.WayPoints(x#,y#,z#,door.Doors, room.Rooms)
 	Return w
 End Function
 
-Function InitWayPoints(loadingstart=45)
+Function InitWayPoints(loadingstart,loadingcount#)
 	
 	Local d.Doors, w.WayPoints, w2.WayPoints, r.Rooms, ClosestRoom.Rooms
 	
@@ -5893,7 +5874,7 @@ Function InitWayPoints(loadingstart=45)
 		number = number + 1
 		iter = iter + 1
 		If iter = 20 Then 
-			DrawLoading(loadingstart+Floor((35.0/amount)*number)) 
+			DrawLoading(loadingstart+Floor((loadingcount/amount)*number)) 
 			iter = 0
 		EndIf
 		
@@ -7004,7 +6985,7 @@ End Function
 
 Include "OverlapResolver.bb"
 
-Function CreateMap()
+Function CreateMap(loadingstart,loadingcount#)
 	DebugLog ("Generating a map using the seed "+GetRandomSeed())
 	
 	MapWidth% = GetModdedINIInt(MapOptions, "facility", "width")
@@ -7402,6 +7383,7 @@ Function CreateMap()
 	temp = 0
 	Local r.Rooms, spacing# = 8.0
 	For y = MapHeight - 1 To 1 Step - 1
+		DrawLoading(loadingstart + Float(MapHeight - 1 - y) / (MapHeight - 1) * loadingcount)
 		
 		;zone% = GetZone(y)
 		

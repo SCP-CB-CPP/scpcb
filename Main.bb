@@ -1,18 +1,9 @@
-;SCP - Containment Breach
-
-;    The game is based on the works of the SCP Foundation community (http://www.scp-wiki.net/).
-
-;    The source code is licensed under Creative Commons Attribution-ShareAlike 3.0 License.
-;    http://creativecommons.org/licenses/by-sa/3.0/
-
-;    See Credits.txt for a list of contributors
-
 Const VersionNumber$ = "1.3.12-pre9"
 Const CompatibleNumber$ = "1.3.12" ;Only change this if the version given isn't working with the current build version - ENDSHN
 
 InitErrorMsgs(10, True)
 SetErrorMsg(0, "An error occured in SCP - Containment Breach v" + VersionNumber)
-SetErrorMsg(1, "Please take a screenshot of this and send it to us!") 
+SetErrorMsg(1, "Please send us the generated minidump along with a screenshot of this window!")
 SetErrorMsg(2, "---------------------------------------------------")
 SetErrorMsg(3, "OS: " + SystemProperty("os") + " " + (32 + (GetEnv("ProgramFiles(X86)") <> 0) * 32) + " Bit (Build: " + SystemProperty("osbuild") + ")")
 SetErrorMsg(4, "CPU: " + Trim(SystemProperty("cpuname")) + " (Arch: " + SystemProperty("cpuarch") + ", " + GetEnv("NUMBER_OF_PROCESSORS") + " Threads)")
@@ -8311,7 +8302,7 @@ Function LoadEntities()
 	DecalTextures(19) = LoadTexture_Strict("GFX\decal19.png", 1 + 2)
 	DecalTextures(20) = LoadTexture_Strict("GFX\decal427.png", 1 + 2)
 	
-	DrawLoading(25)
+	DrawLoading(24)
 	
 	Monitor = LoadMesh_Strict("GFX\map\monitor.b3d")
 	HideEntity Monitor
@@ -8321,7 +8312,7 @@ Function LoadEntities()
 	HideEntity(CamBaseOBJ)
 	CamOBJ = LoadMesh_Strict("GFX\map\CamHead.b3d")
 	HideEntity(CamOBJ)
-	
+
 	Monitor2 = LoadMesh_Strict("GFX\map\monitor_checkpoint.b3d")
 	HideEntity Monitor2
 	Monitor3 = LoadMesh_Strict("GFX\map\monitor_checkpoint.b3d")
@@ -8394,8 +8385,12 @@ Function LoadEntities()
 	EndIf
 	If EnableUserTracks Then DebugLog "User Tracks found: "+UserTrackMusicAmount
 	
+	DrawLoading(25)
+
 	InitItemTemplates()
 	
+	DrawLoading(35)
+
 	ParticleTextures(0) = LoadTexture_Strict("GFX\smoke.png", 1 + 2)
 	ParticleTextures(1) = LoadTexture_Strict("GFX\flash.jpg", 1 + 2)
 	ParticleTextures(2) = LoadTexture_Strict("GFX\dust.jpg", 1 + 2)
@@ -8466,6 +8461,8 @@ Function LoadEntities()
 	OBJTunnel(6)=LoadRMesh("GFX\map\mt_generator.rmesh",Null)
 	HideEntity OBJTunnel(6)
 	
+	DrawLoading(37)
+
 	;TextureLodBias TextureBias
 	TextureLodBias TextureFloat#
 	;Devil Particle System
@@ -8474,7 +8471,7 @@ Function LoadEntities()
 	;	1 - smoke effect
 	
 	Local t0
-	
+
 	InitParticles(Camera)
 	
 	;Spark Effect (short)
@@ -8557,9 +8554,7 @@ Function LoadEntities()
 	CameraZoom(Room2slCam, 0.8)
 	HideEntity(Room2slCam)
 	
-	DrawLoading(30)
-	
-	;LoadRoomMeshes()
+	DrawLoading(40)
 	
 	CatchErrors("LoadEntities")
 End Function
@@ -8584,11 +8579,12 @@ Function InitNewGame()
 	If AccessCode = HARPCODE Then AccessCode = AccessCode + 1
 	
 	If SelectedMap = "" Then
-		CreateMap()
+		CreateMap(50, 19)
 	Else
-		LoadMap("Map Creator\Maps\"+SelectedMap)
+		LoadMap("Map Creator\Maps\"+SelectedMap, 50, 19)
 	EndIf
-	InitWayPoints()
+	DrawLoading(70)
+	InitWayPoints(71, 9)
 	
 	DrawLoading(79)
 	
@@ -8614,7 +8610,7 @@ Function InitNewGame()
 		EntityParent(it\collider, 0)
 	Next
 	
-	DrawLoading(80)
+	DrawLoading(81)
 	For sc.SecurityCams= Each SecurityCams
 		sc\angle = EntityYaw(sc\obj) + sc\angle
 		EntityParent(sc\obj, 0)
