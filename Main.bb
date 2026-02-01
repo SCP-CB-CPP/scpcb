@@ -1,12 +1,3 @@
-;SCP - Containment Breach
-
-;    The game is based on the works of the SCP Foundation community (http://www.scp-wiki.net/).
-
-;    The source code is licensed under Creative Commons Attribution-ShareAlike 3.0 License.
-;    http://creativecommons.org/licenses/by-sa/3.0/
-
-;    See Credits.txt for a list of contributors
-
 Const VersionNumber$ = "1.3.11"
 Const CompatibleNumber$ = "1.3.11" ;Only change this if the version given isn't working with the current build version - ENDSHN
 
