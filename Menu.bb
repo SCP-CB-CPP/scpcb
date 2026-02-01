@@ -154,46 +154,7 @@ Function UpdateMainMenu()
 						If HasNumericSeed Then
 							RandomSeedNumeric = MilliSecs()
 						Else
-							RandomSeed = ""
-							If Rand(15)=1 Then 
-								Select Rand(13)
-									Case 1 
-										RandomSeed = "NIL"
-									Case 2
-										RandomSeed = "NO"
-									Case 3
-										RandomSeed = "d9341"
-									Case 4
-										RandomSeed = "5CP_I73"
-									Case 5
-										RandomSeed = "DONTBLINK"
-									Case 6
-										RandomSeed = "CRUNCH"
-									Case 7
-										RandomSeed = "die"
-									Case 8
-										RandomSeed = "HTAED"
-									Case 9
-										RandomSeed = "rustledjim"
-									Case 10
-										RandomSeed = "larry"
-									Case 11
-										RandomSeed = "JORGE"
-									Case 12
-										RandomSeed = "dirtymetal"
-									Case 13
-										RandomSeed = "whatpumpkin"
-								End Select
-							Else
-								n = Rand(4,8)
-								For i = 1 To n
-									If Rand(3)=1 Then
-										RandomSeed = RandomSeed + Rand(0,9)
-									Else
-										RandomSeed = RandomSeed + Chr(Rand(97,122))
-									EndIf
-								Next							
-							EndIf
+							RandomSeed = RandomSeed + Chr(Rand(97,122))
 						EndIf
 						
 						MainMenuTab = 1
@@ -215,12 +176,34 @@ Function UpdateMainMenu()
 					EndIf
 			End Select
 			
-			DrawButton(x, y, width, height, txt)
-			
-			;rect(x + 4, y + 4, width - 8, height - 8)
-			;color 255, 255, 255	
-			;text(x + width / 2, y + height / 2, Str, True, True)
-		Next	
+			MainMenuTab = 1
+		EndIf
+
+		y = y + spacing
+
+		If DrawButton(x, y, width, height, I_Loc\Menu_LoadUpper) Then
+			LoadSaveGames()
+			MainMenuTab = 2
+		EndIf
+
+		y = y + spacing
+
+		If DrawButton(x, y, width, height, I_Loc\Menu_ModsUpper, True, False, Not ModsEnabled) Then
+			MainMenuTab = 8
+		EndIf
+
+		y = y + spacing
+
+		If DrawButton(x, y, width, height, I_Loc\Menu_OptionsUpper) Then
+			MainMenuTab = 3 : OnSliderID = 66
+		EndiF
+
+		y = y + spacing
+
+		If DrawButton(x, y, width, height, I_Loc\Menu_QuitUpper) Then
+			StopChannel(CurrMusicStream)
+			End
+		EndIf
 		
 	Else
 		

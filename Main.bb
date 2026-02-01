@@ -56,7 +56,7 @@ Include "Blitz_File_FileName.bb"
 
 Include "DevilParticleSystem.bb"
 
-Global SteamActive% = GetOptionInt("options", "enable steam")
+Global SteamActive% = GetOptionInt("general", "enable steam") And (Not Instr(CommandLine(), "-nosteam"))
 If SteamActive Then
 	If Steam_RestartAppIfNecessary(2178380) Then Return
 	If Steam_Init() <> 0 Then RuntimeErrorExt("Steam failed to initialize")
@@ -124,24 +124,9 @@ Global SFXVolume# = GetOptionFloat("audio", "sound volume")
 
 Global Bit16Mode = GetOptionInt("options", "16bit")
 
-If LauncherEnabled Then 
-	AspectRatioRatio = 1.0
+; Exclusive fullscreen ONLY supports the reported resolutions
+If LauncherEnabled And (Not Instr(CommandLine(), "-nolauncher")) Lor Fullscreen And (Not GfxMode3DExists(GraphicWidth, GraphicHeight, 32-16*Bit16Mode)) Then
 	UpdateLauncher()
-Else If Fullscreen And (Not GfxModeExists(GraphicWidth, GraphicHeight, 32-16*Bit16Mode)) Then
-	; Exclusive fullscreen ONLY supports the reported resolutions
-	AspectRatioRatio = 1.0
-	UpdateLauncher()
-Else If Fullscreen
-	Local TotalGfxModes% = CountGfxModes3D()
-	Local samefound% = False
-	For i% = 1 To TotalGfxModes
-		If GraphicWidth = GfxModeWidth(i) And GraphicHeight = GfxModeHeight(i) Then samefound = True : Exit
-	Next
-	If Not samefound Then
-		; Exclusive fullscreen ONLY supports the reported resolutions
-		AspectRatioRatio = 1.0
-		UpdateLauncher()
-	End If
 EndIf
 SetGfxDriver(SelectedGFXDriver)
 Global GFXDriverName$ = GFXDriverName(SelectedGFXDriver)
@@ -11906,12 +11891,10 @@ Function PlayMovie(moviefile$)
 End Function
 
 Function PlayStartupVideos()
-
-	If GetOptionInt("options","play startup video") = 0 Lor IsRestart Then Return
+	If GetOptionInt("general","play startup video") = 0 Lor Instr(CommandLine(), "-novid") Then Return
 
 	PlayMovie("GFX\menu\startup_Undertow")
 	PlayMovie("GFX\menu\startup_TSS")
-
 End Function
 
 Function CanUseItem(canUseWithHazmat%, canUseWithGasMask%, canUseWithEyewear%)
