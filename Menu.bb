@@ -380,6 +380,7 @@ Function UpdateMainMenu()
 					
 					Local SameFound% = 1
 
+					LoadSaveGames()
 					For i% = 1 To SaveGameAmount
 						If SaveGames(i - 1) = CurrSave Then
 							SameFound = SameFound + 1
