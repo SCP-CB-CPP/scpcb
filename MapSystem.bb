@@ -2062,12 +2062,6 @@ Function FillRoom(r.Rooms)
 			em\SizeChange = 0.007
 			em\Achange = -0.006
 			em\Gravity = -0.24
-			
-			;This needs more work
-			;dem.DevilEmitters = CreateDevilEmitter(r\x-175.0*RoomScale,r\y+370.0*RoomScale,r\z+656.0*RoomScale,r,2)
-			;dem\isDeconGas = True
-			;dem.DevilEmitters = CreateDevilEmitter(r\x-655.0*RoomScale,r\y+370.0*RoomScale,r\z+240.0*RoomScale,r,2)
-			;dem\isDeconGas = True
 			;[End Block]
 		Case "lockroom2"
 			;[Block]

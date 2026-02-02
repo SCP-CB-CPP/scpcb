@@ -1419,7 +1419,7 @@ Function UpdateConsole()
 						StrTemp$ = ""
 					EndIf
 					
-					If Int(StrTemp) > -1 And Int(StrTemp) <= 1 ;<--- This is the maximum ID of particles by Devil Particle system, will be increased after time - ENDSHN
+					If Int(StrTemp) >= 0 And Int(StrTemp) <= 2 ;<--- This is the maximum ID of particles by Devil Particle system, will be increased after time - ENDSHN
 						SetEmitter(Collider,ParticleEffect[Int(StrTemp)])
 						CreateConsoleMsg("Spawned particle emitter with ID "+Int(StrTemp)+" at player's position.")
 					Else
@@ -1819,7 +1819,7 @@ Global NavBG = CreateImage(GraphicWidth,GraphicHeight)
 
 Global LightConeModel
 
-Global ParticleEffect[10]
+Global ParticleEffect[3]
 
 Const MaxDTextures=9
 Global DTextures[MaxDTextures]
@@ -8500,33 +8500,6 @@ Function LoadEntities()
 	;SetTemplateSize(ParticleEffect[1], 3, 3, .5, 1.5)
 	SetTemplateSize(ParticleEffect[1], 0.4, 0.4, 0.5, 1.5)
 	SetTemplateSizeVel(ParticleEffect[1], .01, 1.01)
-	
-	;Smoke effect (for decontamination gas)
-	ParticleEffect[2] = CreateTemplate()
-	SetTemplateEmitterBlend(ParticleEffect[2], 1)
-	SetTemplateInterval(ParticleEffect[2], 1)
-	SetTemplateEmitterLifeTime(ParticleEffect[2], 3)
-	SetTemplateParticleLifeTime(ParticleEffect[2], 30, 45)
-	SetTemplateTexture(ParticleEffect[2], "GFX\smoke.png", 2, 1)
-	SetTemplateOffset(ParticleEffect[2], -0.1, 0.1, -0.1, 0.1, -0.1, 0.1)
-	SetTemplateVelocity(ParticleEffect[2], -0.005, 0.005, 0.0, -0.03, -0.005, 0.005)
-	SetTemplateAlphaVel(ParticleEffect[2], True)
-	SetTemplateSize(ParticleEffect[2], 0.4, 0.4, 0.5, 1.5)
-	SetTemplateSizeVel(ParticleEffect[2], .01, 1.01)
-	SetTemplateGravity(ParticleEffect[2], 0.005)
-	t0 = CreateTemplate()
-	SetTemplateEmitterBlend(t0, 1)
-	SetTemplateInterval(t0, 1)
-	SetTemplateEmitterLifeTime(t0, 3)
-	SetTemplateParticleLifeTime(t0, 30, 45)
-	SetTemplateTexture(t0, "GFX\smoke2.png", 2, 1)
-	SetTemplateOffset(t0, -0.1, 0.1, -0.1, 0.1, -0.1, 0.1)
-	SetTemplateVelocity(t0, -0.005, 0.005, 0.0, -0.03, -0.005, 0.005)
-	SetTemplateAlphaVel(t0, True)
-	SetTemplateSize(t0, 0.4, 0.4, 0.5, 1.5)
-	SetTemplateSizeVel(t0, .01, 1.01)
-	SetTemplateGravity(ParticleEffect[2], 0.005)
-	SetTemplateSubTemplate(ParticleEffect[2], t0)
 	
 	Room2slCam = CreateCamera()
 	CameraViewport(Room2slCam, 0, 0, 128, 128)
