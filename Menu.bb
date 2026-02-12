@@ -281,7 +281,7 @@ Function UpdateMainMenu()
 				If SelectedMap = "" Then
 					Text (x + 20 * MenuScale, y + 60 * MenuScale, "Map seed:")
 					If HasNumericSeed Then
-						Local inputBoxSeed$ = InputBox(x+150*MenuScale, y+55*MenuScale, 200*MenuScale, 30*MenuScale, Str(RandomSeedNumeric), 3)
+						Local inputBoxSeed$ = InputBox(x+150*MenuScale, y+55*MenuScale, 200*MenuScale, 30*MenuScale, Str(RandomSeedNumeric), 3, 3)
 						If Instr(inputBoxSeed, "-", 2) <> 0 Then
 							RandomSeedNumeric = -RandomSeedNumeric
 						Else
@@ -1730,7 +1730,7 @@ Function RandomDefaultWidthChar$(min%, max%, def$)
 	If StringWidth(c) <> StringWidth("L") Then Return def Else Return c
 End Function
 
-Function InputBox$(x%, y%, width%, height%, Txt$, ID% = 0)
+Function InputBox$(x%, y%, width%, height%, Txt$, ID% = 0, virtualKeyboardMode=0)
 	;TextBox(x,y,width,height,Txt$)
 	Color (255, 255, 255)
 	DrawTiledImageRect(MenuWhite, (x Mod 256), (y Mod 256), 512, 512, x, y, width, height)
@@ -1741,13 +1741,20 @@ Function InputBox$(x%, y%, width%, height%, Txt$, ID% = 0)
 	If MouseOn(x, y, width, height) Then
 		Color(50, 50, 50)
 		MouseOnBox = True
-		If MouseHit1 Then SelectedInputBox = ID : FlushKeys
+		If MouseHit1 Then
+			SelectedInputBox = ID
+			If virtualKeyboardMode >= 0 Then Steam_OpenOnScreenKeyboard(virtualKeyboardMode, x, y, width, height)
+			FlushKeys
+		EndIf
 	EndIf
 	
 	Rect(x + 2, y + 2, width - 4, height - 4)
 	Color (255, 255, 255)	
 	
-	If (Not MouseOnBox) And MouseHit1 And SelectedInputBox = ID Then SelectedInputBox = 0
+	If (Not MouseOnBox) And MouseHit1 And SelectedInputBox = ID Then
+		SelectedInputBox = 0
+		If virtualKeyboardMode >= 0 Then Steam_CloseOnScreenKeyboard()
+	EndIf
 	
 	Text(x + width / 2, y + height / 2, Txt, True, True)
 
