@@ -30,9 +30,13 @@ Function InitOptionsDir$()
 	If FileType(dir) <> 2 Then CreateDir(dir)
 	dir = dir + "\SCP - Containment Breach"
 	If FileType(dir) <> 2 Then CreateDir(dir)
-	dir = dir + "\options.ini"
-	If FileType(dir) <> 1 Then
-		Local f% = WriteFile(dir)
+	Return dir
+End Function
+
+Function InitOptionsFile$()
+	Local file$ = DataDir + "\options.ini"
+	If FileType(file) <> 1 Lor HasCLIFlag("defaults") Lor HasCLIFlag("default") Then
+		Local f% = WriteFile(file)
 		CloseFile(f)
 	EndIf
 	Return dir
@@ -52,11 +56,45 @@ Function GetOptionFloat#(section$, key$)
 	Return Float(GetOptionString(section, key))
 End Function
 
+Function HasCLIFlag%(name$)
+	name = "-" + name
+	Local cmd$ = CommandLine()
+	Local pos% = Instr(cmd, " " + name + " ")
+	If pos <> 0 Then Return True
+	pos = Instr(cmd, name + " ")
+	If pos = 1 Then Return True
+	pos = Instr(cmd, " " + name)
+	If pos = Len(cmd) - Len(name) Then Return True
+	Return cmd = name
+End Function
+
+Function GetCLIInt%(name$, def%=0)
+	Local txt$ = GetCLIString(name)
+	If txt <> "" Then Return Int(txt)
+	return def
+End Function
+
+Function GetCLIString$(name$, def$="")
+	name = "-" + name + " "
+	Local cmd$ = CommandLine()
+	Local begin% = Instr(cmd, " " + name)
+	If begin = 0 Then
+		begin = Instr(cmd, name)
+		If begin <> 1 Return 0
+	Else
+		begin = begin + 1
+	EndIf
+	begin = begin + Len(name)
+	Local end% = Instr(cmd, " ", begin)
+	If end = 0 Then end = Len(cmd) + 1
+	Return Trim(Mid(cmd, begin, end - begin))
+End Function
+
 Include "Blitz_File_FileName.bb"
 
 Include "DevilParticleSystem.bb"
 
-Global SteamActive% = GetOptionInt("general", "enable steam") And (Not Instr(CommandLine(), "-nosteam"))
+Global SteamActive% = GetOptionInt("general", "enable steam") And (Not HasCLIFlag("nosteam"))
 If SteamActive Then
 	If Steam_RestartAppIfNecessary(2178380) Then Return
 	If Steam_Init() <> 0 Then RuntimeErrorExt("Steam failed to initialize")
@@ -83,11 +121,13 @@ Global LauncherWidth%= Min(GetOptionInt("launcher", "launcher width"), 1024)
 Global LauncherHeight% = Min(GetOptionInt("launcher", "launcher height"), 768)
 Global LauncherEnabled% = GetOptionInt("launcher", "launcher enabled")
 
-Global GraphicWidth% = GetOptionInt("options", "width"), GraphicHeight% = GetOptionInt("options", "height")
+Global GraphicWidth% = GetCLIInt("width", GetCLIInt("w", GetOptionInt("graphics", "width")))
+Global GraphicHeight% = GetCLIInt("height", GetCLIInt("h", GetOptionInt("graphics", "height")))
 If GraphicWidth <= 0 Then GraphicWidth = DesktopWidth()
 If GraphicHeight <= 0 Then GraphicHeight = DesktopHeight()
 
-Global Depth% = 0, Fullscreen% = GetOptionInt("options", "fullscreen")
+Global Depth% = 0
+Global Fullscreen% = GetOptionInt("graphics", "fullscreen")
 
 Global SelectedGFXDriver% = Min(Max(GetOptionInt("options", "gfx driver"), 1), CountGfxDrivers())
 
@@ -103,7 +143,15 @@ Global BorderlessWindowed% = GetOptionInt("options", "borderless windowed")
 Global RealGraphicWidth%,RealGraphicHeight%
 Global AspectRatioRatio#
 
-Global EnableRoomLights% = GetOptionInt("options", "room lights enabled")
+ApplyWindowModeCLIOverrides()
+
+Function ApplyWindowModeCLIOverrides()
+	If HasCLIFlag("noborder") Lor HasCLIFlag("borderless") Then BorderlessWindowed = True : Return
+	If HasCLIFlag("fullscreen") Lor HasCLIFlag("full") Then BorderlessWindowed = False : Fullscreen = True : Return
+	If HasCLIFlag("window") Lor HasCLIFlag("windowed") Lor HasCLIFlag("sw") Lor HasCLIFlag("startwindowed") Then BorderlessWindowed = False : Fullscreen = False
+End Function
+
+Global EnableRoomLights% = GetOptionInt("graphics", "room lights enabled")
 
 Global TextureDetails% = GetOptionInt("options", "texture details")
 Global TextureFloat#
@@ -125,7 +173,7 @@ Global SFXVolume# = GetOptionFloat("audio", "sound volume")
 Global Bit16Mode = GetOptionInt("options", "16bit")
 
 ; Exclusive fullscreen ONLY supports the reported resolutions
-If LauncherEnabled And (Not Instr(CommandLine(), "-nolauncher")) Lor Fullscreen And (Not GfxMode3DExists(GraphicWidth, GraphicHeight, 32-16*Bit16Mode)) Then
+If LauncherEnabled And (Not HasCLIFlag("nolauncher")) Lor Fullscreen And (Not GfxMode3DExists(GraphicWidth, GraphicHeight, 32-16*Bit16Mode)) Then
 	UpdateLauncher()
 EndIf
 SetGfxDriver(SelectedGFXDriver)
@@ -11873,7 +11921,7 @@ Function PlayMovie(moviefile$)
 End Function
 
 Function PlayStartupVideos()
-	If GetOptionInt("general","play startup video") = 0 Lor Instr(CommandLine(), "-novid") Then Return
+	If GetOptionInt("general","play startup video") = 0 Lor HasCLIFlag("novid") Then Return
 
 	PlayMovie("GFX\menu\startup_Undertow")
 	PlayMovie("GFX\menu\startup_TSS")
