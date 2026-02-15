@@ -1743,7 +1743,7 @@ Function InputBox$(x%, y%, width%, height%, Txt$, ID% = 0, virtualKeyboardMode=0
 		MouseOnBox = True
 		If MouseHit1 Then
 			SelectedInputBox = ID
-			If virtualKeyboardMode >= 0 Then Steam_OpenOnScreenKeyboard(virtualKeyboardMode, x, y, width, height)
+			If SteamActive And virtualKeyboardMode >= 0 Then Steam_OpenOnScreenKeyboard(virtualKeyboardMode, x, y, width, height)
 			FlushKeys
 		EndIf
 	EndIf
@@ -1753,7 +1753,7 @@ Function InputBox$(x%, y%, width%, height%, Txt$, ID% = 0, virtualKeyboardMode=0
 	
 	If (Not MouseOnBox) And MouseHit1 And SelectedInputBox = ID Then
 		SelectedInputBox = 0
-		If virtualKeyboardMode >= 0 Then Steam_CloseOnScreenKeyboard()
+		If SteamActive And virtualKeyboardMode >= 0 Then Steam_CloseOnScreenKeyboard()
 	EndIf
 	
 	Text(x + width / 2, y + height / 2, Txt, True, True)
