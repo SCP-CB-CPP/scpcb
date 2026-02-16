@@ -6020,59 +6020,67 @@ Function DrawGUI()
 						EndIf
 
 						;Stop
-						
-						strtemp = GetINIString2(iniStr, loc, "sound")
-						If strtemp <> "" Then PlaySound_Strict LoadTempSound(strtemp)
-						
-						strtemp = GetINIString2(iniStr, loc, "message")
-						If strtemp <> "" Then Msg = strtemp : MsgTimer = 70*6
-						
-						If GetINIInt2(iniStr, loc, "lethal") Or GetINIInt2(iniStr, loc, "deathtimer") Then 
-							DeathMSG = GetINIString2(iniStr, loc, "deathmessage")
-							If GetINIInt2(iniStr, loc, "lethal") Then Kill()
-						EndIf
-						
-						BlurTimer = Max(BlurTimer + GetINIInt2(iniStr, loc, "blur")*70, 0);*temp
-						CameraShakeTimer = Max(CameraShakeTimer + GetINIString2(iniStr, loc, "camerashake"), 0)
-						
-						temp = GetINIInt2(iniStr, loc, "vomit")
-						If temp > 0 Then
-							If VomitTimer = 0 Then
-								VomitTimer = temp
-							Else
-								VomitTimer = Min(VomitTimer, temp)
-							EndIf
-						EndIf
-						
-						temp = GetINIInt2(iniStr, loc, "deathtimer")*70
-						If temp > 0 Then
-							If DeathTimer = 0 Then
-								DeathTimer = temp
-							Else
-								DeathTimer = Min(DeathTimer, temp)
-							EndIf
-						EndIf
-						
-						Injuries = Max(Injuries + GetINIInt2(iniStr, loc, "damage"), 0);*temp
-						Bloodloss = Max(Bloodloss + GetINIInt2(iniStr, loc, "blood loss"), 0);*temp
-						
-						If GetINIInt2(iniStr, loc, "stomachache") Then SCP1025state[3]=1
-						
-						;the state of refined drinks is more than 1.0 (fine setting increases it by 1, very fine doubles it)
-						strtemp = GetINIString2(iniStr, loc, "blink effect")
-						If strtemp <> "" Then BlinkEffect = Float(strtemp)^SelectedItem\state
-						strtemp = GetINIString2(iniStr, loc, "blink effect timer")
-						If strtemp <> "" Then BlinkEffectTimer = Float(strtemp)*SelectedItem\state
-						strtemp = GetINIString2(iniStr, loc, "stamina effect")
-						If strtemp <> "" Then StaminaEffect = Float(strtemp)^SelectedItem\state
-						strtemp = GetINIString2(iniStr, loc, "stamina effect timer")
-						If strtemp <> "" Then StaminaEffectTimer = Float(strtemp)*SelectedItem\state
-						
+				
 						strtemp = GetINIString2(iniStr, loc, "refusemessage")
 						If strtemp <> "" Then
 							Msg = strtemp 
 							MsgTimer = 70*6		
 						Else
+							strtemp = GetINIString2(iniStr, loc, "sound")
+							If strtemp <> "" Then PlaySound_Strict LoadTempSound(strtemp)
+						
+							strtemp = GetINIString2(iniStr, loc, "message")
+							If strtemp <> "" Then Msg = strtemp : MsgTimer = 70*6
+						
+							If GetINIInt2(iniStr, loc, "lethal") Or GetINIInt2(iniStr, loc, "deathtimer") Or GetINIInt2(iniStr, loc, "damage") Or GetINIInt2(iniStr, loc, "blood loss") Then 
+								DeathMSG = GetINIString2(iniStr, loc, "deathmessage")
+								If GetINIInt2(iniStr, loc, "lethal") Then Kill()
+							EndIf
+						
+							BlurTimer = Max(BlurTimer + GetINIInt2(iniStr, loc, "blur")*70, 0);*temp
+							CameraShakeTimer = Max(CameraShakeTimer + GetINIString2(iniStr, loc, "camerashake"), 0)
+						
+							temp = GetINIInt2(iniStr, loc, "vomit")
+							If temp > 0 Then
+								If VomitTimer = 0 Then
+									VomitTimer = temp
+								Else
+									VomitTimer = Min(VomitTimer, temp)
+								EndIf
+							EndIf
+						
+							temp = GetINIInt2(iniStr, loc, "deathtimer")*70
+							If temp > 0 Then
+								If DeathTimer = 0 Then
+									DeathTimer = temp
+								Else
+									DeathTimer = Min(DeathTimer, temp)
+								EndIf
+							EndIf
+						
+							Injuries = Max(Injuries + GetINIInt2(iniStr, loc, "damage"), 0);*temp
+							Bloodloss = Max(Bloodloss + GetINIInt2(iniStr, loc, "blood loss"), 0);*temp
+						
+							If GetINIInt2(iniStr, loc, "stomachache") = 1 Then
+								If SCP1025state[3] = 0 Then
+									SCP1025state[3] = 1
+								Else
+									SCP1025state[3] = SCP1025state[3] + Rnd(0.3,0.9)
+								EndIf							
+							Else
+								SCP1025state[3] = 0
+							EndIf								
+						
+							;the state of refined drinks is more than 1.0 (fine setting increases it by 1, very fine doubles it)
+							strtemp = GetINIString2(iniStr, loc, "blink effect")
+							If strtemp <> "" Then BlinkEffect = Float(strtemp)^SelectedItem\state
+							strtemp = GetINIString2(iniStr, loc, "blink effect timer")
+							If strtemp <> "" Then BlinkEffectTimer = Float(strtemp)*SelectedItem\state
+							strtemp = GetINIString2(iniStr, loc, "stamina effect")
+							If strtemp <> "" Then StaminaEffect = Float(strtemp)^SelectedItem\state
+							strtemp = GetINIString2(iniStr, loc, "stamina effect timer")
+							If strtemp <> "" Then StaminaEffectTimer = Float(strtemp)*SelectedItem\state
+
 							it.Items = CreateItem("emptycup", 0,0,0)
 							it\Picked = True
 							For i = 0 To MaxItemAmount-1
@@ -7369,14 +7377,15 @@ Function DrawMenu()
 		
 		If PlayerRoom\RoomTemplate\Name$ <> "exit1" And PlayerRoom\RoomTemplate\Name$ <> "gatea"
 			If StopHidingTimer = 0 Then
-				If EntityDistance(Curr173\Collider, Collider)<4.0 Or EntityDistance(Curr106\Collider, Collider)<4.0 Then 
+				If EntityDistance(Curr173\Collider, Collider)<4.0 Or EntityDistance(Curr106\Collider, Collider)<4.0 Or EntityDistance(Curr096\Collider, Collider)<4.0 Then 
 					StopHidingTimer = 1
 				EndIf	
-			ElseIf StopHidingTimer < 40
+			ElseIf StopHidingTimer < 999
 				If KillTimer >= 0 Then 
-					StopHidingTimer = StopHidingTimer+FPSfactor
+					StopHidingTimer = StopHidingTimer+FPSfactor2
 					
-					If StopHidingTimer => 40 Then
+					If StopHidingTimer => 999 Then
+						StopHidingTimer = 0
 						PlaySound_Strict(HorrorSFX(15))
 						Msg = I_Loc\Message_Stophiding
 						MsgTimer = 6*70
@@ -8913,6 +8922,7 @@ Function NullGame(playbuttonsfx%=True)
 	DoorTempID = 0
 	RoomTempID = 0
 	
+	StopHidingTimer = 0
 	GameSaved = 0
 	
 	HideDistance# = 15.0
