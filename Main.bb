@@ -173,7 +173,7 @@ Global SFXVolume# = GetOptionFloat("audio", "sound volume")
 Global Bit16Mode = GetOptionInt("options", "16bit")
 
 ; Exclusive fullscreen ONLY supports the reported resolutions
-If LauncherEnabled And (Not HasCLIFlag("nolauncher")) Lor Fullscreen And (Not GfxMode3DExists(GraphicWidth, GraphicHeight, 32-16*Bit16Mode)) Then
+If (LauncherEnabled Lor HasCLIFlag("launcher")) And (Not HasCLIFlag("nolauncher")) Lor Fullscreen And (Not GfxMode3DExists(GraphicWidth, GraphicHeight, 32-16*Bit16Mode)) Then
 	UpdateLauncher()
 EndIf
 SetGfxDriver(SelectedGFXDriver)
