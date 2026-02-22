@@ -7711,15 +7711,6 @@ Function DrawMenu()
 					If MouseOn(x+270*MenuScale,y+MenuScale,20*MenuScale,20*MenuScale) And OnSliderID=0
 						DrawOptionsTooltip(tx,ty,tw,th,"consoleenable")
 					EndIf
-					
-					y = y + 30*MenuScale
-					
-					Color 255,255,255
-					Text(x, y, "Open console on error:")
-					ConsoleOpening = DrawTick(x + 270 * MenuScale, y + MenuScale, ConsoleOpening)
-					If MouseOn(x+270*MenuScale,y+MenuScale,20*MenuScale,20*MenuScale) And OnSliderID=0
-						DrawOptionsTooltip(tx,ty,tw,th,"consoleerror")
-					EndIf
 
 					y = y + 30*MenuScale
 
