@@ -1867,12 +1867,13 @@ Function LoadLoadingScreens(file$)
 			LoadingScreenAmount=LoadingScreenAmount+1
 			ls\ID = LoadingScreenAmount
 			
-			ls\title = TemporaryString
+			ls\title = GetLocalString("loadingscreens", TemporaryString)
 			ls\imgpath = GetINIString(file, TemporaryString, "image path")
 			
 			ls\totalTxtDelay = 0
 			For i = 0 To 4
-				ls\txt[i] = GetINIString(file, TemporaryString, "text"+(i+1))
+				Local translateKey$ = GetINIString(file, TemporaryString, "text"+(i+1))
+				ls\txt[i] = GetLocalString("loadingscreens", translateKey) 
 				ls\totalTxtDelay = ls\totalTxtDelay + Len(ls\txt[i]) * LoadingScreenTimePerCharacter
 				ls\txtDelay[i] = ls\totalTxtDelay
 				If ls\txt[i]<> "" Then ls\txtamount=ls\txtamount+1

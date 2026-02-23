@@ -196,16 +196,23 @@ Global Bit16Mode = GetOptionInt("graphics", "16bit")
 Global HUDScaleFactor# = GetOptionFloat("graphics", "hud scale factor")
 
 Const StringsFile$ = "Data\strings.ini"
+Include "IniController.bb"
 Include "Localization.bb"
+
+Function GetLocalString$(section$, key$)
+	Return IniGetBufferString("general", section, key, key)
+End Function
 
 Global I_Loc.LocalizationTable
 If I_Loc <> Null Then Delete I_Loc ; Happens on reload
+IniClearBuffer("general")
 I_Loc = New LocalizationTable
 For m.ActiveMods = Each ActiveMods
 	Local modPath$ = m\Path + StringsFile
-	If FileType(modPath) = 1 Then LoadLocalization(I_Loc, modPath)
+	If FileType(modPath) = 1 Then LoadLocalization(I_Loc, modPath) : IniWriteBuffer(modPath, "general", False)
 Next
 LoadLocalization(I_Loc, StringsFile)
+IniWriteBuffer(StringsFile, "general", False)
 
 ; Exclusive fullscreen ONLY supports the reported resolutions
 If (LauncherEnabled Lor HasCLIFlag("launcher")) And (Not IsRestart) And (Not HasCLIFlag("nolauncher")) Lor Fullscreen And (Not GfxMode3DExists(GraphicWidth, GraphicHeight, 32-16*Bit16Mode)) Then
