@@ -3493,11 +3493,7 @@ Repeat
 		BlitzcordRunCallbacks()
 	EndIf
 
-	If Vsync = 0 Then
-		Flip 0
-	Else 
-		Flip 1
-	EndIf
+	Flip Vsync Lor MainMenuOpen
 Forever
 
 If SteamActive Then Steam_Shutdown()
