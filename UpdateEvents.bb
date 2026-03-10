@@ -6722,6 +6722,9 @@ Function UpdateEvents()
 							SetAnimTime e\room\Objects[7],297
 							e\EventState = 1
 						EndIf
+					EndIf
+					
+					If e\EventState > 0 Then
 						If EntityDistance(Collider, e\room\Objects[6]) < 2.5 And e\EventState > 0 Then
 							PlaySound_Strict(LoadTempSound("SFX\SCP\079\TestroomWarning.ogg"))
 							For i = 0 To 5
