@@ -7354,16 +7354,24 @@ Function UpdateEvents()
 								End Select
 							End If
 						EndIf
-						
-						If e\EventState > (12 * 70) Then                            
-							For it.Items = Each Items
-								If it\collider <> 0 And it\Picked = False Then
-									If Distance(EntityX(it\collider), EntityZ(it\collider), EntityX(e\room\Objects[2], True), EntityZ(e\room\Objects[2], True)) < (180.0 * RoomScale) Then
-										Use914(it, setting, EntityX(e\room\Objects[3], True), EntityY(e\room\Objects[3], True), EntityZ(e\room\Objects[3], True))
-									End If
+					EndIf
+					
+					If e\EventState > (6 * 70) Then    
+						RotateEntity(e\room\Objects[0], EntityPitch(e\room\Objects[0]), EntityYaw(e\room\Objects[0]), CurveAngle(0, EntityRoll(e\room\Objects[0]),10.0))
+					Else
+						RotateEntity(e\room\Objects[0], EntityPitch(e\room\Objects[0]), EntityYaw(e\room\Objects[0]), 180)
+					EndIf
+					
+					If e\EventState > (12 * 70) Then                            
+						For it.Items = Each Items
+							If it\collider <> 0 And it\Picked = False Then
+								If Distance(EntityX(it\collider), EntityZ(it\collider), EntityX(e\room\Objects[2], True), EntityZ(e\room\Objects[2], True)) < (180.0 * RoomScale) Then
+									Use914(it, setting, EntityX(e\room\Objects[3], True), EntityY(e\room\Objects[3], True), EntityZ(e\room\Objects[3], True))
 								End If
-							Next
-							
+							End If
+						Next
+						
+						If PlayerRoom = e\room Then
 							If Distance(EntityX(Collider), EntityZ(Collider), EntityX(e\room\Objects[2], True), EntityZ(e\room\Objects[2], True)) < (160.0 * RoomScale) Then
 								Select setting
 									Case "coarse"
@@ -7381,15 +7389,7 @@ Function UpdateEvents()
 								DropSpeed = 0
 							EndIf                                
 						EndIf
-					EndIf
-					
-					If e\EventState > (6 * 70) Then    
-						RotateEntity(e\room\Objects[0], EntityPitch(e\room\Objects[0]), EntityYaw(e\room\Objects[0]), CurveAngle(0, EntityRoll(e\room\Objects[0]),10.0))
-					Else
-						RotateEntity(e\room\Objects[0], EntityPitch(e\room\Objects[0]), EntityYaw(e\room\Objects[0]), 180)
-					EndIf
-					
-					If e\EventState > (12 * 70) And PlayerRoom = e\room Then
+						
 						e\room\RoomDoors[0]\open = True
 						e\room\RoomDoors[1]\open = True
 						RotateEntity(e\room\Objects[0], 0, 0, 0)
