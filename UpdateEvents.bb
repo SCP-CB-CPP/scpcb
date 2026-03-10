@@ -7283,32 +7283,6 @@ Function UpdateEvents()
 						GrabbedEntity = 0
 					End If
 					
-					Local setting$ = ""
-					
-					If GrabbedEntity <> e\room\Objects[1] Then
-						angle# = WrapAngle(EntityRoll(e\room\Objects[1]))
-						If angle < 22.5 Then
-							angle = 0
-							setting = "1:1"
-						ElseIf angle < 67.5
-							angle = 40
-							setting = "coarse"
-						ElseIf angle < 180
-							angle = 90
-							setting = "rough"
-						ElseIf angle > 337.5
-							angle = 359 - 360
-							setting = "1:1"
-						ElseIf angle > 292.5
-							angle = 320 - 360
-							setting = "fine"
-						Else
-							angle = 270 - 360
-							setting = "very fine"
-						End If
-						RotateEntity(e\room\Objects[1], 0, 0, CurveValue(angle, EntityRoll(e\room\Objects[1]), 20))
-					EndIf
-					
 					For i% = 0 To 1
 						If GrabbedEntity = e\room\Objects[i] Then
 							If Not EntityInView(e\room\Objects[i], Camera) Then
@@ -7319,22 +7293,44 @@ Function UpdateEvents()
 							Exit
 						End If
 					Next
+				EndIf
+
+				Local setting$ = ""
+				angle# = WrapAngle(EntityRoll(e\room\Objects[1]))
+				If angle < 22.5 Then
+					angle = 0
+					setting = "1:1"
+				ElseIf angle < 67.5
+					angle = 40
+					setting = "coarse"
+				ElseIf angle < 180
+					angle = 90
+					setting = "rough"
+				ElseIf angle > 337.5
+					angle = 359 - 360
+					setting = "1:1"
+				ElseIf angle > 292.5
+					angle = 320 - 360
+					setting = "fine"
+				Else
+					angle = 270 - 360
+					setting = "very fine"
+				End If
+				RotateEntity(e\room\Objects[1], 0, 0, CurveValue(angle, EntityRoll(e\room\Objects[1]), 20))
+
+				If e\EventState > 0 Then
+					e\EventState = e\EventState + FPSfactor
 					
-					If e\EventState > 0 Then
-						e\EventState = e\EventState + FPSfactor
-						
-						
-						e\room\RoomDoors[1]\open = False
-						If e\EventState > 70 * 2 Then
-							If e\room\RoomDoors[0]\open=True Then
-								e\room\RoomDoors[0]\SoundCHN = PlaySound2(LoadTempSound("SFX\SCP\914\DoorClose.ogg"), Camera, e\room\RoomDoors[0]\obj)
-							EndIf
-							
-							e\room\RoomDoors[0]\open = False
+					e\room\RoomDoors[1]\open = False
+					If e\EventState > 70 * 2 Then
+						If e\room\RoomDoors[0]\open=True Then
+							e\room\RoomDoors[0]\SoundCHN = PlaySound2(LoadTempSound("SFX\SCP\914\DoorClose.ogg"), Camera, e\room\RoomDoors[0]\obj)
 						EndIf
-						
+						e\room\RoomDoors[0]\open = False
+					EndIf
+					
+					If PlayerRoom = e\room Then
 						If Distance(EntityX(Collider), EntityZ(Collider), EntityX(e\room\Objects[2], True), EntityZ(e\room\Objects[2], True)) < (170.0 * RoomScale) Then
-							
 							If setting = "rough" Or setting = "coarse" Then
 								If e\EventState > 70 * 2.6 And e\EventState - FPSfactor2 < 70 * 2.6 Then PlaySound_Strict Death914SFX
 							EndIf
@@ -7358,23 +7354,24 @@ Function UpdateEvents()
 								End Select
 							End If
 						EndIf
-						
-						If e\EventState > (6 * 70) Then	
-							RotateEntity(e\room\Objects[0], EntityPitch(e\room\Objects[0]), EntityYaw(e\room\Objects[0]), CurveAngle(0, EntityRoll(e\room\Objects[0]),10.0))
-						Else
-							RotateEntity(e\room\Objects[0], EntityPitch(e\room\Objects[0]), EntityYaw(e\room\Objects[0]), 180)
-						EndIf
-						
-						If e\EventState > (12 * 70) Then							
-							For it.Items = Each Items
-								If it\collider <> 0 And it\Picked = False Then
-									If Distance(EntityX(it\collider), EntityZ(it\collider), EntityX(e\room\Objects[2], True), EntityZ(e\room\Objects[2], True)) < (180.0 * RoomScale) Then
-										Use914(it, setting, EntityX(e\room\Objects[3], True), EntityY(e\room\Objects[3], True), EntityZ(e\room\Objects[3], True))
-										
-									End If
+					EndIf
+					
+					If e\EventState > (6 * 70) Then    
+						RotateEntity(e\room\Objects[0], EntityPitch(e\room\Objects[0]), EntityYaw(e\room\Objects[0]), CurveAngle(0, EntityRoll(e\room\Objects[0]),10.0))
+					Else
+						RotateEntity(e\room\Objects[0], EntityPitch(e\room\Objects[0]), EntityYaw(e\room\Objects[0]), 180)
+					EndIf
+					
+					If e\EventState > (12 * 70) Then                            
+						For it.Items = Each Items
+							If it\collider <> 0 And it\Picked = False Then
+								If Distance(EntityX(it\collider), EntityZ(it\collider), EntityX(e\room\Objects[2], True), EntityZ(e\room\Objects[2], True)) < (180.0 * RoomScale) Then
+									Use914(it, setting, EntityX(e\room\Objects[3], True), EntityY(e\room\Objects[3], True), EntityZ(e\room\Objects[3], True))
 								End If
-							Next
-							
+							End If
+						Next
+						
+						If PlayerRoom = e\room Then
 							If Distance(EntityX(Collider), EntityZ(Collider), EntityX(e\room\Objects[2], True), EntityZ(e\room\Objects[2], True)) < (160.0 * RoomScale) Then
 								Select setting
 									Case "coarse"
@@ -7390,20 +7387,20 @@ Function UpdateEvents()
 								PositionEntity(Collider, EntityX(e\room\Objects[3], True), EntityY(e\room\Objects[3], True) + 1.0, EntityZ(e\room\Objects[3], True))
 								ResetEntity(Collider)
 								DropSpeed = 0
-							EndIf								
-							
-							e\room\RoomDoors[0]\open = True
-							e\room\RoomDoors[1]\open = True
-							RotateEntity(e\room\Objects[0], 0, 0, 0)
-							e\EventState = 0
-							
-							Local opensfx914 = LoadTempSound("SFX\SCP\914\DoorOpen.ogg")
-							e\room\RoomDoors[0]\SoundCHN = PlaySound2(opensfx914, Camera, e\room\RoomDoors[0]\obj)
-							e\room\RoomDoors[1]\SoundCHN = PlaySound2(opensfx914, Camera, e\room\RoomDoors[1]\obj)
-						End If
+							EndIf                                
+						EndIf
+						
+						e\room\RoomDoors[0]\open = True
+						e\room\RoomDoors[1]\open = True
+						RotateEntity(e\room\Objects[0], 0, 0, 0)
+						e\EventState = 0
+						
+						Local opensfx914 = LoadTempSound("SFX\SCP\914\DoorOpen.ogg")
+						e\room\RoomDoors[0]\SoundCHN = PlaySound2(opensfx914, Camera, e\room\RoomDoors[0]\obj)
+						e\room\RoomDoors[1]\SoundCHN = PlaySound2(opensfx914, Camera, e\room\RoomDoors[1]\obj)
 					End If
-					
-				EndIf
+				End If
+				
 				UpdateSoundOrigin(e\SoundCHN,Camera,e\room\Objects[1])
 				;[End Block]
 			Case "1048a"
