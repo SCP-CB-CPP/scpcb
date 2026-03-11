@@ -8058,10 +8058,10 @@ Function UpdateEvents()
 								e\EventState2 = 7
 							EndIf
 						EndIf
-					ElseIf e\EventState2 = 7
-						e\room\RoomDoors[0]\locked = False
-						e\room\RoomDoors[1]\locked = False
-						e\EventState2 = 8
+					;ElseIf e\EventState2 = 7
+					;	e\room\RoomDoors[0]\locked = False
+					;	e\room\RoomDoors[1]\locked = False
+					;	e\EventState2 = 8
 					EndIf
 					
 					If e\room\NPC[0]<>Null
