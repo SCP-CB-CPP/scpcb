@@ -3950,11 +3950,12 @@ Function DrawEnding()
 					
 					Text x, y, "Ending: " + Upper(SelectedEnding)
 					Text x, y+20*MenuScale, "Time played: " +FormatDuration(PlayTime, SpeedRunMode)
-					Text x, y+40*MenuScale, "SCPs encountered: " +scpsEncountered
-					Text x, y+60*MenuScale, "Achievements unlocked: " + achievementsUnlocked+"/"+(MAXACHIEVEMENTS)
-					Text x, y+80*MenuScale, "Rooms found: " + roomsfound+"/"+roomamount
-					Text x, y+100*MenuScale, "Documents discovered: " +docsfound+"/"+docamount
-					Text x, y+120*MenuScale, "Items refined in SCP-914: " +RefinedItems			
+					Text x, y+40*MenuScale, GetSeedString()
+					Text x, y+60*MenuScale, "SCPs encountered: " +scpsEncountered
+					Text x, y+80*MenuScale, "Achievements unlocked: " + achievementsUnlocked+"/"+(MAXACHIEVEMENTS)
+					Text x, y+100*MenuScale, "Rooms found: " + roomsfound+"/"+roomamount
+					Text x, y+120*MenuScale, "Documents discovered: " +docsfound+"/"+docamount
+					Text x, y+140*MenuScale, "Items refined in SCP-914: " +RefinedItems			
 					
 					x = GraphicWidth / 2 - width / 2
 					y = GraphicHeight / 2 - height / 2
