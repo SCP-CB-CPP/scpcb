@@ -378,6 +378,7 @@ Global SpeedRunMode% = GetOptionInt("general", "speed run mode")
 Global PlayTime%
 ; 0 = Running; 1 = Stopped; 2 = Pre-made save loaded; 3 = Ending reached
 Global TimerStopped% = True
+Global PreMadeSaveLoaded% = False
 Global ConsoleFlush%
 Global ConsoleFlushSnd% = 0, ConsoleMusFlush% = 0, ConsoleMusPlay% = 0
 
@@ -7269,27 +7270,19 @@ End Function
 Function DrawTimer()
 	SetFont(Font2)
 	Local durText$
-	If TimerStopped = 0 Lor TimerStopped = 3 Then
-		durText$ = FormatDuration(PlayTime)
-	Else If TimerStopped = 1 Then
-		durText = "The seventh seal has been broken"
-	Else
-		durText$ = "Pre-made save loaded"
-	EndIf
+	Local durText$ = FormatDuration(PlayTime)
 	Local x% = GraphicWidth - StringWidth(durText) - 24
 	Local y% = 24
 	Color 0, 0, 0
 	Text(x + 3 * HUDScale, y + 3 * HUDScale, durText)
-	If TimerStopped And TimerStopped<>3 Then
-		Color 255, 0, 0
+	If UsedConsole Then
+		Color 150, 150, 150
+	Else If First ActiveMods <> Null Then
+		Color 200, 200, 200
+	Else If PreMadeSaveLoaded Then
+		Color 175, 175, 175
 	Else
-		If UsedConsole Then
-			Color 150, 150, 150
-		Else If First ActiveMods <> Null Then
-			Color 200, 200, 200
-		Else
-			Color 255, 255, 255
-		EndIf
+		Color 255, 255, 255
 	EndIf
 	Text(x, y, durText)
 	SetFont(Font1)
@@ -7984,7 +7977,7 @@ Function DrawMenu()
 					MenuOpen = False
 					MainMenuOpen = True
 					MainMenuTab = 0
-					PrevSave = CurrSave
+					PrevSave = ""
 					CurrSave = ""
 					TimerStopped = True
 					FlushKeys()
@@ -8565,6 +8558,7 @@ Function InitNewGame()
 	
 	PlayTime = 0
 	TimerStopped = False
+	PreMadeSaveLoaded = False
 
 	HideDistance# = 15.0
 	

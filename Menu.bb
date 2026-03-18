@@ -1095,7 +1095,7 @@ Function UpdateMainMenu()
 		
 	End If
 	
-	If SpeedRunMode And (Not TimerStopped) Then
+	If SpeedRunMode And (Not TimerStopped) And ((Not PreMadeSaveLoaded) Lor (Not MainMenuOpen)) Then
 		DrawTimer()
 		If MainMenuOpen Then
 			If DrawButton(GraphicWidth - 150 * MenuScale - 24, 60 * MenuScale + 24, 150 * MenuScale, 30 * MenuScale, "Stop timer", False) Then
@@ -1644,7 +1644,7 @@ Function DrawLoading(percent%, shortloading=False)
 			
 		EndIf
 
-		If SpeedRunMode And (Not TimerStopped) And PlayTime > 0 Then
+		If SpeedRunMode And (Not TimerStopped) And PlayTime > 0 And (Not PreMadeSaveLoaded) Then
 			DrawTimer()
 		EndIf
 		

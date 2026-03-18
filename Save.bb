@@ -490,8 +490,10 @@ Function LoadGame(file$)
 	
 	Local playedTime = ReadInt(f)
 	If SpeedRunMode Then
-		If PrevSave <> file Then
-			TimerStopped = 2
+		If PrevSave <> file Lor PreMadeSaveLoaded Then
+			PlayTime = playedTime
+			PreMadeSaveLoaded = True
+			TimerStopped = False
 		EndIf
 	Else
 		PlayTime = playedTime
