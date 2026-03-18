@@ -280,8 +280,10 @@ Function UpdateMainMenu()
 				Color 255,255,255
 				If SelectedMap = "" Then
 					Text (x + 20 * MenuScale, y + 60 * MenuScale, "Map seed:")
-					If HasNumericSeed Then
-						Local inputBoxSeed$ = InputBox(x+150*MenuScale, y+55*MenuScale, 200*MenuScale, 30*MenuScale, Str(RandomSeedNumeric), 3, 3)
+					If UseNumericSeeds Then
+						Local txt$
+						If RandomSeedNumeric = 0 Then txt = "" Else txt = Str(RandomSeedNumeric)
+						Local inputBoxSeed$ = InputBox(x+150*MenuScale, y+55*MenuScale, 200*MenuScale, 30*MenuScale, txt, 3, 3)
 						If Instr(inputBoxSeed, "-", 2) <> 0 Then
 							RandomSeedNumeric = -RandomSeedNumeric
 						Else
@@ -389,8 +391,10 @@ Function UpdateMainMenu()
 						EndIf
 					Next
 					
-					If (Not HasNumericSeed) And RandomSeed = "" Then
-						RandomSeed = Abs(MilliSecs())
+					If UseNumericSeeds Then
+						If RandomSeedNumeric = 0 Then RandomSeedNumeric = MilliSecs()
+					Else
+						If RandomSeed = "" Then RandomSeed = Abs(MilliSecs())
 					EndIf
 
 					SeedRnd GetRandomSeed()

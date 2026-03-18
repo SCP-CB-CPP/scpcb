@@ -7269,7 +7269,6 @@ End Function
 
 Function DrawTimer()
 	SetFont(Font2)
-	Local durText$
 	Local durText$ = FormatDuration(PlayTime)
 	Local x% = GraphicWidth - StringWidth(durText) - 24
 	Local y% = 24
