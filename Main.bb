@@ -2861,13 +2861,13 @@ Function RemoveEvent(e.Events)
 	Delete e
 End Function
 
-Collisions HIT_PLAYER, HIT_MAP, 2, 2
-Collisions HIT_PLAYER, HIT_PLAYER, 1, 3
-Collisions HIT_ITEM, HIT_MAP, 2, 2
-Collisions HIT_APACHE, HIT_APACHE, 1, 2
-Collisions HIT_178, HIT_MAP, 2, 2
-Collisions HIT_178, HIT_178, 1, 3
-Collisions HIT_DEAD, HIT_MAP, 2, 2
+Collisions HIT_PLAYER, HIT_MAP, 2
+Collisions HIT_PLAYER, HIT_PLAYER, 3
+Collisions HIT_ITEM, HIT_MAP, 2
+Collisions HIT_APACHE, HIT_APACHE, 2
+Collisions HIT_178, HIT_MAP, 2
+Collisions HIT_178, HIT_178, 3
+Collisions HIT_DEAD, HIT_MAP, 2
 
 DrawLoading(90, True)
 
@@ -3169,7 +3169,7 @@ While IsRunning
 		If FPSfactor=0
 			UpdateWorld(0)
 		Else
-			UpdateWorld()
+			UpdateWorld(1, FPSfactor / 70)
 			ManipulateNPCBones()
 		EndIf
 		CatchErrors("UpdateWorld")
@@ -4449,8 +4449,11 @@ Function MovePlayer()
 			CurrSpeed = Max(CurveValue(0.0, CurrSpeed-0.1, 1.0),0.0)
 		EndIf
 		
-		If (Not UnableToMove%) Then TranslateEntity Collider, Cos(angle)*CurrSpeed * FPSfactor, 0, Sin(angle)*CurrSpeed * FPSfactor, True
+		Local VX# = Cos(angle) * CurrSpeed * 70
+		Local VZ# = Sin(angle)*CurrSpeed * 70
 		
+		EntityLinearVelocity Collider, VX, 0, VZ
+
 		Local CollidedFloor% = False
 		For i = 1 To CountCollisions(Collider)
 			If CollisionY(Collider, i) < EntityY(Collider) - 0.25 Then CollidedFloor = True
@@ -4484,8 +4487,8 @@ Function MovePlayer()
 			EndIf
 		EndIf
 		PlayerFallingPickDistance# = 10.0
-		
-		If (Not UnableToMove%) And ShouldEntitiesFall Then TranslateEntity Collider, 0, DropSpeed * FPSfactor, 0
+
+		If (Not UnableToMove%) And ShouldEntitiesFall Then EntityLinearVelocity(Collider, VX, DropSpeed * 70, VZ)
 	EndIf
 	
 	ForceMove = False
@@ -8178,6 +8181,13 @@ Function LoadEntities()
 	EntityRadius Collider, 0.15, 0.30
 	EntityPickMode(Collider, 1)
 	EntityType Collider, HIT_PLAYER
+	EntityPhysics(Collider, True)
+	EntityMass(Collider, 1.0)
+	EntityAngularFactor(Collider, 0, 0, 0)
+	EntityRestitution(Collider, 0.0)
+	EntityFriction(Collider, 0.0)
+	EntitySleep(Collider, 0)
+	EntityGravity(Collider, 0.0)
 	
 	Head = CreatePivot()
 	EntityRadius Head, 0.15
