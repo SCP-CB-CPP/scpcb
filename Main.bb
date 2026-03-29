@@ -657,6 +657,8 @@ Function UpdateConsole()
 							CreateConsoleMsg("- playmusic [clip + .wav/.ogg]")
 							CreateConsoleMsg("- camerapick")
 							CreateConsoleMsg("- ending")
+							CreateConsoleMsg("- unlockcheckpoints")
+							CreateConsoleMsg("- togglewarheadlever")
 							CreateConsoleMsg("- unlockexits")
 							CreateConsoleMsg("- omni")
 							CreateConsoleMsg("******************************")
@@ -1273,7 +1275,7 @@ Function UpdateConsole()
 					Curr106\State = 200000
 					Contained106 = True
 					;[End Block]
-				Case "toggle_warhead_lever"
+				Case "toggle_warhead_lever", "togglewarheadlever"
 					;[Block]
 					For e.Events = Each Events
 						If e\EventName = "room2nuke" Then
@@ -1281,6 +1283,45 @@ Function UpdateConsole()
 							Exit
 						EndIf
 					Next
+					;[End Block]
+				Case "unlockcheckpoints"
+					;[Block]
+					StrTemp$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
+					Select StrTemp
+						Case "lcz"
+							For e.Events = Each Events
+								If e\EventName = "room2sl" Then
+									e\EventState3 = 0.0
+									UpdateLever(e\room\Levers[0])
+									RotateEntity(e\room\Levers[0], 0.0, EntityYaw(e\room\Levers[0]), 0.0)
+									Exit
+								EndIf
+							Next
+							CreateConsoleMsg("The Heavy Containment Zone is now unlocked.")	
+						Case "hcz"
+							For e.Events = Each Events
+								If e\EventName = "008" Then
+									e\EventState = 2.0
+									UpdateLever(e\room\Objects[1])
+									RotateEntity(e\room\Objects[1], 0.0, EntityYaw(e\room\Objects[1]), 0.0)
+									Exit
+								EndIf
+							Next	
+							CreateConsoleMsg("The Entrance Zone is now unlocked.")	
+						Default
+							For e.Events = Each Events
+								If e\EventName = "room2sl" Then
+									e\EventState3 = 0.0
+									UpdateLever(e\room\Levers[0])
+									RotateEntity(e\room\Levers[0], 0.0, EntityYaw(e\room\Levers[0]), 0.0)
+								ElseIf e\EventName = "008" Then
+									e\EventState = 2.0
+									UpdateLever(e\room\Objects[1])
+									RotateEntity(e\room\Objects[1], 0.0, EntityYaw(e\room\Objects[1]), 0.0)
+								EndIf
+							Next
+							CreateConsoleMsg("The Heavy Containment Zone and Entrance Zone are now unlocked.")	
+					End Select
 					;[End Block]
 				Case "unlockexits"
 					;[Block]
