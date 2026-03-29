@@ -1431,6 +1431,8 @@ Type RoomTemplates
 	Field Shape%, Name$
 	Field Commonness%, Large%
 	Field DisableDecals%
+
+	Field R%, G%, B%
 	
 	Field TempTriggerboxAmount
 	Field TempTriggerbox[128]
@@ -1444,10 +1446,12 @@ Type RoomTemplates
 	Field MaxX#, MaxY#, MaxZ#
 End Type 	
 
-Function CreateRoomTemplate.RoomTemplates(meshpath$)
+Function CreateRoomTemplate.RoomTemplates(name$)
 	Local rt.RoomTemplates = New RoomTemplates
 	
-	rt\objPath = meshpath
+	rt\Name = name
+
+	rt\R = 255 : rt\G = 255 : rt\B = 255
 	
 	rt\id = RoomTempID
 	RoomTempID=RoomTempID+1
@@ -1464,28 +1468,39 @@ Function LoadRoomTemplates(file$)
 	Local f = OpenFile(file)
 	
 	While Not Eof(f)
-		TemporaryString = Trim(ReadLine(f))
-		If Left(TemporaryString,1) = "[" Then
-			TemporaryString = Mid(TemporaryString, 2, Len(TemporaryString) - 2)
-			StrTemp = GetINIString(file, TemporaryString, "mesh path")
-			
-			rt = CreateRoomTemplate(StrTemp)
-			rt\Name = Lower(TemporaryString)
-			
-			StrTemp = Lower(GetINIString(file, TemporaryString, "shape"))
-			
-			Select StrTemp
-				Case "room1", "1"
-					rt\Shape = ROOM1
-				Case "room2", "2"
-					rt\Shape = ROOM2
-				Case "room2c", "2c"
-					rt\Shape = ROOM2C
-				Case "room3", "3"
-					rt\Shape = ROOM3
-				Case "room4", "4"
-					rt\Shape = ROOM4
-				Default
+		Local l$ = Trim(ReadLine(f))
+		If Left(l,1) = "[" Then
+			l = Mid(l, 2, Len(l) - 2)
+
+			rt = Null
+			For rtt.RoomTemplates = Each RoomTemplates
+				If rtt\Name = l Then rt = rtt : Exit
+			Next
+
+			If rt = Null Then rt = CreateRoomTemplate(l)
+		Else If l <> "" And Instr(l, "#") <> 1 And Instr(l, ";") <> 1 Then
+			Local splitterPos% = Instr(l, "=")
+			Local key$ = Lower(Trim(Left(l, splitterPos - 1)))
+			Local value$ = Trim(Right(l, Len(l) - splitterPos))
+			Select key
+				Case "mesh path", "meshpath" rt\objPath = value
+				Case "shape"
+					Select Lower(value)
+						Case "room1", "1" rt\Shape = ROOM1
+						Case "room2", "2" rt\Shape = ROOM2
+						Case "room2c", "2c" rt\Shape = ROOM2C
+						Case "room3", "3" rt\Shape = ROOM3
+						Case "room4", "4" rt\Shape = ROOM4
+					End Select
+				Case "zone1", "zone2", "zone3" rt\zone[Int(Right(key, 1))-1] = Int(value)
+				Case "commonness" rt\Commonness = Max(Min(Int(value), 100), 0)
+				Case "large" rt\Large = ParseINIInt(value)
+				Case "disable decals", "disabledecals" rt\DisableDecals = ParseINIInt(value)
+				Case "use volume lighting", "usevolumelighting" rt\UseLightCones = ParseINIInt(value)
+				Case "disable overlap check", "disableoverlapcheck" rt\DisableOverlapCheck = ParseINIInt(value)
+				Case "r" rt\R = Int(value)
+				Case "g" rt\G = Int(value)
+				Case "b" rt\B = Int(value)
 			End Select
 			
 			For i = 0 To 4
