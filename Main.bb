@@ -898,6 +898,8 @@ Function UpdateConsole()
 					Local roomIndex% = Int(Piece(ConsoleInput, 3, " "))
 
 					Select roomName
+						Case "room008", "scp-008"
+							roomName = "008"
 						Case "895", "scp-895", "room895"
 							roomName = "coffin"
 						Case "scp-914", "room914"
