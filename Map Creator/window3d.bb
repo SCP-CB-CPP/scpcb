@@ -65,7 +65,7 @@ Global MenuOpen% = True
 
 Const ROOM1% = 1, ROOM2% = 2, ROOM2C% = 3, ROOM3% = 4, ROOM4% = 5
 
-Global Font1 = LoadFont("..\GFX\cour.ttf", 16)
+Global Font1 = LoadFont("..\GFX\font\cour\Courier New.ttf", 16)
 
 Global RoomTempID%
 
