@@ -1722,7 +1722,7 @@ End Function
 
 Function RandomDefaultWidthChar$(min%, max%, def$)
 	Local c$ = Chr(Rand(min%, max%))
-	If StringWidth(c) <> StringWidth("L") Then Return def Else Return c
+	If (Not IsValidUTF8String(c)) Lor StringWidth(c) <> StringWidth("L") Then Return def Else Return c
 End Function
 
 Function InputBox$(x%, y%, width%, height%, Txt$, ID% = 0, virtualKeyboardMode=0)
