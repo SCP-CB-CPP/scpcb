@@ -7,6 +7,10 @@ This game and the source code are licensed under Creative Commons Attribution-Sh
 http://creativecommons.org/licenses/by-sa/3.0/
 
 Requirements:
-•	Blitz3D v1.108
+
+-	[Blitz3D CB](https://github.com/SCP-CB-Community-Preservation-Project/Blitz3D)
+
+> [!IMPORTANT]
+> Make sure to copy all .decls files from this repo's `Userlibs` folder to your Blitz3D installation's `userlibs` folder before compiling.
 
 Beware - the source code is perhaps more horrifying than the game itself!
