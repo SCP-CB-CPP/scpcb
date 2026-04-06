@@ -64,7 +64,7 @@ Function HasCLIFlag%(name$)
 	pos = Instr(cmd, name + " ")
 	If pos = 1 Then Return True
 	pos = Instr(cmd, " " + name)
-	If pos = Len(cmd) - Len(name) Then Return True
+	If pos <> 0 And pos = Len(cmd) - Len(name) Then Return True
 	Return cmd = name
 End Function
 
