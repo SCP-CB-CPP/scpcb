@@ -1618,7 +1618,6 @@ Type Rooms
 	Field Adjacent.Rooms[4]
 	Field AdjDoor.Doors[4]
 	
-	Field NonFreeAble%[10]
 	Field Textures%[10]
 	
 	Field MaxLights% = 0
@@ -1627,8 +1626,6 @@ Type Rooms
 	Field LightSprites2%[MaxRoomLights]
 	Field LightHidden%[MaxRoomLights]
 	Field LightFlicker%[MaxRoomLights]
-	Field AlarmRotor%[1]
-	Field AlarmRotorLight%[1]
 	Field TriggerboxAmount
 	Field Triggerbox[128]
 	Field TriggerboxName$[128]
