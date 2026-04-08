@@ -141,8 +141,6 @@ Global ClosedCaptionsEnabled% = GetOptionInt("audio", "closed captions")
 
 Global CanOpenConsole% = GetOptionInt("console", "enabled")
 
-Global DebugResourcePacks% = GetOptionInt("debug", "resource pack strict load")
-
 Global UseNumericSeeds% = GetOptionInt("general", "numeric seeds")
 
 Dim ArrowIMG(4)

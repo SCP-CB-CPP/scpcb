@@ -110,11 +110,7 @@ Function CreateItemTemplate.ItemTemplates(name$, group$, displayname$, objpath$,
 	If it\displayname = "" Then
 		it\displayname = displayname
 		If it\displayname = "" Then
-			If DebugResourcePacks Then
-				RuntimeErrorExt("Item " + Chr(34) + name + Chr(34) + " is missing a localized string!")
-			Else
-				it\displayname = name
-			EndIf
+			it\displayname = name
 		EndIf
 	EndIf
 	

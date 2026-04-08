@@ -45,7 +45,7 @@ Function LoadImage_Strict%(file$)
 				tmp = LoadImage(modPath)
 				If tmp <> 0 Then
 					Return tmp
-				Else If DebugResourcePacks Then
+				Else
 					RuntimeErrorExt("Failed to load image " + Chr(34) + modPath + Chr(34) + ".")
 				EndIf
 			EndIf
@@ -389,7 +389,7 @@ Function LoadAnimMesh_Strict(File$,parent=0)
 				tmp = LoadAnimMesh(modPath, parent)
 				If tmp <> 0 Then
 					Return tmp
-				Else If DebugResourcePacks Then
+				Else
 					RuntimeErrorExt("Failed to load 3D Animated Mesh " + Chr(34) + modPath + Chr(34) + ".")
 				EndIf
 			EndIf
