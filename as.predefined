@@ -1701,7 +1701,7 @@ class NPC{
     B3D::Entity@ Object3;
     B3D::Entity@ Object4;
     B3D::Pivot@ Collider;
-    int Type;
+    CB::NPC::Type NPCType;
     int ID;
     float DropSpeed;
     int Gravity;
@@ -1775,6 +1775,20 @@ class NPC{
     CB::NPC@ get_Previous() const property;
     void InsertAfter(CB::NPC@);
     void InsertBefore(CB::NPC@);
+    void Remove();
+    void TeleportCloser();
+    void TeleportMTFGroup();
+    int FindPath(float x, float y, float z);
+    int IsInFacility();
+    void FindNextElevator();
+    void GoToElevator();
+    bool SeesNPC(CB::NPC@ other);
+    bool SeesPlayer(bool disableSoundOnCrouch = false);
+    bool PlayerSees096Face();
+    void Animate(float startFrame, float endFrame, float speed, bool loop = true);
+    void SetNPCFrame(float frame);
+    void FinishWalking(float startFrame, float endFrame, float speed);
+    void ChangeNPCTexture(int textureID);
 }
 
 class Room{
@@ -2079,6 +2093,13 @@ int LastMouseHit1Y;
 bool MouseUp1;
 }
 
+namespace CB::NPC {
+CB::NPC@ Current173;
+CB::NPC@ Current106;
+CB::NPC@ Current096;
+CB::NPC@ Current5131;
+}
+
 namespace CB::Player {
 B3D::Pivot@ Collider;
 B3D::Camera@ Camera;
@@ -2124,7 +2145,7 @@ float HealTimer;
 int RefinedItems;
 float DropSpeed;
 float HeadDropSpeed;
-float CurrSpeed;
+float CurrentSpeed;
 float UserCameraPitch;
 float Side;
 bool Crouch;
@@ -2149,5 +2170,31 @@ CB::Console::Msg@ Reissue;
 int R;
 int G;
 int B;
+}
+
+namespace CB::NPC {
+enum Type {
+    SCP173,
+    SCP106,
+    Guard,
+    ClassD,
+    SCP372,
+    Apache,
+    MTF,
+    SCP096,
+    SCP049,
+    Zombie,
+    SCP5131,
+    Tentacle,
+    SCP860,
+    SCP939,
+    SCP066,
+    PDPlane,
+    SCP966,
+    SCP1048a,
+    SCP1499,
+    SCP008,
+    Clerk
+}
 }
 

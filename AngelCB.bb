@@ -195,8 +195,44 @@ End Function
 Function RegisterNPC()
     RegisterTypeFromPtr("NPC", %NPCs)
 
+    Local ns$ = GetDefaultNamespace()
+    If ns <> "" Then SetDefaultNamespace(ns + "::NPC") Else SetDefaultNamespace("NPC")
+
+    RegisterEnum("Type")
+    RegisterEnumValue("Type", "SCP173", 1)
+    RegisterEnumValue("Type", "SCP106", 2)
+    RegisterEnumValue("Type", "Guard", 3)
+    RegisterEnumValue("Type", "ClassD", 4)
+    RegisterEnumValue("Type", "SCP372", 6)
+    RegisterEnumValue("Type", "Apache", 7)
+    RegisterEnumValue("Type", "MTF", 8)
+    RegisterEnumValue("Type", "SCP096", 9)
+    RegisterEnumValue("Type", "SCP049", 10)
+    RegisterEnumValue("Type", "Zombie", 11)
+    RegisterEnumValue("Type", "SCP5131", 12)
+    RegisterEnumValue("Type", "Tentacle", 13)
+    RegisterEnumValue("Type", "SCP860", 14)
+    RegisterEnumValue("Type", "SCP939", 15)
+    RegisterEnumValue("Type", "SCP066", 16)
+    RegisterEnumValue("Type", "PDPlane", 17)
+    RegisterEnumValue("Type", "SCP966", 18)
+    RegisterEnumValue("Type", "SCP1048a", 19)
+    RegisterEnumValue("Type", "SCP1499", 20)
+    RegisterEnumValue("Type", "SCP008", 21)
+    RegisterEnumValue("Type", "Clerk", 22)
+
+    ;RegisterGlobalFunction("Type RegisterNewNPCType()", @RegisterNewNPCType) ; TODO
+
+    RegisterGlobalProperty("NPC@ Current173", &Curr173)
+    RegisterGlobalProperty("NPC@ Current106", &Curr106)
+    RegisterGlobalProperty("NPC@ Current096", &Curr096)
+    RegisterGlobalProperty("NPC@ Current5131", &Curr5131)
+
+    SetDefaultNamespace(ns)
+
     ; Replace first argument with some other type to enforce having to register modded NPC types.
-    RegisterTypeConstructor("NPC", "NPC@ f(int NPCtype, float x, float y, float z)", @CreateNPC)
+    RegisterTypeConstructor("NPC", "NPC@ f(NPC::Type type, float x, float y, float z)", @CreateNPC)
+    RegisterObjectMethod("NPC", "void Remove()", @RemoveNPC)
 
     RegisterTypeField("NPC", "B3D::Entity@ Object", %NPCs\obj)
     RegisterTypeField("NPC", "B3D::Entity@ Object2", %NPCs\obj2)
@@ -204,7 +240,7 @@ Function RegisterNPC()
     RegisterTypeField("NPC", "B3D::Entity@ Object4", %NPCs\obj4)
     RegisterTypeField("NPC", "B3D::Pivot@ Collider", %NPCs\Collider)
 
-    RegisterTypeField("NPC", "int Type", %NPCs\NPCtype)
+    RegisterTypeField("NPC", "NPC::Type NPCType", %NPCs\NPCtype)
     RegisterTypeField("NPC", "int ID", %NPCs\ID)
 
     RegisterTypeField("NPC", "float DropSpeed", %NPCs\DropSpeed)
@@ -302,6 +338,23 @@ Function RegisterNPC()
     RegisterTypeField("NPC", "int Channel2IsStream", %NPCs\SoundChn2_IsStream)
 
     RegisterTypeField("NPC", "float FallingPickDistance", %NPCs\FallingPickDistance)
+
+    RegisterObjectMethod("NPC", "void TeleportCloser()", @TeleportCloser)
+    RegisterObjectMethod("NPC", "void TeleportMTFGroup()", @TeleportMTFGroup)
+    
+    RegisterObjectMethod("NPC", "int FindPath(float x, float y, float z)", @FindPath)
+    RegisterObjectMethod("NPC", "int IsInFacility()", @CheckForNPCInFacility) ; 2 means the NPC is in the tunnels
+    RegisterObjectMethod("NPC", "void FindNextElevator()", @FindNextElevator)
+    RegisterObjectMethod("NPC", "void GoToElevator()", @GoToElevator)
+    
+    RegisterObjectMethod("NPC", "bool SeesNPC(NPC@ other)", @OtherNPCSeesMeNPC)
+    RegisterObjectMethod("NPC", "bool SeesPlayer(bool disableSoundOnCrouch=false)", @MeNPCSeesPlayer)
+    RegisterObjectMethod("NPC", "bool PlayerSees096Face()", @Sees096Face)
+
+    RegisterObjectMethod("NPC", "void Animate(float startFrame, float endFrame, float speed, bool loop=true)", @AnimateNPC)
+    RegisterObjectMethod("NPC", "void SetNPCFrame(float frame)", @SetNPCFrame)
+    RegisterObjectMethod("NPC", "void FinishWalking(float startFrame, float endFrame, float speed)", @FinishWalking)
+    RegisterObjectMethod("NPC", "void ChangeNPCTexture(int textureID)", @ChangeNPCTextureID)
 End Function
 
 Function RegisterMap()
@@ -464,7 +517,7 @@ Function RegisterPlayer()
 
     RegisterGlobalProperty("float DropSpeed", &DropSpeed)
     RegisterGlobalProperty("float HeadDropSpeed", &HeadDropSpeed)
-    RegisterGlobalProperty("float CurrSpeed", &CurrSpeed)
+    RegisterGlobalProperty("float CurrentSpeed", &CurrSpeed)
     RegisterGlobalProperty("float UserCameraPitch", &user_camera_pitch)
     RegisterGlobalProperty("float Side", &side)
     RegisterGlobalProperty("bool Crouch", &Crouch)

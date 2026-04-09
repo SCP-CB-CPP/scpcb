@@ -1388,6 +1388,17 @@ Function UpdateMainMenu()
 							ExecFile("Mods")
 						EndIf
 						RowText(I_Loc\Mods_Openlocal, x + 10 * MenuScale, y + (80 + 10) * MenuScale, 150 * MenuScale, (50 - 15) * MenuScale, True)
+
+						If DebuggerAttached()
+							If DrawButton(x + 10 * MenuScale, y + 140 * MenuScale, 150 * MenuScale, 30 * MenuScale, "Gen. decls.", False, False, UpdatingMod<>Null) Then
+								Local f% = WriteFile("as.predefined")
+								WriteLine(f, GetDeclarations())
+								;For ma.ActiveMods = Each ActiveMods
+								;	If ma\ScriptModule <> 0 Then WriteLine(f, GetDeclarations(ma\ScriptModule))
+								;Next
+								CloseFile f
+							EndIf
+						EndIf
 					EndIf
 				EndIf
 
