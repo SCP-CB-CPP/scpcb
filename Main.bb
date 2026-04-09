@@ -307,7 +307,7 @@ Global ScreenGamma# = GetOptionFloat("graphics", "screengamma")
 
 Global ViewBobScale# = GetOptionFloat("graphics", "view bob")
 
-Global FOV% = GetOptionInt("graphics", "fov")
+Global FOV# = GetOptionFloat("graphics", "fov")
 Const DEFAULT_FOV% = 59
 
 Global HUDStartX%, HUDEndX%, HUDStartY%, HUDEndY%
@@ -4782,8 +4782,8 @@ Function MovePlayer()
 	CatchErrors("MovePlayer")
 End Function
 
-Function ZoomCamera(fov%)
-	CameraZoom(Camera, Min(1.0+(CurrCameraZoom/400.0),1.1) / Tan((ATan(Tan(fov%/2.0)*RealGraphicWidth/RealGraphicHeight))))
+Function ZoomCamera(fov#)
+	CameraZoom(Camera, Min(1.0+(CurrCameraZoom/400.0),1.1) / Tan((ATan(Tan(fov#/2.0)*RealGraphicWidth/RealGraphicHeight))))
 End Function
 
 Function MouseLook()
