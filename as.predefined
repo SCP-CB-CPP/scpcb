@@ -1,0 +1,2153 @@
+
+namespace B3D {
+void DebugLogRuntimeStats();
+Channel@ PlayMusic(string midifile, int mode = 0);
+}
+
+namespace B3D::Sound {
+B3D::Sound@ Load(string filename);
+B3D::Sound@ Load3D(string filename);
+}
+
+namespace B3D::Bank {
+B3D::Bank@ Create(int size = 0);
+int StringSize(string str);
+}
+
+namespace B3D::Buffer {
+B3D::Buffer@ get_Back() property;
+B3D::Buffer@ get_Depth() property;
+B3D::Buffer@ get_Graphics() property;
+B3D::Buffer@ Set(B3D::Buffer@ buffer, B3D::Buffer@ depth = null, int pass = 0);
+void CopyPixel(int srcX, int srcY, B3D::Buffer@ srcBuffer, int destX, int destY, B3D::Buffer@ destBuffer = null);
+void CopyPixelFast(int srcX, int srcY, B3D::Buffer@ srcBuffer, int destX, int destY, B3D::Buffer@ destBuffer = null);
+}
+
+namespace B3D::Font {
+B3D::Font@ Load(string fontname, int height = 12, int bold = 0, int italic = 0, int underlined = 0, int smooth = 1);
+B3D::Font@ get_Current() property;
+void set_Current(B3D::Font@ font) property;
+int get_Width() property;
+int get_Height() property;
+int StringWidth(string str);
+int StringHeight(string str);
+string Path(string facename);
+}
+
+namespace B3D::Movie {
+B3D::Movie@ Open(string file);
+}
+
+namespace B3D::Image {
+B3D::Image@ Load(string bmpfile, int flags = 0);
+B3D::Image@ LoadAnim(string bmpfile, int cellwidth, int cellheight, int first, int count);
+B3D::Image@ LoadAnimGrid(string bmpfile, int columns, int rows, int first, int count);
+B3D::Image@ Create(int width, int height, int frames = 1, int flags = 0);
+int get_Count() property;
+B3D::Image@ Get(int id);
+void SetAutoMidHandle(int enable);
+}
+
+namespace B3D {
+int RectsOverlap(int x1, int y1, int width1, int height1, int x2, int y2, int width2, int height2);
+int CountGfxDrivers();
+string GfxDriverName(int driver);
+void SetGfxDriver(int driver);
+int CountGfxModes();
+int GfxModeExists(int width, int height, int deprecated = 0);
+int GfxModeWidth(int mode);
+int GfxModeHeight(int mode);
+int get_AvailVidMem() property;
+int get_TotalVidMem() property;
+float get_DPIScaleX() property;
+float get_DPIScaleY() property;
+int GfxDriver3D(int driver);
+int CountGfxModes3D();
+int GfxMode3DExists(int width, int height, int depth);
+int GfxMode3D(int mode);
+int Windowed3D();
+void Graphics(int width, int height, int depth = 0, int mode = 0, int hide = 0);
+void Graphics3D(int width, int height, int depth = 0, int mode = 0, int hide = 0);
+void EndGraphics();
+int get_GraphicsLost() property;
+int get_GraphicsInFocus() property;
+void set_GraphicsLevel(int level) property;
+int get_GraphicsLevel() property;
+int get_ScanLine() property;
+void Flip(int vwait = 1);
+int get_GraphicsWidth() property;
+int get_GraphicsHeight() property;
+int get_GraphicsDepth() property;
+void SetOrigin(int x, int y);
+void SetViewport(int x, int y, int width, int height);
+void SetColor(int red, int green, int blue, int alpha = 255);
+void GetColor(int x, int y);
+int GetColorRed();
+int GetColorGreen();
+int GetColorBlue();
+int GetColorAlpha();
+void SetClsColor(int red, int green, int blue, int alpha = 255);
+void Cls();
+void Plot(int x, int y);
+void Rect(int x, int y, int width, int height, int solid = 1);
+void Oval(int x, int y, int width, int height, int solid = 1);
+void Line(int x1, int y1, int x2, int y2);
+void Text(int x, int y, string text, int xPos = 0, int yPos = 0);
+string ConvertToANSI(string str);
+string ConvertToUTF8(string str);
+void CopyRect(int sourceX, int sourceY, int width, int height, int destX, int destY, Buffer@ srcBuffer = null, Buffer@ destBuffer = null);
+void CopyRectStretch(int sourceX, int sourceY, int width, int height, int destX, int destY, int destW, int destH, Buffer@ srcBuffer = null, Buffer@ destBuffer = null);
+void Batching(int start);
+void Write(string str);
+void Print(string = "");
+string Input(string = "");
+void Locate(int x, int y);
+void ShowPointer();
+void HidePointer();
+int get_DesktopWidth() property;
+int get_DesktopHeight() property;
+void SetLoaderMatrix(string fileExt, float xx, float xy, float xz, float yx, float yy, float yz, float zx, float zy, float zz);
+int get_HWTexUnits() property;
+int get_GfxDriverCaps3D() property;
+void SetWireFrame(int enable);
+void SetAntiAlias(int enable, int samples = 2);
+void SetAmbientLight(float red, float green, float blue);
+void ClearCollisions();
+void Collisions(int sourceType, int destinationType, int method, int response);
+void UpdateWorld(float elapsedTime = 1);
+void CaptureWorld();
+void BeginRender(float tween = 1, int mask = -1);
+void EndRender();
+void RenderWorld(float tween = 1, int cam = 0, int mask = -1, int settings = -1);
+void ClearWorld(int entities = 1, int brushes = 1, int textures = 1, int effects = 1);
+int get_TrisRendered() property;
+int get_Batches() property;
+float GetStats3D(int type);
+void SetScissorRect(int enable, int x = 0, int y = 0, int width = 0, int height = 0);
+float Distance(float x1, float x2, float y1, float y2, float z1 = 0, float z2 = 0);
+float DistanceSquared(float x1, float x2, float y1, float y2, float z1 = 0, float z2 = 0);
+void SetHardwareSkinning(int enable);
+int get_MemoryLoad() property;
+int get_TotalPhys() property;
+int get_AvailPhys() property;
+int get_TotalVirtual() property;
+int get_AvailVirtual() property;
+int get_RunningOnWine() property;
+}
+
+namespace B3D::Texture {
+B3D::Texture@ Create(int width, int height, int flags = 0, int frames = 1);
+B3D::Texture@ Load(string file, int flags = 1);
+B3D::Texture@ LoadAnim(string file, int flags, int width, int height, int first, int count);
+B3D::Texture@ LoadAnimGrid(string file, int flags, int columns, int rows, int first, int count);
+void SetLodBias(float bias);
+void SetAnisotropic(int level);
+void SetTextureDivisor(int div);
+void ClearFilters();
+void SetTextureFilter(string matchText, int textureFlags = 0);
+int get_ActiveCount() property;
+int get_TotalCount() property;
+B3D::Texture@ Get(int id);
+}
+
+namespace B3D::Effect {
+B3D::Effect@ Load(string, string = "");
+string GetError();
+}
+
+namespace B3D::Brush {
+B3D::Brush@ Create(float red = 255, float green = 255, float blue = 255);
+B3D::Brush@ Load(string file, int textureFlags = 1, float uScale = 1, float vScale = 1);
+int get_Count() property;
+B3D::Brush@ Get(int id);
+}
+
+namespace B3D {
+void TFormPoint(float x, float y, float z, Entity@ sourceEntity, Entity@ destEntity);
+void TFormVector(float x, float y, float z, Entity@ sourceEntity, Entity@ destEntity);
+void TFormNormal(float x, float y, float z, Entity@ sourceEntity, Entity@ destEntity);
+float get_TFormedX() property;
+float get_TFormedY() property;
+float get_TFormedZ() property;
+float VectorYaw(float x, float y, float z);
+float VectorPitch(float x, float y, float z);
+Entity@ LinePick(float x, float y, float z, float dx, float dy, float dz, float radius = 0);
+float get_PickedX() property;
+float get_PickedY() property;
+float get_PickedZ() property;
+float get_PickedNX() property;
+float get_PickedNY() property;
+float get_PickedNZ() property;
+float get_PickedTime() property;
+Entity@ get_PickedEntity() property;
+Surface@ get_PickedSurface() property;
+int get_PickedTriangle() property;
+}
+
+namespace B3D::Mesh {
+B3D::Mesh@ Load(string file, B3D::Entity@ parent = null);
+B3D::Mesh@ LoadAnim(string file, B3D::Entity@ parent = null);
+B3D::Mesh@ Find(string file);
+B3D::Mesh@ Create(B3D::Entity@ parent = null);
+B3D::Mesh@ CreateCube(B3D::Entity@ parent = null);
+B3D::Mesh@ CreateSphere(int segments = 8, B3D::Entity@ parent = null);
+B3D::Mesh@ CreateCylinder(int segments = 8, int solid = 1, B3D::Entity@ parent = null);
+B3D::Mesh@ CreateCone(int segments = 8, int solid = 1, B3D::Entity@ parent = null);
+}
+
+namespace B3D::Camera {
+B3D::Camera@ Create(B3D::Entity@ parent = null);
+float get_ProjectedX() property;
+float get_ProjectedY() property;
+float get_ProjectedZ() property;
+}
+
+namespace B3D::Light {
+B3D::Light@ Create(int type = 1, B3D::Entity@ parent = null);
+}
+
+namespace B3D::Pivot {
+B3D::Pivot@ Create(B3D::Entity@ parent = null);
+}
+
+namespace B3D::Sprite {
+B3D::Sprite@ Create(B3D::Entity@ parent = null);
+B3D::Sprite@ Load(string file, int textureFlags = 1, B3D::Entity@ parent = null);
+}
+
+namespace B3D::Plane {
+B3D::Plane@ Create(int segments = 1, B3D::Entity@ parent = null);
+}
+
+namespace B3D::Terrain {
+B3D::Terrain@ Create(int gridSize, B3D::Entity@ parent = null);
+B3D::Terrain@ Load(string heightmapFile, B3D::Entity@ parent = null);
+}
+
+namespace B3D::Listener {
+B3D::Listener@ Create(B3D::Entity@ parent, float rolloffFactor = 1, float dopplerScale = 1, float distanceScale = 1);
+}
+
+namespace B3D {
+void CombineKeys(int flush);
+int KeyDown(int key);
+int KeyHit(int key);
+int GetKey();
+int WaitKey();
+string TextInput(string txt);
+void FlushKeys();
+string GetKeyName(int key);
+int MouseDown(int button);
+int MouseHit(int button);
+int GetMouse();
+int WaitMouse();
+int get_MouseX() property;
+int get_MouseY() property;
+int get_MouseZ() property;
+int get_MouseXSpeed() property;
+int get_MouseYSpeed() property;
+int get_MouseZSpeed() property;
+void FlushMouse();
+void MoveMouse(int x, int y);
+int JoyType(int port = 0);
+int JoyDown(int button, int port = 0);
+int JoyHit(int button, int port = 0);
+int GetJoy(int port = 0);
+int WaitJoy(int port = 0);
+int get_JoyCount() property;
+int JoyConnected(int port = 0);
+float JoyX(int port = 0);
+float JoyY(int port = 0);
+float JoyZ(int port = 0);
+float JoyU(int port = 0);
+float JoyV(int port = 0);
+float JoyPitch(int port = 0);
+float JoyYaw(int port = 0);
+float JoyRoll(int port = 0);
+int JoyHat(int port = 0);
+int JoyXDir(int port = 0);
+int JoyYDir(int port = 0);
+int JoyZDir(int port = 0);
+float JoyLeftTrigger(int port = 0);
+float JoyRightTrigger(int port = 0);
+int JoyUDir(int port = 0);
+int JoyVDir(int port = 0);
+void JoyVibrate(int port, float left, float right);
+void StopJoyVibrate(int port);
+void FlushJoy();
+void set_DirectInputEnabled(int enable) property;
+int get_DirectInputEnabled() property;
+float Sin(float degrees);
+float Cos(float degrees);
+float Tan(float degrees);
+float ASin(float value);
+float ACos(float value);
+float ATan(float value);
+float ATan2(float floata, float floatb);
+float Sqr(float value);
+float Floor(float value);
+float Ceil(float value);
+float Exp(float value);
+float Log(float value);
+float Log10(float value);
+float Min(float n, float m);
+float Max(float n, float m);
+float Clamp(float v, float lo, float hi);
+int IsNaN(float n);
+float Rnd(float from, float to = 0);
+int Rand(int from, int to = 1);
+void set_RandomSeed(int seed) property;
+int get_RandomSeed() property;
+void End();
+void Stop();
+void AppTitle(string, string = "");
+void RuntimeError(string message);
+void ExceptionDialog(int enable);
+void MemoryAccessViolation(string = "");
+void InitErrorMsgs(int number, int hasMacro = 0);
+void SetErrorMsg(int pos, string message);
+string GetException();
+void ClearException();
+void Delay(int millisecs);
+void Sleep(int millisecs);
+int MilliSecs();
+string CommandLine();
+string SystemProperty(string property);
+string GetEnv(string envVar);
+void DisableClose();
+string GetUserLanguage();
+string GetLocaleInfo();
+}
+
+namespace B3D::Timer {
+B3D::Timer@ Create(int hertz);
+}
+
+namespace B3D {
+string get_ClipboardContents() property;
+void set_ClipboardContents(string contents) property;
+void MessageBox(string title, string text);
+void DebugLog(string text);
+string Chr(int ascii);
+string Hex(int value);
+string Bin(int value);
+string HighPrecisionFloatString(float value);
+string CurrentDate();
+string CurrentTime();
+}
+
+namespace CB::Waypoint {
+CB::Waypoint@ get_First() property;
+CB::Waypoint@ get_Last() property;
+}
+
+namespace CB::NPC {
+CB::NPC@ get_First() property;
+CB::NPC@ get_Last() property;
+}
+
+namespace CB::Room {
+CB::Room@ get_First() property;
+CB::Room@ get_Last() property;
+}
+
+namespace CB::Door {
+CB::Door@ get_First() property;
+CB::Door@ get_Last() property;
+}
+
+namespace CB::TempItem {
+CB::TempItem@ get_First() property;
+CB::TempItem@ get_Last() property;
+}
+
+namespace CB::TempDoor {
+CB::TempDoor@ get_First() property;
+CB::TempDoor@ get_Last() property;
+}
+
+namespace CB::RoomTemplate {
+CB::RoomTemplate@ get_First() property;
+CB::RoomTemplate@ get_Last() property;
+}
+
+namespace CB::TempWaypoint {
+CB::TempWaypoint@ get_First() property;
+CB::TempWaypoint@ get_Last() property;
+}
+
+namespace CB::Forest {
+CB::Forest@ get_First() property;
+CB::Forest@ get_Last() property;
+}
+
+namespace CB::MaintenanceTunnel {
+CB::MaintenanceTunnel@ get_First() property;
+CB::MaintenanceTunnel@ get_Last() property;
+}
+
+namespace CB::Decal {
+CB::Decal@ get_First() property;
+CB::Decal@ get_Last() property;
+}
+
+namespace CB::Console::Msg {
+CB::Console::Msg@ get_First() property;
+CB::Console::Msg@ get_Last() property;
+}
+
+namespace CB::Console {
+void CreateMessage(string txt, int r = -1, int g = -1, int b = -1, bool isCommand = false);
+}
+
+namespace CB::Event {
+CB::Event@ get_First() property;
+CB::Event@ get_Last() property;
+}
+
+namespace CB {
+float UpdateElevator(float state, Door@ door1, Door@ door2, B3D::Entity@ room1, B3D::Entity@ room2, Event@ event, bool ignorerotation = true);
+}
+
+class array<T>{
+    funcdef bool less(const T&in, const T&in);
+    T& opIndex(uint index);
+    const T& opIndex(uint index) const;
+    uint opForBegin() const;
+    bool opForEnd(uint) const;
+    uint opForNext(uint) const;
+    const T& opForValue0(uint index) const;
+    uint opForValue1(uint index) const;
+    T[]& opAssign(const T[]&in);
+    void InsertAt(uint index, const T&in value);
+    void InsertAt(uint index, const T[]&inout arr);
+    void InsertLast(const T&in value);
+    void RemoveAt(uint index);
+    void RemoveLast();
+    void RemoveRange(uint start, uint count);
+    void Reserve(uint length);
+    void Resize(uint length);
+    void SortAsc();
+    void SortAsc(uint startAt, uint count);
+    void SortDesc();
+    void SortDesc(uint startAt, uint count);
+    void Reverse();
+    int Find(const T&in value) const;
+    int Find(uint startAt, const T&in value) const;
+    int FindByRef(const T&in value) const;
+    int FindByRef(uint startAt, const T&in value) const;
+    bool opEquals(const T[]&in) const;
+    bool get_IsEmpty() const property;
+    void Sort(T[]::less&in, uint startAt = 0, uint count = uint(-1));
+    uint get_length() const property;
+    void set_length(uint) property;
+}
+
+class string{
+    ~string();
+    string();
+    string(const string&in);
+    string& opAssign(const string&in);
+    string& opAddAssign(const string&in);
+    string opAdd(const string&in) const;
+    bool opEquals(const string&in) const;
+    uint get_Length() const property;
+    string String(int repeat);
+    string Left(int count);
+    string Right(int count);
+    string Replace(string from, string to);
+    int Instr(string find, int from = 1);
+    string Substr(int start, int length);
+    string Mid(int start, int count = -1);
+    string Upper();
+    string Lower();
+    string Trim();
+    string LSet(int size);
+    string RSet(int size);
+    int get_IsValidUTF8String() const property;
+    int Asc();
+}
+
+class dictionaryValue{
+    ~dictionaryValue();
+    dictionaryValue();
+    dictionaryValue& opAssign(const dictionaryValue&in);
+    dictionaryValue& opHndlAssign(const ?&in);
+    dictionaryValue& opHndlAssign(const dictionaryValue&in);
+    dictionaryValue& opAssign(const ?&in);
+    dictionaryValue& opAssign(double);
+    dictionaryValue& opAssign(int64);
+    void opCast(?&out);
+    void opConv(?&out);
+    int64 opConv();
+    double opConv();
+}
+
+class dictionary{
+    dictionary& opAssign(const dictionary&in);
+    void Set(const string&in, const ?&in);
+    bool Get(const string&in, ?&out) const;
+    void Set(const string&in, const int64&in);
+    bool Get(const string&in, int64&out) const;
+    void Set(const string&in, const double&in);
+    bool Get(const string&in, double&out) const;
+    bool Exists(const string&in) const;
+    bool get_IsEmpty() const property;
+    uint get_Size() const property;
+    bool Delete(const string&in);
+    void DeleteAll();
+    string[]@ GetKeys() const;
+    dictionaryValue& opIndex(const string&in);
+    const dictionaryValue& opIndex(const string&in) const;
+    dictionaryIter@ opForBegin() const;
+    bool opForEnd(dictionaryIter@) const;
+    dictionaryIter@ opForNext(dictionaryIter@) const;
+    const dictionaryValue& opForValue0(dictionaryIter@) const;
+    const string& opForValue1(dictionaryIter@) const;
+}
+
+class dictionaryIter{
+}
+
+class carray<T>{
+    T& opIndex(int idx);
+    const T& opIndex(int idx) const;
+}
+
+namespace B3D {
+
+class Stream{
+    int get_IsEOF() const property;
+    int get_IsReadAvail() const property;
+    int ReadByte();
+    int ReadShort();
+    int ReadInt();
+    float ReadFloat();
+    string ReadString();
+    string ReadLine();
+    void WriteByte(int value);
+    void WriteShort(int value);
+    void WriteInt(int value);
+    void WriteFloat(float value);
+    void WriteString(string value);
+    void WriteLine(string value);
+    void CopyTo(B3D::Stream@ destStream, int bufferSize = 16384);
+}
+
+class Channel{
+    void Stop();
+    void Pause();
+    void Resume();
+    void SetPitch(int pitch);
+    void SetVolume(float volume);
+    void SetPan(float pan);
+    int get_IsPlaying() const property;
+}
+
+class Sound{
+    void Free();
+    B3D::Channel@ Play();
+    void Loop();
+    void SetPitch(int pitch);
+    void SetVolume(float volume);
+    void SetPan(float pan);
+}
+
+class Bank{
+    int Verify();
+    void Free();
+    int get_Size() const property;
+    void set_Size(int size) property;
+    int get_Pointer() const property;
+    void CopyTo(int srcOffset, B3D::Bank@ destBank, int destOffset, int count);
+    int PeekByte(int offset);
+    int PeekShort(int offset);
+    int PeekInt(int offset);
+    float PeekFloat(int offset);
+    string PeekString(int offset);
+    void PokeByte(int offset, int value);
+    void PokeShort(int offset, int value);
+    void PokeInt(int offset, int value);
+    void PokeFloat(int offset, float value);
+    int PokeString(int offset, string value);
+    int ReadBytes(B3D::Stream@ file, int offset, int count);
+    int WriteBytes(B3D::Stream@ file, int offset, int count);
+}
+
+class Buffer{
+    int Save(string bmpfile);
+    void Draw(int x, int y, int width, int height, int blending = 1);
+    void DrawRect(int x, int y, int width, int height, int srcx, int srcy, int srcwidth, int srcheight, int blending = 1);
+    int get_Width() const property;
+    int get_Height() const property;
+    int get_Depth() const property;
+    int Lock();
+    void Unlock();
+    int ReadPixel(int y, int buffer);
+    void WritePixel(int y, int argb, int buffer);
+    int ReadPixelFast(int y, int buffer);
+    void WritePixelFast(int y, int argb, int buffer);
+}
+
+class Font{
+    void Free();
+}
+
+class Movie{
+    int Draw(int x = 0, int y = 0, int w = -1, int h = -1);
+    int get_Width() const property;
+    int get_Height() const property;
+    int get_IsPlaying() const property;
+    void Close();
+}
+
+class Image{
+    B3D::Image@ Copy(int flags = 0);
+    void Free();
+    int Save(string bmpfile, int frame = 0);
+    string get_Name() const property;
+    void Grab(int x, int y, int frame = 0);
+    B3D::Buffer@ GetBuffer(int frame = 0);
+    void Draw(int x, int y, int frame = 0, int colored = 0);
+    void DrawBlock(int x, int y, int frame = 0, int colored = 0);
+    void Tile(int x = 0, int y = 0, int frame = 0);
+    void TileBlock(int x = 0, int y = 0, int frame = 0);
+    void DrawRect(int x, int y, int rectX, int rectY, int rectWidth, int rectHeight, int frame = 0, int colored = 0);
+    void DrawBlockRect(int x, int y, int rectX, int rectY, int rectWidth, int rectHeight, int frame = 0, int colored = 0);
+    void Mask(int red, int green, int blue);
+    void SetHandle(int x, int y);
+    void SetMidHandle();
+    int get_Width() const property;
+    int get_Height() const property;
+    int get_XHandle() const property;
+    int get_YHandle() const property;
+    void Scale(float xscale, float yscale);
+    void Resize(int width, int height);
+    void Rotate(float angle);
+    int Overlaps(int x1, int y1, B3D::Image@ image2, int x2, int y2);
+    int RectOverlaps(int x, int y, int rectX, int rectY, int rectWidth, int rectHeight);
+}
+
+class Matrix{
+}
+
+class Texture{
+    void Free();
+    void SetBlend(int blend);
+    void SetCoords(int coords);
+    void SetBumpEnvMat(int x, int y, float envmat);
+    void SetBumpEnvScale(float envmat);
+    void SetBumpEnvOffset(float envoffset);
+    void Scale(float uScale, float vScale);
+    void Rotate(float angle);
+    void Position(float uOffset, float vOffset);
+    int get_Width() const property;
+    int get_Height() const property;
+    string get_Name() const property;
+    void SetCubeFace(int face);
+    void SetCubeMode(int mode);
+    B3D::Buffer@ GetBuffer(int frame = 0);
+}
+
+class Effect{
+    void Free();
+    int SetTexture(string var, B3D::Texture@ tex);
+    int SetTechnique(string var);
+    void SetBool(string var, int value);
+    void SetInt(string var, int value);
+    void SetFloat(string var, float value);
+    void SetVector(string var, float x = 0, float y = 0, float z = 0, float w = 0);
+    void SetMatrix(string var, B3D::Matrix@ value);
+    void SetBoolArray(string var, B3D::Bank@ bnk);
+    void SetIntArray(string var, B3D::Bank@ bnk);
+    void SetFloatArray(string var, B3D::Bank@ bnk);
+    void SetVectorArray(string var, B3D::Bank@ bnk);
+    void SetMatrixArray(string var, B3D::Bank@ bnk);
+}
+
+class Brush{
+    void Free();
+    void SetColor(float red, float green, float blue);
+    void SetAlpha(float alpha);
+    void SetShininess(float shininess, float power = 1);
+    void SetMaterial(float roughness, float metallic);
+    void SetEffect(B3D::Effect@ effect);
+    void SetTexture(B3D::Texture@ texture, int frame = 0, int index = 0);
+    B3D::Texture@ GetTexture(int index = 0);
+    void SetBlend(int blend);
+    void SetFX(int fx);
+}
+
+class Surface{
+    B3D::Brush@ get_Brush() const property;
+    void Clear(int clearVertices = 1, int clearTriangles = 1);
+    void Paint(B3D::Brush@ brush);
+    int AddVertex(float x, float y, float z, float u = 0, float v = 0, float w = 1);
+    int AddTriangle(int v0, int v1, int v2);
+    void SetVertexCoords(int index, float x, float y, float z);
+    void SetVertexNormal(int index, float nx, float ny, float nz);
+    void SetVertexColor(int index, float red, float green, float blue, float alpha = 1);
+    void SetVertexTexCoords(int index, float u, float v, float w = 1, int coordSet = 0);
+    int get_VertexCount() const property;
+    int get_TriangleCount() const property;
+    float GetVertexX(int index);
+    float GetVertexY(int index);
+    float GetVertexZ(int index);
+    float GetVertexNX(int index);
+    float GetVertexNY(int index);
+    float GetVertexNZ(int index);
+    float GetVertexRed(int index);
+    float GetVertexGreen(int index);
+    float GetVertexBlue(int index);
+    float GetVertexAlpha(int index);
+    float GetVertexU(int index, int coordSet = 0);
+    float GetVertexV(int index, int coordSet = 0);
+    float GetVertexW(int index, int coordSet = 0);
+    int GetTriangleVertex(int index, int vertex);
+}
+
+class Entity{
+    B3D::Channel@ EmitSound(B3D::Sound@ entity);
+    B3D::Entity@ Copy(B3D::Entity@ = null);
+    float GetX(int global = 0, float tween = 1);
+    float GetY(int global = 0, float tween = 1);
+    float GetZ(int global = 0, float tween = 1);
+    float GetPitch(int global = 0, float tween = 1);
+    float GetYaw(int global = 0, float tween = 1);
+    float GetRoll(int global = 0, float tween = 1);
+    float GetScaleX(int global = 0, float tween = 1);
+    float GetScaleY(int global = 0, float tween = 1);
+    float GetScaleZ(int global = 0, float tween = 1);
+    float GetMatElement(int row, int column);
+    void Reset();
+    void SetType(int collisionType, int recursive = 0);
+    void SetPickMode(int pickGeometry, int obscurer = 1);
+    void GetPickMode(int pickGeometry, int obscurer);
+    B3D::Entity@ GetParent();
+    int GetEntityType();
+    void SetRadius(float xRadius, float yRadius = 0);
+    void SetBox(float x, float y, float z, float width, float height, float depth);
+    void GetBox(int x, int y, int z, int width, int height, int depth);
+    float Distance(B3D::Entity@ destinationEntity);
+    float DistanceSquared(B3D::Entity@ destinationEntity);
+    B3D::Entity@ Pick(float range);
+    int CanSee(B3D::Entity@ destEntity);
+    B3D::Entity@ Collided(int type);
+    int CountCollisions();
+    float CollisionX(int collisionIndex);
+    float CollisionY(int collisionIndex);
+    float CollisionZ(int collisionIndex);
+    float CollisionNX(int collisionIndex);
+    float CollisionNY(int collisionIndex);
+    float CollisionNZ(int collisionIndex);
+    float CollisionTime(int collisionIndex);
+    B3D::Entity@ CollisionEntity(int collisionIndex);
+    B3D::Surface@ CollisionSurface(int collisionIndex);
+    int CollisionTriangle(int collisionIndex);
+    void Move(float x, float y, float z, int global = 0);
+    void Turn(float pitch, float yaw, float roll, int global = 0);
+    void Translate(float x, float y, float z, int global = 0);
+    void Position(float x, float y, float z, int global = 0);
+    void Scale(float xScale, float yScale, float zScale, int global = 0);
+    void Rotate(float pitch, float yaw, float roll, int global = 0);
+    void PointAt(B3D::Entity@ target, float roll = 0);
+    void AlignToVector(float vectorX, float vectorY, float vectorZ, int axis, float rate = 1);
+    float GetPitchTo(B3D::Entity@ destEntity);
+    float GetYawTo(B3D::Entity@ destEntity);
+    void SetAnimTime(float time, int animSeq = 0);
+    void Animate(int mode = 1, float speed = 1, int sequence = 0, float transition = 0);
+    void SetAnimKey(int frame, int posKey = 1, int rotKey = 1, int scaleKey = 1);
+    int LoadAnimSeq(string file);
+    int AddAnimSeq(int length);
+    int ExtractAnimSeq(int firstFrame, int lastFrame, int animSeq = 0);
+    int get_AnimSeq() const property;
+    float get_AnimTime() const property;
+    int get_AnimLength() const property;
+    int get_Animating() const property;
+    void SetParent(B3D::Entity@ parent, int global = 1);
+    int CountChildren();
+    B3D::Entity@ GetChild(int index);
+    B3D::Entity@ FindChild(string name);
+    void SetInstance(B3D::Entity@ parent);
+    B3D::Entity@ GetInstance();
+    void Hide();
+    void Show();
+    int get_IsHidden() const property;
+    int get_Exists() const property;
+    void Free();
+    void set_Name(string name) property;
+    string get_Name() const property;
+    string get_Filename() const property;
+    string get_Class() const property;
+    void set_Mask(int mask) property;
+    int get_Mask() const property;
+    B3D::Model@ opCast();
+    const B3D::Model@ opCast() const;
+    B3D::Camera@ opCast();
+    const B3D::Camera@ opCast() const;
+    B3D::Light@ opCast();
+    const B3D::Light@ opCast() const;
+    B3D::Pivot@ opCast();
+    const B3D::Pivot@ opCast() const;
+    B3D::Listener@ opCast();
+    const B3D::Listener@ opCast() const;
+}
+
+class Model{
+    B3D::Channel@ EmitSound(B3D::Sound@ entity);
+    B3D::Model@ Copy(B3D::Entity@ = null);
+    float GetX(int global = 0, float tween = 1);
+    float GetY(int global = 0, float tween = 1);
+    float GetZ(int global = 0, float tween = 1);
+    float GetPitch(int global = 0, float tween = 1);
+    float GetYaw(int global = 0, float tween = 1);
+    float GetRoll(int global = 0, float tween = 1);
+    float GetScaleX(int global = 0, float tween = 1);
+    float GetScaleY(int global = 0, float tween = 1);
+    float GetScaleZ(int global = 0, float tween = 1);
+    float GetMatElement(int row, int column);
+    void Reset();
+    void SetType(int collisionType, int recursive = 0);
+    void SetPickMode(int pickGeometry, int obscurer = 1);
+    void GetPickMode(int pickGeometry, int obscurer);
+    B3D::Entity@ GetParent();
+    int GetEntityType();
+    void SetRadius(float xRadius, float yRadius = 0);
+    void SetBox(float x, float y, float z, float width, float height, float depth);
+    void GetBox(int x, int y, int z, int width, int height, int depth);
+    float Distance(B3D::Entity@ destinationEntity);
+    float DistanceSquared(B3D::Entity@ destinationEntity);
+    B3D::Entity@ Pick(float range);
+    int CanSee(B3D::Entity@ destEntity);
+    B3D::Entity@ Collided(int type);
+    int CountCollisions();
+    float CollisionX(int collisionIndex);
+    float CollisionY(int collisionIndex);
+    float CollisionZ(int collisionIndex);
+    float CollisionNX(int collisionIndex);
+    float CollisionNY(int collisionIndex);
+    float CollisionNZ(int collisionIndex);
+    float CollisionTime(int collisionIndex);
+    B3D::Entity@ CollisionEntity(int collisionIndex);
+    B3D::Surface@ CollisionSurface(int collisionIndex);
+    int CollisionTriangle(int collisionIndex);
+    void Move(float x, float y, float z, int global = 0);
+    void Turn(float pitch, float yaw, float roll, int global = 0);
+    void Translate(float x, float y, float z, int global = 0);
+    void Position(float x, float y, float z, int global = 0);
+    void Scale(float xScale, float yScale, float zScale, int global = 0);
+    void Rotate(float pitch, float yaw, float roll, int global = 0);
+    void PointAt(B3D::Entity@ target, float roll = 0);
+    void AlignToVector(float vectorX, float vectorY, float vectorZ, int axis, float rate = 1);
+    float GetPitchTo(B3D::Entity@ destEntity);
+    float GetYawTo(B3D::Entity@ destEntity);
+    void SetAnimTime(float time, int animSeq = 0);
+    void Animate(int mode = 1, float speed = 1, int sequence = 0, float transition = 0);
+    void SetAnimKey(int frame, int posKey = 1, int rotKey = 1, int scaleKey = 1);
+    int LoadAnimSeq(string file);
+    int AddAnimSeq(int length);
+    int ExtractAnimSeq(int firstFrame, int lastFrame, int animSeq = 0);
+    int get_AnimSeq() const property;
+    float get_AnimTime() const property;
+    int get_AnimLength() const property;
+    int get_Animating() const property;
+    void SetParent(B3D::Entity@ parent, int global = 1);
+    int CountChildren();
+    B3D::Entity@ GetChild(int index);
+    B3D::Entity@ FindChild(string name);
+    void SetInstance(B3D::Entity@ parent);
+    B3D::Entity@ GetInstance();
+    void Hide();
+    void Show();
+    int get_IsHidden() const property;
+    int get_Exists() const property;
+    void Free();
+    void set_Name(string name) property;
+    string get_Name() const property;
+    string get_Filename() const property;
+    string get_Class() const property;
+    void set_Mask(int mask) property;
+    int get_Mask() const property;
+    B3D::Entity@ opImplCast();
+    const B3D::Entity@ opImplCast() const;
+    float get_Alpha() const property;
+    void set_Alpha(float alpha) property;
+    int get_GetColorR() const property;
+    int get_ColorG() const property;
+    int get_ColorB() const property;
+    void SetColor(float red, float green, float blue);
+    int get_Blend() const property;
+    void set_Blend(int blend) property;
+    B3D::Texture@ GetTexture(int tid);
+    B3D::Buffer@ GetTextureBuffer(int tid, int bid = 0);
+    void SetTexture(B3D::Texture@ texture, int frame = 0, int index = 0);
+    B3D::Brush@ get_Brush() const property;
+    void set_Brush(B3D::Brush@ brush) property;
+    void SetOrder(int order);
+    void SetShininess(float shininess, float power = 1);
+    void SetMaterial(float roughness, float metallic);
+    void SetEffect(B3D::Effect@ effect);
+    void SetFX(int fx);
+    void SetAutoFade(float near, float far);
+    B3D::Mesh@ opCast();
+    const B3D::Mesh@ opCast() const;
+    B3D::Sprite@ opCast();
+    const B3D::Sprite@ opCast() const;
+    B3D::Plane@ opCast();
+    const B3D::Plane@ opCast() const;
+    B3D::Terrain@ opCast();
+    const B3D::Terrain@ opCast() const;
+}
+
+class Mesh{
+    B3D::Channel@ EmitSound(B3D::Sound@ entity);
+    B3D::Mesh@ Copy(B3D::Entity@ = null);
+    float GetX(int global = 0, float tween = 1);
+    float GetY(int global = 0, float tween = 1);
+    float GetZ(int global = 0, float tween = 1);
+    float GetPitch(int global = 0, float tween = 1);
+    float GetYaw(int global = 0, float tween = 1);
+    float GetRoll(int global = 0, float tween = 1);
+    float GetScaleX(int global = 0, float tween = 1);
+    float GetScaleY(int global = 0, float tween = 1);
+    float GetScaleZ(int global = 0, float tween = 1);
+    float GetMatElement(int row, int column);
+    void Reset();
+    void SetType(int collisionType, int recursive = 0);
+    void SetPickMode(int pickGeometry, int obscurer = 1);
+    void GetPickMode(int pickGeometry, int obscurer);
+    B3D::Entity@ GetParent();
+    int GetEntityType();
+    void SetRadius(float xRadius, float yRadius = 0);
+    void SetBox(float x, float y, float z, float width, float height, float depth);
+    void GetBox(int x, int y, int z, int width, int height, int depth);
+    float Distance(B3D::Entity@ destinationEntity);
+    float DistanceSquared(B3D::Entity@ destinationEntity);
+    B3D::Entity@ Pick(float range);
+    int CanSee(B3D::Entity@ destEntity);
+    B3D::Entity@ Collided(int type);
+    int CountCollisions();
+    float CollisionX(int collisionIndex);
+    float CollisionY(int collisionIndex);
+    float CollisionZ(int collisionIndex);
+    float CollisionNX(int collisionIndex);
+    float CollisionNY(int collisionIndex);
+    float CollisionNZ(int collisionIndex);
+    float CollisionTime(int collisionIndex);
+    B3D::Entity@ CollisionEntity(int collisionIndex);
+    B3D::Surface@ CollisionSurface(int collisionIndex);
+    int CollisionTriangle(int collisionIndex);
+    void Move(float x, float y, float z, int global = 0);
+    void Turn(float pitch, float yaw, float roll, int global = 0);
+    void Translate(float x, float y, float z, int global = 0);
+    void Position(float x, float y, float z, int global = 0);
+    void Scale(float xScale, float yScale, float zScale, int global = 0);
+    void Rotate(float pitch, float yaw, float roll, int global = 0);
+    void PointAt(B3D::Entity@ target, float roll = 0);
+    void AlignToVector(float vectorX, float vectorY, float vectorZ, int axis, float rate = 1);
+    float GetPitchTo(B3D::Entity@ destEntity);
+    float GetYawTo(B3D::Entity@ destEntity);
+    void SetAnimTime(float time, int animSeq = 0);
+    void Animate(int mode = 1, float speed = 1, int sequence = 0, float transition = 0);
+    void SetAnimKey(int frame, int posKey = 1, int rotKey = 1, int scaleKey = 1);
+    int LoadAnimSeq(string file);
+    int AddAnimSeq(int length);
+    int ExtractAnimSeq(int firstFrame, int lastFrame, int animSeq = 0);
+    int get_AnimSeq() const property;
+    float get_AnimTime() const property;
+    int get_AnimLength() const property;
+    int get_Animating() const property;
+    void SetParent(B3D::Entity@ parent, int global = 1);
+    int CountChildren();
+    B3D::Entity@ GetChild(int index);
+    B3D::Entity@ FindChild(string name);
+    void SetInstance(B3D::Entity@ parent);
+    B3D::Entity@ GetInstance();
+    void Hide();
+    void Show();
+    int get_IsHidden() const property;
+    int get_Exists() const property;
+    void Free();
+    void set_Name(string name) property;
+    string get_Name() const property;
+    string get_Filename() const property;
+    string get_Class() const property;
+    void set_Mask(int mask) property;
+    int get_Mask() const property;
+    float get_Alpha() const property;
+    void set_Alpha(float alpha) property;
+    int get_GetColorR() const property;
+    int get_ColorG() const property;
+    int get_ColorB() const property;
+    void SetColor(float red, float green, float blue);
+    int get_Blend() const property;
+    void set_Blend(int blend) property;
+    B3D::Texture@ GetTexture(int tid);
+    B3D::Buffer@ GetTextureBuffer(int tid, int bid = 0);
+    void SetTexture(B3D::Texture@ texture, int frame = 0, int index = 0);
+    B3D::Brush@ get_Brush() const property;
+    void set_Brush(B3D::Brush@ brush) property;
+    void SetOrder(int order);
+    void SetShininess(float shininess, float power = 1);
+    void SetMaterial(float roughness, float metallic);
+    void SetEffect(B3D::Effect@ effect);
+    void SetFX(int fx);
+    void SetAutoFade(float near, float far);
+    B3D::Model@ opImplCast();
+    const B3D::Model@ opImplCast() const;
+    B3D::Mesh@ CreateCube(B3D::Entity@ parent = null);
+    B3D::Mesh@ CopyMesh(B3D::Entity@ parent = null);
+    void ScaleMesh(float xScale, float yScale, float zScale);
+    void RotateMesh(float pitch, float yaw, float roll);
+    void PositionMesh(float x, float y, float z);
+    void Fit(float x, float y, float z, float width, float height, float depth, int uniform = 0);
+    void Flip();
+    void PaintMesh(B3D::Brush@ brush);
+    void Add(B3D::Mesh@ destMesh);
+    void UpdateNormals(int flat = 0);
+    void UpdateTB();
+    void Light(float red, float green, float blue, float range = 0, float x = 0, float y = 0, float z = 0);
+    float get_Width() const property;
+    float get_Height() const property;
+    float get_Depth() const property;
+    int Intersects(B3D::Mesh@ meshB);
+    B3D::Surface@ CreateSurface(B3D::Brush@ brush = null, int dynamic = 0);
+    B3D::Surface@ FindSurface(B3D::Brush@ brush);
+    int get_SurfaceCount() const property;
+    B3D::Surface@ GetSurface(int surfaceIndex);
+    void SetCullBox(float x, float y, float z, float width, float height, float depth);
+    void GetBox(float&out, float&out, float&out, float&out, float&out, float&out);
+}
+
+class Camera{
+    B3D::Channel@ EmitSound(B3D::Sound@ entity);
+    B3D::Camera@ Copy(B3D::Entity@ = null);
+    float GetX(int global = 0, float tween = 1);
+    float GetY(int global = 0, float tween = 1);
+    float GetZ(int global = 0, float tween = 1);
+    float GetPitch(int global = 0, float tween = 1);
+    float GetYaw(int global = 0, float tween = 1);
+    float GetRoll(int global = 0, float tween = 1);
+    float GetScaleX(int global = 0, float tween = 1);
+    float GetScaleY(int global = 0, float tween = 1);
+    float GetScaleZ(int global = 0, float tween = 1);
+    float GetMatElement(int row, int column);
+    void Reset();
+    void SetType(int collisionType, int recursive = 0);
+    void SetPickMode(int pickGeometry, int obscurer = 1);
+    void GetPickMode(int pickGeometry, int obscurer);
+    B3D::Entity@ GetParent();
+    int GetEntityType();
+    void SetRadius(float xRadius, float yRadius = 0);
+    void SetBox(float x, float y, float z, float width, float height, float depth);
+    void GetBox(int x, int y, int z, int width, int height, int depth);
+    float Distance(B3D::Entity@ destinationEntity);
+    float DistanceSquared(B3D::Entity@ destinationEntity);
+    B3D::Entity@ Pick(float range);
+    int CanSee(B3D::Entity@ destEntity);
+    B3D::Entity@ Collided(int type);
+    int CountCollisions();
+    float CollisionX(int collisionIndex);
+    float CollisionY(int collisionIndex);
+    float CollisionZ(int collisionIndex);
+    float CollisionNX(int collisionIndex);
+    float CollisionNY(int collisionIndex);
+    float CollisionNZ(int collisionIndex);
+    float CollisionTime(int collisionIndex);
+    B3D::Entity@ CollisionEntity(int collisionIndex);
+    B3D::Surface@ CollisionSurface(int collisionIndex);
+    int CollisionTriangle(int collisionIndex);
+    void Move(float x, float y, float z, int global = 0);
+    void Turn(float pitch, float yaw, float roll, int global = 0);
+    void Translate(float x, float y, float z, int global = 0);
+    void Position(float x, float y, float z, int global = 0);
+    void Scale(float xScale, float yScale, float zScale, int global = 0);
+    void Rotate(float pitch, float yaw, float roll, int global = 0);
+    void PointAt(B3D::Entity@ target, float roll = 0);
+    void AlignToVector(float vectorX, float vectorY, float vectorZ, int axis, float rate = 1);
+    float GetPitchTo(B3D::Entity@ destEntity);
+    float GetYawTo(B3D::Entity@ destEntity);
+    void SetAnimTime(float time, int animSeq = 0);
+    void Animate(int mode = 1, float speed = 1, int sequence = 0, float transition = 0);
+    void SetAnimKey(int frame, int posKey = 1, int rotKey = 1, int scaleKey = 1);
+    int LoadAnimSeq(string file);
+    int AddAnimSeq(int length);
+    int ExtractAnimSeq(int firstFrame, int lastFrame, int animSeq = 0);
+    int get_AnimSeq() const property;
+    float get_AnimTime() const property;
+    int get_AnimLength() const property;
+    int get_Animating() const property;
+    void SetParent(B3D::Entity@ parent, int global = 1);
+    int CountChildren();
+    B3D::Entity@ GetChild(int index);
+    B3D::Entity@ FindChild(string name);
+    void SetInstance(B3D::Entity@ parent);
+    B3D::Entity@ GetInstance();
+    void Hide();
+    void Show();
+    int get_IsHidden() const property;
+    int get_Exists() const property;
+    void Free();
+    void set_Name(string name) property;
+    string get_Name() const property;
+    string get_Filename() const property;
+    string get_Class() const property;
+    void set_Mask(int mask) property;
+    int get_Mask() const property;
+    B3D::Entity@ opImplCast();
+    const B3D::Entity@ opImplCast() const;
+    void SetZoom(float zoom);
+    void SetRange(float near, float far);
+    float get_RangeNear() const property;
+    float get_RangeFar() const property;
+    void SetClsColor(float red, float green, float blue);
+    void SetClsMode(int clsColor, int clsZbuffer);
+    void SetCullMode(int mode);
+    void SetDepthBias(float bias, float slopebias);
+    void SetReverseZ(int b);
+    void SetColorWrite(int b);
+    void SetProjMode(int mode);
+    void SetViewport(int x, int y, int width, int height);
+    void SetFogColor(float red, float green, float blue);
+    void SetFogRange(float near, float far);
+    float get_FogRangeNear() const property;
+    float get_FogRangeFar() const property;
+    void SetFogDensity(float density);
+    void SetFogMode(int mode);
+    int Project(float x, float y, float z, int clamp = 1);
+    B3D::Matrix@ GetMatrix(int typ, float tween = 1);
+    B3D::Entity@ Pick(float viewportX, float viewportY);
+    void Render(B3D::Model@ entity, float tween = 1);
+    void SetOrder(int order);
+    int InView(B3D::Entity@ camera);
+}
+
+class Light{
+    B3D::Channel@ EmitSound(B3D::Sound@ entity);
+    B3D::Light@ Copy(B3D::Entity@ = null);
+    float GetX(int global = 0, float tween = 1);
+    float GetY(int global = 0, float tween = 1);
+    float GetZ(int global = 0, float tween = 1);
+    float GetPitch(int global = 0, float tween = 1);
+    float GetYaw(int global = 0, float tween = 1);
+    float GetRoll(int global = 0, float tween = 1);
+    float GetScaleX(int global = 0, float tween = 1);
+    float GetScaleY(int global = 0, float tween = 1);
+    float GetScaleZ(int global = 0, float tween = 1);
+    float GetMatElement(int row, int column);
+    void Reset();
+    void SetType(int collisionType, int recursive = 0);
+    void SetPickMode(int pickGeometry, int obscurer = 1);
+    void GetPickMode(int pickGeometry, int obscurer);
+    B3D::Entity@ GetParent();
+    int GetEntityType();
+    void SetRadius(float xRadius, float yRadius = 0);
+    void SetBox(float x, float y, float z, float width, float height, float depth);
+    void GetBox(int x, int y, int z, int width, int height, int depth);
+    float Distance(B3D::Entity@ destinationEntity);
+    float DistanceSquared(B3D::Entity@ destinationEntity);
+    B3D::Entity@ Pick(float range);
+    int CanSee(B3D::Entity@ destEntity);
+    B3D::Entity@ Collided(int type);
+    int CountCollisions();
+    float CollisionX(int collisionIndex);
+    float CollisionY(int collisionIndex);
+    float CollisionZ(int collisionIndex);
+    float CollisionNX(int collisionIndex);
+    float CollisionNY(int collisionIndex);
+    float CollisionNZ(int collisionIndex);
+    float CollisionTime(int collisionIndex);
+    B3D::Entity@ CollisionEntity(int collisionIndex);
+    B3D::Surface@ CollisionSurface(int collisionIndex);
+    int CollisionTriangle(int collisionIndex);
+    void Move(float x, float y, float z, int global = 0);
+    void Turn(float pitch, float yaw, float roll, int global = 0);
+    void Translate(float x, float y, float z, int global = 0);
+    void Position(float x, float y, float z, int global = 0);
+    void Scale(float xScale, float yScale, float zScale, int global = 0);
+    void Rotate(float pitch, float yaw, float roll, int global = 0);
+    void PointAt(B3D::Entity@ target, float roll = 0);
+    void AlignToVector(float vectorX, float vectorY, float vectorZ, int axis, float rate = 1);
+    float GetPitchTo(B3D::Entity@ destEntity);
+    float GetYawTo(B3D::Entity@ destEntity);
+    void SetAnimTime(float time, int animSeq = 0);
+    void Animate(int mode = 1, float speed = 1, int sequence = 0, float transition = 0);
+    void SetAnimKey(int frame, int posKey = 1, int rotKey = 1, int scaleKey = 1);
+    int LoadAnimSeq(string file);
+    int AddAnimSeq(int length);
+    int ExtractAnimSeq(int firstFrame, int lastFrame, int animSeq = 0);
+    int get_AnimSeq() const property;
+    float get_AnimTime() const property;
+    int get_AnimLength() const property;
+    int get_Animating() const property;
+    void SetParent(B3D::Entity@ parent, int global = 1);
+    int CountChildren();
+    B3D::Entity@ GetChild(int index);
+    B3D::Entity@ FindChild(string name);
+    void SetInstance(B3D::Entity@ parent);
+    B3D::Entity@ GetInstance();
+    void Hide();
+    void Show();
+    int get_IsHidden() const property;
+    int get_Exists() const property;
+    void Free();
+    void set_Name(string name) property;
+    string get_Name() const property;
+    string get_Filename() const property;
+    string get_Class() const property;
+    void set_Mask(int mask) property;
+    int get_Mask() const property;
+    B3D::Entity@ opImplCast();
+    const B3D::Entity@ opImplCast() const;
+    void SetColor(float red, float green, float blue);
+    void set_Range(float range) property;
+    float get_Range() const property;
+    void SetConeAngles(float innerAngle, float outerAngle);
+}
+
+class Pivot{
+    B3D::Channel@ EmitSound(B3D::Sound@ entity);
+    B3D::Pivot@ Copy(B3D::Entity@ = null);
+    float GetX(int global = 0, float tween = 1);
+    float GetY(int global = 0, float tween = 1);
+    float GetZ(int global = 0, float tween = 1);
+    float GetPitch(int global = 0, float tween = 1);
+    float GetYaw(int global = 0, float tween = 1);
+    float GetRoll(int global = 0, float tween = 1);
+    float GetScaleX(int global = 0, float tween = 1);
+    float GetScaleY(int global = 0, float tween = 1);
+    float GetScaleZ(int global = 0, float tween = 1);
+    float GetMatElement(int row, int column);
+    void Reset();
+    void SetType(int collisionType, int recursive = 0);
+    void SetPickMode(int pickGeometry, int obscurer = 1);
+    void GetPickMode(int pickGeometry, int obscurer);
+    B3D::Entity@ GetParent();
+    int GetEntityType();
+    void SetRadius(float xRadius, float yRadius = 0);
+    void SetBox(float x, float y, float z, float width, float height, float depth);
+    void GetBox(int x, int y, int z, int width, int height, int depth);
+    float Distance(B3D::Entity@ destinationEntity);
+    float DistanceSquared(B3D::Entity@ destinationEntity);
+    B3D::Entity@ Pick(float range);
+    int CanSee(B3D::Entity@ destEntity);
+    B3D::Entity@ Collided(int type);
+    int CountCollisions();
+    float CollisionX(int collisionIndex);
+    float CollisionY(int collisionIndex);
+    float CollisionZ(int collisionIndex);
+    float CollisionNX(int collisionIndex);
+    float CollisionNY(int collisionIndex);
+    float CollisionNZ(int collisionIndex);
+    float CollisionTime(int collisionIndex);
+    B3D::Entity@ CollisionEntity(int collisionIndex);
+    B3D::Surface@ CollisionSurface(int collisionIndex);
+    int CollisionTriangle(int collisionIndex);
+    void Move(float x, float y, float z, int global = 0);
+    void Turn(float pitch, float yaw, float roll, int global = 0);
+    void Translate(float x, float y, float z, int global = 0);
+    void Position(float x, float y, float z, int global = 0);
+    void Scale(float xScale, float yScale, float zScale, int global = 0);
+    void Rotate(float pitch, float yaw, float roll, int global = 0);
+    void PointAt(B3D::Entity@ target, float roll = 0);
+    void AlignToVector(float vectorX, float vectorY, float vectorZ, int axis, float rate = 1);
+    float GetPitchTo(B3D::Entity@ destEntity);
+    float GetYawTo(B3D::Entity@ destEntity);
+    void SetAnimTime(float time, int animSeq = 0);
+    void Animate(int mode = 1, float speed = 1, int sequence = 0, float transition = 0);
+    void SetAnimKey(int frame, int posKey = 1, int rotKey = 1, int scaleKey = 1);
+    int LoadAnimSeq(string file);
+    int AddAnimSeq(int length);
+    int ExtractAnimSeq(int firstFrame, int lastFrame, int animSeq = 0);
+    int get_AnimSeq() const property;
+    float get_AnimTime() const property;
+    int get_AnimLength() const property;
+    int get_Animating() const property;
+    void SetParent(B3D::Entity@ parent, int global = 1);
+    int CountChildren();
+    B3D::Entity@ GetChild(int index);
+    B3D::Entity@ FindChild(string name);
+    void SetInstance(B3D::Entity@ parent);
+    B3D::Entity@ GetInstance();
+    void Hide();
+    void Show();
+    int get_IsHidden() const property;
+    int get_Exists() const property;
+    void Free();
+    void set_Name(string name) property;
+    string get_Name() const property;
+    string get_Filename() const property;
+    string get_Class() const property;
+    void set_Mask(int mask) property;
+    int get_Mask() const property;
+    B3D::Entity@ opImplCast();
+    const B3D::Entity@ opImplCast() const;
+}
+
+class Sprite{
+    B3D::Channel@ EmitSound(B3D::Sound@ entity);
+    B3D::Sprite@ Copy(B3D::Entity@ = null);
+    float GetX(int global = 0, float tween = 1);
+    float GetY(int global = 0, float tween = 1);
+    float GetZ(int global = 0, float tween = 1);
+    float GetPitch(int global = 0, float tween = 1);
+    float GetYaw(int global = 0, float tween = 1);
+    float GetRoll(int global = 0, float tween = 1);
+    float GetScaleX(int global = 0, float tween = 1);
+    float GetScaleY(int global = 0, float tween = 1);
+    float GetScaleZ(int global = 0, float tween = 1);
+    float GetMatElement(int row, int column);
+    void Reset();
+    void SetType(int collisionType, int recursive = 0);
+    void SetPickMode(int pickGeometry, int obscurer = 1);
+    void GetPickMode(int pickGeometry, int obscurer);
+    B3D::Entity@ GetParent();
+    int GetEntityType();
+    void SetRadius(float xRadius, float yRadius = 0);
+    void SetBox(float x, float y, float z, float width, float height, float depth);
+    void GetBox(int x, int y, int z, int width, int height, int depth);
+    float Distance(B3D::Entity@ destinationEntity);
+    float DistanceSquared(B3D::Entity@ destinationEntity);
+    B3D::Entity@ Pick(float range);
+    int CanSee(B3D::Entity@ destEntity);
+    B3D::Entity@ Collided(int type);
+    int CountCollisions();
+    float CollisionX(int collisionIndex);
+    float CollisionY(int collisionIndex);
+    float CollisionZ(int collisionIndex);
+    float CollisionNX(int collisionIndex);
+    float CollisionNY(int collisionIndex);
+    float CollisionNZ(int collisionIndex);
+    float CollisionTime(int collisionIndex);
+    B3D::Entity@ CollisionEntity(int collisionIndex);
+    B3D::Surface@ CollisionSurface(int collisionIndex);
+    int CollisionTriangle(int collisionIndex);
+    void Move(float x, float y, float z, int global = 0);
+    void Turn(float pitch, float yaw, float roll, int global = 0);
+    void Translate(float x, float y, float z, int global = 0);
+    void Position(float x, float y, float z, int global = 0);
+    void Scale(float xScale, float yScale, float zScale, int global = 0);
+    void Rotate(float pitch, float yaw, float roll, int global = 0);
+    void PointAt(B3D::Entity@ target, float roll = 0);
+    void AlignToVector(float vectorX, float vectorY, float vectorZ, int axis, float rate = 1);
+    float GetPitchTo(B3D::Entity@ destEntity);
+    float GetYawTo(B3D::Entity@ destEntity);
+    void SetAnimTime(float time, int animSeq = 0);
+    void Animate(int mode = 1, float speed = 1, int sequence = 0, float transition = 0);
+    void SetAnimKey(int frame, int posKey = 1, int rotKey = 1, int scaleKey = 1);
+    int LoadAnimSeq(string file);
+    int AddAnimSeq(int length);
+    int ExtractAnimSeq(int firstFrame, int lastFrame, int animSeq = 0);
+    int get_AnimSeq() const property;
+    float get_AnimTime() const property;
+    int get_AnimLength() const property;
+    int get_Animating() const property;
+    void SetParent(B3D::Entity@ parent, int global = 1);
+    int CountChildren();
+    B3D::Entity@ GetChild(int index);
+    B3D::Entity@ FindChild(string name);
+    void SetInstance(B3D::Entity@ parent);
+    B3D::Entity@ GetInstance();
+    void Hide();
+    void Show();
+    int get_IsHidden() const property;
+    int get_Exists() const property;
+    void Free();
+    void set_Name(string name) property;
+    string get_Name() const property;
+    string get_Filename() const property;
+    string get_Class() const property;
+    void set_Mask(int mask) property;
+    int get_Mask() const property;
+    float get_Alpha() const property;
+    void set_Alpha(float alpha) property;
+    int get_GetColorR() const property;
+    int get_ColorG() const property;
+    int get_ColorB() const property;
+    void SetColor(float red, float green, float blue);
+    int get_Blend() const property;
+    void set_Blend(int blend) property;
+    B3D::Texture@ GetTexture(int tid);
+    B3D::Buffer@ GetTextureBuffer(int tid, int bid = 0);
+    void SetTexture(B3D::Texture@ texture, int frame = 0, int index = 0);
+    B3D::Brush@ get_Brush() const property;
+    void set_Brush(B3D::Brush@ brush) property;
+    void SetOrder(int order);
+    void SetShininess(float shininess, float power = 1);
+    void SetMaterial(float roughness, float metallic);
+    void SetEffect(B3D::Effect@ effect);
+    void SetFX(int fx);
+    void SetAutoFade(float near, float far);
+    B3D::Model@ opImplCast();
+    const B3D::Model@ opImplCast() const;
+    void RotateSprite(float angle);
+    void ScaleSprite(float xScale, float yScale);
+    void SetHandle(float xHandle, float yHandle);
+    void SetViewMode(int viewMode);
+}
+
+class Plane{
+    B3D::Channel@ EmitSound(B3D::Sound@ entity);
+    B3D::Plane@ Copy(B3D::Entity@ = null);
+    float GetX(int global = 0, float tween = 1);
+    float GetY(int global = 0, float tween = 1);
+    float GetZ(int global = 0, float tween = 1);
+    float GetPitch(int global = 0, float tween = 1);
+    float GetYaw(int global = 0, float tween = 1);
+    float GetRoll(int global = 0, float tween = 1);
+    float GetScaleX(int global = 0, float tween = 1);
+    float GetScaleY(int global = 0, float tween = 1);
+    float GetScaleZ(int global = 0, float tween = 1);
+    float GetMatElement(int row, int column);
+    void Reset();
+    void SetType(int collisionType, int recursive = 0);
+    void SetPickMode(int pickGeometry, int obscurer = 1);
+    void GetPickMode(int pickGeometry, int obscurer);
+    B3D::Entity@ GetParent();
+    int GetEntityType();
+    void SetRadius(float xRadius, float yRadius = 0);
+    void SetBox(float x, float y, float z, float width, float height, float depth);
+    void GetBox(int x, int y, int z, int width, int height, int depth);
+    float Distance(B3D::Entity@ destinationEntity);
+    float DistanceSquared(B3D::Entity@ destinationEntity);
+    B3D::Entity@ Pick(float range);
+    int CanSee(B3D::Entity@ destEntity);
+    B3D::Entity@ Collided(int type);
+    int CountCollisions();
+    float CollisionX(int collisionIndex);
+    float CollisionY(int collisionIndex);
+    float CollisionZ(int collisionIndex);
+    float CollisionNX(int collisionIndex);
+    float CollisionNY(int collisionIndex);
+    float CollisionNZ(int collisionIndex);
+    float CollisionTime(int collisionIndex);
+    B3D::Entity@ CollisionEntity(int collisionIndex);
+    B3D::Surface@ CollisionSurface(int collisionIndex);
+    int CollisionTriangle(int collisionIndex);
+    void Move(float x, float y, float z, int global = 0);
+    void Turn(float pitch, float yaw, float roll, int global = 0);
+    void Translate(float x, float y, float z, int global = 0);
+    void Position(float x, float y, float z, int global = 0);
+    void Scale(float xScale, float yScale, float zScale, int global = 0);
+    void Rotate(float pitch, float yaw, float roll, int global = 0);
+    void PointAt(B3D::Entity@ target, float roll = 0);
+    void AlignToVector(float vectorX, float vectorY, float vectorZ, int axis, float rate = 1);
+    float GetPitchTo(B3D::Entity@ destEntity);
+    float GetYawTo(B3D::Entity@ destEntity);
+    void SetAnimTime(float time, int animSeq = 0);
+    void Animate(int mode = 1, float speed = 1, int sequence = 0, float transition = 0);
+    void SetAnimKey(int frame, int posKey = 1, int rotKey = 1, int scaleKey = 1);
+    int LoadAnimSeq(string file);
+    int AddAnimSeq(int length);
+    int ExtractAnimSeq(int firstFrame, int lastFrame, int animSeq = 0);
+    int get_AnimSeq() const property;
+    float get_AnimTime() const property;
+    int get_AnimLength() const property;
+    int get_Animating() const property;
+    void SetParent(B3D::Entity@ parent, int global = 1);
+    int CountChildren();
+    B3D::Entity@ GetChild(int index);
+    B3D::Entity@ FindChild(string name);
+    void SetInstance(B3D::Entity@ parent);
+    B3D::Entity@ GetInstance();
+    void Hide();
+    void Show();
+    int get_IsHidden() const property;
+    int get_Exists() const property;
+    void Free();
+    void set_Name(string name) property;
+    string get_Name() const property;
+    string get_Filename() const property;
+    string get_Class() const property;
+    void set_Mask(int mask) property;
+    int get_Mask() const property;
+    float get_Alpha() const property;
+    void set_Alpha(float alpha) property;
+    int get_GetColorR() const property;
+    int get_ColorG() const property;
+    int get_ColorB() const property;
+    void SetColor(float red, float green, float blue);
+    int get_Blend() const property;
+    void set_Blend(int blend) property;
+    B3D::Texture@ GetTexture(int tid);
+    B3D::Buffer@ GetTextureBuffer(int tid, int bid = 0);
+    void SetTexture(B3D::Texture@ texture, int frame = 0, int index = 0);
+    B3D::Brush@ get_Brush() const property;
+    void set_Brush(B3D::Brush@ brush) property;
+    void SetOrder(int order);
+    void SetShininess(float shininess, float power = 1);
+    void SetMaterial(float roughness, float metallic);
+    void SetEffect(B3D::Effect@ effect);
+    void SetFX(int fx);
+    void SetAutoFade(float near, float far);
+    B3D::Model@ opImplCast();
+    const B3D::Model@ opImplCast() const;
+}
+
+class Terrain{
+    B3D::Channel@ EmitSound(B3D::Sound@ entity);
+    B3D::Terrain@ Copy(B3D::Entity@ = null);
+    float GetX(int global = 0, float tween = 1);
+    float GetY(int global = 0, float tween = 1);
+    float GetZ(int global = 0, float tween = 1);
+    float GetPitch(int global = 0, float tween = 1);
+    float GetYaw(int global = 0, float tween = 1);
+    float GetRoll(int global = 0, float tween = 1);
+    float GetScaleX(int global = 0, float tween = 1);
+    float GetScaleY(int global = 0, float tween = 1);
+    float GetScaleZ(int global = 0, float tween = 1);
+    float GetMatElement(int row, int column);
+    void Reset();
+    void SetType(int collisionType, int recursive = 0);
+    void SetPickMode(int pickGeometry, int obscurer = 1);
+    void GetPickMode(int pickGeometry, int obscurer);
+    B3D::Entity@ GetParent();
+    int GetEntityType();
+    void SetRadius(float xRadius, float yRadius = 0);
+    void SetBox(float x, float y, float z, float width, float height, float depth);
+    void GetBox(int x, int y, int z, int width, int height, int depth);
+    float Distance(B3D::Entity@ destinationEntity);
+    float DistanceSquared(B3D::Entity@ destinationEntity);
+    B3D::Entity@ Pick(float range);
+    int CanSee(B3D::Entity@ destEntity);
+    B3D::Entity@ Collided(int type);
+    int CountCollisions();
+    float CollisionX(int collisionIndex);
+    float CollisionY(int collisionIndex);
+    float CollisionZ(int collisionIndex);
+    float CollisionNX(int collisionIndex);
+    float CollisionNY(int collisionIndex);
+    float CollisionNZ(int collisionIndex);
+    float CollisionTime(int collisionIndex);
+    B3D::Entity@ CollisionEntity(int collisionIndex);
+    B3D::Surface@ CollisionSurface(int collisionIndex);
+    int CollisionTriangle(int collisionIndex);
+    void Move(float x, float y, float z, int global = 0);
+    void Turn(float pitch, float yaw, float roll, int global = 0);
+    void Translate(float x, float y, float z, int global = 0);
+    void Position(float x, float y, float z, int global = 0);
+    void Scale(float xScale, float yScale, float zScale, int global = 0);
+    void Rotate(float pitch, float yaw, float roll, int global = 0);
+    void PointAt(B3D::Entity@ target, float roll = 0);
+    void AlignToVector(float vectorX, float vectorY, float vectorZ, int axis, float rate = 1);
+    float GetPitchTo(B3D::Entity@ destEntity);
+    float GetYawTo(B3D::Entity@ destEntity);
+    void SetAnimTime(float time, int animSeq = 0);
+    void Animate(int mode = 1, float speed = 1, int sequence = 0, float transition = 0);
+    void SetAnimKey(int frame, int posKey = 1, int rotKey = 1, int scaleKey = 1);
+    int LoadAnimSeq(string file);
+    int AddAnimSeq(int length);
+    int ExtractAnimSeq(int firstFrame, int lastFrame, int animSeq = 0);
+    int get_AnimSeq() const property;
+    float get_AnimTime() const property;
+    int get_AnimLength() const property;
+    int get_Animating() const property;
+    void SetParent(B3D::Entity@ parent, int global = 1);
+    int CountChildren();
+    B3D::Entity@ GetChild(int index);
+    B3D::Entity@ FindChild(string name);
+    void SetInstance(B3D::Entity@ parent);
+    B3D::Entity@ GetInstance();
+    void Hide();
+    void Show();
+    int get_IsHidden() const property;
+    int get_Exists() const property;
+    void Free();
+    void set_Name(string name) property;
+    string get_Name() const property;
+    string get_Filename() const property;
+    string get_Class() const property;
+    void set_Mask(int mask) property;
+    int get_Mask() const property;
+    float get_Alpha() const property;
+    void set_Alpha(float alpha) property;
+    int get_GetColorR() const property;
+    int get_ColorG() const property;
+    int get_ColorB() const property;
+    void SetColor(float red, float green, float blue);
+    int get_Blend() const property;
+    void set_Blend(int blend) property;
+    B3D::Texture@ GetTexture(int tid);
+    B3D::Buffer@ GetTextureBuffer(int tid, int bid = 0);
+    void SetTexture(B3D::Texture@ texture, int frame = 0, int index = 0);
+    B3D::Brush@ get_Brush() const property;
+    void set_Brush(B3D::Brush@ brush) property;
+    void SetOrder(int order);
+    void SetShininess(float shininess, float power = 1);
+    void SetMaterial(float roughness, float metallic);
+    void SetEffect(B3D::Effect@ effect);
+    void SetFX(int fx);
+    void SetAutoFade(float near, float far);
+    B3D::Model@ opImplCast();
+    const B3D::Model@ opImplCast() const;
+    void SetDetail(int detailLevel, int morph = 0);
+    void SetShading(int enable);
+    float GetX(float worldX, float worldY, float worldZ);
+    float GetY(float worldX, float worldY, float worldZ);
+    float GetZ(float worldX, float worldY, float worldZ);
+    int get_Size() const property;
+    float GetHeight(int terrainX, int terrainZ);
+    void Modify(int terrainX, int terrainZ, float height, int realtime = 0);
+}
+
+class Listener{
+    B3D::Channel@ EmitSound(B3D::Sound@ entity);
+    B3D::Listener@ Copy(B3D::Entity@ = null);
+    float GetX(int global = 0, float tween = 1);
+    float GetY(int global = 0, float tween = 1);
+    float GetZ(int global = 0, float tween = 1);
+    float GetPitch(int global = 0, float tween = 1);
+    float GetYaw(int global = 0, float tween = 1);
+    float GetRoll(int global = 0, float tween = 1);
+    float GetScaleX(int global = 0, float tween = 1);
+    float GetScaleY(int global = 0, float tween = 1);
+    float GetScaleZ(int global = 0, float tween = 1);
+    float GetMatElement(int row, int column);
+    void Reset();
+    void SetType(int collisionType, int recursive = 0);
+    void SetPickMode(int pickGeometry, int obscurer = 1);
+    void GetPickMode(int pickGeometry, int obscurer);
+    B3D::Entity@ GetParent();
+    int GetEntityType();
+    void SetRadius(float xRadius, float yRadius = 0);
+    void SetBox(float x, float y, float z, float width, float height, float depth);
+    void GetBox(int x, int y, int z, int width, int height, int depth);
+    float Distance(B3D::Entity@ destinationEntity);
+    float DistanceSquared(B3D::Entity@ destinationEntity);
+    B3D::Entity@ Pick(float range);
+    int CanSee(B3D::Entity@ destEntity);
+    B3D::Entity@ Collided(int type);
+    int CountCollisions();
+    float CollisionX(int collisionIndex);
+    float CollisionY(int collisionIndex);
+    float CollisionZ(int collisionIndex);
+    float CollisionNX(int collisionIndex);
+    float CollisionNY(int collisionIndex);
+    float CollisionNZ(int collisionIndex);
+    float CollisionTime(int collisionIndex);
+    B3D::Entity@ CollisionEntity(int collisionIndex);
+    B3D::Surface@ CollisionSurface(int collisionIndex);
+    int CollisionTriangle(int collisionIndex);
+    void Move(float x, float y, float z, int global = 0);
+    void Turn(float pitch, float yaw, float roll, int global = 0);
+    void Translate(float x, float y, float z, int global = 0);
+    void Position(float x, float y, float z, int global = 0);
+    void Scale(float xScale, float yScale, float zScale, int global = 0);
+    void Rotate(float pitch, float yaw, float roll, int global = 0);
+    void PointAt(B3D::Entity@ target, float roll = 0);
+    void AlignToVector(float vectorX, float vectorY, float vectorZ, int axis, float rate = 1);
+    float GetPitchTo(B3D::Entity@ destEntity);
+    float GetYawTo(B3D::Entity@ destEntity);
+    void SetAnimTime(float time, int animSeq = 0);
+    void Animate(int mode = 1, float speed = 1, int sequence = 0, float transition = 0);
+    void SetAnimKey(int frame, int posKey = 1, int rotKey = 1, int scaleKey = 1);
+    int LoadAnimSeq(string file);
+    int AddAnimSeq(int length);
+    int ExtractAnimSeq(int firstFrame, int lastFrame, int animSeq = 0);
+    int get_AnimSeq() const property;
+    float get_AnimTime() const property;
+    int get_AnimLength() const property;
+    int get_Animating() const property;
+    void SetParent(B3D::Entity@ parent, int global = 1);
+    int CountChildren();
+    B3D::Entity@ GetChild(int index);
+    B3D::Entity@ FindChild(string name);
+    void SetInstance(B3D::Entity@ parent);
+    B3D::Entity@ GetInstance();
+    void Hide();
+    void Show();
+    int get_IsHidden() const property;
+    int get_Exists() const property;
+    void Free();
+    void set_Name(string name) property;
+    string get_Name() const property;
+    string get_Filename() const property;
+    string get_Class() const property;
+    void set_Mask(int mask) property;
+    int get_Mask() const property;
+    B3D::Entity@ opImplCast();
+    const B3D::Entity@ opImplCast() const;
+}
+
+class Timer{
+    int Wait();
+    void Free();
+}
+}
+
+namespace CB {
+
+class Waypoint{
+    B3D::Pivot@ Object;
+    Door@ Door;
+    Room@ Room;
+    int State;
+    carray<Waypoint@> Connected;
+    carray<float> Distance;
+    float FCost;
+    float GCost;
+    float HCost;
+    Waypoint@ Parent;
+    void Delete();
+    CB::Waypoint@ get_Next() const property;
+    CB::Waypoint@ get_Previous() const property;
+    void InsertAfter(CB::Waypoint@);
+    void InsertBefore(CB::Waypoint@);
+}
+
+class NPC{
+    B3D::Entity@ Object;
+    B3D::Entity@ Object2;
+    B3D::Entity@ Object3;
+    B3D::Entity@ Object4;
+    B3D::Pivot@ Collider;
+    int Type;
+    int ID;
+    float DropSpeed;
+    int Gravity;
+    float State;
+    float State2;
+    float State3;
+    int PrevState;
+    int MakingNoise;
+    float Frame;
+    float Angle;
+    B3D::Sound@ Sound;
+    B3D::Channel@ Channel;
+    float SoundTimer;
+    B3D::Sound@ Sound2;
+    B3D::Channel@ Channel2;
+    float Speed;
+    float CurrentSpeed;
+    string Texture;
+    float Idle;
+    float Reload;
+    int LastSeen;
+    float LastDistance;
+    float PrevX;
+    float PrevY;
+    float PrevZ;
+    NPC@ Target;
+    int TargetID;
+    float EnemyX;
+    float EnemyY;
+    float EnemyZ;
+    carray<Waypoint@> Path;
+    int PathStatus;
+    float PathTimer;
+    int PathLocation;
+    float NVX;
+    float NVY;
+    float NVZ;
+    string NVName;
+    float GravityMultiplier;
+    float MaxGravity;
+    int MTFVariant;
+    NPC@ MTFLeader;
+    int IsDead;
+    float BlinkTimer;
+    int IgnorePlayer;
+    int ManipulateBone;
+    int ManipulationType;
+    string BoneToManipulate;
+    float BonePitch;
+    float BoneYaw;
+    float BoneRoll;
+    string NPCNameInSection;
+    int InFacility;
+    int CanUseElevator;
+    int HP;
+    float PathX;
+    float PathZ;
+    string Model;
+    float ModelScaleX;
+    float ModelScaleY;
+    float ModelScaleZ;
+    int HideFromNVG;
+    int TextureID;
+    float CollRadius;
+    float IdleTimer;
+    int ChannelIsStream;
+    int Channel2IsStream;
+    float FallingPickDistance;
+    void Delete();
+    CB::NPC@ get_Next() const property;
+    CB::NPC@ get_Previous() const property;
+    void InsertAfter(CB::NPC@);
+    void InsertBefore(CB::NPC@);
+}
+
+class Room{
+    int Zone;
+    int Found;
+    B3D::Pivot@ Object;
+    float X;
+    float Y;
+    float Z;
+    int Angle;
+    RoomTemplate@ Template;
+    float Distance;
+    B3D::Channel@ SoundCHN;
+    Forest@ Forest;
+    carray<int> SoundEmitter;
+    carray<B3D::Pivot@> SoundEmitterObj;
+    carray<float> SoundEmitterRange;
+    carray<B3D::Channel@> SoundEmitterCHN;
+    carray<B3D::Light@> Lights;
+    carray<float> LightIntensity;
+    carray<B3D::Sprite@> LightSprites;
+    carray<B3D::Entity@> Objects;
+    carray<B3D::Entity@> Levers;
+    carray<Door@> RoomDoors;
+    carray<NPC@> NPC;
+    MaintenanceTunnel@ MaintenanceTunnel;
+    carray<Room@> Adjacent;
+    carray<Door@> AdjacentDoor;
+    carray<B3D::Texture@> Textures;
+    int MaxLights;
+    carray<int> LightSpriteHidden;
+    carray<B3D::Pivot@> LightSpritesPivot;
+    carray<B3D::Sprite@> LightSprites2;
+    carray<int> LightHidden;
+    carray<int> LightFlicker;
+    int TriggerboxAmount;
+    carray<B3D::Mesh@> Triggerbox;
+    carray<string> TriggerboxName;
+    float MaxWayPointY;
+    carray<float> LightR;
+    carray<float> LightG;
+    carray<float> LightB;
+    carray<B3D::Mesh@> LightCone;
+    carray<B3D::Sprite@> LightConeSpark;
+    carray<float> LightConeSparkTimer;
+    float MinX;
+    float MinY;
+    float MinZ;
+    float MaxX;
+    float MaxY;
+    float MaxZ;
+    void Delete();
+    CB::Room@ get_Next() const property;
+    CB::Room@ get_Previous() const property;
+    void InsertAfter(CB::Room@);
+    void InsertBefore(CB::Room@);
+}
+
+class Door{
+    B3D::Mesh@ Object;
+    B3D::Mesh@ Object2;
+    B3D::Mesh@ FrameObject;
+    carray<B3D::Mesh@> Buttons;
+    bool Locked;
+    bool Open;
+    int Angle;
+    float OpenState;
+    int FastOpen;
+    int Direction;
+    int Timer;
+    float TimerState;
+    int KeyCard;
+    Room@ Room;
+    bool DisableWaypoint;
+    float Distance;
+    B3D::Channel@ Channel;
+    string Code;
+    int ID;
+    int Level;
+    bool AutoClose;
+    Door@ LinkedDoor;
+    bool IsElevatorDoor;
+    bool MTFClose;
+    bool NPCCalledElevator;
+    B3D::Mesh@ DoorHitObject;
+    void Delete();
+    CB::Door@ get_Next() const property;
+    CB::Door@ get_Previous() const property;
+    void InsertAfter(CB::Door@);
+    void InsertBefore(CB::Door@);
+}
+
+class TempItem{
+    string Name;
+    float X;
+    float Y;
+    float Z;
+    bool HasCustomAngle;
+    float AngleX;
+    float AngleY;
+    float AngleZ;
+    float State;
+    float State2;
+    float Chance;
+    TempItem@ Successor;
+    void Delete();
+    CB::TempItem@ get_Next() const property;
+    CB::TempItem@ get_Previous() const property;
+    void InsertAfter(CB::TempItem@);
+    void InsertBefore(CB::TempItem@);
+}
+
+class TempDoor{
+    int Dir;
+    int KeyCard;
+    string Code;
+    float X;
+    float Y;
+    float Z;
+    float Angle;
+    bool SpawnOpen;
+    bool Locked;
+    bool DeleteHalf;
+    bool AllowRemoteControl;
+    float Button1PosX;
+    float Button1PosY;
+    float Button1PosZ;
+    float Button1RotX;
+    float Button1RotY;
+    float Button1RotZ;
+    float Button2PosX;
+    float Button2PosY;
+    float Button2PosZ;
+    float Button2RotX;
+    float Button2RotY;
+    float Button2RotZ;
+    TempDoor@ Successor;
+    void Delete();
+    CB::TempDoor@ get_Next() const property;
+    CB::TempDoor@ get_Previous() const property;
+    void InsertAfter(CB::TempDoor@);
+    void InsertBefore(CB::TempDoor@);
+}
+
+class RoomTemplate{
+    B3D::Pivot@ Object;
+    int ID;
+    string ObjectPath;
+    carray<int> Zone;
+    carray<int> TempSoundEmitter;
+    carray<float> TempSoundEmitterX;
+    carray<float> TempSoundEmitterY;
+    carray<float> TempSoundEmitterZ;
+    carray<float> TempSoundEmitterRange;
+    int Shape;
+    string Name;
+    int Commonness;
+    int Large;
+    float SetRoom;
+    int SetRoomPriority;
+    int DisableDecals;
+    int R;
+    int G;
+    int B;
+    int TempTriggerboxAmount;
+    carray<B3D::Mesh@> TempTriggerbox;
+    carray<string> TempTriggerboxName;
+    TempItem@ FirstTempItem;
+    TempDoor@ FirstTempDoor;
+    bool UseLightCones;
+    bool DisableOverlapCheck;
+    float MinX;
+    float MinY;
+    float MinZ;
+    float MaxX;
+    float MaxY;
+    float MaxZ;
+    void Delete();
+    CB::RoomTemplate@ get_Next() const property;
+    CB::RoomTemplate@ get_Previous() const property;
+    void InsertAfter(CB::RoomTemplate@);
+    void InsertBefore(CB::RoomTemplate@);
+}
+
+class TempWaypoint{
+    float X;
+    float Y;
+    float Z;
+    RoomTemplate@ RoomTemplate;
+    void Delete();
+    CB::TempWaypoint@ get_Next() const property;
+    CB::TempWaypoint@ get_Previous() const property;
+    void InsertAfter(CB::TempWaypoint@);
+    void InsertBefore(CB::TempWaypoint@);
+}
+
+class Forest{
+    carray<B3D::Mesh@> TileMesh;
+    carray<B3D::Entity@> DetailMesh;
+    carray<int> Grid;
+    carray<B3D::Mesh@> TileEntities;
+    B3D::Pivot@ Pivot;
+    carray<B3D::Pivot@> Door;
+    carray<B3D::Mesh@> DetailEntities;
+    void Delete();
+    CB::Forest@ get_Next() const property;
+    CB::Forest@ get_Previous() const property;
+    void InsertAfter(CB::Forest@);
+    void InsertBefore(CB::Forest@);
+}
+
+class MaintenanceTunnel{
+    carray<int> Grid;
+    carray<int> Angles;
+    carray<B3D::Pivot@> Meshes;
+    carray<B3D::Pivot@> Entities;
+    carray<Waypoint@> Waypoints;
+    void Delete();
+    CB::MaintenanceTunnel@ get_Next() const property;
+    CB::MaintenanceTunnel@ get_Previous() const property;
+    void InsertAfter(CB::MaintenanceTunnel@);
+    void InsertBefore(CB::MaintenanceTunnel@);
+}
+
+class Decal{
+    B3D::Sprite@ Object;
+    float SizeChange;
+    float Size;
+    float MaxSize;
+    float AlphaChange;
+    float Alpha;
+    int BlendMode;
+    int FX;
+    int ID;
+    float Timer;
+    float Lifetime;
+    float X;
+    float Y;
+    float Z;
+    float Pitch;
+    float Yaw;
+    float Roll;
+    void Delete();
+    CB::Decal@ get_Next() const property;
+    CB::Decal@ get_Previous() const property;
+    void InsertAfter(CB::Decal@);
+    void InsertBefore(CB::Decal@);
+}
+}
+
+namespace CB::Console {
+
+class Msg{
+    string Text;
+    bool IsCommand;
+    int R;
+    int G;
+    int B;
+    void Delete();
+    CB::Console::Msg@ get_Next() const property;
+    CB::Console::Msg@ get_Previous() const property;
+    void InsertAfter(CB::Console::Msg@);
+    void InsertBefore(CB::Console::Msg@);
+}
+}
+
+namespace CB {
+
+class Event{
+    string Name;
+    Room@ Room;
+    float State;
+    float State2;
+    float State3;
+    B3D::Channel@ Channel;
+    B3D::Channel@ Channel2;
+    int ChannelIsStream;
+    int Channel2IsStream;
+    string String;
+    B3D::Image@ Image;
+    void Delete();
+    CB::Event@ get_Next() const property;
+    CB::Event@ get_Previous() const property;
+    void InsertAfter(CB::Event@);
+    void InsertBefore(CB::Event@);
+}
+float FPSFactor;
+}
+
+namespace CB::Options {
+int InvertMouse;
+}
+
+namespace CB::Input {
+int MouseHit1;
+bool MouseDown1;
+int MouseHit2;
+bool DoubleClick;
+int LastMouseHit1;
+int LastMouseHit1X;
+int LastMouseHit1Y;
+bool MouseUp1;
+}
+
+namespace CB::Player {
+B3D::Pivot@ Collider;
+B3D::Camera@ Camera;
+B3D::Pivot@ Head;
+float KillTimer;
+int KillAnimation;
+float FallTimer;
+float DeathTimer;
+float Sanity;
+float ForceMove;
+float ForceAngle;
+int RestoreSanity;
+bool Playable;
+float BlinkFrequency;
+float BlinkTimer;
+float EyeIrritation;
+float EyeStuck;
+float BlinkEffect;
+float BlinkEffectTimer;
+float Stamina;
+float StaminaEffect;
+float StaminaEffectTimer;
+float CameraShakeTimer;
+bool Vomit;
+float VomitTimer;
+int Regurgitate;
+carray<float> SCP1025State;
+float HeartBeatRate;
+float HeartBeatTimer;
+float HeartBeatVolume;
+int WearingGasMask;
+int WearingHazmat;
+int WearingVest;
+int Wearing714;
+int WearingNightVision;
+float NVTimer;
+bool SuperMan;
+float SuperManTimer;
+float Injuries;
+float Bloodloss;
+float Infect;
+float HealTimer;
+int RefinedItems;
+float DropSpeed;
+float HeadDropSpeed;
+float CurrSpeed;
+float UserCameraPitch;
+float Side;
+bool Crouch;
+float CrouchState;
+int PlayerZone;
+CB::Room@ PlayerRoom;
+int GrabbedEntity;
+bool GodMode;
+bool NoClip;
+float NoClipSpeed;
+float CoffinDistance;
+float PlayerSoundVolume;
+}
+
+namespace CB::Console {
+bool Open;
+string Input;
+float Scroll;
+bool ScrollDragging;
+int MouseMemory;
+CB::Console::Msg@ Reissue;
+int R;
+int G;
+int B;
+}
+

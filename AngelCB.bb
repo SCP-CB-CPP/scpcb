@@ -30,7 +30,7 @@ End Function
 Function RegisterDoor()
     RegisterTypeFromPtr("Door", %Doors)
 
-    RegisterTypeConstructor("Door", "Door@ f(int, float, float, float, float, Room@, int=0, int=0, int=0, string=" + Chr(34) + Chr(34) + ", int=0)", @CreateDoor)
+    RegisterTypeConstructor("Door", "Door@ f(int lvl, float x, float y, float z, float yawAngle, Room@ room, bool startOpen=false, int big=0, int keycard=0, string code=" + Chr(34) + Chr(34) + ", bool useCollisionMesh=false)", @CreateDoor)
 
     RegisterTypeField("Door", "B3D::Mesh@ Object", %Doors\obj)
     RegisterTypeField("Door", "B3D::Mesh@ Object2", %Doors\obj2)
@@ -54,7 +54,7 @@ Function RegisterDoor()
     RegisterTypeField("Door", "B3D::Channel@ Channel", %Doors\SoundCHN)
     RegisterTypeField("Door", "string Code", %Doors\Code)
     RegisterTypeField("Door", "int ID", %Doors\ID)
-    RegisterTypeField("Door", "int Level", %Doors\Level)
+    RegisterTypeField("Door", "int Level", %Doors\Level) ; TODO: Unused? (See function parameter)
     RegisterTypeField("Door", "bool AutoClose", %Doors\AutoClose)
     RegisterTypeField("Door", "Door@ LinkedDoor", %Doors\LinkedDoor)
     RegisterTypeField("Door", "bool IsElevatorDoor", %Doors\IsElevatorDoor)
@@ -155,7 +155,7 @@ RegisterTypeFromPtr("TempItem", %TempItems)
 End Function
 
 Function RegisterWayPoint()
-    RegisterTypeConstructor("Waypoint", "Waypoint@ f(float, float, float, Door@, Room@)", @CreateWaypoint)
+    RegisterTypeConstructor("Waypoint", "Waypoint@ f(float x, float y, float z, Door@ door, Room@ room)", @CreateWaypoint)
     RegisterTypeField("Waypoint", "B3D::Pivot@ Object", %WayPoints\obj)
     RegisterTypeField("Waypoint", "Door@ Door", %WayPoints\door)
     RegisterTypeField("Waypoint", "Room@ Room", %WayPoints\room)
@@ -196,7 +196,7 @@ Function RegisterNPC()
     RegisterTypeFromPtr("NPC", %NPCs)
 
     ; Replace first argument with some other type to enforce having to register modded NPC types.
-    RegisterTypeConstructor("NPC", "NPC@ f(int, float, float, float)", @CreateNPC)
+    RegisterTypeConstructor("NPC", "NPC@ f(int NPCtype, float x, float y, float z)", @CreateNPC)
 
     RegisterTypeField("NPC", "B3D::Entity@ Object", %NPCs\obj)
     RegisterTypeField("NPC", "B3D::Entity@ Object2", %NPCs\obj2)
@@ -380,7 +380,7 @@ Function RegisterDecal()
     RegisterTypeFromPtr("Decal", %Decals)
 
     ; TODO: Ability to register custom decal textures.
-    RegisterTypeConstructor("Decal", "Decal@ f(int, float, float, float, float, float, float)", @CreateDecal)
+    RegisterTypeConstructor("Decal", "Decal@ f(int id, float x, float y, float z, float pitch, float yaw, float roll)", @CreateDecal)
 
     RegisterTypeField("Decal", "B3D::Sprite@ Object", %Decals\obj)
     RegisterTypeField("Decal", "float SizeChange", %Decals\SizeChange)
@@ -509,7 +509,7 @@ Function RegisterConsole()
     RegisterGlobalProperty("int G", &ConsoleG)
     RegisterGlobalProperty("int B", &ConsoleB)
 
-    RegisterGlobalFunction("void CreateMessage(string, int=-1, int=-1, int=-1, bool=false)", @CreateConsoleMsg)
+    RegisterGlobalFunction("void CreateMessage(string txt, int r=-1, int g=-1, int b=-1, bool isCommand=false)", @CreateConsoleMsg)
 
     SetDefaultNamespace(ns)
 End Function

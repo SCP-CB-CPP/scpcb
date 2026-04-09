@@ -1,16 +1,22 @@
 void Hook_UpdateEvent(CB::Event@ e) {
-    if (e.Name == "COOL") {
-        B3D::DebugLog("AWESOME!");
-    } else {
-        //B3D::DebugLog("Awww" + e.Name);
-    }
+    // Your code here.
 }
 
 void Hook_FillRoom(CB::Room@ r) {
-    B3D::DebugLog("AWESOME");
-    CB::Decal@ d = CB::Decal(0, r.X, r.Y + 0.01, r.Z, 90, 0, 0);
+    CB::NPC(3, r.X, r.Y + 1, r.Z);
 }
 
+using namespace CB;
+using namespace B3D;
+
 void Hook_Update() {
-    B3D::DebugLog("AWESOME");
+    NPC@ scp173 = NPC::First;
+    while (scp173 != null && scp173.Type != 1) {
+        @scp173 = scp173.Next;
+    }
+    if (scp173 != null) {
+        Console::CreateMessage("Found SCP-173!");
+    } else {
+        Console::CreateMessage("Couldn't find SCP-173 :(");
+    }
 }
