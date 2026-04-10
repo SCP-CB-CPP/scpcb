@@ -1,5 +1,13 @@
 Function RegisterCommon()
     RegisterGlobalProperty("float FPSFactor", &FPSFactor)
+    
+    ; TODO: Probably move these to a "Menu" namespace.
+    RegisterGlobalProperty("const bool IsMainMenuOpen", &MainMenuOpen)
+    RegisterGlobalProperty("int OpenMenu", &MenuOpen)
+    RegisterGlobalProperty("float StopHidingTimer", &StopHidingTimer)
+
+    RegisterGlobalFunction("bool IsAnyMenuOpen()", @IsAnyMenuOpen)
+    RegisterGlobalFunction("bool IsPaused()", @IsPaused)
 End Function
 
 Function RegisterOptions()
@@ -574,6 +582,69 @@ Function RegisterDecal()
     RegisterTypeField("Decal", "float Roll", %Decals\roll)
 End Function
 
+Function RegisterItem()
+    RegisterTypeFromPtr("ItemTemplate", %ItemTemplates)
+
+    RegisterTypeField("ItemTemplate", "string DisplayName", %ItemTemplates\displayname)
+    RegisterTypeField("ItemTemplate", "string Name", %ItemTemplates\name)
+    RegisterTypeField("ItemTemplate", "string Group", %ItemTemplates\group)
+    RegisterTypeField("ItemTemplate", "int Sound", %ItemTemplates\sound)
+    RegisterTypeField("ItemTemplate", "bool Found", %ItemTemplates\found)
+    RegisterTypeField("ItemTemplate", "B3D::Mesh@ Object", %ItemTemplates\obj)
+    RegisterTypeField("ItemTemplate", "string ObjectPath", %ItemTemplates\objpath)
+    RegisterTypeField("ItemTemplate", "B3D::Image@ InventoryImage", %ItemTemplates\invimg)
+    RegisterTypeField("ItemTemplate", "B3D::Image@ InventoryImage2", %ItemTemplates\invimg2)
+    RegisterTypeField("ItemTemplate", "string InventoryImagePath", %ItemTemplates\invimgpath)
+    RegisterTypeField("ItemTemplate", "string ImagePath", %ItemTemplates\imgpath)
+    RegisterTypeField("ItemTemplate", "B3D::Image@ Image", %ItemTemplates\img)
+    RegisterTypeField("ItemTemplate", "bool IsAnimated", %ItemTemplates\isAnim)
+    RegisterTypeField("ItemTemplate", "float Scale", %ItemTemplates\scale)
+    RegisterTypeField("ItemTemplate", "B3D::Texture@ Texture", %ItemTemplates\tex)
+    RegisterTypeField("ItemTemplate", "string TexturePath", %ItemTemplates\texpath)
+
+    RegisterTypeFromPtr("Item", %Items)
+    RegisterTypeFromPtr("Inventory", %Inventories)
+
+    RegisterTypeField("Inventory", "carray<Item@> Items", %Inventories\Items)
+    RegisterTypeField("Inventory", "int Size", %Inventories\Size)
+
+
+    RegisterTypeField("Item", "string DisplayName", %Items\displayname)
+    RegisterTypeField("Item", "B3D::Pivot@ Collider", %Items\collider)
+    RegisterTypeField("Item", "B3D::Mesh@ Model", %Items\model)
+    RegisterTypeField("Item", "ItemTemplate@ Template", %Items\itemtemplate)
+    RegisterTypeField("Item", "float DropSpeed", %Items\DropSpeed)
+    RegisterTypeField("Item", "int R", %Items\r)
+    RegisterTypeField("Item", "int G", %Items\g)
+    RegisterTypeField("Item", "int B", %Items\b)
+    RegisterTypeField("Item", "float A", %Items\a)
+    RegisterTypeField("Item", "B3D::Channel@ Channel", %Items\SoundChn)
+    RegisterTypeField("Item", "float Distance", %Items\dist)
+    RegisterTypeField("Item", "float DistanceTimer", %Items\disttimer)
+    RegisterTypeField("Item", "float State", %Items\state)
+    RegisterTypeField("Item", "float State2", %Items\state2)
+    RegisterTypeField("Item", "bool Picked", %Items\Picked)
+    RegisterTypeField("Item", "int Dropped", %Items\Dropped)
+    RegisterTypeField("Item", "B3D::Image@ InventoryImage", %Items\invimg)
+    RegisterTypeField("Item", "float XSpeed", %Items\xspeed)
+    RegisterTypeField("Item", "float ZSpeed", %Items\zspeed)
+    RegisterTypeField("Item", "Inventory@ Inventory", %Items\Inventory)
+    RegisterTypeField("Item", "int ID", %Items\ID)
+    RegisterTypeField("Item", "string DrinkName", %Items\drinkName)
+
+    RegisterTypeConstructor("Item", "Item@ f(string name, float x, float y, float z)", @CreateItem)
+    RegisterObjectMethod("Item", "void Remove(bool inGame=true)", @RemoveItem)
+    RegisterObjectMethod("Item", "void Pick()", @PickItem)
+    RegisterObjectMethod("Item", "void Drop(bool playDropSound=true)", @DropItem)
+
+    Local ns$ = GetDefaultNamespace()
+    If ns <> "" Then SetDefaultNamespace(ns + "::Item") Else SetDefaultNamespace("Item")
+    RegisterGlobalProperty("int LastItemID", &LastItemID)
+    RegisterGlobalFunction("ItemTemplate@ FindTemplate(string name)", @FindItemTemplate)
+    RegisterGlobalFunction("Item@ CreateCup(string drinkName, float x, float y, float z, int r, int g, int b, float a=1)", @CreateCup)
+    SetDefaultNamespace(ns)
+End Function
+
 Function RegisterPlayer()
     Local ns$ = GetDefaultNamespace()
     If ns <> "" Then SetDefaultNamespace(ns + "::Player") Else SetDefaultNamespace("Player")
@@ -642,7 +713,7 @@ Function RegisterPlayer()
     RegisterGlobalProperty("float CrouchState", &CrouchState)
 
     RegisterGlobalProperty("int PlayerZone", &PlayerZone)
-    RegisterGlobalProperty("Room@ PlayerRoom", &PlayerRoom)
+    RegisterGlobalProperty("Room@ CurrentRoom", &PlayerRoom)
 
     RegisterGlobalProperty("int GrabbedEntity", &GrabbedEntity)
 
@@ -653,6 +724,17 @@ Function RegisterPlayer()
     RegisterGlobalProperty("float CoffinDistance", &CoffinDistance)
 
     RegisterGlobalProperty("float PlayerSoundVolume", &PlayerSoundVolume)
+
+    RegisterGlobalProperty("int ItemAmount", &ItemAmount)
+    RegisterGlobalProperty("Item@ SelectedItem", &SelectedItem)
+    RegisterGlobalProperty("Item@ ClosestItem", &ClosestItem)
+
+    RegisterGlobalProperty("bool InventoryOpen", &InvOpen)
+    RegisterGlobalProperty("Item@ OpenInventoryItem", &OtherOpen)
+
+    RegisterGlobalProperty("float MessageTimer", &MsgTimer)
+    RegisterGlobalProperty("string Message", &Msg)
+    RegisterGlobalProperty("string DeathMessage", &DeathMsg)
 
     SetDefaultNamespace(ns)
 End Function
@@ -720,6 +802,7 @@ Function RegisterCB()
     RegisterNPC()
     RegisterMap()
     RegisterDecal()
+    RegisterItem()
     RegisterPlayer()
     RegisterConsole()
     RegisterEvent()

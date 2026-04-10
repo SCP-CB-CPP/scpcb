@@ -1,4 +1,4 @@
-Const VersionNumber$ = "1.3.12.1-s2"
+Const VersionNumber$ = "1.3.12.1-s3"
 ;Only change this if the version given isn't working with the current build version - ENDSHN
 Const CompatibleNumber$ = "1.3.12"
 
@@ -1129,6 +1129,7 @@ Function UpdateConsole()
 						it.Items = CreateItem(itt\name, EntityX(Collider), EntityY(Camera,True), EntityZ(Collider))
 						EntityType(it\collider, HIT_ITEM)
 
+						; TODO: Scripts need to be able to hook into this.
 						If itt\name = "snavulti" Lor itt\name = "fineradio" Lor itt\name = "veryfineradio" Then
 							it\state = 101
 						EndIf
@@ -1761,6 +1762,9 @@ Function UpdateConsole()
 					CreateConsoleMsg("Reloading all scripts...")
 					LoadScripts()
 					CreateConsoleMsg("Reloaded all scripts.")
+				Case "exec"
+					StrTemp$ = Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " "))
+					ExecuteString(StrTemp$)
 				Case "mav"
 					RuntimeErrorExt("Violation Access Memory")
 				Case "jorge"
@@ -5698,6 +5702,13 @@ Function DrawGUI()
 						Inventory(MouseSlot) = SelectedItem
 						SelectedItem = Null
 					ElseIf Inventory(MouseSlot) <> SelectedItem
+						If CombineItems\Subscribers > 0 Then
+							PrepareFunction(2)
+							SetArgObj(0, &SelectedItem)
+							Local ii.Items = Inventory(MouseSlot)
+							SetArgObj(1, &ii)
+							CallHook(CombineItems)
+						EndIf
 						Local groupSelector$ = ""
 						If SelectedItem\itemtemplate\group = "paper" Lor SelectedItem\itemtemplate\group = "misc" Then groupSelector = SelectedItem\itemtemplate\name
 						Select SelectedItem\itemtemplate\name
@@ -5881,6 +5892,12 @@ Function DrawGUI()
 	Else ;invopen = False
 		
 		If SelectedItem <> Null Then
+			If SelectItem\Subscribers > 0 Then
+				PrepareFunction(1)
+				SetArgObj(0, &SelectedItem)
+				CallHook(SelectItem)
+			EndIf
+
 			Select SelectedItem\itemtemplate\name
 				Case "nvgoggles"
 					;[Block]

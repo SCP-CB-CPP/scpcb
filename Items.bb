@@ -1,9 +1,7 @@
-Global BurntNote%
-
 Const MaxItemAmount% = 10
 Global ItemAmount%
 Dim Inventory.Items(MaxItemAmount + 1)
-Global InvSelect%, SelectedItem.Items
+Global SelectedItem.Items
 
 Global ClosestItem.Items
 
@@ -18,7 +16,7 @@ Type ItemTemplates
 	
 	Field found%
 	
-	Field obj%, objpath$, parentobjpath$
+	Field obj%, objpath$
 	Field invimg%,invimg2%,invimgpath$
 	Field imgpath$, img%
 	
@@ -35,7 +33,7 @@ Function CreateItemTemplate.ItemTemplates(name$, group$, displayname$, objpath$,
 	
 	;if another item shares the same object, copy it
 	For it2.itemtemplates = Each ItemTemplates
-		If it2\objpath = objpath And it2\obj <> 0 Then it\obj = CopyEntity(it2\obj) : it\parentobjpath=it2\objpath : Exit
+		If it2\objpath = objpath And it2\obj <> 0 Then it\obj = CopyEntity(it2\obj) : Exit
 	Next
 	
 	If it\obj = 0 Then
@@ -266,8 +264,6 @@ Type Items
 	
 	Field r%,g%,b%,a#
 	
-	Field level
-	
 	Field SoundChn%
 	
 	Field dist#, disttimer#
@@ -382,6 +378,13 @@ Function RemoveItem(i.Items, inGame%=True)
 			EndIf
 		Next
 		
+		If RemoveItem\Subscribers > 0 Then
+			PrepareFunction(1)
+			Local ii.Items = i
+			SetArgObj(0, &ii)
+			CallHook(RemoveItem)
+		EndIf
+
 		Select i\itemtemplate\name 
 			Case "nvgoggles", "finenvgoggles", "supernv"
 				WearingNightVision = False
@@ -548,6 +551,13 @@ Function PickItem(item.Items)
 	If (Not fullINV) Then
 		For n% = 0 To MaxItemAmount - 1
 			If Inventory(n) = Null Then
+				If PickItem\Subscribers > 0 Then
+					PrepareFunction(1)
+					Local ii.Items = item
+					SetArgObj(0, &ii)
+					CallHook(PickItem)
+				EndIf
+
 				Select item\itemtemplate\name
 					Case "scp1123"
 						If Not (Wearing714 = 1) Then
@@ -697,6 +707,14 @@ Function DropItem(item.Items,playdropsound%=True)
 			Exit
 		EndIf
 	Next
+
+	If DropItem\Subscribers > 0 Then
+		PrepareFunction(1)
+		Local ii.Items = item
+		SetArgObj(0, &ii)
+		CallHook(DropItem)
+	EndIf
+
 	Select item\itemtemplate\name
 		Case "gasmask", "supergasmask", "gasmask3"
 			WearingGasMask = False

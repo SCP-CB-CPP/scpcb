@@ -23,3 +23,19 @@ void Hook_Update() {
     }
     Options::FOV = configuredFOV * (1.f + Player::CurrentSpeed * 5);
 }
+
+void Hook_CombineItems(Item@ dragged, Item@ onto) {
+    if (dragged.Template.Name.Substring(0, 3) != "key" || onto.Template.Name.Substring(0, 3) != "key") return;
+
+    string lvl1 = dragged.Template.Name.Substring(3, 1);
+    string lvl2 = onto.Template.Name.Substring(3, 1);
+
+    if (lvl1.Length == 0 || lvl2.Length == 0) return;
+
+    int res = lvl1.ParseInt() + lvl2.ParseInt();
+    if (res > 6) return;
+
+    Item@ new = Item("key" + ToString(res), Player::Camera.GetX(1), Player::Camera.GetY(1), Player::Camera.GetZ(1));
+    dragged.Remove(true);
+    onto.Remove(true);
+}

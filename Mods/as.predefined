@@ -1,3 +1,5 @@
+string ToString(float f);
+string ToString(int i);
 
 namespace B3D {
 void DebugLogRuntimeStats();
@@ -310,12 +312,13 @@ string get_ClipboardContents() property;
 void set_ClipboardContents(string contents) property;
 void MessageBox(string title, string text);
 void DebugLog(string text);
-string Chr(int ascii);
-string Hex(int value);
-string Bin(int value);
-string HighPrecisionFloatString(float value);
 string CurrentDate();
 string CurrentTime();
+}
+
+namespace CB {
+bool IsAnyMenuOpen();
+bool IsPaused();
 }
 
 namespace CB::Options {
@@ -395,6 +398,26 @@ CB::Decal@ get_First() property;
 CB::Decal@ get_Last() property;
 }
 
+namespace CB::ItemTemplate {
+CB::ItemTemplate@ get_First() property;
+CB::ItemTemplate@ get_Last() property;
+}
+
+namespace CB::Item {
+CB::Item@ get_First() property;
+CB::Item@ get_Last() property;
+}
+
+namespace CB::Inventory {
+CB::Inventory@ get_First() property;
+CB::Inventory@ get_Last() property;
+}
+
+namespace CB::Item {
+CB::ItemTemplate@ FindTemplate(string name);
+CB::Item@ CreateCup(string drinkName, float x, float y, float z, int r, int g, int b, float a = 1);
+}
+
 namespace CB::Console::Msg {
 CB::Console::Msg@ get_First() property;
 CB::Console::Msg@ get_Last() property;
@@ -457,20 +480,11 @@ class string {
     string opAdd(const string&in) const;
     bool opEquals(const string&in) const;
     uint get_Length() const property;
-    string String(int repeat);
-    string Left(int count);
-    string Right(int count);
-    string Replace(string from, string to);
-    int Instr(string find, int from = 1);
-    string Substr(int start, int length);
-    string Mid(int start, int count = -1);
-    string Upper();
-    string Lower();
-    string Trim();
-    string LSet(int size);
-    string RSet(int size);
-    int get_IsValidUTF8String() const property;
-    int Asc();
+    string Substring(int start, int count = 2147483647) const;
+    int Find(const string&in toFind, int start = 0) const;
+    string Replace(const string&in toReplace, const string&in replaceWith) const;
+    float ParseFloat() const;
+    int ParseInt() const;
 }
 
 class dictionaryValue {
@@ -2046,6 +2060,73 @@ class Decal {
     void InsertAfter(CB::Decal@);
     void InsertBefore(CB::Decal@);
 }
+
+class ItemTemplate {
+    string DisplayName;
+    string Name;
+    string Group;
+    int Sound;
+    bool Found;
+    B3D::Mesh@ Object;
+    string ObjectPath;
+    B3D::Image@ InventoryImage;
+    B3D::Image@ InventoryImage2;
+    string InventoryImagePath;
+    string ImagePath;
+    B3D::Image@ Image;
+    bool IsAnimated;
+    float Scale;
+    B3D::Texture@ Texture;
+    string TexturePath;
+    void Delete();
+    CB::ItemTemplate@ get_Next() const property;
+    CB::ItemTemplate@ get_Previous() const property;
+    void InsertAfter(CB::ItemTemplate@);
+    void InsertBefore(CB::ItemTemplate@);
+}
+
+class Item {
+    string DisplayName;
+    B3D::Pivot@ Collider;
+    B3D::Mesh@ Model;
+    CB::ItemTemplate@ Template;
+    float DropSpeed;
+    int R;
+    int G;
+    int B;
+    float A;
+    B3D::Channel@ Channel;
+    float Distance;
+    float DistanceTimer;
+    float State;
+    float State2;
+    bool Picked;
+    int Dropped;
+    B3D::Image@ InventoryImage;
+    float XSpeed;
+    float ZSpeed;
+    CB::Inventory@ Inventory;
+    int ID;
+    string DrinkName;
+    void Delete();
+    CB::Item@ get_Next() const property;
+    CB::Item@ get_Previous() const property;
+    void InsertAfter(CB::Item@);
+    void InsertBefore(CB::Item@);
+    void Remove(bool inGame = true);
+    void Pick();
+    void Drop(bool playDropSound = true);
+}
+
+class Inventory {
+    carray<CB::Item@> Items;
+    int Size;
+    void Delete();
+    CB::Inventory@ get_Next() const property;
+    CB::Inventory@ get_Previous() const property;
+    void InsertAfter(CB::Inventory@);
+    void InsertBefore(CB::Inventory@);
+}
 }
 
 namespace CB::Console {
@@ -2085,6 +2166,9 @@ class Event {
     void InsertBefore(CB::Event@);
 }
 float FPSFactor;
+bool IsMainMenuOpen;
+int OpenMenu;
+float StopHidingTimer;
 }
 
 namespace CB::Options {
@@ -2162,6 +2246,10 @@ CB::NPC@ Current096;
 CB::NPC@ Current5131;
 }
 
+namespace CB::Item {
+int LastItemID;
+}
+
 namespace CB::Player {
 B3D::Pivot@ Collider;
 B3D::Camera@ Camera;
@@ -2213,13 +2301,21 @@ float Side;
 bool Crouch;
 float CrouchState;
 int PlayerZone;
-CB::Room@ PlayerRoom;
+CB::Room@ CurrentRoom;
 int GrabbedEntity;
 bool GodMode;
 bool NoClip;
 float NoClipSpeed;
 float CoffinDistance;
 float PlayerSoundVolume;
+int ItemAmount;
+CB::Item@ SelectedItem;
+CB::Item@ ClosestItem;
+bool InventoryOpen;
+CB::Item@ OpenInventoryItem;
+float MessageTimer;
+string Message;
+string DeathMessage;
 }
 
 namespace CB::Console {

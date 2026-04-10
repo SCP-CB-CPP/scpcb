@@ -930,29 +930,6 @@ Function RegisterStream()
 End Function
 
 Function RegisterString()
-    RegisterObjectMethod("string", "string String(int repeat)", @String)
-    RegisterObjectMethod("string", "string Left(int count)", @Left)
-    RegisterObjectMethod("string", "string Right(int count)", @Right)
-    RegisterObjectMethod("string", "string Replace(string from, string to)", @Replace)
-    RegisterObjectMethod("string", "int Instr(string find, int from=1)", @Instr)
-    RegisterObjectMethod("string", "string Substr(int start, int length)", @Substr)
-    RegisterObjectMethod("string", "string Mid(int start, int count=-1)", @Mid)
-    RegisterObjectMethod("string", "string Upper()", @Upper)
-    RegisterObjectMethod("string", "string Lower()", @Lower)
-    RegisterObjectMethod("string", "string Trim()", @Trim)
-    RegisterObjectMethod("string", "string LSet(int size)", @LSet)
-    RegisterObjectMethod("string", "string RSet(int size)", @RSet)
-
-    RegisterObjectMethod("string", "int get_IsValidUTF8String() const property", @IsValidUTF8String)
-
-    RegisterObjectMethod("string", "int Asc()", @Asc)
-    ;RegisterObjectMethod("string", "int Len()", @Len)
-
-    RegisterGlobalFunction("string Chr(int ascii)", @Chr)
-    RegisterGlobalFunction("string Hex(int value)", @Hex)
-    RegisterGlobalFunction("string Bin(int value)", @Bin)
-    RegisterGlobalFunction("string HighPrecisionFloatString(float value)", @HighPrecisionFloatString)
-    
     RegisterGlobalFunction("string CurrentDate()", @CurrentDate)
     RegisterGlobalFunction("string CurrentTime()", @CurrentTime)
 End Function
