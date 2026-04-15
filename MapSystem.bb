@@ -2863,11 +2863,18 @@ Function FillRoom(r.Rooms)
 			;[End Block]
 		Case "room2poffices2"
 			;[Block]
-			d = CreateDoor(r\zone, r\x + 240.0 * RoomScale, 0.0, r\z + 48.0 * RoomScale, 270, r, False, False, 3)
-			PositionEntity(d\buttons[0], r\x + 224.0 * RoomScale, EntityY(d\buttons[0],True), r\z + 176.0 * RoomScale,True)
-			PositionEntity(d\buttons[1], r\x + 256.0 * RoomScale, EntityY(d\buttons[1],True), EntityZ(d\buttons[1],True),True)			
-			d\AutoClose = False : d\open = False
+			r\RoomDoors[1] = CreateDoor(r\zone, r\x + 240.0 * RoomScale, 0.0, r\z + 48.0 * RoomScale, 270, r, False, False, 3)
+			PositionEntity(r\RoomDoors[1]\buttons[0], r\x + 224.0 * RoomScale, EntityY(r\RoomDoors[1]\buttons[0],True), r\z + 176.0 * RoomScale,True)
+			PositionEntity(r\RoomDoors[1]\buttons[1], r\x + 256.0 * RoomScale, EntityY(r\RoomDoors[1]\buttons[1],True), EntityZ(r\RoomDoors[1]\buttons[1],True),True)			
+			r\RoomDoors[1]\AutoClose = False : r\RoomDoors[1]\open = False
 			
+			de.Decals = CreateDecal(22, r\x + 600.0*RoomScale, 0.005, r\z + 232.0*RoomScale, 90, Rand(360), 0)
+			de\Size = 0.6 : ScaleSprite(de\obj, de\Size, de\Size) : EntityParent(de\obj, r\obj)
+
+			it = CreateItem("bdc", r\x + 600.0*RoomScale, r\y + 125.0*RoomScale, r\z + 232.0*RoomScale)
+			RotateEntity(it\collider, 0, r\angle + 110, 0)
+			EntityParent(it\collider, r\obj)
+
 			r\RoomDoors[0] = CreateDoor(r\zone, r\x - 432.0 * RoomScale, 0.0, r\z, 90, r, False, False, 0, "1234")
 			PositionEntity(r\RoomDoors[0]\buttons[0], r\x - 416.0 * RoomScale, EntityY(r\RoomDoors[0]\buttons[0],True), r\z + 176.0 * RoomScale,True)
 			FreeEntity r\RoomDoors[0]\buttons[1] : r\RoomDoors[0]\buttons[1] = 0

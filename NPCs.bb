@@ -100,6 +100,10 @@ Function CreateNPC.NPCs(NPCtype%, x#, y#, z#)
 				EntityTexture n\obj, texFestive, 0, 0
 				FreeTexture texFestive
 			EndIf
+
+			If BirthdayHat Then
+				n\obj3 = LoadMesh_Strict("GFX\npcs\partyhat.b3d", n\obj)
+			EndIf
 			
 			temp# = (GetModdedINIFloat("DATA\NPCs.ini", "SCP-173", "scale") / MeshDepth(n\obj))			
 			ScaleEntity n\obj, temp,temp,temp

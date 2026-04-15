@@ -4158,6 +4158,11 @@ Function UpdateEvents()
 						EndIf
 						
 					EndIf
+
+					If e\room\RoomDoors[1]\open And e\EventState2 = 0 Then
+						e\EventState2 = 1
+						If (Not Wearing714) Then PlaySound2(LoadTempSound("SFX\Room\BD\keycard.ogg"), Camera, e\room\RoomDoors[1]\buttons[0])
+					EndIf
 				EndIf
 				;[End Block]
 			Case "room2servers"
@@ -7400,6 +7405,30 @@ Function UpdateEvents()
 							e\room\RoomDoors[1]\SoundCHN = PlaySound2(opensfx914, Camera, e\room\RoomDoors[1]\obj)
 						End If
 					End If
+
+					If e\room\Objects[4] <> 0 Then
+						Select e\EventState3
+							Case 0
+								e\EventState3 = 1
+							Case 1
+								If EntityDistance(Collider, e\room\Objects[4]) < 1.0 Then
+									PlaySound2(LoadTempSound("SFX\Room\BD\Horn.ogg"), Camera, e\room\Objects[4])
+									e\EventState3 = 2
+								EndIf
+							Case 2
+								If EntityDistance(Collider, e\room\Objects[4]) > 5 Then
+									e\EventState3 = 1
+								EndIf
+						End Select
+					Else If e\EventState3 <> 0 Then
+						e\Room\Objects[4] = LoadMesh_Strict("GFX\npcs\duck_low_res.b3d")
+						ScaleEntity(e\Room\Objects[4], 0.07, 0.07, 0.07)
+						tex = LoadTexture_Strict("GFX\npcs\duck.ae")
+						EntityTexture e\Room\Objects[4], tex
+						FreeTexture tex
+						PositionEntity(e\Room\Objects[4], EntityX(e\room\Objects[3], True), 8*RoomScale, EntityZ(e\room\Objects[3], True))
+						RotateEntity(e\Room\Objects[4], 0, e\Room\angle + 210, 0)
+					EndIf
 					
 				EndIf
 				UpdateSoundOrigin(e\SoundCHN,Camera,e\room\Objects[1])
