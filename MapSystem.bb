@@ -8331,7 +8331,7 @@ End Function
 Function UpdateChunks(r.Rooms,ChunkPartAmount%,spawnNPCs%=True)
 	CatchErrors("Uncaught (UpdateChunks)")
 
-	If r\Objects[0] = 0 Then Return
+	If r\Objects[0] = 0 Then CatchErrors("UpdateChunks") : Return
 
 	Local ch.Chunk,StrTemp$,i%,x#,z#,ch2.Chunk,y#,n.NPCs,j%
 	Local ChunkX#,ChunkZ#,ChunkMaxDistance#=3*40
