@@ -314,7 +314,7 @@ Function UpdateEvents()
 						EndIf
 					EndIf
 					
-					If ((e\EventState Mod 600 > 300) And ((e\EventState+FPSfactor) Mod 600 < 300)) Then
+					If ((e\EventState Mod 600 > 300) And ((e\EventState+PrevFPSFactor) Mod 600 < 300)) Then
 						i = Floor((e\EventState-5000)/600)+1
 						
 						If i = 0 Then PlaySound_Strict(LoadTempSound("SFX\Room\Intro\PA\scripted\scripted6.ogg"))
@@ -4155,6 +4155,11 @@ Function UpdateEvents()
 						EndIf
 						
 					EndIf
+
+					If e\room\RoomDoors[1]\open And e\EventState2 = 0 Then
+						e\EventState2 = 1
+						If (Not Wearing714) Then PlaySound2(LoadTempSound("SFX\Room\BD\keycard.ogg"), Camera, e\room\RoomDoors[1]\buttons[0])
+					EndIf
 				EndIf
 				;[End Block]
 			Case "room2servers"
@@ -7397,6 +7402,30 @@ Function UpdateEvents()
 							e\room\RoomDoors[1]\SoundCHN = PlaySound2(opensfx914, Camera, e\room\RoomDoors[1]\obj)
 						End If
 					End If
+
+					If e\room\Objects[4] <> 0 Then
+						Select e\EventState3
+							Case 0
+								e\EventState3 = 1
+							Case 1
+								If EntityDistance(Collider, e\room\Objects[4]) < 1.0 Then
+									PlaySound2(LoadTempSound("SFX\Room\BD\Horn.ogg"), Camera, e\room\Objects[4])
+									e\EventState3 = 2
+								EndIf
+							Case 2
+								If EntityDistance(Collider, e\room\Objects[4]) > 5 Then
+									e\EventState3 = 1
+								EndIf
+						End Select
+					Else If e\EventState3 <> 0 Then
+						e\Room\Objects[4] = LoadMesh_Strict("GFX\npcs\duck_low_res.b3d")
+						ScaleEntity(e\Room\Objects[4], 0.07, 0.07, 0.07)
+						tex = LoadTexture_Strict("GFX\npcs\duck.ae")
+						EntityTexture e\Room\Objects[4], tex
+						FreeTexture tex
+						PositionEntity(e\Room\Objects[4], EntityX(e\room\Objects[3], True), 8*RoomScale, EntityZ(e\room\Objects[3], True))
+						RotateEntity(e\Room\Objects[4], 0, e\Room\angle + 210, 0)
+					EndIf
 					
 				EndIf
 				UpdateSoundOrigin(e\SoundCHN,Camera,e\room\Objects[1])
@@ -8710,8 +8739,11 @@ Function UpdateDimension1499()
 				ShowEntity e\room\obj
 				If QuickLoadPercent = 100 Or QuickLoadPercent = -1
 					UpdateChunks(e\room,15)
-					ShowEntity NTF_1499Sky
-					Update1499Sky()
+					; This is an attempt at a bandaid fix for very inconsistent 1499 crashes.
+					If EntityExist(NTF_1499Sky) Then
+						ShowEntity NTF_1499Sky
+						Update1499Sky()
+					EndIf
 					ShouldPlay = 18
 					If EntityY(Collider)<800.0
 						PositionEntity Collider,EntityX(Collider),800.5,EntityZ(Collider),True

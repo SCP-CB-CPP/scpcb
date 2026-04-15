@@ -238,6 +238,8 @@ Function CreateSubtitleToken(entry.SubtitleEntry, soundPathGroup$, tokenType)
 				t\entry = entry
 
 				Insert t Before First SubtitleToken
+
+				t\fromFile = 1 Shl tokenType
 			Else
 				; Append entry to existing linked list
 				Local e.SubtitleEntry = t\entry
@@ -246,9 +248,13 @@ Function CreateSubtitleToken(entry.SubtitleEntry, soundPathGroup$, tokenType)
 				Wend
 
 				e\nextEntry = entry
-			EndIf
 
-			t\fromFile = t\fromFile Or (1 Shl tokenType)
+				t\fromFile = t\fromFile Or (1 Shl tokenType)
+
+				; All tokens in a group share the same entry. This means that appending to the first one is sufficient.
+				; Appending to the others would actually create a loop in the linked list.
+				Exit
+			EndIf
 		EndIf
 
 		offset = toChar+1
@@ -832,8 +838,11 @@ Function UpdateSubtitles(factor#)
 			If SubBox\lines < 20 Then
 				Local noLines% = SubBox\lines <= 0
 
+				; If we don't load this into a local, the check will spuriously fail.
+				; This is incredibly obscure and I currently believe it may be the result of some x86 asm generation bug.
+				Local sw% = StringWidth(txtLine)
 				; Split long lines of text into multiple subtitles
-				If StringWidth(txtLine) > SubBox\screenWidth-10 Then
+				If sw >= SubBox\screenWidth-10 Then
 					TryCreateSplitSubtitleMsg(queue, txtLine, 10)
 				Else ; No need to split
 					TryCreateSubtitleMsg(queue, txtLine)

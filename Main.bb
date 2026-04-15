@@ -1,4 +1,4 @@
-Const VersionNumber$ = "1.3.12.1"
+Const VersionNumber$ = "1.3.12.2"
 ;Only change this if the version given isn't working with the current build version - ENDSHN
 Const CompatibleNumber$ = "1.3.12"
 
@@ -140,8 +140,6 @@ Global ClosedCaptionsEnabled% = GetOptionInt("audio", "closed captions")
 
 Global CanOpenConsole% = GetOptionInt("console", "enabled")
 
-Global DebugResourcePacks% = GetOptionInt("debug", "resource pack strict load")
-
 Global UseNumericSeeds% = GetOptionInt("general", "numeric seeds")
 
 Dim ArrowIMG(4)
@@ -164,6 +162,7 @@ Global ShowFPS = GetOptionInt("graphics", "show FPS")
 
 Global WireframeState
 Global HalloweenTex
+Global BirthdayHat = False
 
 Global BorderlessWindowed% = GetOptionInt("graphics", "borderless windowed")
 Global RealGraphicWidth%,RealGraphicHeight%
@@ -1092,8 +1091,10 @@ Function UpdateConsole()
 					Local itt.ItemTemplates = FindItemTemplate(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
 					If itt = Null Then
 						CreateConsoleMsg("Item not found.",255,150,0)
+					Else If itt\name = "bdc" Then
+						CreateConsoleMsg("Don't be a party pooper!",255,150,0)
 					Else
-							CreateConsoleMsg(itt\displayname + " spawned.")
+						CreateConsoleMsg(itt\displayname + " spawned.")
 						it.Items = CreateItem(itt\name, EntityX(Collider), EntityY(Camera,True), EntityZ(Collider))
 						EntityType(it\collider, HIT_ITEM)
 
@@ -2065,7 +2066,7 @@ Global NavBG%
 
 Global LightConeModel
 
-Global ParticleEffect[3]
+Global ParticleEffect[7]
 
 Const MaxDTextures=9
 Global DTextures[MaxDTextures]
@@ -3034,7 +3035,7 @@ Global LeverOBJ%, LeverBaseOBJ%
 Global DoorColl%
 Global ButtonOBJ%, ButtonKeyOBJ%, ButtonCodeOBJ%, ButtonScannerOBJ%
 
-Dim DecalTextures%(20)
+Dim DecalTextures%(23)
 
 Global Monitor%, MonitorTexture%
 Global CamBaseOBJ%, CamOBJ%
@@ -5945,6 +5946,40 @@ Function DrawGUI()
 					EndIf	
 					SelectedItem = Null
 					;[End Block]
+				Case "bdc"
+					;[Block]
+					If CanUseItem(False, False, True) Then
+						If Wearing714 = 0 Then
+							Injuries = 0
+							BloodLoss = 0
+							ResetDiseases()
+
+							If SelectedItem\state = 0 Then
+								Msg = I_Loc\MessageItem_BdcUse
+							Else
+								Msg = I_Loc\MessageItem_BdcUseFlipped
+							EndIf
+							MsgTimer = 70 * 10
+
+							For i% = 3 To 7
+								SetEmitter(Camera, ParticleEffect[i], True)
+							Next
+
+							PlaySound_Strict LoadTempSound("SFX\Room\BD\Horn.ogg")
+
+							If Not BirthdayHat Then
+								BirthdayHat = True
+								Curr173\obj3 = LoadMesh_Strict("GFX\npcs\partyhat.b3d", Curr173\obj)
+							EndIf
+						Else
+							Msg = I_Loc\MessageItem_BdcUseStale
+							MsgTimer = 70 * 7
+						EndIf
+
+						RemoveItem(SelectedItem)
+						SelectedItem = Null
+					EndIf
+					;[End Block]
 				Case "scp500"
 					;[Block]
 					If CanUseItem(False, False, True)
@@ -8570,6 +8605,8 @@ Function LoadEntities()
 	DecalTextures(18) = LoadTexture_Strict("GFX\decalpd6.dc", 1 + 2)	
 	DecalTextures(19) = LoadTexture_Strict("GFX\decal19.png", 1 + 2)
 	DecalTextures(20) = LoadTexture_Strict("GFX\decal427.png", 1 + 2)
+	DecalTextures(21) = LoadTexture_Strict("GFX\smoke2.png", 1 + 2)
+	DecalTextures(22) = LoadTexture_Strict("GFX\bd\Confetti.png", 1 + 2)
 	
 	DrawLoading(24)
 	
@@ -8792,6 +8829,20 @@ Function LoadEntities()
 	SetTemplateSize(ParticleEffect[2], 0.005, 0.005)
 	SetTemplateAlphaVel(ParticleEffect[2], True)
 	
+	;BDC
+	For i = 3 To 7
+		ParticleEffect[i] = CreateTemplate()
+		SetTemplateEmitterBlend(ParticleEffect[i], 1)
+		SetTemplateEmitterLifeTime(ParticleEffect[i], 60)
+		SetTemplateParticleLifeTime(ParticleEffect[i], 500, 500)
+		SetTemplateTexture(ParticleEffect[i], "GFX\bd\Confetti" + Str(i-2) + ".png", 2, 1)
+		SetTemplateVelocity(ParticleEffect[i], -0.005, 0.005, 0, 0.005, -0.005, 0.005)
+		SetTemplateOffset(ParticleEffect[i], -0.05, 0.05, 0.05, 0.05, -0.05, 0.05)
+		SetTemplateGravity(ParticleEffect[i], 0.0001)
+		SetTemplateSize(ParticleEffect[i], 0.01, 0.01)
+		SetTemplateRotation(ParticleEffect[i], -30, 30)
+	Next
+
 	Room2slCam = CreateCamera()
 	CameraViewport(Room2slCam, 0, 0, 128, 128)
 	CameraRange Room2slCam, 0.05, 6.0
@@ -10246,6 +10297,26 @@ Function Use914(item.Items, setting$, x#, y#, z#)
 					
 			End Select
 			
+			RemoveItem(item)
+		Case "bdc"
+			Select setting
+				Case "rough", "coarse"
+					d.Decals = CreateDecal(21, x, 8*RoomScale+0.010, z, 90, Rand(360), 0)
+					d\Size = 0.4 : ScaleSprite(d\obj, d\Size, d\Size)
+					d.Decals = CreateDecal(22, x, 8*RoomScale+0.011, z, 90, Rand(360), 0)
+					d\Size = 0.3 : ScaleSprite(d\obj, d\Size, d\Size)
+					PlaySound_Strict LoadTempSound("SFX\Room\BD\Sad.ogg")
+				Case "1:1"
+					it2 = CreateItem("bdc", x, y, z)
+					it2\State = 1 - item\State
+				Case "fine"
+					it2 = CreateItem("origami", x, y, z)
+				Case "very fine"
+					For e.Events = Each Events
+						If e\EventName = "914" Then e\EventState3 = 1 : Exit
+					Next
+			End Select
+
 			RemoveItem(item)
 		Case "scp420j", "cigarette"
 			Select setting

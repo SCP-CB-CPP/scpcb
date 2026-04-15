@@ -339,6 +339,9 @@ Type LocalizationTable
     Field MessageItem_VeryfinesyringeUseHuge$
     Field MessageItem_VeryfinesyringeUseVeryhuge$
     Field MessageItem_VeryfinesyringeUseStomacheache$
+    Field MessageItem_BdcUse$
+    Field MessageItem_BdcUseFlipped$
+    Field MessageItem_BdcUseStale$
     Field MessageItem_PillUse$
     Field MessageItem_PillUseHealnausea$
     Field MessageItem_CigaretteUseUnable$
@@ -868,6 +871,9 @@ Function LoadLocalization(loc.LocalizationTable, file$)
                             Case "veryfinesyringe.use.huge" If loc\MessageItem_VeryfinesyringeUseHuge = "" Then loc\MessageItem_VeryfinesyringeUseHuge = value
                             Case "veryfinesyringe.use.veryhuge" If loc\MessageItem_VeryfinesyringeUseVeryhuge = "" Then loc\MessageItem_VeryfinesyringeUseVeryhuge = value
                             Case "veryfinesyringe.use.stomacheache" If loc\MessageItem_VeryfinesyringeUseStomacheache = "" Then loc\MessageItem_VeryfinesyringeUseStomacheache = value
+                            Case "bdc.use" If loc\MessageItem_BdcUse = "" Then loc\MessageItem_BdcUse = value
+                            Case "bdc.use.flipped" If loc\MessageItem_BdcUseFlipped = "" Then loc\MessageItem_BdcUseFlipped = value
+                            Case "bdc.use.stale" If loc\MessageItem_BdcUseStale = "" Then loc\MessageItem_BdcUseStale = value
                             Case "pill.use" If loc\MessageItem_PillUse = "" Then loc\MessageItem_PillUse = value
                             Case "pill.use.healnausea" If loc\MessageItem_PillUseHealnausea = "" Then loc\MessageItem_PillUseHealnausea = value
                             Case "cigarette.use.unable" If loc\MessageItem_CigaretteUseUnable = "" Then loc\MessageItem_CigaretteUseUnable = value
