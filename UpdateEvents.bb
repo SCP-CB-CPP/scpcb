@@ -7406,7 +7406,7 @@ Function UpdateEvents()
 					If e\room\Objects[4] <> 0 Then
 						Select e\EventState3
 							Case 0
-								e\EventState3 = 1
+								FreeEntity(e\room\Objects[4]) : e\room\Objects[4] = 0
 							Case 1
 								If EntityDistance(Collider, e\room\Objects[4]) < 1.0 Then
 									PlaySound2(LoadTempSound("SFX\Room\BD\Horn.ogg"), Camera, e\room\Objects[4])
