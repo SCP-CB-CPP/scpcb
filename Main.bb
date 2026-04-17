@@ -1336,7 +1336,7 @@ Function UpdateConsole()
 						CreateConsoleMsg("Debug Mode On")
 
 						For r.Rooms = Each Rooms
-							Local tb.Triggerbox = r\FirstTriggerbox
+							Local tb.Triggerboxes = r\FirstTriggerbox
 							While tb <> Null
 								EntityAlpha(tb\Obj, 0.2)
 								tb = tb\Successor
@@ -1346,7 +1346,7 @@ Function UpdateConsole()
 						CreateConsoleMsg("Debug Mode Off")
 					
 						For r.Rooms = Each Rooms
-							tb.Triggerbox = r\FirstTriggerbox
+							tb.Triggerboxes = r\FirstTriggerbox
 							While tb <> Null
 								EntityAlpha(tb\Obj, 0.0)
 								tb = tb\Successor
@@ -9358,6 +9358,7 @@ Function NullGame(playbuttonsfx%=True)
 	
 	;ClearWorld
 	
+	Delete Each Triggerboxes
 	Delete Each LightTemplates
 	Delete Each Materials
 	Delete Each WayPoints
@@ -12157,7 +12158,7 @@ Function CheckTriggers$(r.Rooms, x#, y#, z#)
 	Local i%,sx#,sy#,sz#
 	Local inside% = -1
 
-	Local tb.Triggerbox = r\FirstTriggerbox
+	Local tb.Triggerboxes = r\FirstTriggerbox
 	While tb <> Null
 		sx# = EntityScaleX(tb\Obj, 1)
 		sy# = Max(EntityScaleY(tb\Obj, 1), 0.001)

@@ -250,12 +250,12 @@ Function LoadRMesh(file$,rt.RoomTemplates)
 	
 	;trigger boxes
 	If hasTriggerBox
-		Local lastTriggerbox.TempTriggerbox
+		Local lastTriggerbox.TempTriggerboxes
 
 		Local triggerboxCount% = ReadInt(f)
 		DebugLog "TriggerBoxEnable"
 		For k = 1 To triggerboxCount
-			Local tb.TempTriggerbox = New TempTriggerbox
+			Local tb.TempTriggerboxes = New TempTriggerboxes
 			
 			tb\Obj = CreateMesh(obj)
 			EntityAlpha(tb\Obj, 0.0)
@@ -675,9 +675,11 @@ End Function
 Function ResetAllRMeshes()
 	Delete Each TempWayPoints
 	Delete Each TempScreens
+	Delete Each TempTriggerboxes
 	Delete Each TempItems
 	Delete Each TempDoors
 	For rt.RoomTemplates = Each RoomTemplates
+		rt\FirstTempTriggerbox = Null
 		rt\FirstTempItem = Null
 		rt\FirstTempDoor = Null
 		If rt\obj <> 0 Then FreeEntity(rt\obj) : rt\obj = 0
@@ -1573,7 +1575,7 @@ Type RoomTemplates
 
 	Field R%, G%, B%
 	
-	Field FirstTempTriggerbox.TempTriggerbox
+	Field FirstTempTriggerbox.TempTriggerboxes
 
 	Field FirstTempItem.TempItems
 
@@ -1587,10 +1589,10 @@ Type RoomTemplates
 	Field MaxX#, MaxY#, MaxZ#
 End Type 	
 
-Type TempTriggerbox
+Type TempTriggerboxes
 	Field Obj%
 	Field Name$
-	Field Successor.TempTriggerbox
+	Field Successor.TempTriggerboxes
 End Type
 
 Type TempItems
@@ -1818,7 +1820,7 @@ Type Rooms
 	Field LightSprites2%[MaxRoomLights]
 	Field LightHidden%[MaxRoomLights]
 	Field LightFlicker%[MaxRoomLights]
-	Field FirstTriggerbox.Triggerbox
+	Field FirstTriggerbox.Triggerboxes
 	Field MaxWayPointY#
 	Field LightR#[MaxRoomLights],LightG#[MaxRoomLights],LightB#[MaxRoomLights]
 	Field LightCone%[MaxRoomLights]
@@ -1829,10 +1831,10 @@ Type Rooms
 	Field MaxX#, MaxY#, MaxZ#
 End Type 
 
-Type Triggerbox
+Type Triggerboxes
 	Field Obj%
 	Field Name$
-	Field Successor.Triggerbox
+	Field Successor.Triggerboxes
 End Type
 
 Const gridsz%=19 ;Same size as the main map itself (better for the map creator)
@@ -5521,10 +5523,10 @@ Function FillRoom(r.Rooms)
 		EndIf
 	Next
 	
-	Local tempTb.TempTriggerbox = r\RoomTemplate\FirstTempTriggerbox
-	Local lastTb.Triggerbox
+	Local tempTb.TempTriggerboxes = r\RoomTemplate\FirstTempTriggerbox
+	Local lastTb.Triggerboxes
 	While tempTb <> Null
-		Local tb.Triggerbox = New Triggerbox
+		Local tb.Triggerboxes = New Triggerboxes
 		tb\Obj = CopyEntity(tempTb\Obj, r\obj)
 		tb\Name = tempTb\Name
 		If lastTb = Null Then
