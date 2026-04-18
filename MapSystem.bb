@@ -104,11 +104,15 @@ Function GetCache.Materials(name$)
 	Return Null
 End Function
 
-Function AddTextureToCache(texture%)
+Function AddTextureToCache(texture%, nameOverride$="")
 	Local tc.Materials=GetCache(StripPath(TextureName(texture)))
 	If tc.Materials=Null Then
 		tc.Materials=New Materials
-		tc\name=StripPath(TextureName(texture))
+		If nameOverride<>"" Then
+			tc\name=StripPath(nameOverride)
+		Else
+			tc\name=StripPath(TextureName(texture))
+		EndIf
 		If BumpEnabled Then
 			Local temp$=""
 			Local hasOverride%
@@ -2890,12 +2894,14 @@ Function FillRoom(r.Rooms)
 			PositionEntity(r\RoomDoors[1]\buttons[1], r\x + 256.0 * RoomScale, EntityY(r\RoomDoors[1]\buttons[1],True), EntityZ(r\RoomDoors[1]\buttons[1],True),True)			
 			r\RoomDoors[1]\AutoClose = False : r\RoomDoors[1]\open = False
 			
-			de.Decals = CreateDecal(22, r\x + 600.0*RoomScale, 0.005, r\z + 232.0*RoomScale, 90, Rand(360), 0)
-			de\Size = 0.6 : ScaleSprite(de\obj, de\Size, de\Size) : EntityParent(de\obj, r\obj)
+			If IsBirthday Then
+				de.Decals = CreateDecal(22, r\x + 600.0*RoomScale, 0.005, r\z + 232.0*RoomScale, 90, Rand(360), 0)
+				de\Size = 0.6 : ScaleSprite(de\obj, de\Size, de\Size) : EntityParent(de\obj, r\obj)
 
-			it = CreateItem("bdc", r\x + 600.0*RoomScale, r\y + 125.0*RoomScale, r\z + 232.0*RoomScale)
-			RotateEntity(it\collider, 0, r\angle + 110, 0)
-			EntityParent(it\collider, r\obj)
+				it = CreateItem("bdc", r\x + 600.0*RoomScale, r\y + 125.0*RoomScale, r\z + 232.0*RoomScale)
+				RotateEntity(it\collider, 0, r\angle + 110, 0)
+				EntityParent(it\collider, r\obj)
+			EndIf
 
 			r\RoomDoors[0] = CreateDoor(r\zone, r\x - 432.0 * RoomScale, 0.0, r\z, 90, r, False, False, 0, "1234")
 			PositionEntity(r\RoomDoors[0]\buttons[0], r\x - 416.0 * RoomScale, EntityY(r\RoomDoors[0]\buttons[0],True), r\z + 176.0 * RoomScale,True)

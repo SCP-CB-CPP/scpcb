@@ -342,6 +342,7 @@ Type LocalizationTable
     Field MessageItem_BdcUse$
     Field MessageItem_BdcUseFlipped$
     Field MessageItem_BdcUseStale$
+    Field MessageItem_BdcUseStaleDate$
     Field MessageItem_PillUse$
     Field MessageItem_PillUseHealnausea$
     Field MessageItem_CigaretteUseUnable$
@@ -874,6 +875,7 @@ Function LoadLocalization(loc.LocalizationTable, file$)
                             Case "bdc.use" If loc\MessageItem_BdcUse = "" Then loc\MessageItem_BdcUse = value
                             Case "bdc.use.flipped" If loc\MessageItem_BdcUseFlipped = "" Then loc\MessageItem_BdcUseFlipped = value
                             Case "bdc.use.stale" If loc\MessageItem_BdcUseStale = "" Then loc\MessageItem_BdcUseStale = value
+                            Case "bdc.use.stale.date" If loc\MessageItem_BdcUseStaleDate = "" Then loc\MessageItem_BdcUseStaleDate = value
                             Case "pill.use" If loc\MessageItem_PillUse = "" Then loc\MessageItem_PillUse = value
                             Case "pill.use.healnausea" If loc\MessageItem_PillUseHealnausea = "" Then loc\MessageItem_PillUseHealnausea = value
                             Case "cigarette.use.unable" If loc\MessageItem_CigaretteUseUnable = "" Then loc\MessageItem_CigaretteUseUnable = value

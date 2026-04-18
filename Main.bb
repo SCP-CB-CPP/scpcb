@@ -168,6 +168,7 @@ Global ShowFPS = GetOptionInt("graphics", "show FPS")
 
 Global WireframeState
 Global HalloweenTex
+Global IsBirthday = Left(CurrentDate(), 7) = "15 Apr " Lor HasCLIFlag("birthday")
 Global BirthdayHat = False
 
 Global BorderlessWindowed% = GetOptionInt("graphics", "borderless windowed")
@@ -1089,8 +1090,6 @@ Function UpdateConsole()
 					Local itt.ItemTemplates = FindItemTemplate(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
 					If itt = Null Then
 						CreateConsoleMsg("Item not found.",255,150,0)
-					Else If itt\name = "bdc" Then
-						CreateConsoleMsg("Don't be a party pooper!",255,150,0)
 					Else
 						CreateConsoleMsg(itt\displayname + " spawned.")
 						it.Items = CreateItem(itt\name, EntityX(Collider), EntityY(Camera,True), EntityZ(Collider))
@@ -1652,8 +1651,11 @@ Function UpdateConsole()
 					Else
 						StrTemp$ = ""
 					EndIf
-					
-					If Int(StrTemp) >= 0 And Int(StrTemp) <= 2 ;<--- This is the maximum ID of particles by Devil Particle system, will be increased after time - ENDSHN
+
+					Local maxParticlesIdx% = 2
+					If IsBirthday Then maxParticlesIdx = 7
+
+					If Int(StrTemp) >= 0 And Int(StrTemp) <= maxParticlesIdx% ;<--- This is the maximum ID of particles by Devil Particle system, will be increased after time - ENDSHN
 						SetEmitter(Collider,ParticleEffect[Int(StrTemp)])
 						CreateConsoleMsg("Spawned particle emitter with ID "+Int(StrTemp)+" at player's position.")
 					Else
@@ -5999,7 +6001,7 @@ Function DrawGUI()
 				Case "bdc"
 					;[Block]
 					If CanUseItem(False, False, True) Then
-						If Wearing714 = 0 Then
+						If Wearing714 = 0 And IsBirthday Then
 							Injuries = 0
 							BloodLoss = 0
 							ResetDiseases()
@@ -6022,7 +6024,11 @@ Function DrawGUI()
 								Curr173\obj3 = LoadMesh_Strict("GFX\npcs\partyhat.b3d", Curr173\obj)
 							EndIf
 						Else
-							Msg = I_Loc\MessageItem_BdcUseStale
+							If Not (IsBirthday) Then
+								Msg = I_Loc\MessageItem_BdcUseStaleDate
+							Else
+								Msg = I_Loc\MessageItem_BdcUseStale
+							EndIf
 							MsgTimer = 70 * 7
 						EndIf
 
@@ -8827,7 +8833,13 @@ Function LoadEntities()
 	;[End Block]
 
 	InitMaterials()
-	
+
+	If IsBirthday Then
+		tex = LoadModdedTextureNonStrict("GFX\map\miscsigns3.ae", 1)
+		TextureBlend(tex, 5)
+		AddTextureToCache(tex, "GFX\map\miscsigns3.jpg")
+	EndIf
+
 	OBJTunnel(0)=LoadRMesh("GFX\map\mt1.rmesh",Null)	
 	HideEntity OBJTunnel(0)				
 	OBJTunnel(1)=LoadRMesh("GFX\map\mt2.rmesh",Null)	
@@ -8904,18 +8916,20 @@ Function LoadEntities()
 	SetTemplateAlphaVel(ParticleEffect[2], True)
 	
 	;BDC
-	For i = 3 To 7
-		ParticleEffect[i] = CreateTemplate()
-		SetTemplateEmitterBlend(ParticleEffect[i], 1)
-		SetTemplateEmitterLifeTime(ParticleEffect[i], 60)
-		SetTemplateParticleLifeTime(ParticleEffect[i], 500, 500)
-		SetTemplateTexture(ParticleEffect[i], "GFX\bd\Confetti" + Str(i-2) + ".png", 2, 1)
-		SetTemplateVelocity(ParticleEffect[i], -0.005, 0.005, 0, 0.005, -0.005, 0.005)
-		SetTemplateOffset(ParticleEffect[i], -0.05, 0.05, 0.05, 0.05, -0.05, 0.05)
-		SetTemplateGravity(ParticleEffect[i], 0.0001)
-		SetTemplateSize(ParticleEffect[i], 0.01, 0.01)
-		SetTemplateRotation(ParticleEffect[i], -30, 30)
-	Next
+	If IsBirthday Then
+		For i = 3 To 7
+			ParticleEffect[i] = CreateTemplate()
+			SetTemplateEmitterBlend(ParticleEffect[i], 1)
+			SetTemplateEmitterLifeTime(ParticleEffect[i], 60)
+			SetTemplateParticleLifeTime(ParticleEffect[i], 500, 500)
+			SetTemplateTexture(ParticleEffect[i], "GFX\bd\Confetti" + Str(i-2) + ".png", 2, 1)
+			SetTemplateVelocity(ParticleEffect[i], -0.005, 0.005, 0, 0.005, -0.005, 0.005)
+			SetTemplateOffset(ParticleEffect[i], -0.05, 0.05, 0.05, 0.05, -0.05, 0.05)
+			SetTemplateGravity(ParticleEffect[i], 0.0001)
+			SetTemplateSize(ParticleEffect[i], 0.01, 0.01)
+			SetTemplateRotation(ParticleEffect[i], -30, 30)
+		Next
+	EndIf
 
 	Room2slCam = CreateCamera()
 	CameraViewport(Room2slCam, 0, 0, 128, 128)

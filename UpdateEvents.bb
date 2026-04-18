@@ -4026,14 +4026,19 @@ Function UpdateEvents()
 					If e\room\Objects[2] = 0 Then
 						e\room\Objects[2] =	LoadMesh_Strict("GFX\npcs\duck_low_res.b3d")
 						ScaleEntity(e\room\Objects[2], 0.07, 0.07, 0.07)
-						tex = LoadTexture_Strict("GFX\npcs\duck1.png")
+						If IsBirthday Then
+							tex = LoadTexture_Strict("GFX\npcs\duck.ae")
+							LoadEventSound(e,"SFX\Room\BD\Horn.ogg")
+						Else
+							tex = LoadTexture_Strict("GFX\npcs\duck1.png")
+							LoadEventSound(e,"SFX\SCP\Joke\Saxophone.ogg")
+						EndIf
 						EntityTexture e\room\Objects[2], tex
 						FreeTexture tex
 						PositionEntity (e\room\Objects[2], EntityX(e\room\Objects[0],True), EntityY(e\room\Objects[0],True), EntityZ(e\room\Objects[0],True))
 						PointEntity e\room\Objects[2], e\room\obj
 						RotateEntity(e\room\Objects[2], 0, EntityYaw(e\room\Objects[2],True),0, True)
 						
-						LoadEventSound(e,"SFX\SCP\Joke\Saxophone.ogg")
 					Else
 						If EntityInView(e\room\Objects[2],Camera)=False Then
 							e\EventState = e\EventState + FPSfactor
@@ -4161,7 +4166,7 @@ Function UpdateEvents()
 
 					If e\room\RoomDoors[1]\open And e\EventState2 = 0 Then
 						e\EventState2 = 1
-						If (Not Wearing714) Then PlaySound2(LoadTempSound("SFX\Room\BD\keycard.ogg"), Camera, e\room\RoomDoors[1]\buttons[0])
+						If IsBirthday And (Not Wearing714) Then PlaySound2(LoadTempSound("SFX\Room\BD\keycard.ogg"), Camera, e\room\RoomDoors[1]\buttons[0])
 					EndIf
 				EndIf
 				;[End Block]
@@ -7412,7 +7417,7 @@ Function UpdateEvents()
 								FreeEntity(e\room\Objects[4]) : e\room\Objects[4] = 0
 							Case 1
 								If EntityDistance(Collider, e\room\Objects[4]) < 1.0 Then
-									PlaySound2(LoadTempSound("SFX\Room\BD\Horn.ogg"), Camera, e\room\Objects[4])
+									If IsBirthday Then PlaySound2(LoadTempSound("SFX\Room\BD\Horn.ogg"), Camera, e\room\Objects[4])
 									e\EventState3 = 2
 								EndIf
 							Case 2
@@ -7423,9 +7428,11 @@ Function UpdateEvents()
 					Else If e\EventState3 <> 0 Then
 						e\Room\Objects[4] = LoadMesh_Strict("GFX\npcs\duck_low_res.b3d")
 						ScaleEntity(e\Room\Objects[4], 0.07, 0.07, 0.07)
-						tex = LoadTexture_Strict("GFX\npcs\duck.ae")
-						EntityTexture e\Room\Objects[4], tex
-						FreeTexture tex
+						If IsBirthday Then
+							tex = LoadTexture_Strict("GFX\npcs\duck.ae")
+							EntityTexture e\Room\Objects[4], tex
+							FreeTexture tex
+						EndIf
 						PositionEntity(e\Room\Objects[4], EntityX(e\room\Objects[3], True), 8*RoomScale, EntityZ(e\room\Objects[3], True))
 						RotateEntity(e\Room\Objects[4], 0, e\Room\angle + 210, 0)
 					EndIf
