@@ -147,6 +147,58 @@ Function RegisterCBInput()
     SetDefaultNamespace(ns)
 End Function
 
+Function SetParticleSystemEmitter(template, owner, fixed = False)
+    Return SetEmitter(owner, template, fixed)
+End Function
+
+Function RegisterParticleSystem()
+    ; Technically they are meshes, but I don't think they should be treated as such.
+    RegisterB3DEntitySubtype("ParticleEmitter", True)
+    RegisterObjectMethod("ParticleEmitter", "void Free(bool deleteParticles=true)", @FreeEmitter)
+    RegisterObjectMethod("ParticleEmitter", "void Freeze()", @FreezeEmitter)
+    RegisterObjectMethod("ParticleEmitter", "void Unfreeze()", @UnfreezeEmitter)
+    
+
+    RegisterType("ParticleTemplate")
+    RegisterTypeConstructor("ParticleTemplate", "ParticleTemplate@ f()", @CreateTemplate)
+
+    RegisterObjectMethod("ParticleTemplate", "void Free()", @FreeTemplate)
+
+    RegisterObjectMethod("ParticleTemplate", "void set_EmitterBlend(int value) property", @SetTemplateEmitterBlend)
+    RegisterObjectMethod("ParticleTemplate", "void set_Interval(int value) property", @SetTemplateInterval)
+    RegisterObjectMethod("ParticleTemplate", "void set_ParticlesPerInterval(int value) property", @SetTemplateParticlesPerInterval)
+    RegisterObjectMethod("ParticleTemplate", "void set_MaxParticles(int value) property", @SetTemplateMaxParticles)
+    RegisterObjectMethod("ParticleTemplate", "void set_EmitterLifeTime(int value) property", @SetTemplateEmitterLifeTime)
+    RegisterObjectMethod("ParticleTemplate", "void set_Gravity(float value) property", @SetTemplateGravity)
+    RegisterObjectMethod("ParticleTemplate", "void set_Alpha(float value) property", @SetTemplateAlpha)
+    RegisterObjectMethod("ParticleTemplate", "void set_AlphaVel(bool value) property", @SetTemplateAlphaVel)
+    RegisterObjectMethod("ParticleTemplate", "void set_Brightness(int value) property", @SetTemplateBrightness)
+    RegisterObjectMethod("ParticleTemplate", "void set_Yaw(float value) property", @SetTemplateYaw)
+
+    RegisterObjectMethod("ParticleTemplate", "void SetParticleLifeTime(int minTime, int maxTime)", @SetTemplateParticleLifeTime)
+    RegisterObjectMethod("ParticleTemplate", "void SetTexture(string path, int mode=0, int blend=1)", @SetTemplateTexture)
+    RegisterObjectMethod("ParticleTemplate", "void SetAnimatedTexture(string path, int mode, int blend, int width, int height, int maxFrames, float speed=1)", @SetTemplateAnimTexture)
+    RegisterObjectMethod("ParticleTemplate", "void SetOffset(float minX, float maxX, float minY, float maxY, float minZ, float maxZ)", @SetTemplateOffset)
+    RegisterObjectMethod("ParticleTemplate", "void SetVelocity(float minX, float maxX, float minY, float maxY, float minZ, float maxZ)", @SetTemplateVelocity)
+    RegisterObjectMethod("ParticleTemplate", "void SetRotation(float minRotationSpeed, float maxRotationSpeed)", @SetTemplateRotation)
+    RegisterObjectMethod("ParticleTemplate", "void SetAlignToFall(bool alignToFall, int alignOffset=0)", @SetTemplateAlignToFall)
+    RegisterObjectMethod("ParticleTemplate", "void SetSize(float x, float y, float minMultiplier=1, float maxMultiplier=1)", @SetTemplateSize)
+    RegisterObjectMethod("ParticleTemplate", "void SetSizeVelocity(float add, float mult)", @SetTemplateSizeVel)
+    RegisterObjectMethod("ParticleTemplate", "void SetColors(int col1, int col2)", @SetTemplateColors)
+    RegisterObjectMethod("ParticleTemplate", "void SetFloor(float y, float bounce=0.5)", @SetTemplateFloor)
+    RegisterObjectMethod("ParticleTemplate", "void SetFixAngles(int pitch, int yaw)", @SetTemplateFixAngles)
+    RegisterObjectMethod("ParticleTemplate", "void AddSubTemplate(ParticleTemplate@ template)", @SetTemplateSubTemplate)
+
+    RegisterObjectMethod("ParticleTemplate", "ParticleEmitter@ Emit(B3D::Entity@ owner, bool fixed=false)", @SetParticleSystemEmitter)
+
+    Local ns$ = GetDefaultNamespace()
+    If ns <> "" Then SetDefaultNamespace(ns + "::Particles") Else SetDefaultNamespace("Particles")
+    RegisterGlobalFunction("void Initialize(B3D::Camera@ camera)", @InitParticles)
+    RegisterGlobalFunction("void Update()", @UpdateParticles_Devil)
+    RegisterGlobalFunction("void FreeAll()", @FreeParticles)
+    SetDefaultNamespace(ns)
+End Function
+
 Function RegisterDoor()
     RegisterTypeFromPtr("Door", %Doors)
 
@@ -298,9 +350,7 @@ Function RegisterTriggerbox()
 
     Local ns$ = GetDefaultNamespace()
     If ns <> "" Then SetDefaultNamespace(ns + "::Triggerbox") Else SetDefaultNamespace("Triggerbox")
-
     RegisterGlobalFunction("string Check(Room@ room, float x, float y, float z)", @CheckTriggers)
-
     SetDefaultNamespace(ns)
 End Function
 
@@ -809,6 +859,7 @@ Function RegisterCB()
     RegisterIO()
     RegisterCBAudio()
     RegisterCBInput()
+    RegisterParticleSystem()
     ; Fucking ugly but the dependencies have a ton of circles.
     RegisterTypeFromPtr("Waypoint", %WayPoints)
     RegisterNPC()

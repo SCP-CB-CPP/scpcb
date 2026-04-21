@@ -226,7 +226,7 @@ tmp\pitch_fix = pitch_fix
 tmp\yaw_fix = yaw_fix
 End Function
 
-Function SetTemplateSubTemplate(template, sub_template, for_each_particle = False)
+Function SetTemplateSubTemplate(template, sub_template)
 tmp.Template = Object.Template(template)
 For i = 0 To 7
 	If tmp\sub_template[i] = Null Then
