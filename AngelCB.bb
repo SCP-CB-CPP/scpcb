@@ -153,7 +153,9 @@ End Function
 
 Function RegisterParticleSystem()
     ; Technically they are meshes, but I don't think they should be treated as such.
-    RegisterB3DEntitySubtype("ParticleEmitter", True)
+    RegisterB3DEntitySubtype("ParticleEmitter", False)
+    RegisterTypeInheritance("CB::ParticleEmitter", "B3D::Entity")
+
     RegisterObjectMethod("ParticleEmitter", "void Free(bool deleteParticles=true)", @FreeEmitter)
     RegisterObjectMethod("ParticleEmitter", "void Freeze()", @FreezeEmitter)
     RegisterObjectMethod("ParticleEmitter", "void Unfreeze()", @UnfreezeEmitter)
