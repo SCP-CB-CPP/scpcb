@@ -4099,7 +4099,7 @@ Function DrawEnding()
 			SubBox\screenTop = GraphicsHeight() * 0.9
 			RecalculateSubtitleBoxTarget()
 
-			EndingScreen = LoadImage_Strict("GFX\endingscreen.pt")
+			EndingScreen = LoadImage_Strict("GFX\endingscreen.pt", MenuScale)
 			
 			ShouldPlay = 23
 			CurrMusicVolume = MusicVolume
@@ -4117,7 +4117,7 @@ Function DrawEnding()
 			;-200 -> -700
 			;Max(50 - (Abs(KillTimer)-200),0)    =    0->50
 			If Rand(1,150)<Min((Abs(EndingTimer)-200),155) Then
-				DrawImage EndingScreen, GraphicWidth/2-400, GraphicHeight/2-400
+				DrawImage EndingScreen, GraphicWidth/2-ImageWidth(EndingScreen)/2, GraphicHeight/2-ImageHeight(EndingScreen)/2
 			Else
 				Color 0,0,0
 				Rect 100,100,GraphicWidth-200,GraphicHeight-200
@@ -4135,7 +4135,7 @@ Function DrawEnding()
 			
 		Else
 			
-			DrawImage EndingScreen, GraphicWidth/2-400, GraphicHeight/2-400
+			DrawImage EndingScreen, GraphicWidth/2-ImageWidth(EndingScreen)/2, GraphicHeight/2-ImageHeight(EndingScreen)/2
 			
 			If EndingTimer < -1000 And EndingTimer > -2000
 				
@@ -4281,11 +4281,11 @@ Function InitCredits()
 	Local file% = OpenFile("Credits.txt")
 	Local l$
 	
-	CreditsFont% = LoadFont_Strict("GFX\font\cour\Courier New.ttf", Int(21 * (GraphicHeight / 1024.0)))
-	CreditsFont2% = LoadFont_Strict("GFX\font\cour\Courier New.ttf", Int(35 * (GraphicHeight / 1024.0)))
+	CreditsFont% = LoadFont_Strict("GFX\font\cour\Courier New.ttf", Int(21 * MenuScale))
+	CreditsFont2% = LoadFont_Strict("GFX\font\cour\Courier New.ttf", Int(35 * MenuScale))
 	
 	If CreditsScreen = 0
-		CreditsScreen = LoadImage_Strict("GFX\creditsscreen.pt")
+		CreditsScreen = LoadImage_Strict("GFX\creditsscreen.pt", MenuScale)
 	EndIf
 	
 	Repeat
@@ -4329,7 +4329,7 @@ Function DrawCredits()
     Cls
 	
 	If Rand(1,300)>1
-		DrawImage CreditsScreen, GraphicWidth/2-400, GraphicHeight/2-400
+		DrawImage CreditsScreen, GraphicWidth/2-ImageWidth(CreditsScreen)/2, GraphicHeight/2-ImageHeight(CreditsScreen)/2
 	EndIf
 	
 	id = 0
