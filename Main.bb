@@ -9682,7 +9682,7 @@ Function UpdateMusic()
 		If NowPlaying <> ShouldPlay ; playing the wrong clip, fade out
 			CurrMusicVolume# = Max(CurrMusicVolume - (FPSfactor / 250.0), 0)
 			If CurrMusicVolume = 0
-				If NowPlaying<66
+				If NowPlaying<>66
 					StopStream_Strict(MusicCHN)
 				EndIf
 				NowPlaying = ShouldPlay
@@ -9693,13 +9693,21 @@ Function UpdateMusic()
 			CurrMusicVolume = CurrMusicVolume + (MusicVolume - CurrMusicVolume) * (0.1*FPSfactor)
 		EndIf
 		
-		If NowPlaying < 66
-			If CurrMusic = 0
-				MusicCHN = StreamSound_Strict("SFX\Music\"+Music(NowPlaying)+".ogg",0.0)
-				CurrMusic = 1
+		If NowPlaying <> 66 Then
+			Local musicFile$
+			If NowPlaying => 0 And NowPlaying < 66 Then
+				musicFile = "SFX\Music\"+Music(NowPlaying)+".ogg"
+			Else
+				Local m.ScriptMusic = Object.ScriptMusic(NowPlaying - SCRIPT_MUSIC_START)
+				musicFile = m\File
 			EndIf
-			SetStreamVolume_Strict(MusicCHN,CurrMusicVolume)
 		EndIf
+
+		If CurrMusic = 0
+			MusicCHN = StreamSound_Strict(musicFile,0.0)
+			CurrMusic = 1
+		EndIf
+		SetStreamVolume_Strict(MusicCHN,CurrMusicVolume)
 	Else
 		If FPSfactor > 0 Or OptionsMenu = 2 Then
 			;CurrMusicVolume = 1.0

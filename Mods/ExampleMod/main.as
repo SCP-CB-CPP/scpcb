@@ -1,5 +1,14 @@
+using namespace CB;
+using namespace B3D;
+
+Music m;
+
+void Hook_Initialize() {
+    m = Music::RegisterCustom("SFX\\Radio\\scpradio0.ogg");
+}
+
 void Hook_InitializeEvents() {
-    CreateEvent("guardspin", "room3pit", 0, 1);
+    Event::Create("guardspin", "room3pit", 0, 1);
 }
 
 void Hook_UpdateEvent(CB::Event@ e) {
@@ -11,9 +20,6 @@ void Hook_UpdateEvent(CB::Event@ e) {
 void Hook_FillRoom(CB::Room@ r) {
     if (r.Objects[1] == null) @r.Objects[1] = CB::NPC(NPC::Type::Guard, r.X, r.Y + 1, r.Z).Collider;
 }
-
-using namespace CB;
-using namespace B3D;
 
 float configuredFOV = -1.f;
 
@@ -63,6 +69,7 @@ void Hook_Update() {
             }
         }
     }
+    Music::ShouldPlay = m;
 }
 
 void Hook_CombineItems(Item@ dragged, Item@ onto) {

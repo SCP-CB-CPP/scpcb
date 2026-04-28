@@ -487,7 +487,7 @@ Function RegisterB3DEntityMisc()
 End Function
 
 Function RegisterB3DModelSubtype(name$, isActualSubType%=True)
-    RegisterB3DEntitySubtype(name, Not isActualSubType)
+    RegisterB3DEntitySubtype(name, True)
 
     RegisterObjectMethod(name, "float get_Alpha() const property", @GetEntityAlpha)
     RegisterObjectMethod(name, "void set_Alpha(float alpha) property", @EntityAlpha)

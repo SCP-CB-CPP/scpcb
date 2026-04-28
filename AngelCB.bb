@@ -104,6 +104,22 @@ Function RegisterIO()
     ; TODO: Sprite (used)? Terrain (unused)? Image grid (unused)?
 End Function
 
+Type ScriptMusic
+    Field File$
+End Type
+
+Const SCRIPT_MUSIC_START% = 128
+
+Function RegisterCustomMusic%(file$)
+    Local m.ScriptMusic = New ScriptMusic
+    m\File = file
+    Local hdl% = Handle(m) + SCRIPT_MUSIC_START
+    If hdl => 0 And hdl < SCRIPT_MUSIC_START Then
+        RuntimeErrorExt("Failed to register custom music.")
+    End If
+    Return hdl
+End Function
+
 Function RegisterCBAudio()
     RegisterType("Sound")
 
@@ -127,6 +143,42 @@ Function RegisterCBAudio()
     Local ns$ = GetDefaultNamespace()
     If ns <> "" Then SetDefaultNamespace(ns + "::Sound") Else SetDefaultNamespace("Sound")
     RegisterGlobalFunction("CB::Sound@ LoadTemporary(string file)", @LoadTempSound)
+    SetDefaultNamespace(ns)
+
+
+    RegisterEnum("Music")
+    RegisterEnumValue("Music", "LightContainmentZone", 0)
+    RegisterEnumValue("Music", "HeavyContainmentZone", 1)
+    RegisterEnumValue("Music", "EntranceZone", 2)
+    RegisterEnumValue("Music", "PocketDimension", 3)
+    RegisterEnumValue("Music", "Room079", 4)
+    RegisterEnumValue("Music", "GateB1", 5)
+    RegisterEnumValue("Music", "GateB2", 6)
+    RegisterEnumValue("Music", "Room3Storage", 7)
+    RegisterEnumValue("Music", "Room049", 8)
+    RegisterEnumValue("Music", "Forest860", 9)
+    RegisterEnumValue("Music", "SCP106Chase", 10)
+    RegisterEnumValue("Music", "Menu", 11)
+    RegisterEnumValue("Music", "Forest860Chase", 12)
+    RegisterEnumValue("Music", "Intro", 13)
+    RegisterEnumValue("Music", "SCP178", 14)
+    RegisterEnumValue("Music", "PocketDimensionTrench", 15)
+    RegisterEnumValue("Music", "Room205", 16)
+    RegisterEnumValue("Music", "GateA", 17)
+    RegisterEnumValue("Music", "Dimension1499", 18)
+    RegisterEnumValue("Music", "Dimension1499Danger", 19)
+    RegisterEnumValue("Music", "SCP049Chase", 20)
+    RegisterEnumValue("Music", "EndingMenuBreath", 21)
+    RegisterEnumValue("Music", "Room914", 22)
+    RegisterEnumValue("Music", "Ending", 23)
+    RegisterEnumValue("Music", "Credits", 24)
+    RegisterEnumValue("Music", "AfterCredits", 25)
+    RegisterEnumValue("Music", "Invalid", 66)
+
+    If ns <> "" Then SetDefaultNamespace(ns + "::Music") Else SetDefaultNamespace("Music")
+    RegisterGlobalFunction("Music RegisterCustom(string file)", @RegisterCustomMusic)
+    RegisterGlobalProperty("Music NowPlaying", &NowPlaying)
+    RegisterGlobalProperty("Music ShouldPlay", &ShouldPlay)
     SetDefaultNamespace(ns)
 End Function
 

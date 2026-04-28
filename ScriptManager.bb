@@ -72,7 +72,6 @@ Function CallHook%(h.Hooks)
             Local ret%
             For i = 0 To h\Subscribers-1
                 ExecuteFunction(HookFuncs%(h\ID, i), &ret)
-                DebugLog("Called hook " + h\FuncName + " in module returned " + ret)
                 If ret Then Return True
             Next
     End Select
