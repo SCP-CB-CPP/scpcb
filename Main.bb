@@ -2114,17 +2114,17 @@ Global ForestNPC,ForestNPCTex,ForestNPCData#[3]
 
 ;-----------------------------------------  Images ----------------------------------------------------------
 
-Global PauseMenuIMG%
+Global PauseMenuIMG% = 0
 
-Global SprintIcon%
-Global BlinkIcon%
-Global CrouchIcon%
-Global HandIcon%
-Global HandIcon2%
+Global SprintIcon% = 0
+Global BlinkIcon% = 0
+Global CrouchIcon% = 0
+Global HandIcon% = 0
+Global HandIcon2% = 0
 
-Global StaminaMeterIMG%
+Global StaminaMeterIMG% = 0
 
-Global Panel294, Using294%, Input294$
+Global Panel294 = 0, Using294%, Input294$
 
 DrawLoading(35, True)
 
@@ -8392,9 +8392,11 @@ Function LoadEntities()
 		TempSounds[i]=0
 	Next
 	
-	PauseMenuIMG% = LoadImage_Strict("GFX\menu\pausemenu.jpg")
-	MaskImage PauseMenuIMG, 255,255,0
-	ScaleImage PauseMenuIMG,MenuScale,MenuScale
+	If PauseMenuIMG% = 0 Then
+		PauseMenuIMG% = LoadImage_Strict("GFX\menu\pausemenu.jpg")
+		MaskImage PauseMenuIMG, 255,255,0
+		ScaleImage PauseMenuIMG,MenuScale,MenuScale
+	EndIf
 	
 	If SprintIcon = 0 Then
 		SprintIcon% = LoadImage_Strict("GFX\sprinticon.png")
