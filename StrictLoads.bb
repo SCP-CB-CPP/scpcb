@@ -26,11 +26,15 @@ SoundExtensions[0] = "ogg"
 SoundExtensions[1] = "wav"
 SoundExtensions[2] = "mp3"
 
+Global LoadImageScaleResult#
+
 ;basic wrapper functions that check to make sure that the file exists before attempting to load it, raises an RTE if it doesn't
 ;more informative alternative to MAVs outside of debug mode, makes it immiediately obvious whether or not someone is loading resources
 ;likely to cause more crashes than 'clean' CB, as this prevents anyone from loading any assets that don't exist, regardless if they are ever used
 ;added zero checks since blitz load functions return zero sometimes even if the filetype exists
 Function LoadImage_Strict%(file$, scale#=0, flags%=0)
+	LoadImageScaleResult = 1.0
+
 	Local ext$ = File_GetExtension(file)
 	Local fileNoExt$ = Left(file, Len(file) - Len(ext))
 	Local tmp%
@@ -82,6 +86,7 @@ Function ScaleImageFromFile(img%, path$, scale#)
 		Local val# = Float(ReadLine(f))
 		CloseFile f
 		scale = scale * val
+		LoadImageScaleResult = val
 	EndIf
 	If scale <> 1.0 Then
 		ScaleImage img, scale, scale

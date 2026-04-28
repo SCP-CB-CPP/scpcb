@@ -199,8 +199,6 @@ End Select
 Global ConsoleOpening% = GetOptionInt("console", "auto opening")
 Global SFXVolume# = GetOptionFloat("audio", "sound volume")
 
-Global HUDScaleFactor# = GetOptionFloat("graphics", "hud scale factor")
-
 Const StringsFile$ = "Data\strings.ini"
 Include "Localization.bb"
 
@@ -253,7 +251,68 @@ Else
 EndIf
 
 Global MenuScale# = CalculateMenuScale()
-Global HUDScale# = Max(MenuScale * HUDScaleFactor, 1)
+Global HUDScaleScalar# = Max(1.0, MenuScale)
+Global MinHUDScaleFactor#
+Global MaxHUDScaleFactor#
+CalculateHUDScaleFactorLimits()
+Global HUDScaleFactor# = Max(MinHUDScaleFactor, Min(MaxHUDScaleFactor, GetOptionFloat("graphics", "hud scale factor")))
+Global HUDScale# = HUDScaleScalar * HUDScaleFactor
+
+Function CalculateHUDScaleFactorLimits()
+	Local minHUDScale# = 1.0
+	Local maxHUDScale# = Max(1.5, MenuScale * 2)
+	MinHUDScaleFactor = minHUDScale / HUDScaleScalar
+	MaxHUDScaleFactor = maxHUDScale / HUDScaleScalar
+End Function
+
+Type HUDScaledImage
+	Field Img%
+	Field BaseWidth%
+	Field BaseHeight%
+End Type
+
+Function LoadImageHUDScaled(file$, fixedSizeX% = 0, fixedSizeY% = 0)
+	Local img%
+	Local h.HUDScaledImage = New HUDScaledImage
+	If fixedSizeX = 0 Then
+		img = LoadImage_Strict(file, HUDScale)
+		h\BaseWidth = ImageWidthUnscaled(img) * LoadImageScaleResult
+		h\BaseHeight = ImageHeightUnscaled(img) * LoadImageScaleResult
+	Else
+		If fixedSizeY = 0 Then fixedSizeY = fixedSizeX
+		img = LoadImage_Strict(file)
+		ResizeImage(img, fixedSizeX * HUDScale, fixedSizeY * HUDScale)
+		h\BaseWidth = fixedSizeX
+		h\BaseHeight = fixedSizeY
+	EndIf
+	h\Img = img
+	Return img
+End Function
+
+Function FreeImageHUDScaled(img%)
+	For h.HUDScaledImage = Each HUDScaledImage
+		If h\Img = img Then
+			Delete h
+			Exit
+		EndIf
+	Next
+	FreeImage(img)
+End Function
+
+Function UpdateHUDScaleFactor(newFactor#)
+	If newFactor = HUDScaleFactor Then Return
+
+	HUDScaleFactor = newFactor
+	HUDScale = HUDScaleScalar * HUDScaleFactor
+	For h.HUDScaledImage = Each HUDScaledImage
+		ResizeImage(h\Img, h\BaseWidth * HUDScale, h\BaseHeight * HUDScale)
+	Next
+
+	; Hardcoding because I'm LAME!
+	FreeFont Font3 : FreeFont Font4
+	Font3% = LoadFont_Strict("GFX\font\DS-DIGI\DS-Digital.ttf", Int(15 * HUDScale))
+	Font4% = LoadFont_Strict("GFX\font\DS-DIGI\DS-Digital.ttf", Int(42 * HUDScale))
+End Function
 
 Function CalculateMenuScale#()
 	Local short% = Min(GraphicWidth, GraphicHeight)
@@ -338,13 +397,8 @@ LoadSubtitles()
 
 SetFont Font2
 
-Global BlinkMeterIMG% = LoadImage_Strict("GFX\blinkmeter.png", HUDScale)
-Global MenuMeterIMG%
-If HUDScale = MenuScale Then
-	MenuMeterIMG = BlinkMeterIMG
-Else
-	MenuMeterIMG = LoadImage_Strict("GFX\blinkmeter.png", MenuScale)
-EndIf
+Global BlinkMeterIMG% = LoadImageHUDScaled("GFX\blinkmeter.png")
+Global MenuMeterIMG% = LoadImage_Strict("GFX\blinkmeter.png", MenuScale)
 
 DrawLoading(0, True)
 
@@ -991,6 +1045,18 @@ Function UpdateConsole()
 						CreateConsoleMsg("Coordinates: "+EntityX(c)+", "+EntityY(c)+", "+EntityZ(c))
 						CreateConsoleMsg("******************************")							
 					EndIf
+					;[End Block]
+				Case "hudscalefactor"
+					;[Block]
+					StrTemp$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
+
+					UpdateHUDScaleFactor(Float(StrTemp))
+					;[End Block]
+				Case "hudoffset"
+					;[Block]
+					StrTemp$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
+					HUDOffsetScale = Float(StrTemp)
+					UpdateHUDOffsets()
 					;[End Block]
 				Case "viewbob"
 					;[Block]
@@ -2030,8 +2096,8 @@ Global NoTarget% = False
 Global GuaranteedOmni% = False
 
 Global NVGImages[2]
-NVGImages[0] = LoadImage_Strict("GFX\battery_green.png", HUDScale)
-NVGImages[1] = LoadImage_Strict("GFX\battery_blue.png", HUDScale)
+NVGImages[0] = LoadImageHUDScaled("GFX\battery_green.png")
+NVGImages[1] = LoadImageHUDScaled("GFX\battery_blue.png")
 
 Global Wearing1499% = False
 Global AmbientLight%, AmbientLightNVG%
@@ -2073,12 +2139,10 @@ Global ParticleAmount% = GetOptionInt("graphics","particle amount")
 
 Dim NavImages(5)
 For i = 0 To 3
-	NavImages(i) = LoadImage_Strict("GFX\navigator\roomborder"+i+".png")
-	ScaleImage(NavImages(i), HUDScale, HUDScale)
+	NavImages(i) = LoadImageHUDScaled("GFX\navigator\roomborder"+i+".png")
 Next
 Global NavSize% = ImageWidth(NavImages(0))
-NavImages(4) = LoadImage_Strict("GFX\navigator\batterymeter.png")
-ScaleImage(NavImages(4), HUDScale, HUDScale)
+NavImages(4) = LoadImageHUDScaled("GFX\navigator\batterymeter.png")
 
 Global NavBG%
 
@@ -6349,7 +6413,7 @@ Function DrawGUI()
 					If SelectedItem\state <= 100 Then SelectedItem\state = Max(0, SelectedItem\state - FPSfactor * 0.004)
 					
 					If SelectedItem\itemtemplate\img=0 Then
-						SelectedItem\itemtemplate\img=LoadImage_Strict(SelectedItem\itemtemplate\imgpath, HUDScale)	
+						SelectedItem\itemtemplate\img=LoadImageHUDScaled(SelectedItem\itemtemplate\imgpath)
 					EndIf
 					
 					;radiostate(5) = has the "use the number keys" -message been shown yet (true/false)
@@ -6843,8 +6907,7 @@ Function DrawGUI()
 					Color 255, 255, 255
 
 					If SelectedItem\itemtemplate\img=0 Then
-						SelectedItem\itemtemplate\img=LoadImage_Strict(SelectedItem\itemtemplate\imgpath)
-						ScaleImage(SelectedItem\itemtemplate\img, HUDScale, HUDScale)
+						SelectedItem\itemtemplate\img=LoadImageHUDScaled(SelectedItem\itemtemplate\imgpath)
 					EndIf
 					
 					If SelectedItem\state <= 100 Then SelectedItem\state = Max(0, SelectedItem\state - FPSfactor * 0.005)
@@ -7745,6 +7808,17 @@ Function DrawMenu()
 
 					y=y+50*MenuScale
 
+					Local l# = Unlerp(MinHUDScaleFactor, MaxHUDScaleFactor, HUDScaleFactor)
+					l = SlideBar(x + 270*MenuScale, y+6*MenuScale,100*MenuScale, l#*100, 7)/100
+					Color 255,255,255
+					Text(x, y, I_Loc\Launcher_Hudscalefactor)
+					UpdateHUDScaleFactor(Lerp(MinHUDScaleFactor, MaxHUDScaleFactor, l))
+					If (MouseOn(x+270*MenuScale,y+6*MenuScale,100*MenuScale+14,20) And OnSliderID=0) Lor OnSliderID=7
+						DrawOptionsTooltip(tx,ty,tw,th,"hudscalefactor")
+					EndIf
+
+					y=y+30*MenuScale
+
 					HUDOffsetScale = SlideBar(x + 270*MenuScale, y+6*MenuScale,100*MenuScale, HUDOffsetScale*100, 5)/100
 					Color 255,255,255
 					Text(x, y, I_Loc\OptionName_Hudoffset)
@@ -8320,15 +8394,15 @@ Function LoadEntities()
 	
 	PauseMenuIMG% = LoadImage_Strict("GFX\menu\pausemenu.jpg", MenuScale)
 	
-	SprintIcon% = LoadImage_Strict("GFX\sprinticon.png", HUDScale)
-	BlinkIcon% = LoadImage_Strict("GFX\blinkicon.png", HUDScale)
-	CrouchIcon% = LoadImage_Strict("GFX\sneakicon.png", HUDScale)
-	HandIcon% = LoadImage_Strict("GFX\handsymbol.png", HUDScale)
-	HandIcon2% = LoadImage_Strict("GFX\handsymbol2.png", HUDScale)
+	SprintIcon% = LoadImageHUDScaled("GFX\sprinticon.png")
+	BlinkIcon% = LoadImageHUDScaled("GFX\blinkicon.png")
+	CrouchIcon% = LoadImageHUDScaled("GFX\sneakicon.png")
+	HandIcon% = LoadImageHUDScaled("GFX\handsymbol.png")
+	HandIcon2% = LoadImageHUDScaled("GFX\handsymbol2.png")
 
-	StaminaMeterIMG% = LoadImage_Strict("GFX\staminameter.png", HUDScale)
+	StaminaMeterIMG% = LoadImageHUDScaled("GFX\staminameter.png")
 
-	Panel294 = LoadImage_Strict("GFX\294panel.jpg", HUDScale)
+	Panel294 = LoadImageHUDScaled("GFX\294panel.jpg")
 
 	Load294()
 
@@ -11200,8 +11274,12 @@ Function angleDist#(a0#,a1#)
 	Return bb
 End Function
 
-Function lerp#(a#, b#, f#)
+Function Lerp#(a#, b#, f#)
     Return a * (1.0 - f) + (b * f)
+End Function
+
+Function Unlerp#(a#, b#, f#)
+	Return (f - a) / (b - a)
 End Function
 
 ;--------------------------------------- decals -------------------------------------------------------
@@ -11613,6 +11691,7 @@ Function SaveOptionsINI()
 	PutINIValue(OptionFile, "general", "speed run mode", SpeedRunMode%)
 	PutINIValue(OptionFile, "general", "numeric seeds", UseNumericSeeds%)
 	PutINIValue(OptionFile, "controls", "mouse smoothing", MouseSmooth)
+	PutINIValue(OptionFile, "graphics", "hud scale factor", HUDScaleFactor)
 	PutINIValue(OptionFile, "graphics", "hud offset", HUDOffsetScale)
 	PutINIValue(OptionFile, "graphics", "view bob", ViewBobScale)
 	PutINIValue(OptionFile, "graphics", "fov", FOV)

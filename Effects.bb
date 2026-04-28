@@ -36,7 +36,7 @@ Function UpdatePostProcess()
 End Function
 
 Function ProcessGammaEffect(gamma#)
-	EffectFloat(GammaEffect, "Gamma", lerp(gamma, 1.0, 0.3)) ; Limit gamma
+	EffectFloat(GammaEffect, "Gamma", Lerp(gamma, 1.0, 0.3)) ; Limit gamma
 	RenderEffectQuad(GammaEffect, BackBuffer(), "Main")
 End Function
 

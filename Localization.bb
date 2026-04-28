@@ -116,6 +116,7 @@ Type LocalizationTable
     Field OptionTooltip_Gamma$
     Field OptionTooltip_Texlod$
     Field OptionTooltip_Vram$
+    Field OptionTooltip_Hudscalefactor$
     Field OptionTooltip_Hudoffset$
     Field OptionTooltip_Viewbob$
     Field OptionTooltip_Fov$
@@ -598,6 +599,7 @@ Function LoadLocalization(loc.LocalizationTable, file$)
                             Case "gamma" If loc\OptionTooltip_Gamma = "" Then loc\OptionTooltip_Gamma = value
                             Case "texlod" If loc\OptionTooltip_Texlod = "" Then loc\OptionTooltip_Texlod = value
                             Case "vram" If loc\OptionTooltip_Vram = "" Then loc\OptionTooltip_Vram = value
+                            Case "hudscalefactor" If loc\OptionTooltip_Hudscalefactor = "" Then loc\OptionTooltip_Hudscalefactor = value
                             Case "hudoffset" If loc\OptionTooltip_Hudoffset = "" Then loc\OptionTooltip_Hudoffset = value
                             Case "viewbob" If loc\OptionTooltip_Viewbob = "" Then loc\OptionTooltip_Viewbob = value
                             Case "fov" If loc\OptionTooltip_Fov = "" Then loc\OptionTooltip_Fov = value
