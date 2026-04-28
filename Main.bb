@@ -8287,16 +8287,29 @@ Function LoadEntities()
 	MaskImage PauseMenuIMG, 255,255,0
 	ScaleImage PauseMenuIMG,MenuScale,MenuScale
 	
-	SprintIcon% = LoadImage_Strict("GFX\sprinticon.png")
-	BlinkIcon% = LoadImage_Strict("GFX\blinkicon.png")
-	CrouchIcon% = LoadImage_Strict("GFX\sneakicon.png")
-	HandIcon% = LoadImage_Strict("GFX\handsymbol.png")
-	HandIcon2% = LoadImage_Strict("GFX\handsymbol2.png")
+	If SprintIcon = 0 Then
+		SprintIcon% = LoadImage_Strict("GFX\sprinticon.png")
+	EndIf
+	If BlinkIcon = 0 Then
+		BlinkIcon% = LoadImage_Strict("GFX\blinkicon.png")
+	EndIf
+	If CrouchIcon = 0 Then
+		CrouchIcon% = LoadImage_Strict("GFX\sneakicon.png")
+	EndIf
+	If HandIcon = 0 Then
+		HandIcon% = LoadImage_Strict("GFX\handsymbol.png")
+	EndIf
+	If HandIcon2 = 0 Then
+		HandIcon2% = LoadImage_Strict("GFX\handsymbol2.png")
+	EndIf
 
-	StaminaMeterIMG% = LoadImage_Strict("GFX\staminameter.jpg")
+	If StaminaMeterIMG = 0 Then
+		StaminaMeterIMG% = LoadImage_Strict("GFX\staminameter.jpg")
+	EndIf
 
-	Panel294 = LoadImage_Strict("GFX\294panel.jpg")
-	MaskImage(Panel294, 255,0,255)
+	If Panel294 = 0 Then
+		Panel294 = LoadImage_Strict("GFX\294panel.jpg")
+	EndIf
 	
 	
 	Brightness% = GetINIFloat("options.ini", "options", "brightness")
@@ -9244,45 +9257,24 @@ Function NullGame(playbuttonsfx%=True)
 	
 	;ClearWorld
 	
-	For lt.LightTemplates = Each LightTemplates
-		Delete lt
-	Next 
-	
-	For m.Materials = Each Materials
-		Delete m
-	Next
-	
-	For wp.WayPoints = Each WayPoints
-		Delete wp
-	Next
-	
-	For twp.TempWayPoints = Each TempWayPoints
-		Delete twp
-	Next	
-	
-	For r.Rooms = Each Rooms
-		Delete r
-	Next
-	
+	Delete Each LightTemplates
+	Delete Each Materials
+	Delete Each WayPoints
+	Delete Each TempWayPoints
+	Delete Each Rooms	
+	Delete Each Inventories
+	Delete Each Items
+
 	For itt.ItemTemplates = Each ItemTemplates
+		FreeImage(itt\invimg)
+		If itt\invimg2 <> 0 Then FreeImage(itt\invimg2)
 		Delete itt
-	Next 
-	
-	For it.Items = Each Items
-		Delete it
 	Next
-	
-	For pr.Props = Each Props
-		Delete pr
-	Next
-	
-	For de.decals = Each Decals
-		Delete de
-	Next
-	
-	For n.NPCS = Each NPCs
-		Delete n
-	Next
+
+	Delete Each Props
+	Delete Each Decals
+	Delete Each NPCs
+
 	Curr173 = Null
 	Curr106 = Null
 	Curr096 = Null
