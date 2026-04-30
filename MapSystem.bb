@@ -479,7 +479,7 @@ Function LoadRMesh(file$,rt.RoomTemplates)
 				d\Z = ReadFloat(f) * RoomScale
 
 				d\Dir = ReadInt(f)
-				If version => 0 Then
+				If version => 1 Then
 					d\Index = ReadInt(f)
 				Else
 					d\Index = -1
