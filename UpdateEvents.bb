@@ -7345,7 +7345,7 @@ Function UpdateEvents()
 							e\room\RoomDoors[0]\open = False
 						EndIf
 						
-						If CheckTriggers(PlayerRoom, EntityX(Collider), EntityY(Collider), EntityZ(Collider)) = "914input" Then
+						If IsIn914Input(PlayerRoom, EntityX(Collider), EntityY(Collider), EntityZ(Collider)) Then
 							
 							If setting = "rough" Or setting = "coarse" Then
 								If e\EventState > 70 * 2.6 And e\EventState - FPSfactor2 < 70 * 2.6 Then PlaySound_Strict Death914SFX
@@ -7380,13 +7380,13 @@ Function UpdateEvents()
 						If e\EventState > (12 * 70) Then							
 							For it.Items = Each Items
 								If it\collider <> 0 And it\Picked = False Then
-									If CheckTriggers(PlayerRoom, EntityX(it\Collider), EntityY(it\Collider), EntityZ(it\Collider)) = "914input" Then
+									If IsIn914Input(PlayerRoom, EntityX(it\Collider), EntityY(it\Collider), EntityZ(it\Collider)) Then
 										Use914(it, setting, EntityX(e\room\Objects[3], True), EntityY(e\room\Objects[3], True), EntityZ(e\room\Objects[3], True))
 									End If
 								End If
 							Next
 							
-							If CheckTriggers(PlayerRoom, EntityX(Collider), EntityY(Collider), EntityZ(Collider)) = "914input" Then
+							If IsIn914Input(PlayerRoom, EntityX(Collider), EntityY(Collider), EntityZ(Collider)) Then
 								Select setting
 									Case "coarse"
 										Injuries = 4.0
@@ -9938,36 +9938,17 @@ Function UpdateEndings()
 	
 End Function
 
+Global Use914Triggerbox% = False
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+Function IsIn914Input(r.Rooms, x#, y#, z#)
+	If Use914Triggerbox Then
+		Return CheckTriggers(r, x, y, z) = "914input"
+	Else
+		TFormPoint(x, y, z, 0, r\obj)
+		Local tx# = TFormedX(), ty# = TFormedY(), tz# = TFormedZ()
+		Return tx > -926 And tx < -497 And ty > 0 And ty < 322 And tz > 521 And tz < 767
+	EndIf
+End Function
 
 ;~IDEal Editor Parameters:
 ;~F#A13

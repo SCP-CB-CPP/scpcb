@@ -4469,6 +4469,13 @@ Function FillRoom(r.Rooms)
 			
 			it = CreateItem("docL1", r\x - 928.0 * RoomScale, 160.0 * RoomScale, r\z - 160.0 * RoomScale)
 			EntityParent(it\collider, r\obj)
+
+			Use914Triggerbox = False
+			Local ttb.TempTriggerboxes = r\RoomTemplate\FirstTempTriggerbox
+			While ttb <> Null
+				If ttb\Name = "914input" Then Use914Triggerbox = True : Exit
+				ttb = ttb\Successor
+			Wend
 			;[End Block]
 		Case "173"
 			;[Block]
