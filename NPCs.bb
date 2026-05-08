@@ -7081,106 +7081,253 @@ Function Find860Angle(n.NPCs, fr.Forest)
 	EndIf		
 End Function
 
-Function Console_SpawnNPC(c_input$, c_state$ = "")
-	Local n.NPCs
-	Local consoleMSG$
-	
+Function Console_NPCNameToType%(c_input$)
 	Select c_input$ 
 		Case "008", "008zombie"
-			n.NPCs = CreateNPC(NPCtype008, EntityX(Collider), EntityY(Collider) + 0.2, EntityZ(Collider))
-			n\State = 1
-			consoleMSG = "SCP-008 infected human spawned."
-			
+			Return NPCtype008
 		Case "049", "scp049", "scp-049"
-			n.NPCs = CreateNPC(NPCtype049, EntityX(Collider), EntityY(Collider) + 0.2, EntityZ(Collider))
-			n\State = 1
-			consoleMSG = "SCP-049 spawned."
-			
-		Case "049-2", "0492", "scp-049-2", "scp049-2", "049zombie"
-			n.NPCs = CreateNPC(NPCtypeZombie, EntityX(Collider), EntityY(Collider) + 0.2, EntityZ(Collider))
-			n\State = 1
-			consoleMSG = "SCP-049-2 spawned."
-			
+			Return NPCtype049
+		Case "049-2", "0492", "scp-049-2", "scp049-2", "scp-0492", "scp0492", "049zombie"
+			Return NPCtypeZombie
 		Case "066", "scp066", "scp-066"
-			n.NPCs = CreateNPC(NPCtype066, EntityX(Collider), EntityY(Collider) + 0.2, EntityZ(Collider))
-			consoleMSG = "SCP-066 spawned."
-			
+			Return NPCtype066
 		Case "096", "scp096", "scp-096"
-			n.NPCs = CreateNPC(NPCtype096, EntityX(Collider), EntityY(Collider) + 0.2, EntityZ(Collider))
+			Return NPCtype096
+		Case "106", "scp106", "scp-106", "larry"
+			Return NPCtypeOldMan
+		Case "173", "scp173", "scp-173", "statue"
+			Return NPCtype173
+		Case "372", "scp372", "scp-372"
+			Return NPCtype372
+		Case "513-1", "5131", "scp513-1", "scp-513-1", "scp-5131", "scp5131"
+			Return NPCtype5131
+		Case "860-2", "8602", "scp860-2", "scp-860-2", "scp-8602", "scp8602"
+			Return NPCtype860
+		Case "939", "scp939", "scp-939"
+			Return NPCtype939
+		Case "966", "scp966", "scp-966"
+			Return NPCtype966
+		Case "1048a", "1048-a", "scp1048-a", "scp-1048-a", "scp1048a", "scp-1048a"
+			Return NPCtype1048a
+		Case "1499-1", "14991", "scp-1499-1", "scp1499-1", "scp-14991", "scp14991"
+			Return NPCtype1499
+		Case "class-d", "classd", "d"
+			Return NPCtypeD
+		Case "guard"
+			Return NPCtypeGuard
+		Case "mtf", "ntf"
+			Return NPCtypeMTF
+		Case "apache", "helicopter"
+			Return NPCtypeApache
+		Case "tentacle"
+			Return NPCtypeTentacle
+		Case "clerk"
+			Return NPCtypeClerk
+		Default
+			Return -1
+	End Select
+End Function
+
+Function Console_NPCTypeToName$(npcType%, plural% = False)
+	Local name$, hasPlural% = False
+	Select npcType
+		Case NPCtype008
+			name = "SCP-008 infected human" : hasPlural = True
+		Case NPCtype049
+			name = "SCP-049"
+		Case NPCtypeZombie
+			name = "SCP-049-2"
+		Case NPCtype066
+			name = "SCP-066"
+		Case NPCtype096
+			name = "SCP-096"
+		Case NPCtypeOldMan
+			name = "SCP-106"
+		Case NPCtype173
+			name = "SCP-173"
+		Case NPCtype372
+			name = "SCP-372"
+		Case NPCtype5131
+			name = "SCP-513-1"
+		Case NPCtype860
+			name = "SCP-860-2"
+		Case NPCtype939
+			name = "SCP-939 instance" : hasPlural = True
+		Case NPCtype966
+			name = "SCP-966 instance" : hasPlural = True
+		Case NPCtype1048a
+			name = "SCP-1048-A"
+		Case NPCtype1499
+			name = "SCP-1499-1 instance" : hasPlural = True
+		Case NPCtypeD
+			If plural Then Return "D-Classes" Else Return "D-Class"
+		Case NPCtypeGuard
+			name = "Guard" : hasPlural = True
+		Case NPCtypeMTF
+			name = "MTF unit" : hasPlural = True
+		Case NPCtypeApache
+			name = "Apache" : hasPlural = True
+		Case NPCtypeTentacle
+			name = "SCP-035 tentacle" : hasPlural = True
+		Case NPCtypeClerk
+			name = "Clerk" : hasPlural = True
+		Default
+			name = "Unknown"
+	End Select
+	If plural And hasPlural Then name = name + "s"
+	Return name
+End Function
+
+Function Console_ListNPCTypes()
+	CreateConsoleMsg("008zombie / 049 / 049-2 / 066 / 096 / 106 / 173")
+	CreateConsoleMsg("/ 372 / 513-1 / 966 / 1048-a / 1499-1 / class-d")
+	CreateConsoleMsg("/ guard / mtf / apache / tentacle")
+End Function
+
+Function Console_SpawnNPC(c_input$, c_state$ = "")
+	Local n.NPCs
+	
+	Local npcType% = Console_NPCNameToType(c_input)
+
+	Select npcType
+		Case NPCtype008, NPCtype049, NPCtypeZombie
+			n.NPCs = CreateNPC(npcType, EntityX(Collider), EntityY(Collider) + 0.2, EntityZ(Collider))
+			n\State = 1
+		Case NPCtype066, NPCtype372, NPCtype5131, NPCType966, NPCtype1048a, NPCtype1499, NPCtypeD, NPCtypeGuard, NPCtypeApache, NPCtypeClerk
+			n.NPCs = CreateNPC(npcType, EntityX(Collider), EntityY(Collider) + 0.2, EntityZ(Collider))
+		Case NPCType096
+			n.NPCs = CreateNPC(npcType, EntityX(Collider), EntityY(Collider) + 0.2, EntityZ(Collider))
 			n\State = 5
 			If (Curr096 = Null) Then Curr096 = n
-			consoleMSG = "SCP-096 spawned."
-			
-		Case "106", "scp106", "scp-106", "larry"
-			n.NPCs = CreateNPC(NPCtypeOldMan, EntityX(Collider), EntityY(Collider) - 0.5, EntityZ(Collider))
+		Case NPCtypeOldMan
+			n.NPCs = CreateNPC(npcType, EntityX(Collider), EntityY(Collider) - 0.5, EntityZ(Collider))
 			n\State = -1
-			consoleMSG = "SCP-106 spawned."
-			
-		Case "173", "scp173", "scp-173", "statue"
-			n.NPCs = CreateNPC(NPCtype173, EntityX(Collider), EntityY(Collider) + 0.2, EntityZ(Collider))
+			; No Curr106?
+		Case NPCtype173
+			n.NPCs = CreateNPC(npcType, EntityX(Collider), EntityY(Collider) + 0.2, EntityZ(Collider))
 			Curr173 = n
 			If (Curr173\Idle = 3) Then Curr173\Idle = False
-			consoleMSG = "SCP-173 spawned."
-		Case "372", "scp372", "scp-372"
-			n.NPCs = CreateNPC(NPCtype372, EntityX(Collider), EntityY(Collider) + 0.2, EntityZ(Collider))
-			consoleMSG = "SCP-372 spawned."
-			
-		Case "513-1", "5131", "scp513-1", "scp-513-1"
-			n.NPCs = CreateNPC(NPCtype5131, EntityX(Collider), EntityY(Collider) + 0.2, EntityZ(Collider))
-			consoleMSG = "SCP-513-1 spawned."
-			
-		Case "860-2", "8602", "scp860-2", "scp-860-2"
-			CreateConsoleMsg("SCP-860-2 cannot be spawned with the console. Sorry!", 255, 0, 0)
-			
-		Case "939", "scp939", "scp-939"
-			CreateConsoleMsg("SCP-939 instances cannot be spawned with the console. Sorry!", 255, 0, 0)
-
-		Case "966", "scp966", "scp-966"
-			n.NPCs = CreateNPC(NPCtype966, EntityX(Collider), EntityY(Collider) + 0.2, EntityZ(Collider))
-			consoleMSG = "SCP-966 instance spawned."
-			
-		Case "1048a", "1048-a", "scp1048-a", "scp-1048-a", "scp1048a", "scp-1048a"
-			n.NPCs = CreateNPC(NPCtype1048a, EntityX(Collider), EntityY(Collider) + 0.2, EntityZ(Collider))
-			consoleMSG = "SCP-1048-A spawned."
-			
-		Case "1499-1", "14991", "scp-1499-1", "scp1499-1"
-			n.NPCs = CreateNPC(NPCtype1499, EntityX(Collider), EntityY(Collider) + 0.2, EntityZ(Collider))
-			consoleMSG = "SCP-1499-1 instance spawned."
-			
-		Case "class-d", "classd", "d"
-			n.NPCs = CreateNPC(NPCtypeD, EntityX(Collider), EntityY(Collider) + 0.2, EntityZ(Collider))
-			consoleMSG = "D-Class spawned."
-			
-		Case "guard"
-			n.NPCs = CreateNPC(NPCtypeGuard, EntityX(Collider), EntityY(Collider) + 0.2, EntityZ(Collider))
-			consoleMSG = "Guard spawned."
-			
-		Case "mtf"
-			n.NPCs = CreateNPC(NPCtypeMTF, EntityX(Collider), EntityY(Collider) + 0.2, EntityZ(Collider))
-			consoleMSG = "MTF unit spawned."
-			
-		Case "apache", "helicopter"
-			n.NPCs = CreateNPC(NPCtypeApache, EntityX(Collider), EntityY(Collider) + 0.2, EntityZ(Collider))
-			consoleMSG = "Apache spawned."
-			
-		Case "tentacle"
-			n.NPCs = CreateNPC(NPCtypeTentacle, EntityX(Collider), EntityY(Collider), EntityZ(Collider))
-			consoleMSG = "SCP-035 tentacle spawned."
-			
-		Case "clerk"
-			n.NPCs = CreateNPC(NPCtypeClerk, EntityX(Collider), EntityY(Collider) + 0.2, EntityZ(Collider))
-			consoleMSG = "Clerk spawned."
-			
-		Default 
+		Case NPCType860, NPCtype939
+			CreateConsoleMsg(Console_NPCTypeToName(npcType, True) + " cannot be spawned with the console. Sorry!", 255, 0, 0) : Return
+		Case NPCtypeTentacle
+			n.NPCs = CreateNPC(npcType, EntityX(Collider), EntityY(Collider), EntityZ(Collider))
+		Default
 			CreateConsoleMsg("NPC type not found.", 255, 0, 0) : Return
 	End Select
-	
+
+	Local consoleMSG$ = Console_NPCTypeToName(npcType) + " spawned."
+
 	If n <> Null
 		If c_state <> "" Then n\State = Float(c_state) : consoleMSG = consoleMSG + " (State = " + n\State + ")"
 	EndIf
 	
 	CreateConsoleMsg(consoleMSG)
+End Function
+
+Function Console_ChangeNPCSpeed(c_input$, c_speed#)
+	Local npcType% = Console_NPCNameToType(c_input)
+
+	Select npcType
+		Case NPCtype372, NPCtype5131, NPCtypeApache, NPCtypeTentacle, NPCtype1048a
+			CreateConsoleMsg(Console_NPCTypeToName(npcType) + " speed cannot be changed with the console. Sorry!", 255, 0, 0) : Return
+		Case -1
+			CreateConsoleMsg("NPC type not found.", 255, 0, 0) : Return
+	End Select
+
+	For n.NPCs = Each NPCs
+		If n\NPCtype = npcType Then
+			n\Speed = c_speed
+		EndIf
+	Next
 	
+	CreateConsoleMsg(Console_NPCTypeToName(npcType) + " speed changed to " + c_speed)
+End Function
+
+Function Console_PrintNPCState(c_input$)
+	Local npcType% = Console_NPCNameToType(c_input)
+
+	If npcType = -1 Then CreateConsoleMsg("NPC type not found.", 255, 0, 0) : Return
+
+	Local any% = False
+	For n.NPCs = Each NPCs
+		If n\NPCtype = npcType Then
+			If any Then
+				CreateConsoleMsg("******************************")
+			Else
+				CreateConsoleMsg(Console_NPCTypeToName(npcType))
+				any = True
+			EndIf
+			CreateConsoleMsg("Position: " + EntityX(n\obj, True) + ", " + EntityY(n\obj, True) + ", " + EntityZ(n\obj, True))
+			CreateConsoleMsg("Idle: " + n\Idle)
+			CreateConsoleMsg("State: " + n\State)
+		EndIf
+	Next
+
+	If Not any Then CreateConsoleMsg("No " + Console_NPCTypeToName(npcType, True) + " found.", 255, 0, 0)
+End Function
+
+Function Console_CheckCanToggleNPC(npcType%)
+	Select npcType
+		Case -1
+			CreateConsoleMsg("NPC type not found.", 255, 0, 0) : Return False
+		Case NPCtype106, NPCtype173
+			Return True
+		Default
+			CreateConsoleMsg(Console_NPCTypeToName(npcType, True) + " cannot be enabled/disabled with the console. Sorry!", 255, 0, 0) : Return False
+	End Select
+End Function
+
+Function Console_EnableNPC(c_input$)
+	Local npcType% = Console_NPCNameToType(c_input)
+
+	If Not Console_CheckCanToggleNPC(npcType) Then Return
+
+	For n.NPCs = Each NPCs
+		If n\NPCtype = npcType Then
+			EnableNPC(n)
+		EndIf
+	Next
+	
+	CreateConsoleMsg(Console_NPCTypeToName(npcType, True) + " enabled.")
+End Function
+
+Function Console_DisableNPC(c_input$)
+	Local npcType% = Console_NPCNameToType(c_input)
+
+	If Not Console_CheckCanToggleNPC(npcType) Then Return
+
+	For n.NPCs = Each NPCs
+		If n\NPCtype = npcType Then
+			DisableNPC(n)
+		EndIf
+	Next
+	
+	CreateConsoleMsg(Console_NPCTypeToName(npcType) + " disabled.")
+End Function
+
+Function EnableNPC(n.NPCs)
+	Select n\NPCtype
+		Case NPCtype106
+			n\Idle = False
+			Contained106 = False
+		Case NPCtype173
+			n\Idle = False
+	End Select
+	ShowEntity n\obj
+	ShowEntity n\Collider
+End Function
+
+Function DisableNPC(n.NPCs)
+	Select n\NPCtype
+		Case NPCtype106
+			n\Idle = True
+			n\State = 200000
+			Contained106 = True
+		Case NPCtype173
+			n\Idle = 3
+	End Select
+	HideEntity n\obj
+	HideEntity n\Collider
 End Function
 
 Function ManipulateNPCBones()

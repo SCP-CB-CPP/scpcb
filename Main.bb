@@ -716,16 +716,11 @@ Function UpdateConsole()
 							CreateConsoleMsg("LIST OF COMMANDS - PAGE 2/3")
 							CreateConsoleMsg("******************************")
 							CreateConsoleMsg("- spawn [npc type] [state]")
-							CreateConsoleMsg("- 096state")
+							CreateConsoleMsg("- npcspeed [npc type] [speed]")
+							CreateConsoleMsg("- npcstate [npc type]")
+							CreateConsoleMsg("- enable [npc type]")
+							CreateConsoleMsg("- disable [npc type]")
 							CreateConsoleMsg("- reset096")
-							CreateConsoleMsg("- 106state")
-							CreateConsoleMsg("- 106speed")
-							CreateConsoleMsg("- disable106")
-							CreateConsoleMsg("- enable106")
-							CreateConsoleMsg("- 173speed")
-							CreateConsoleMsg("- 173state")
-							CreateConsoleMsg("- disable173")
-							CreateConsoleMsg("- enable173")
 							CreateConsoleMsg("- halloween")
 							CreateConsoleMsg("- scp-420-j")
 							CreateConsoleMsg("******************************")
@@ -815,9 +810,7 @@ Function UpdateConsole()
 							CreateConsoleMsg("******************************")
 							CreateConsoleMsg("Spawns an NPC at the player's location.")
 							CreateConsoleMsg("Valid parameters are:")
-							CreateConsoleMsg("008zombie / 049 / 049-2 / 066 / 096 / 106 / 173")
-							CreateConsoleMsg("/ 372 / 513-1 / 966 / 1048-a / 1499-1 / class-d")
-							CreateConsoleMsg("/ guard / mtf / apache / tentacle")
+							Console_ListNPCTypes()
 							CreateConsoleMsg("******************************")
 						Case "revive","undead","resurrect"
 							CreateConsoleMsg("HELP - revive")
@@ -1139,6 +1132,14 @@ Function UpdateConsole()
 					
 					WireFrame WireframeState
 					;[End Block]
+				Case "npcspeed"
+					;[Block]
+					args$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
+					StrTemp$ = Piece$(args$, 1)
+					StrTemp2$ = Piece$(args$, 2)
+
+					Console_ChangeNPCSpeed(StrTemp$, Float(StrTemp2))
+					;[End Block]
 				Case "173speed"
 					;[Block]
 					StrTemp$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
@@ -1150,6 +1151,21 @@ Function UpdateConsole()
 					StrTemp$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
 					Curr106\Speed = Float(StrTemp)
 					CreateConsoleMsg("106's speed set to " + StrTemp)
+					;[End Block]
+				Case "npcstate"
+					;[Block]
+					StrTemp$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
+					Console_PrintNPCState(StrTemp)
+					;[End Block]
+				Case "enable"
+					;[Block]
+					StrTemp$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
+					Console_EnableNPC(StrTemp)
+					;[End Block]
+				Case "disable"
+					;[Block]
+					StrTemp$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
+					Console_DisableNPC(StrTemp)
 					;[End Block]
 				Case "173state"
 					;[Block]
@@ -1182,28 +1198,19 @@ Function UpdateConsole()
 					;[End Block]
 				Case "disable173"
 					;[Block]
-					Curr173\Idle = 3 ;This phenominal comment is brought to you by PolyFox. His absolute wisdom in this fatigue of knowledge brought about a new era of 173 state checks.
-					HideEntity Curr173\obj
-					HideEntity Curr173\Collider
+					DisableNPC(Curr173)
 					;[End Block]
 				Case "enable173"
 					;[Block]
-					Curr173\Idle = False
-					ShowEntity Curr173\obj
-					ShowEntity Curr173\Collider
+					EnableNPC(Curr173)
 					;[End Block]
 				Case "disable106"
 					;[Block]
-					Curr106\Idle = True
-					Curr106\State = 200000
-					Contained106 = True
+					DisableNPC(Curr106)
 					;[End Block]
 				Case "enable106"
 					;[Block]
-					Curr106\Idle = False
-					Contained106 = False
-					ShowEntity Curr106\Collider
-					ShowEntity Curr106\obj
+					EnableNPC(Curr106)
 					;[End Block]
 				Case "halloween"
 					;[Block]
@@ -1832,9 +1839,8 @@ CreateConsoleMsg(" ")
 CreateConsoleMsg("  - heal")
 CreateConsoleMsg("  - spawnitem [item name]")
 CreateConsoleMsg(" ")
-CreateConsoleMsg("  - disable173/enable173")
-CreateConsoleMsg("  - disable106/enable106")
-CreateConsoleMsg("  - 173state/106state/096state")
+CreateConsoleMsg("  - disable/enable [npc type]")
+CreateConsoleMsg("  - npcspeed [npc type] [speed]")
 CreateConsoleMsg("  - spawn [npc type]")
 
 ;---------------------------------------------------------------------------------------------------
