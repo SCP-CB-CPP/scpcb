@@ -168,6 +168,7 @@ Function LoadSubtitleTokens(path$, tokenType)
 
 	Local firstEntry.SubtitleEntry
 	Local lastEntry.SubtitleEntry
+	Local isCaptionDefault% = False
 	While Not Eof(f)
 		Local linestr$ = ReadLine(f)
 		Local strtemp$ = Trim(SubtitleStripComments(linestr))
@@ -179,6 +180,7 @@ Function LoadSubtitleTokens(path$, tokenType)
 				CreateSubtitleToken(firstEntry, section, tokenType)
 				firstEntry = Null
 				lastEntry = Null
+				isCaptionDefault = False
 			EndIf
 
 			section = Lower(Mid(strtemp, 2, Len(strtemp)-2))
@@ -194,7 +196,9 @@ Function LoadSubtitleTokens(path$, tokenType)
 			Local value$ = Trim(Right(strtemp, Len(strtemp)-equal))
 
 			If Not ApplySubtitleColorSetting(key, value, c) Then
-				Local e.SubtitleEntry = CreateSubtitleEntry(key, value, c, tokenType)
+				If key = "caption" Then isCaptionDefault = (value = "true") : Continue
+
+				Local e.SubtitleEntry = CreateSubtitleEntry(key, value, c, tokenType, isCaptionDefault)
 				If e\col = c Then used = True ; If the same color gets returned, this color is now being referenced directly by an entry and should not be deleted.
 				If firstEntry = Null Then firstEntry = e
 				If lastEntry <> Null Then lastEntry\nextEntry = e
@@ -213,13 +217,14 @@ Function LoadSubtitleTokens(path$, tokenType)
 End Function
 
 
-Function CreateSubtitleEntry.SubtitleEntry(key$, value$, clr.SubtitleColor, tokenType)
+Function CreateSubtitleEntry.SubtitleEntry(key$, value$, clr.SubtitleColor, tokenType%, isCaptionDefault%)
 	Local e.SubtitleEntry = new SubtitleEntry
 
 	e\time = Float(key)
 	e\length = (5.0+1.0) * 70.0
 
 	e\col = clr
+	e\entryType = isCaptionDefault Shl 1
 	e\txt = ParseSubtitleSettings(e, value)
 
 	If tokenType = TOKEN_TYPE_CAPTION Then
