@@ -4160,7 +4160,7 @@ Function DrawEnding()
 		;EndIf
 		
 		If EndingScreen = 0 Then
-			SubBox\screenTop = GraphicsHeight() * 0.9
+			SubBox\screenTop = GraphicHeight * 0.9
 			RecalculateSubtitleBoxTarget()
 
 			EndingScreen = LoadImage_Strict("GFX\endingscreen.pt")
