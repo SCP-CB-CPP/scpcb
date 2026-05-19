@@ -1194,6 +1194,11 @@ Function UpdateLauncher()
 		EndIf
 	Next
 
+	Local aspectRatioBarWidth% = -5
+	For i = 0 To (AspectRatioCount - 1)
+		aspectRatioBarWidth = aspectRatioBarWidth + StringWidth(Str(AspectRatioWidths(i)) + ":" + Str(AspectRatioHeights(i))) + 15
+	Next
+
 	If SelectedGfxMode = -1 Then SelectedGfxMode = nativeGfxMode : SelectedAspectRatio = nativeAspectRatio
 
 	Local gfxDriverCount = CountGfxDrivers()
@@ -1229,7 +1234,7 @@ Function UpdateLauncher()
 		y = y - 5
 
 		Color 255, 255, 255
-		Rect(x, y, 400, 20)
+		Rect(x, y, aspectRatioBarWidth, 20)
 		For i = 0 To (AspectRatioCount - 1)
 			Color 0, 0, 0
 			Local txt$ = Str(AspectRatioWidths(i)) + ":" + Str(AspectRatioHeights(i))
