@@ -7314,17 +7314,17 @@ Function CreateMap(loadingstart,loadingcount#)
 				For x = x_min To x_max
 					If MapTemp(x,y)=3 Then
 						placed=False
-						Select 0 ;see if adding a ROOM4 is possible
-							Case (MapTemp(x+1,y) Or MapTemp(x+1,y+1) Or MapTemp(x+1,y-1) Or MapTemp(x+2,y) Or x=x_max)
+						Select 1 ;see if adding a ROOM4 is possible
+							Case (x<>x_max And MapTemp(x+1,y)+MapTemp(x+1,y+1)+MapTemp(x+1,y-1)+MapTemp(x+2,y)=0)
 								MapTemp(x+1,y)=1
 								placed=True
-							Case (MapTemp(x-1,y) Or MapTemp(x-1,y+1) Or MapTemp(x-1,y-1) Or MapTemp(x-2,y) Or x=x_min)
+							Case (x<>x_min And MapTemp(x-1,y)+MapTemp(x-1,y+1)+MapTemp(x-1,y-1)+MapTemp(x-2,y)=0)
 								MapTemp(x-1,y)=1
 								placed=True
-							Case (MapTemp(x,y+1) Or MapTemp(x+1,y+1) Or MapTemp(x-1,y+1) Or MapTemp(x,y+2) Or (i=0 And y=y_max))
+							Case ((i<>0 Lor y<>y_max) And MapTemp(x,y+1)+MapTemp(x+1,y+1)+MapTemp(x-1,y+1)+MapTemp(x,y+2)=0)
 								MapTemp(x,y+1)=1
 								placed=True
-							Case (MapTemp(x,y-1) Or MapTemp(x+1,y-1) Or MapTemp(x-1,y-1) Or MapTempSafe(x,y-2) Or (i<2 And y=y_min))
+							Case ((i=2 Lor y<>y_min) And MapTemp(x,y-1)+MapTemp(x+1,y-1)+MapTemp(x-1,y-1)+MapTemp(x,y-2)=0)
 								MapTemp(x,y-1)=1
 								placed=True
 						End Select
