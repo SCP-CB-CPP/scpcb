@@ -8752,11 +8752,8 @@ Function UpdateDimension1499()
 				ShowEntity e\room\obj
 				If QuickLoadPercent = 100 Or QuickLoadPercent = -1
 					UpdateChunks(e\room,15)
-					; This is an attempt at a bandaid fix for very inconsistent 1499 crashes.
-					If EntityExist(NTF_1499Sky) Then
-						ShowEntity NTF_1499Sky
-						Update1499Sky()
-					EndIf
+					ShowEntity NTF_1499Sky
+					Update1499Sky()
 					ShouldPlay = 18
 					If EntityY(Collider)<800.0
 						PositionEntity Collider,EntityX(Collider),800.5,EntityZ(Collider),True
