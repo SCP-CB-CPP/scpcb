@@ -8375,9 +8375,9 @@ Function GetSeedString$(loc%=True)
 		EndIf
 	Else
 		If HasNumericSeed Then
-			Return "Map seed: "+Str(RandomSeedNumeric)
+			Return "Map seed (numeric): "+Str(RandomSeedNumeric)
 		Else
-			Return "Map seed (numeric): "+RandomSeed
+			Return "Map seed: "+RandomSeed
 		EndIf
 	EndIf
 End Function
