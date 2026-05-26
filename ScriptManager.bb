@@ -10,8 +10,10 @@ Type Hooks
 End Type
 
 Global HookCount% = 0
-Const HOOK_TYPE_RUN_ALL = 0
-Const HOOK_TYPE_OVERRIDABLE = 1
+Const HOOK_TYPE_RUN_ALL% = 0
+Const HOOK_TYPE_OVERRIDABLE% = 1
+Const HOOK_TYPE_RETURN_INT% = 2
+Const HOOK_TYPE_RETURN_STR% = 3
 
 Delete Each Hooks
 Global Initialize.Hooks = CreateHook("Hook_Initialize")
@@ -41,6 +43,13 @@ Global CreateNPC.Hooks = CreateHook("Hook_CreateNPC")
 Global PostCreateNPC.Hooks = CreateHook("Hook_PostCreateNPC")
 Global RemoveNPC.Hooks = CreateHook("Hook_RemoveNPC", HOOK_TYPE_OVERRIDABLE)
 Global UpdateNPC.Hooks = CreateHook("Hook_UpdateNPC", HOOK_TYPE_OVERRIDABLE)
+Global ConsoleNPCNameToType.Hooks = CreateHook("Hook_ConsoleNPCNameToType", HOOK_TYPE_RETURN_INT)
+Global ConsoleNPCTypeToName.Hooks = CreateHook("Hook_ConsoleNPCTypeToName", HOOK_TYPE_RETURN_STR)
+Global ConsoleSpawnNPC.Hooks = CreateHook("Hook_ConsoleSpawnNPC", HOOK_TYPE_OVERRIDABLE)
+Global ConsoleCheckCanChangeNPCSpeed.Hooks = CreateHook("Hook_ConsoleCheckCanChangeNPCSpeed", HOOK_TYPE_RETURN_INT)
+Global ConsoleCheckCanToggleNPC.Hooks = CreateHook("Hook_ConsoleCheckCanToggleNPC", HOOK_TYPE_RETURN_INT)
+Global EnableNPC.Hooks = CreateHook("Hook_EnableNPC", HOOK_TYPE_OVERRIDABLE)
+Global DisableNPC.Hooks = CreateHook("Hook_DisableNPC", HOOK_TYPE_OVERRIDABLE)
 
 Dim HookFuncs%(HookCount, 0)
 
@@ -82,8 +91,28 @@ Function CallHook%(h.Hooks)
                 ExecuteFunction(HookFuncs%(h\ID, i), &ret)
                 If ret Then Return True
             Next
+        Case HOOK_TYPE_RETURN_INT
+            For i = 0 To h\Subscribers-1
+                ExecuteFunction(HookFuncs%(h\ID, i), &ret)
+                If ret <> -1 Then Return ret
+            Next
+        Case HOOK_TYPE_RETURN_STR
+            RuntimeErrorExt("Incorrect call hook function called for return type string!")
     End Select
     Return False
+End Function
+
+Function CallHookStr$(h.Hooks)
+    If h\HookType <> HOOK_TYPE_RETURN_STR Then
+        RuntimeErrorExt("Incorrect call hook function called for non-string return type!")
+        Return ""
+    End If
+    Local ret$
+    For i = 0 To h\Subscribers-1
+        ExecuteFunction(HookFuncs%(h\ID, i), &ret)
+        If ret <> "" Then Return ret
+    Next
+    Return ""
 End Function
 
 Function CreateModule%(name$, file$)

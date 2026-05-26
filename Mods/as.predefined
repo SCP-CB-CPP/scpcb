@@ -482,6 +482,7 @@ float UpdateElevator(float state, CB::Door@ door1, CB::Door@ door2, B3D::Entity@
 void UpdateAll();
 void UpdateDimension1499();
 void UpdateEndings();
+void IsIn914Input(CB::Room@ room, float x, float y, float z);
 }
 
 namespace CB::SubtitleBox {
@@ -537,7 +538,7 @@ void Render();
 string StripComments(string line);
 void LoadVoices(string path);
 void LoadTokens(string path, int tokenType);
-CB::SubtitleEntry@ CreateEntry(string key, string value, CB::SubtitleColor@ color, int tokenType);
+CB::SubtitleEntry@ CreateEntry(string key, string value, CB::SubtitleColor@ color, int tokenType, bool isCaptionDefault);
 void CreateToken(CB::SubtitleEntry@ entry, string soundPathGroup, int tokenType);
 CB::SubtitleToken@ GetToken(string soundPath);
 string ParseSettings(CB::SubtitleEntry@ entry, string txt, bool isCaption = false);
@@ -839,6 +840,7 @@ class Brush {
     void SetEffect(B3D::Effect@ effect);
     void SetTexture(B3D::Texture@ texture, int frame = 0, int index = 0);
     B3D::Texture@ GetTexture(int index = 0);
+    int GetBlend();
     void SetBlend(int blend);
     void SetFX(int fx);
 }
@@ -1178,6 +1180,7 @@ class Mesh {
     void Flip();
     void PaintMesh(B3D::Brush@ brush);
     void Add(B3D::Mesh@ destMesh);
+    int Weld(float epsilon);
     void UpdateNormals(int flat = 0);
     void UpdateTB();
     void Light(float red, float green, float blue, float range = 0, float x = 0, float y = 0, float z = 0);
@@ -1290,7 +1293,7 @@ class Camera {
     int Project(float x, float y, float z, int clamp = 1);
     B3D::Matrix@ GetMatrix(int typ, float tween = 1);
     B3D::Entity@ Pick(float viewportX, float viewportY);
-    void Render(B3D::Model@ entity, float tween = 1);
+    void Render(B3D::Model@ entity, float tween = 1, int settings = -1);
     void SetOrder(int order);
     int InView(B3D::Entity@ camera);
 }

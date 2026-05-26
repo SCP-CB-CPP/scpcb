@@ -7108,6 +7108,13 @@ Function Find860Angle(n.NPCs, fr.Forest)
 End Function
 
 Function Console_NPCNameToType%(c_input$)
+	If ConsoleNPCNameToType\Subscribers > 0 Then
+		PrepareFunction(1)
+		SetArgString(0, c_input)
+		Local ret% = CallHook(ConsoleNPCNameToType)
+		If ret <> -1 Then Return ret
+	EndIf
+
 	Select c_input$ 
 		Case "008", "008zombie"
 			Return NPCtype008
@@ -7156,6 +7163,15 @@ End Function
 
 Function Console_NPCTypeToName$(npcType%, plural% = False)
 	Local name$, hasPlural% = False
+
+	If ConsoleNPCTypeToName\Subscribers > 0 Then
+		PrepareFunction(2)
+		SetArgInt(0, npcType)
+		SetArgInt(1, plural)
+		name = CallHookStr(ConsoleNPCTypeToName)
+		If name <> "" Then Return name
+	EndIf
+
 	Select npcType
 		Case NPCtype008
 			name = "SCP-008 infected human" : hasPlural = True
@@ -7205,6 +7221,7 @@ Function Console_NPCTypeToName$(npcType%, plural% = False)
 End Function
 
 Function Console_ListNPCTypes()
+	; TODO: Script hooking?
 	CreateConsoleMsg("008zombie / 049 / 049-2 / 066 / 096 / 106 / 173")
 	CreateConsoleMsg("/ 372 / 513-1 / 966 / 1048-a / 1499-1 / class-d")
 	CreateConsoleMsg("/ guard / mtf / apache / tentacle")
@@ -7215,12 +7232,21 @@ Function Console_SpawnNPC(c_input$, c_state$ = "")
 	
 	Local npcType% = Console_NPCNameToType(c_input)
 
+	If ConsoleSpawnNPC\Subscribers > 0 Then
+		PrepareFunction(1)
+		SetArgInt(0, npcType)
+		Select CallHook(ConsoleSpawnNPC)
+			Case 0
+				npcType = -3
+			Case 1
+				npcType = -2
+		End Select
+	EndIf
+
 	Select npcType
 		Case NPCtype008, NPCtype049, NPCtypeZombie
 			n.NPCs = CreateNPC(npcType, EntityX(Collider), EntityY(Collider) + 0.2, EntityZ(Collider))
 			n\State = 1
-		Case NPCtype066, NPCtype372, NPCtype5131, NPCType966, NPCtype1048a, NPCtype1499, NPCtypeD, NPCtypeGuard, NPCtypeApache, NPCtypeClerk
-			n.NPCs = CreateNPC(npcType, EntityX(Collider), EntityY(Collider) + 0.2, EntityZ(Collider))
 		Case NPCType096
 			n.NPCs = CreateNPC(npcType, EntityX(Collider), EntityY(Collider) + 0.2, EntityZ(Collider))
 			n\State = 5
@@ -7233,12 +7259,16 @@ Function Console_SpawnNPC(c_input$, c_state$ = "")
 			n.NPCs = CreateNPC(npcType, EntityX(Collider), EntityY(Collider) + 0.2, EntityZ(Collider))
 			Curr173 = n
 			If (Curr173\Idle = 3) Then Curr173\Idle = False
-		Case NPCType860, NPCtype939
+		Case NPCType860, NPCtype939, -3
 			CreateConsoleMsg(Console_NPCTypeToName(npcType, True) + " cannot be spawned with the console. Sorry!", 255, 0, 0) : Return
 		Case NPCtypeTentacle
 			n.NPCs = CreateNPC(npcType, EntityX(Collider), EntityY(Collider), EntityZ(Collider))
-		Default
+		Case -1
 			CreateConsoleMsg("NPC type not found.", 255, 0, 0) : Return
+		Case -2
+			; NOP
+		Default
+			n.NPCs = CreateNPC(npcType, EntityX(Collider), EntityY(Collider) + 0.2, EntityZ(Collider))
 	End Select
 
 	Local consoleMSG$ = Console_NPCTypeToName(npcType) + " spawned."
@@ -7253,8 +7283,19 @@ End Function
 Function Console_ChangeNPCSpeed(c_input$, c_speed#)
 	Local npcType% = Console_NPCNameToType(c_input)
 
+	If ConsoleCheckCanChangeNPCSpeed\Subscribers > 0 Then
+		PrepareFunction(1)
+		SetArgInt(0, npcType)
+		Select CallHook(ConsoleCheckCanChangeNPCSpeed)
+			Case 0
+				npcType = -3
+			Case 1
+				npcType = -2
+		End Select
+	EndIf
+
 	Select npcType
-		Case NPCtype372, NPCtype5131, NPCtypeApache, NPCtypeTentacle, NPCtype1048a
+		Case NPCtype372, NPCtype5131, NPCtypeApache, NPCtypeTentacle, NPCtype1048a, -3
 			CreateConsoleMsg(Console_NPCTypeToName(npcType) + " speed cannot be changed with the console. Sorry!", 255, 0, 0) : Return
 		Case -1
 			CreateConsoleMsg("NPC type not found.", 255, 0, 0) : Return
@@ -7293,10 +7334,21 @@ Function Console_PrintNPCState(c_input$)
 End Function
 
 Function Console_CheckCanToggleNPC(npcType%)
+	If ConsoleCheckCanToggleNPC\Subscribers > 0 Then
+		PrepareFunction(1)
+		SetArgInt(0, npcType)
+		Select CallHook(ConsoleCheckCanToggleNPC)
+			Case 0
+				npcType = -3
+			Case 1
+				npcType = -2
+		End Select
+	EndIf
+
 	Select npcType
 		Case -1
 			CreateConsoleMsg("NPC type not found.", 255, 0, 0) : Return False
-		Case NPCtypeOldMan, NPCtype173
+		Case NPCtypeOldMan, NPCtype173, -2
 			Return True
 		Default
 			CreateConsoleMsg(Console_NPCTypeToName(npcType, True) + " cannot be enabled/disabled with the console. Sorry!", 255, 0, 0) : Return False
@@ -7332,6 +7384,13 @@ Function Console_DisableNPC(c_input$)
 End Function
 
 Function EnableNPC(n.NPCs)
+	If EnableNPC\Subscribers > 0 Then
+		Local nn.NPCs = n
+		PrepareFunction(1)
+		SetArgObj(0, &nn)
+		If CallHook(EnableNPC) Then Return
+	EndIf
+
 	Select n\NPCtype
 		Case NPCtypeOldMan
 			n\Idle = False
@@ -7344,6 +7403,13 @@ Function EnableNPC(n.NPCs)
 End Function
 
 Function DisableNPC(n.NPCs)
+	If DisableNPC\Subscribers > 0 Then
+		Local nn.NPCs = n
+		PrepareFunction(1)
+		SetArgObj(0, &nn)
+		If CallHook(DisableNPC) Then Return
+	EndIf
+
 	Select n\NPCtype
 		Case NPCtypeOldMan
 			n\Idle = True
