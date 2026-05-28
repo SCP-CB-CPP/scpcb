@@ -1215,6 +1215,8 @@ Function UpdateLauncher()
 
 	Local height% = 18
 	
+	If SteamActive Then Steam_SetOverlayNotificationPosition(1)
+
 	Repeat
 		;Cls
 		Color 0,0,0
@@ -1395,6 +1397,8 @@ Function UpdateLauncher()
 	Dim AspectRatioWidths%(0), AspectRatioHeights%(0)
 	Dim GfxModeCountPerAspectRatio%(0)
 	Dim GfxModeWidthsByAspectRatio%(0, 0), GfxModeHeightsByAspectRatio%(0, 0)
+
+	If SteamActive Then Steam_SetOverlayNotificationPosition(3)
 End Function
 
 Function GreatestCommonDivsior(u%, v%)
