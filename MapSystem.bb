@@ -6360,7 +6360,6 @@ Dim MapName$(0, 0)
 Dim MapRoomID%(ROOM4 + 1)
 Dim MapRoom$(ROOM4 + 1, 0)
 
-; TODO: Replace the individual Room1Amount etc with this
 Dim RoomAmounts(ROOM4 + 1, ZONEAMOUNT)
 Dim MinPositions(ROOM4 + 1, 0)
 Dim MaxPositions(ROOM4 + 1, 0)
@@ -7187,8 +7186,6 @@ Function CreateMap(loadingstart,loadingcount#)
 	Until y < 2
 	
 	
-	Local Room1Amount%[3], Room2Amount%[3],Room2CAmount%[3],Room3Amount%[3],Room4Amount%[3]
-	
 	;count the amount of rooms
 	For y = 1 To MapHeight - 1
 		zone% = GetZone(y)
@@ -7200,19 +7197,19 @@ Function CreateMap(loadingstart,loadingcount#)
 				If MapTemp(x,y)<255 Then MapTemp(x, y) = temp
 				Select MapTemp(x,y)
 					Case 1
-						Room1Amount[zone]=Room1Amount[zone]+1
+						RoomAmounts(ROOM1, zone)=RoomAmounts(ROOM1, zone)+1
 					Case 2
 						If Min(MapTemp(x + 1, y),1) + Min(MapTemp(x - 1, y),1)= 2 Then
-							Room2Amount[zone]=Room2Amount[zone]+1	
+							RoomAmounts(ROOM2, zone)=RoomAmounts(ROOM2, zone)+1	
 						ElseIf Min(MapTemp(x, y + 1),1) + Min(MapTemp(x , y - 1),1)= 2
-							Room2Amount[zone]=Room2Amount[zone]+1	
+							RoomAmounts(ROOM2, zone)=RoomAmounts(ROOM2, zone)+1	
 						Else
-							Room2CAmount[zone] = Room2CAmount[zone]+1
+							RoomAmounts(ROOM2C, zone) = RoomAmounts(ROOM2C, zone)+1
 						EndIf
 					Case 3
-						Room3Amount[zone]=Room3Amount[zone]+1
+						RoomAmounts(ROOM3, zone)=RoomAmounts(ROOM3, zone)+1
 					Case 4
-						Room4Amount[zone]=Room4Amount[zone]+1
+						RoomAmounts(ROOM4, zone)=RoomAmounts(ROOM4, zone)+1
 				End Select
 			EndIf
 		Next
@@ -7224,7 +7221,7 @@ Function CreateMap(loadingstart,loadingcount#)
 
 	;force more room1s (if needed)
 	For i = 0 To 2
-		temp = -Room1Amount[i]+forceRoom1
+		temp = -RoomAmounts(ROOM1, i)+forceRoom1
 		
 		If temp > 0 Then
 			
@@ -7255,17 +7252,17 @@ Function CreateMap(loadingstart,loadingcount#)
 								Select MapTemp(x2,y2)
 									Case 2
 										If Min(MapTemp(x2 + 1, y2),1) + Min(MapTemp(x2 - 1, y2),1)= 2 Then
-											Room2Amount[i]=Room2Amount[i]-1
-											Room3Amount[i]=Room3Amount[i]+1
+											RoomAmounts(ROOM2, i)=RoomAmounts(ROOM2, i)-1
+											RoomAmounts(ROOM3, i)=RoomAmounts(ROOM3, i)+1
 											placed = True
 										ElseIf Min(MapTemp(x2, y2 + 1),1) + Min(MapTemp(x2, y2 - 1),1)= 2
-											Room2Amount[i]=Room2Amount[i]-1
-											Room3Amount[i]=Room3Amount[i]+1
+											RoomAmounts(ROOM2, i)=RoomAmounts(ROOM2, i)-1
+											RoomAmounts(ROOM3, i)=RoomAmounts(ROOM3, i)+1
 											placed = True
 										EndIf
 									Case 3
-										Room3Amount[i]=Room3Amount[i]-1
-										Room4Amount[i]=Room4Amount[i]+1	
+										RoomAmounts(ROOM3, i)=RoomAmounts(ROOM3, i)-1
+										RoomAmounts(ROOM4, i)=RoomAmounts(ROOM4, i)+1	
 										placed = True
 								End Select
 								
@@ -7273,7 +7270,7 @@ Function CreateMap(loadingstart,loadingcount#)
 									MapTemp(x2,y2)=MapTemp(x2,y2)+1
 									
 									MapTemp(x, y) = 1
-									Room1Amount[i] = Room1Amount[i]+1	
+									RoomAmounts(ROOM1, i) = RoomAmounts(ROOM1, i)+1	
 									
 									temp=temp-1
 								EndIf
@@ -7299,7 +7296,7 @@ Function CreateMap(loadingstart,loadingcount#)
 		x_min = 1
 		x_max = MapWidth - 2
 		
-		temp = -Room4Amount[i]+forceRoom4
+		temp = -RoomAmounts(ROOM4, i)+forceRoom4
 
 		If temp > 0 Then
 			DebugLog "forcing a ROOM4 into zone "+i
@@ -7326,9 +7323,9 @@ Function CreateMap(loadingstart,loadingcount#)
 						If placed Then
 							MapTemp(x,y)=4 ;turn this room into a ROOM4
 							DebugLog "ROOM4 forced into slot ("+x+", "+y+")"
-							Room4Amount[i]=Room4Amount[i]+1
-							Room3Amount[i]=Room3Amount[i]-1
-							Room1Amount[i]=Room1Amount[i]+1
+							RoomAmounts(ROOM4, i)=RoomAmounts(ROOM4, i)+1
+							RoomAmounts(ROOM3, i)=RoomAmounts(ROOM3, i)-1
+							RoomAmounts(ROOM1, i)=RoomAmounts(ROOM1, i)+1
 							temp = temp - 1
 						EndIf
 					EndIf
@@ -7340,7 +7337,7 @@ Function CreateMap(loadingstart,loadingcount#)
 			If temp>0 Then DebugLog "Couldn't place all ROOM4s in zone "+i
 		EndIf
 		
-		temp = -Room2CAmount[i]+forceRoom2c
+		temp = -RoomAmounts(ROOM2C, i)+forceRoom2c
 
 		If temp>0 Then
 			DebugLog "forcing a ROOM2C into zone "+i
@@ -7416,8 +7413,8 @@ Function CreateMap(loadingstart,loadingcount#)
 								EndIf
 						End Select
 						If placed Then
-							Room2CAmount[i]=Room2CAmount[i]+1
-							Room2Amount[i]=Room2Amount[i]+1
+							RoomAmounts(ROOM2C, i)=RoomAmounts(ROOM2C, i)+1
+							RoomAmounts(ROOM2, i)=RoomAmounts(ROOM2, i)+1
 							temp = temp - 1
 						EndIf
 					EndIf
@@ -7432,48 +7429,39 @@ Function CreateMap(loadingstart,loadingcount#)
 	Next
 	
 	Local MaxRooms% = 55*MapWidth/20
-	MaxRooms=Max(MaxRooms,Room1Amount[0]+Room1Amount[1]+Room1Amount[2]+1)
-	MaxRooms=Max(MaxRooms,Room2Amount[0]+Room2Amount[1]+Room2Amount[2]+1)
-	MaxRooms=Max(MaxRooms,Room2CAmount[0]+Room2CAmount[1]+Room2CAmount[2]+1)
-	MaxRooms=Max(MaxRooms,Room3Amount[0]+Room3Amount[1]+Room3Amount[2]+1)
-	MaxRooms=Max(MaxRooms,Room4Amount[0]+Room4Amount[1]+Room4Amount[2]+1)
+	For rs = ROOM1 To ROOM4
+		MaxRooms=Max(MaxRooms, RoomAmounts(rs, 0)+RoomAmounts(rs, 1)+RoomAmounts(rs, 2)+1)
+	Next
 	Dim MapRoom$(ROOM4 + 1, MaxRooms)
 	
-	For z = 1 To ZONEAMOUNT
-		RoomAmounts(ROOM1, z) = Room1Amount[z-1]
-		RoomAmounts(ROOM2, z) = Room2Amount[z-1]
-		RoomAmounts(ROOM2C, z) = Room2CAmount[z-1]
-		RoomAmounts(ROOM3, z) = Room3Amount[z-1]
-		RoomAmounts(ROOM4, z) = Room4Amount[z-1]
-	Next
-
 	Dim MinPositions%(ROOM4 + 1, ZONEAMOUNT)
 	Dim MaxPositions%(ROOM4 + 1, ZONEAMOUNT)
 	For rs = ROOM1 To ROOM4
-		For z = 1 To ZONEAMOUNT
+		For z = 0 To ZONEAMOUNT-1
 			MinPositions(rs, z) = 0
-			MaxPositions(rs, z) = RoomAmounts(rs, 1)
+			MaxPositions(rs, z) = RoomAmounts(rs, 0)
+			If z > 0 Then
+				MinPositions(rs, z) = MinPositions(rs, z) + RoomAmounts(rs, 0)
+				MaxPositions(rs, z) = MaxPositions(rs, z) + RoomAmounts(rs, 1)
+			EndIf
 			If z > 1 Then
 				MinPositions(rs, z) = MinPositions(rs, z) + RoomAmounts(rs, 1)
 				MaxPositions(rs, z) = MaxPositions(rs, z) + RoomAmounts(rs, 2)
-			EndIf
-			If z > 2 Then
-				MinPositions(rs, z) = MinPositions(rs, z) + RoomAmounts(rs, 2)
-				MaxPositions(rs, z) = MaxPositions(rs, z) + RoomAmounts(rs, 3)
 			EndIf
 		Next
 	Next
 	
 	MapRoom(ROOM1, 0) = "start"	
 	
-	MapRoom(ROOM1, MaxPositions(ROOM1, 3)-2) = "exit1"
-	MapRoom(ROOM1, MaxPositions(ROOM1, 3)-1) = "gateaentrance"
+	MapRoom(ROOM1, MaxPositions(ROOM1, 2)-2) = "exit1"
+	MapRoom(ROOM1, MaxPositions(ROOM1, 2)-1) = "gateaentrance"
 	
 	For rt.RoomTemplates = Each RoomTemplates
 		If rt\SetRoom >= 0 Then
 			For i% = 0 To ZONEAMOUNT-1
 				zone% = rt\zone[i]
 				If zone <> 0 Then
+					zone = zone - 1
 					Local start% = MinPositions(rt\Shape, zone)
 					SetRoom(rt\Name, rt\Shape, start+Floor(rt\SetRoom*Float(RoomAmounts(rt\Shape, zone))),start,MaxPositions(rt\Shape, zone))
 				EndIf
