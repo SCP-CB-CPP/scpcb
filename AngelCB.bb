@@ -465,6 +465,26 @@ Function RegisterMaintenanceTunnel()
     RegisterTypeField("MaintenanceTunnel", "carray<Waypoint@> Waypoints", %Grids\waypoints)
 End Function
 
+Function RegisterMapGen()
+    Local ns$ = GetDefaultNamespace()
+    If ns <> "" Then SetDefaultNamespace(ns + "::Map") Else SetDefaultNamespace("Map")
+
+    RegisterGlobalProperty("int Width", &MapWidth)
+    RegisterGlobalProperty("int Height", &MapHeight)
+
+    RegisterGlobalProperty("dim2<int> Temporary", &MapTemp)
+    RegisterGlobalProperty("dim2<int> Found", &MapFound)
+    RegisterGlobalProperty("dim2<string> Name", &MapName)
+    RegisterGlobalProperty("dim1<int> RoomID", &MapRoomID)
+    RegisterGlobalProperty("dim2<string> Room", &MapRoom)
+
+    RegisterGlobalProperty("dim2<int> RoomAmounts", &RoomAmounts)
+    RegisterGlobalProperty("dim2<int> MinPositions", &MinPositions)
+    RegisterGlobalProperty("dim2<int> MaxPositions", &MaxPositions)
+
+    SetDefaultNamespace(ns)
+End Function
+
 Function RegisterNPC()
     RegisterTypeFromPtr("NPC", %NPCs)
 
@@ -639,6 +659,7 @@ Function RegisterMap()
     RegisterTriggerbox()
     RegisterForest()
     RegisterMaintenanceTunnel()
+    RegisterMapGen()
 
     RegisterTypeConstructor("Room", "Room@ f(int zone, int shape, float x, float y, float z, int angle, string name)", @CreateRoom)
 
