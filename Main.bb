@@ -10361,7 +10361,8 @@ Function Use914(item.Items, setting$, x#, y#, z#)
 						it2 = CreateItem("playingcard", x, y, z)			
 					EndIf	
 				Case "fine", "very fine"
-					it2 = CreateItem("key6", x, y, z)
+					PositionEntity(item\collider, x, y, z)
+					ResetEntity(item\collider)
 			End Select			
 			
 			RemoveItem(item)
