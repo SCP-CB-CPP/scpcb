@@ -863,7 +863,6 @@ Function UpdateEvents()
 											
 											If MouseHit1 Then
 												SelectedItem = CreateItem("doc173", 0.0, 0.0, 0.0)
-												EntityType SelectedItem\collider,HIT_ITEM
 												
 												PickItem(SelectedItem)
 												
@@ -2656,7 +2655,6 @@ Function UpdateEvents()
 								PlaySound2(NeckSnapSFX(0),Camera,e\room\NPC[0]\Collider,8.0)
 								;Wallet spawning (with 3 coins)
 								it.Items = CreateItem("wallet",EntityX(e\room\NPC[0]\Collider,True),EntityY(e\room\NPC[0]\Collider,True),EntityZ(e\room\NPC[0]\Collider,True))
-								EntityType(it\collider, HIT_ITEM)
 								PointEntity it\collider,e\room\NPC[1]\Collider
 								MoveEntity it\collider,-0.4,0,-0.2
 								TeleportEntity(it\collider,EntityX(it\collider),EntityY(it\collider),EntityZ(it\collider),-0.02,True,10)
@@ -2667,7 +2665,6 @@ Function UpdateEvents()
 									it2\itemtemplate\found=True
 									it\Inventory\Items[i] = it2
 									HideEntity(it2\collider)
-									EntityType(it2\collider, HIT_ITEM)
 								Next
 							EndIf
 							If e\EventState > 70*8.0 And e\EventState-FPSfactor =< 70*8.0 Then
@@ -3437,10 +3434,8 @@ Function UpdateEvents()
 										Case 7
 											AddLight%(Null, e\room\x+ix*2.0-(Sin(EntityYaw(tempInt,True))*504.0*RoomScale)+(Cos(EntityYaw(tempInt,True))*16.0*RoomScale), MT_HEIGHT+(396.0*RoomScale), e\room\z+iy*2.0+(Cos(EntityYaw(tempInt,True))*504.0*RoomScale)+(Sin(EntityYaw(tempInt,True))*16.0*RoomScale), 2, 500.0 * RoomScale, 255, 200, 200)
 											it = CreateItem("scp500",e\room\x+ix*2.0+(Cos(EntityYaw(tempInt,True))*(-208.0)*RoomScale)-(Sin(EntityYaw(tempInt,True))*1226.0*RoomScale),MT_HEIGHT+(80.0*RoomScale),e\room\z+iy*2.0+(Sin(EntityYaw(tempInt,True))*(-208.0)*RoomScale)+(Cos(EntityYaw(tempInt,True))*1226.0*RoomScale))
-											EntityType (it\collider, HIT_ITEM)
 											
 											it = CreateItem("nvgoggles",e\room\x+ix*2.0-(Sin(EntityYaw(tempInt,True))*504.0*RoomScale)+(Cos(EntityYaw(tempInt,True))*16.0*RoomScale), MT_HEIGHT+(80.0*RoomScale), e\room\z+iy*2.0+(Cos(EntityYaw(tempInt,True))*504.0*RoomScale)+(Sin(EntityYaw(tempInt,True))*16.0*RoomScale))
-											EntityType (it\collider, HIT_ITEM)
 									End Select
 									
 									If e\room\grid\grid[ix+(iy*gridsz)]=6 Or e\room\grid\grid[ix+(iy*gridsz)]=5 Then
@@ -4129,7 +4124,6 @@ Function UpdateEvents()
 										MsgTimer = 70 * 5
 									Else
 										SelectedItem = CreateItem("drawing", 0.0, 0.0, 0.0)
-										EntityType SelectedItem\collider,HIT_ITEM
 										
 										PickItem(SelectedItem)
 										
@@ -4622,7 +4616,6 @@ Function UpdateEvents()
 							Case 18
 								TFormPoint -344,176, 272, e\room\obj,0
 								it.Items = CreateItem("docStrange", TFormedX(), TFormedY(), TFormedZ())
-								EntityType(it\collider, HIT_ITEM)
 							Case 25
 								e\room\NPC[0]=CreateNPC(NPCtypeD, EntityX(e\room\obj)+Cos(e\room\angle-90)*760*RoomScale, 0.35, EntityZ(e\room\obj)+Sin(e\room\angle-90)*760*RoomScale)
 								RotateEntity e\room\NPC[0]\Collider, 0, e\room\angle-200, 0, True
@@ -4694,7 +4687,6 @@ Function UpdateEvents()
 										TFormPoint x+1024*i,y,z,e\room\obj,0
 										it2.items = CreateItem(it\itemtemplate\name, TFormedX(), EntityY(it\collider), TFormedZ())
 										RotateEntity(it2\collider, EntityPitch(it\collider),EntityYaw(it\collider),0)
-										EntityType(it2\collider, HIT_ITEM)
 									Next
 								Else
 									For it2.items = Each Items
@@ -5544,10 +5536,8 @@ Function UpdateEvents()
 							PlaySound_Strict LoadTempSound("SFX\Room\Blackout.ogg")
 							If EntityDistance(e\room\Objects[11],Collider)<EntityDistance(e\room\Objects[12],Collider) Then
 								it = CreateItem("docMap", EntityX(e\room\Objects[11],True),EntityY(e\room\Objects[11],True),EntityZ(e\room\Objects[11],True))
-								EntityType it\collider,HIT_ITEM
 							Else
 								it = CreateItem("docMap", EntityX(e\room\Objects[12],True),EntityY(e\room\Objects[12],True),EntityZ(e\room\Objects[12],True))
-								EntityType it\collider,HIT_ITEM
 							EndIf
 						ElseIf e\EventState > 0
 							
@@ -7000,7 +6990,7 @@ Function UpdateEvents()
 			Case "008"
 				;[Block]
 				If PlayerRoom = e\room Then	
-					GiveAchievement(Achv008)=True
+					GiveAchievement(Achv008)
 					;container open
 					If e\EventState = 0 Then
 						If Curr173\Idle<2 And EntityDistance(Curr173\Collider,Collider)>HideDistance ;Just making sure that 173 is far away enough to spawn him to this room
@@ -7682,7 +7672,6 @@ Function UpdateEvents()
 							If (shouldCreateItem) Then
 								RemoveItem(Inventory(e\EventState2))
 								it=CreateItem(itt\name,EntityX(pp,True),EntityY(pp,True),EntityZ(pp,True))
-								EntityType(it\collider, HIT_ITEM)
 								PlaySound_Strict LoadTempSound("SFX\SCP\1162\Exchange"+Rand(0,4)+".ogg")
 								e\EventState3 = 0.0
 								
@@ -7705,7 +7694,6 @@ Function UpdateEvents()
 						For itt.ItemTemplates = Each ItemTemplates
 							If IsItemGoodFor1162(itt) And Rand(6)=1
 								it = CreateItem(itt\name, EntityX(pp,True),EntityY(pp,True),EntityZ(pp,True))
-								EntityType(it\collider, HIT_ITEM)
 								GiveAchievement(Achv1162)
 								MouseHit1 = False
 								e\EventState3 = 0.0
@@ -7762,7 +7750,6 @@ Function UpdateEvents()
 							Case 5
 								it = CreateItem("oldbadge",EntityX(pp,True),EntityY(pp,True),EntityZ(pp,True))
 						End Select
-						EntityType(it\collider, HIT_ITEM)
 						GiveAchievement(Achv1162)
 						MouseHit1 = False
 						e\EventState3 = 0.0

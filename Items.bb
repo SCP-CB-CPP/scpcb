@@ -328,6 +328,8 @@ Function CreateItem.Items(name$, x#, y#, z#)
 
 	i\ID=LastItemID+1
 	LastItemID=i\ID
+
+	EntityType(i\collider, HIT_ITEM)
 	
 	CatchErrors("CreateItem")
 	Return i

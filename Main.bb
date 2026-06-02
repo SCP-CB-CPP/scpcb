@@ -1217,7 +1217,6 @@ Function UpdateConsole()
 					Else
 						CreateConsoleMsg(itt\displayname + " spawned.")
 						it.Items = CreateItem(itt\name, EntityX(Collider), EntityY(Camera,True), EntityZ(Collider))
-						EntityType(it\collider, HIT_ITEM)
 
 						; TODO: Scripts need to be able to hook into this.
 						If itt\name = "snavulti" Lor itt\name = "fineradio" Lor itt\name = "veryfineradio" Then
@@ -1363,7 +1362,6 @@ Function UpdateConsole()
 						Else
 							it.Items = CreateItem("joint", EntityX(Collider,True)+Cos((360.0/20.0)*i)*Rnd(0.3,0.5), EntityY(Camera,True), EntityZ(Collider,True)+Sin((360.0/20.0)*i)*Rnd(0.3,0.5))
 						EndIf
-						EntityType (it\collider, HIT_ITEM)
 					Next
 					PlaySound_Strict LoadTempSound("SFX\Music\420J.ogg")
 					;[End Block]
@@ -1728,13 +1726,11 @@ Function UpdateConsole()
 				Case "spawnradio"
 					;[Block]
 					it.Items = CreateItem("fineradio", EntityX(Collider), EntityY(Camera,True), EntityZ(Collider))
-					EntityType(it\collider, HIT_ITEM)
 					it\state = 101
 					;[End Block]
 				Case "spawnnvg"
 					;[Block]
 					it.Items = CreateItem("nvgoggles", EntityX(Collider), EntityY(Camera,True), EntityZ(Collider))
-					EntityType(it\collider, HIT_ITEM)
 					it\state = 1000
 					;[End Block]
 				Case "spawnpumpkin","pumpkin"
@@ -1744,7 +1740,6 @@ Function UpdateConsole()
 				Case "spawnnav"
 					;[Block]
 					it.Items = CreateItem("snavulti", EntityX(Collider), EntityY(Camera,True), EntityZ(Collider))
-					EntityType(it\collider, HIT_ITEM)
 					it\state = 101
 					;[End Block]
 				Case "teleport173"
@@ -1809,12 +1804,19 @@ Function UpdateConsole()
 						StrTemp$ = ""
 					EndIf
 					
-					If Int(StrTemp)>=0 And Int(StrTemp)<MAXACHIEVEMENTS
-						Achievements(Int(StrTemp))=True
-						CreateConsoleMsg("Achievemt "+AchievementStrings(Int(StrTemp))+" unlocked.")
-					Else
-						CreateConsoleMsg("Achievement with ID "+Int(StrTemp)+" doesn't exist.",255,150,0)
-					EndIf
+					i% = 0
+					Local searched% = Int(StrTemp)
+					For a.Achievements = Each Achievements
+						If i = searched%
+							a\Unlocked = True
+							CreateConsoleMsg("Achievemt "+a\LocalName+" unlocked.")
+							i = -1
+							Exit
+						EndIf
+						i = i + 1
+					Next
+
+					If i <> -1 Then CreateConsoleMsg("Achievement with ID "+searched+" doesn't exist.",255,150,0)
 					;[End Block]
 				Case "427state"
 					;[Block]
@@ -4338,20 +4340,19 @@ Function DrawEnding()
 					Next
 					
 					Local scpsEncountered=1
-					For i = Achv008 To Achv1499
-						scpsEncountered = scpsEncountered+Achievements(i)
-					Next
-					
-					Local achievementsUnlocked =0
-					For i = 0 To MAXACHIEVEMENTS-1
-						achievementsUnlocked = achievementsUnlocked + Achievements(i)
+					Local achievementsUnlocked=0
+					For a.Achievements = Each Achievements
+						If a\Unlocked Then
+							achievementsUnlocked = achievementsUnlocked + 1
+							If a\IsSCP Then scpsEncountered = scpsEncountered + 1
+						EndIf
 					Next
 					
 					Text x, y, I_Loc\Menu_EndEnding+" " + Upper(SelectedEnding)
 					Text x, y+20*MenuScale, I_Loc\Menu_EndTime+" " + FormatDuration(PlayTime, SpeedRunMode)
 					Text x, y+40*MenuScale, GetSeedString()
 					Text x, y+60*MenuScale, I_Loc\Menu_EndScps+" " + scpsEncountered
-					Text x, y+80*MenuScale, I_Loc\Menu_EndAchv+" " + achievementsUnlocked+"/"+(MAXACHIEVEMENTS)
+					Text x, y+80*MenuScale, I_Loc\Menu_EndAchv+" " + achievementsUnlocked+"/"+(AchievementCount)
 					Text x, y+100*MenuScale, I_Loc\Menu_EndRooms+" " + roomsfound+"/"+roomamount
 					Text x, y+120*MenuScale, I_Loc\Menu_EndDocs+" " +docsfound+"/"+docamount
 					Text x, y+140*MenuScale, I_Loc\Menu_End914+" " +RefinedItems			
@@ -6482,7 +6483,6 @@ Function DrawGUI()
 							For i = 0 To MaxItemAmount-1
 								If Inventory(i)=SelectedItem Then Inventory(i) = it : Exit
 							Next					
-							EntityType (it\collider, HIT_ITEM)
 							
 							RemoveItem(SelectedItem)						
 						EndIf
@@ -8308,7 +8308,7 @@ Function DrawMenu()
 			
 			If AchievementsMenu>0 Then
 				;DebugLog AchievementsMenu
-				If AchievementsMenu <= Floor(Float(MAXACHIEVEMENTS-1)/12.0) Then 
+				If AchievementsMenu <= Floor(Float(AchievementCount-1)/12.0) Then 
 					If DrawButton(x+341*MenuScale, y + 344*MenuScale, 50*MenuScale, 60*MenuScale, ">") Then
 						AchievementsMenu = AchievementsMenu+1
 					EndIf
@@ -8319,20 +8319,29 @@ Function DrawMenu()
 					EndIf
 				EndIf
 				
+				Local a.Achievements = First Achievements
+				For i=1 To (AchievementsMenu-1)*12
+					a = After a
+				Next
+				Local startAchv.Achievements = a
+
 				For i=0 To 11
-					If i+((AchievementsMenu-1)*12)<MAXACHIEVEMENTS Then
-						DrawAchvIMG(AchvXIMG,y+((i/4)*120*MenuScale),i+((AchievementsMenu-1)*12))
+					If a <> Null Then
+						DrawAchvIMG(AchvXIMG+((i Mod 4)*SeparationConst),y+((i/4)*120*MenuScale),a)
+						a = After a
 					Else
 						Exit
 					EndIf
 				Next
 				
+				a = startAchv
 				For i=0 To 11
-					If i+((AchievementsMenu-1)*12)<MAXACHIEVEMENTS Then
+					If a <> Null Then
 						If MouseOn(AchvXIMG+((i Mod 4)*SeparationConst),y+((i/4)*120*MenuScale),64*scale,64*scale) Then
-							AchievementTooltip(i+((AchievementsMenu-1)*12))
+							AchievementTooltip(a)
 							Exit
 						EndIf
+						a = After a
 					Else
 						Exit
 					EndIf
@@ -9141,7 +9150,7 @@ Function InitNewGame()
 	Next
 	
 	For it.Items = Each Items
-		EntityType (it\collider, HIT_ITEM)
+		ResetEntity(it\collider)
 		EntityParent(it\collider, 0)
 	Next
 	
@@ -9187,7 +9196,6 @@ Function InitNewGame()
 			it\itemtemplate\found=True
 			Inventory(0) = it
 			HideEntity(it\collider)
-			EntityType (it\collider, HIT_ITEM)
 			EntityParent(it\collider, 0)
 			ItemAmount = ItemAmount + 1
 			it = CreateItem("doc173", 1, 1, 1)
@@ -9196,7 +9204,6 @@ Function InitNewGame()
 			it\itemtemplate\found=True
 			Inventory(1) = it
 			HideEntity(it\collider)
-			EntityType (it\collider, HIT_ITEM)
 			EntityParent(it\collider, 0)
 			ItemAmount = ItemAmount + 1
 		ElseIf (r\RoomTemplate\Name = "173" And IntroEnabled) Then
@@ -9470,8 +9477,8 @@ Function NullGame(playbuttonsfx%=True)
 		Delete s
 	Next
 	
-	For i = 0 To MAXACHIEVEMENTS-1
-		Achievements(i)=0
+	For a.Achievements = Each Achievements
+		a\Unlocked = False
 	Next
 	RefinedItems = 0
 	
@@ -10397,29 +10404,27 @@ Function Use914(item.Items, setting$, x#, y#, z#)
 							End Select
 						Case "key5"	
 							Local CurrAchvAmount%=0
-							For i = 0 To MAXACHIEVEMENTS-1
-								If Achievements(i)=True
-									CurrAchvAmount=CurrAchvAmount+1
-								EndIf
+							For a.Achievements = Each Achievements
+								CurrAchvAmount=CurrAchvAmount+a\Unlocked
 							Next
 							
 							DebugLog CurrAchvAmount
 							
 							Select SelectedDifficulty\otherFactors
 								Case EASY
-									If GuaranteedOmni Lor Rand(0,((MAXACHIEVEMENTS-1)*3)-((CurrAchvAmount-1)*3))=0
+									If GuaranteedOmni Lor Rand(0,((AchievementCount-1)*3)-((CurrAchvAmount-1)*3))=0
 										it2 = CreateItem("key6", x, y, z)
 									Else
 										it2 = CreateItem("mastercard", x, y, z)
 									EndIf
 								Case NORMAL
-									If GuaranteedOmni Lor Rand(0,((MAXACHIEVEMENTS-1)*4)-((CurrAchvAmount-1)*3))=0
+									If GuaranteedOmni Lor Rand(0,((AchievementCount-1)*4)-((CurrAchvAmount-1)*3))=0
 										it2 = CreateItem("key6", x, y, z)
 									Else
 										it2 = CreateItem("mastercard", x, y, z)
 									EndIf
 								Case HARD
-									If GuaranteedOmni Lor Rand(0,((MAXACHIEVEMENTS-1)*5)-((CurrAchvAmount-1)*3))=0
+									If GuaranteedOmni Lor Rand(0,((AchievementCount-1)*5)-((CurrAchvAmount-1)*3))=0
 										it2 = CreateItem("key6", x, y, z)
 									Else
 										it2 = CreateItem("mastercard", x, y, z)
@@ -10428,29 +10433,27 @@ Function Use914(item.Items, setting$, x#, y#, z#)
 					End Select
 				Case "very fine"
 					CurrAchvAmount%=0
-					For i = 0 To MAXACHIEVEMENTS-1
-						If Achievements(i)=True
-							CurrAchvAmount=CurrAchvAmount+1
-						EndIf
+					For a.Achievements = Each Achievements
+						CurrAchvAmount=CurrAchvAmount+a\Unlocked
 					Next
 					
 					DebugLog CurrAchvAmount
 					
 					Select SelectedDifficulty\otherFactors
 						Case EASY
-							If GuaranteedOmni Lor Rand(0,((MAXACHIEVEMENTS-1)*3)-((CurrAchvAmount-1)*3))=0
+							If GuaranteedOmni Lor Rand(0,((AchievementCount-1)*3)-((CurrAchvAmount-1)*3))=0
 								it2 = CreateItem("key6", x, y, z)
 							Else
 								it2 = CreateItem("mastercard", x, y, z)
 							EndIf
 						Case NORMAL
-							If GuaranteedOmni Lor Rand(0,((MAXACHIEVEMENTS-1)*4)-((CurrAchvAmount-1)*3))=0
+							If GuaranteedOmni Lor Rand(0,((AchievementCount-1)*4)-((CurrAchvAmount-1)*3))=0
 								it2 = CreateItem("key6", x, y, z)
 							Else
 								it2 = CreateItem("mastercard", x, y, z)
 							EndIf
 						Case HARD
-							If GuaranteedOmni Lor Rand(0,((MAXACHIEVEMENTS-1)*5)-((CurrAchvAmount-1)*3))=0
+							If GuaranteedOmni Lor Rand(0,((AchievementCount-1)*5)-((CurrAchvAmount-1)*3))=0
 								it2 = CreateItem("key6", x, y, z)
 							Else
 								it2 = CreateItem("mastercard", x, y, z)
@@ -10497,9 +10500,6 @@ Function Use914(item.Items, setting$, x#, y#, z#)
 					it3 = CreateItem("25ct", x, y, z)
 					it4 = CreateItem("25ct", x, y, z)
 					it5 = CreateItem("25ct", x, y, z)
-					EntityType (it3\collider, HIT_ITEM)
-					EntityType (it4\collider, HIT_ITEM)
-					EntityType (it5\collider, HIT_ITEM)
 				Case "1:1"
 					it2 = CreateItem("key1", x, y, z)	
 			    Case "fine", "very fine"
@@ -10748,8 +10748,6 @@ Function Use914(item.Items, setting$, x#, y#, z#)
 			EndIf
 			
 	End Select
-	
-	If it2 <> Null Then EntityType (it2\collider, HIT_ITEM)
 End Function
 
 Global Keyboard294Layers%, Keyboard294X%, Keyboard294Y%, Keyboard294Width%, Keyboard294Height%, Keyboard294TileWidth#, Keyboard294TileHeight#, Keyboard294ResetLayerOnInput%
@@ -10948,7 +10946,6 @@ Function Use294()
 					If glow Then alpha = -alpha
 					
 					it.items = CreateCup(Input294, EntityX(PlayerRoom\Objects[1],True),EntityY(PlayerRoom\Objects[1],True),EntityZ(PlayerRoom\Objects[1],True), r,g,b,alpha)
-					EntityType (it\collider, HIT_ITEM)
 					
 				Else
 					;out of range
