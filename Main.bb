@@ -1254,7 +1254,7 @@ Function UpdateConsole()
 					StrTemp$ = Piece$(args$, 1)
 					StrTemp2$ = Piece$(args$, 2)
 
-					Console_ChangeNPCSpeed(StrTemp$, Float(StrTemp2))
+					Console_ChangeNPCSpeed(Console_NPCNameToType(StrTemp$), Float(StrTemp2$))
 					;[End Block]
 				Case "173speed"
 					;[Block]
@@ -1271,17 +1271,17 @@ Function UpdateConsole()
 				Case "npcstate"
 					;[Block]
 					StrTemp$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
-					Console_PrintNPCState(StrTemp)
+					Console_PrintNPCState(Console_NPCNameToType(StrTemp))
 					;[End Block]
 				Case "enable"
 					;[Block]
 					StrTemp$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
-					Console_EnableNPC(StrTemp)
+					Console_EnableNPC(Console_NPCNameToType(StrTemp))
 					;[End Block]
 				Case "disable"
 					;[Block]
 					StrTemp$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
-					Console_DisableNPC(StrTemp)
+					Console_DisableNPC(Console_NPCNameToType(StrTemp))
 					;[End Block]
 				Case "173state"
 					;[Block]
@@ -1530,9 +1530,9 @@ Function UpdateConsole()
 					
 					;Hacky fix for when the user doesn't input a second parameter.
 					If (StrTemp <> StrTemp2) Then
-						Console_SpawnNPC(StrTemp, StrTemp2)
+						Console_SpawnNPC(Console_NPCNameToType(StrTemp), StrTemp2)
 					Else
-						Console_SpawnNPC(StrTemp)
+						Console_SpawnNPC(Console_NPCNameToType(StrTemp))
 					EndIf
 					;[End Block]
 				;new Console Commands in SCP:CB 1.3 - ENDSHN

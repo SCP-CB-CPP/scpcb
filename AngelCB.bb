@@ -433,12 +433,12 @@ End Function
 Function RegisterTriggerbox()
     RegisterTypeFromPtr("Triggerbox", %Triggerboxes)
     RegisterTypeField("Triggerbox", "B3D::Mesh@ Object", %Triggerboxes\Obj)
-    RegisterTypeField("TempTriggerbox", "float MinX", %Triggerboxes\MinX)
-    RegisterTypeField("TempTriggerbox", "float MinY", %Triggerboxes\MinY)
-    RegisterTypeField("TempTriggerbox", "float MinZ", %Triggerboxes\MinZ)
-    RegisterTypeField("TempTriggerbox", "float MaxX", %Triggerboxes\MaxX)
-    RegisterTypeField("TempTriggerbox", "float MaxY", %Triggerboxes\MaxY)
-    RegisterTypeField("TempTriggerbox", "float MaxZ", %Triggerboxes\MaxZ)
+    RegisterTypeField("Triggerbox", "float MinX", %Triggerboxes\MinX)
+    RegisterTypeField("Triggerbox", "float MinY", %Triggerboxes\MinY)
+    RegisterTypeField("Triggerbox", "float MinZ", %Triggerboxes\MinZ)
+    RegisterTypeField("Triggerbox", "float MaxX", %Triggerboxes\MaxX)
+    RegisterTypeField("Triggerbox", "float MaxY", %Triggerboxes\MaxY)
+    RegisterTypeField("Triggerbox", "float MaxZ", %Triggerboxes\MaxZ)
     RegisterTypeField("Triggerbox", "string Name", %Triggerboxes\Name)
     RegisterTypeField("Triggerbox", "Triggerbox@ Successor", %Triggerboxes\Successor)
 
@@ -449,8 +449,6 @@ Function RegisterTriggerbox()
 End Function
 
 Function RegisterForest()
-    RegisterTypeFromPtr("Forest", %Forest)
-
     ; TODO: These types are fucked up but this appears to be accurate to how they're assigned.
     RegisterTypeField("Forest", "carray<B3D::Mesh@> TileMesh", %Forest\TileMesh)
     RegisterTypeField("Forest", "carray<B3D::Entity@> DetailMesh", %Forest\DetailMesh)
@@ -528,7 +526,16 @@ Function RegisterNPC()
     RegisterGlobalProperty("NPC@ Current096", &Curr096)
     RegisterGlobalProperty("NPC@ Current5131", &Curr5131)
 
-    RegisterGlobalFunction("NPC@+ Create(Type type, float x, float y, float z)", @CreateNPC)
+    RegisterGlobalFunction("NPC@+ Create(Type, float x, float y, float z)", @CreateNPC)
+    RegisterGlobalFunction("int FindFreeID()", @FindFreeNPCID)
+
+    RegisterGlobalFunction("void UpdateAll()", @UpdateNPCs)
+
+    RegisterGlobalFunction("void Shoot(float x, float y, float z, float hitProb=1.0, bool impactParticles=true, bool instaKill=false)", @Shoot)
+
+    RegisterGlobalFunction("void ManipulateBones()", @ManipulateNPCBones)
+    RegisterGlobalFunction("string GetBoneManipulationValue(string npcName, string boneName, string section, int valueType=0)", @GetNPCManipulationValue)
+    RegisterGlobalFunction("float ChangeAngleValueForCorrectBoneAssignment(float value)", @ChangeAngleValueForCorrectBoneAssigning)
 
     SetDefaultNamespace(ns)
 
@@ -651,10 +658,21 @@ Function RegisterNPC()
     RegisterObjectMethod("NPC", "bool SeesPlayer(bool disableSoundOnCrouch=false)", @MeNPCSeesPlayer)
     RegisterObjectMethod("NPC", "bool PlayerSees096Face()", @Sees096Face)
 
+    RegisterObjectMethod("NPC", "void PlayMTFSound(CB::Sound@)", @PlayMTFSound, True)
+    ;RegisterObjectMethod("NPC", "void UpdateMTFUnit()", @UpdateMTFUnit)
+
     RegisterObjectMethod("NPC", "void Animate(float startFrame, float endFrame, float speed, bool loop=true)", @AnimateNPC)
     RegisterObjectMethod("NPC", "void SetNPCFrame(float frame)", @SetNPCFrame)
     RegisterObjectMethod("NPC", "void FinishWalking(float startFrame, float endFrame, float speed)", @FinishWalking)
     RegisterObjectMethod("NPC", "void ChangeNPCTexture(int textureID)", @ChangeNPCTextureID)
+
+    RegisterObjectMethod("NPC", "void ForceSetID(int newID)", @ForceSetNPCID)
+    RegisterObjectMethod("NPC", "float Find860Angle(Forest@)", @Find860Angle)
+
+    RegisterObjectMethod("NPC", "void EnableNPC()", @EnableNPC)
+    RegisterObjectMethod("NPC", "void DisableNPC()", @DisableNPC)
+
+    RegisterObjectMethod("NPC", "void ApplyDifficultySpeedScale()", @NPCSpeedChange)
 End Function
 
 Function RegisterMap()
@@ -919,6 +937,10 @@ Function RegisterPlayer()
     RegisterGlobalProperty("string Message", &Msg)
     RegisterGlobalProperty("string DeathMessage", &DeathMsg)
 
+    RegisterGlobalFunction("void MoveToPocketDimension()", @MoveToPocketDimension)
+
+    RegisterGlobalFunction("bool IsInReachableRoom(bool is049ChamberReachable=false)", @PlayerInReachableRoom)
+
     SetDefaultNamespace(ns)
 End Function
 
@@ -962,6 +984,16 @@ Function RegisterConsole()
     RegisterGlobalProperty("int B", &ConsoleB)
 
     RegisterGlobalFunction("void CreateMessage(string txt, int r=-1, int g=-1, int b=-1, bool isCommand=false)", @CreateConsoleMsg)
+
+    RegisterGlobalFunction("CB::NPC::Type NPCNameToType(string name)", @Console_NPCNameToType)
+    RegisterGlobalFunction("string NPCTypeToName(CB::NPC::Type, bool plural=false)", @Console_NPCTypeToName)
+    RegisterGlobalFunction("void ListNPCTypes()", @Console_ListNPCTypes)
+    RegisterGlobalFunction("void SpawnNPC(CB::NPC::Type, string stateStr=" + Chr(34) + Chr(34) + ")", @Console_SpawnNPC)
+    RegisterGlobalFunction("void ChangeNPCSpeed(CB::NPC::Type, float speed)", @Console_ChangeNPCSpeed)
+    RegisterGlobalFunction("void PrintNPCState(CB::NPC::Type)", @Console_PrintNPCState)
+    RegisterGlobalFunction("bool CheckCanToggleNPC(CB::NPC::Type)", @Console_CheckCanToggleNPC)
+    RegisterGlobalFunction("void EnableNPC(CB::NPC::Type)", @Console_EnableNPC)
+    RegisterGlobalFunction("void DisableNPC(CB::NPC::Type)", @Console_DisableNPC)
 
     SetDefaultNamespace(ns)
 End Function
@@ -1251,6 +1283,7 @@ Function RegisterCB()
     RegisterParticleSystem()
     ; Fucking ugly but the dependencies have a ton of cycles.
     RegisterTypeFromPtr("Waypoint", %WayPoints)
+    RegisterTypeFromPtr("Forest", %Forest)
     RegisterNPC()
     RegisterMap()
     RegisterDecal()

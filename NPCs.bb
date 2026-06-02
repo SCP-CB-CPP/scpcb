@@ -7227,10 +7227,8 @@ Function Console_ListNPCTypes()
 	CreateConsoleMsg("/ guard / mtf / apache / tentacle")
 End Function
 
-Function Console_SpawnNPC(c_input$, c_state$ = "")
+Function Console_SpawnNPC(npcType%, c_state$ = "")
 	Local n.NPCs
-	
-	Local npcType% = Console_NPCNameToType(c_input)
 
 	If ConsoleSpawnNPC\Subscribers > 0 Then
 		PrepareFunction(1)
@@ -7280,9 +7278,7 @@ Function Console_SpawnNPC(c_input$, c_state$ = "")
 	CreateConsoleMsg(consoleMSG)
 End Function
 
-Function Console_ChangeNPCSpeed(c_input$, c_speed#)
-	Local npcType% = Console_NPCNameToType(c_input)
-
+Function Console_ChangeNPCSpeed(npcType%, c_speed#)
 	If ConsoleCheckCanChangeNPCSpeed\Subscribers > 0 Then
 		PrepareFunction(1)
 		SetArgInt(0, npcType)
@@ -7310,9 +7306,7 @@ Function Console_ChangeNPCSpeed(c_input$, c_speed#)
 	CreateConsoleMsg(Console_NPCTypeToName(npcType) + " speed changed to " + c_speed)
 End Function
 
-Function Console_PrintNPCState(c_input$)
-	Local npcType% = Console_NPCNameToType(c_input)
-
+Function Console_PrintNPCState(npcType%)
 	If npcType = -1 Then CreateConsoleMsg("NPC type not found.", 255, 0, 0) : Return
 
 	Local any% = False
@@ -7355,9 +7349,7 @@ Function Console_CheckCanToggleNPC(npcType%)
 	End Select
 End Function
 
-Function Console_EnableNPC(c_input$)
-	Local npcType% = Console_NPCNameToType(c_input)
-
+Function Console_EnableNPC(npcType%)
 	If Not Console_CheckCanToggleNPC(npcType) Then Return
 
 	For n.NPCs = Each NPCs
@@ -7369,9 +7361,7 @@ Function Console_EnableNPC(c_input$)
 	CreateConsoleMsg(Console_NPCTypeToName(npcType, True) + " enabled.")
 End Function
 
-Function Console_DisableNPC(c_input$)
-	Local npcType% = Console_NPCNameToType(c_input)
-
+Function Console_DisableNPC(npcType%)
 	If Not Console_CheckCanToggleNPC(npcType) Then Return
 
 	For n.NPCs = Each NPCs
@@ -7516,16 +7506,12 @@ Function GetNPCManipulationValue$(NPC$,bone$,section$,valuetype%=0)
 	
 End Function
 
-Function ChangeAngleValueForCorrectBoneAssigning(value#)
-	Local numb#
-	
+Function ChangeAngleValueForCorrectBoneAssigning#(value#)
 	If value# <= 180.0
-		numb# = value#
+		Return value#
 	Else
-		numb# = -360+value#
+		Return -360+value#
 	EndIf
-	
-	Return numb#
 End Function
 
 Function NPCSpeedChange(n.NPCs)
