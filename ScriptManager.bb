@@ -16,6 +16,7 @@ Const HOOK_TYPE_RETURN_INT% = 2
 Const HOOK_TYPE_RETURN_STR% = 3
 
 Delete Each Hooks
+Global InitializeLauncher.Hooks = CreateHook("Hook_InitializeLauncher")
 Global Initialize.Hooks = CreateHook("Hook_Initialize")
 Global Shutdown.Hooks = CreateHook("Hook_Shutdown")
 Global SaveOptions.Hooks = CreateHook("Hook_SaveOptions")

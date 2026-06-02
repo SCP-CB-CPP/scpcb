@@ -158,8 +158,6 @@ Function LoadScripts()
 			SubscribeModuleHooks(m\ScriptModule)
 		EndIf
 	Next
-
-	If Initialize\Subscribers > 0 Then PrepareFunction(0) : CallHook(Initialize)
 End Function
 
 Global Font1%, Font2%, Font3%, Font4%, Font5%, Font6%
@@ -3273,6 +3271,8 @@ Global I_Zone.MapZones = New MapZones
 
 Global TotalVidMem = TotalVidMem()
 Global TotalPhysMem = TotalPhys()
+
+If Initialize\Subscribers > 0 Then PrepareFunction(0) : CallHook(Initialize)
 
 While IsRunning
 	SetErrorMsg(5, "GPU: " + GFXDriverName + " (" + (TotalVidMem - (AvailVidMem() / 1024)) + "MB/" + TotalVidMem + " MB)")

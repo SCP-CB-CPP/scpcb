@@ -1658,6 +1658,8 @@ Function UpdateLauncher()
 	
 	If SteamActive Then Steam_SetOverlayNotificationPosition(1)
 
+	If InitializeLauncher\Subscribers > 0 Then PrepareFunction(0) : CallHook(InitializeLauncher)
+
 	Repeat
 		;Cls
 		Color 0,0,0

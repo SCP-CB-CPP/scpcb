@@ -6,14 +6,8 @@ Achievement BonkAchv;
 
 void Hook_Initialize() {
     m = Music::RegisterCustom("SFX\\Radio\\scpradio0.ogg");
-}
-
-void Hook_LoadEntities() {
-    // TODO: One-time initialize hook after launcher.
-    if (BonkAchv == null) {
-        BonkAchv = Achievement::Create("Bonk", false);
-        BonkAchv.InsertBefore(Achievement::AchvConsole);
-    }
+    BonkAchv = Achievement::Create("Bonk", false);
+    BonkAchv.InsertBefore(Achievement::AchvConsole);
 }
 
 void Hook_InitializeEvents() {
