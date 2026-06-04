@@ -20,8 +20,9 @@ void Hook_UpdateEvent(CB::Event e) {
     }
 }
 
-void Hook_FillRoom(CB::Room r) {
+bool Hook_FillRoom(CB::Room r) {
     if (r.Objects[1] == null) r.Objects[1] = CB::NPC::Create(NPC::Type::Guard, r.X, r.Y + 1, r.Z).Collider;
+    return false;
 }
 
 float configuredFOV = -1.f;

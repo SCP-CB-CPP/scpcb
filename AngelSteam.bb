@@ -18,6 +18,8 @@ Function RegisterSteamworks()
 
 	RegisterGlobalFunction("bool GetOverlayState()", @Steam_GetOverlayState)
 	RegisterGlobalFunction("bool GetOverlayUpdated()", @Steam_GetOverlayUpdated)
+	RegisterGlobalFunction("void SetOverlayNotificationInset(int x, int y)", @Steam_SetOverlayNotificationInset)
+	RegisterGlobalFunction("void SetOverlayNotificationPosition(int pos)", @Steam_SetOverlayNotificationPosition)
 
 	RegisterGlobalFunction("bool SetRichPresence(cstr@ key, cstr@ value)", @Steam_SetRichPresence)
 
