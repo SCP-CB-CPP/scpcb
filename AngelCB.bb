@@ -487,6 +487,20 @@ Function RegisterMapGen()
     RegisterGlobalProperty("dim2<int> MinPositions", &MinPositions)
     RegisterGlobalProperty("dim2<int> MaxPositions", &MaxPositions)
 
+    RegisterGlobalFunction("void Create(int loadingStart, float loadingCount)", @CreateMap)
+    RegisterGlobalFunction("void CreateLayout()", @CreateMapLayout)
+    RegisterGlobalFunction("void CountRooms()", @CountRooms)
+    RegisterGlobalFunction("void ForceRooms()", @ForceRooms)
+    RegisterGlobalFunction("void ForceRoom1s(int desiredCountPerZone)", @ForceRoom1s)
+    RegisterGlobalFunction("void ForceRoom2CsAnd4s(int desired2CCountPerZone, int desired4CountPerZone)", @ForceRoom2CsAnd4s)
+    RegisterGlobalFunction("void InitializeRoomRanges()", @InitializeRoomRanges)
+    RegisterGlobalFunction("void SetRooms()", @SetRooms)
+    RegisterGlobalFunction("void CreateRooms(int loadingStart, float loadingCount)", @CreateRooms)
+    RegisterGlobalFunction("void PreventRoomOverlaps()", @PreventRoomOverlaps)
+    RegisterGlobalFunction("void DrawDebug()", @DrawDebugMap)
+    RegisterGlobalFunction("void CreateDoors()", @CreateDoors)
+    RegisterGlobalFunction("void ConnectAdjacentRooms()", @ConnectAdjacentRooms)
+
     SetDefaultNamespace(ns)
 End Function
 
@@ -689,6 +703,10 @@ Function RegisterMap()
     Local ns$ = GetDefaultNamespace()
     If ns <> "" Then SetDefaultNamespace(ns + "::Room") Else SetDefaultNamespace("Room")
     RegisterGlobalFunction("Room@+ Create(int zone, int shape, float x, float y, float z, int angle, string name)", @CreateRoom)
+    SetDefaultNamespace(ns)
+
+    If ns <> "" Then SetDefaultNamespace(ns + "::Map") Else SetDefaultNamespace("Map")
+    RegisterGlobalFunction("void SetupTriggerBoxes(Room@ room)", @SetupTriggerBoxes)
     SetDefaultNamespace(ns)
 
     RegisterTypeField("Room", "int Zone", %Rooms\zone)

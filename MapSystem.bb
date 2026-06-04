@@ -7112,6 +7112,11 @@ End Function
 Include "OverlapResolver.bb"
 
 Function CreateMapLayout()
+	If MapCreateLayout\Subscribers > 0 Then
+		PrepareFunction(0)
+		If CallHook(MapCreateLayout) Then Return
+	EndIf
+
 	Local x% = Floor(MapWidth / 2)
 	Local y% = MapHeight - 2;Rand(3, 5)
 	
@@ -7215,14 +7220,11 @@ Function CountRooms()
 	Next
 End Function
 
-Function ForceRooms()
+Function ForceRoom1s(desiredCountPerZone%)
 	Local y_min%, y_max%, x_min%, x_max%
-
-	Local forceRoom1 = GetModdedINIInt(MapOptions, "facility", "force room1")
-
-	;force more room1s (if needed)
+	
 	For i = 0 To 2
-		temp = -RoomAmounts(ROOM1, i)+forceRoom1
+		temp = -RoomAmounts(ROOM1, i)+desiredCountPerZone
 		
 		If temp > 0 Then
 			
@@ -7285,19 +7287,18 @@ Function ForceRooms()
 			Next
 		EndIf
 	Next
-	
-	Local forceRoom4 = GetModdedINIInt(MapOptions, "facility", "force room4")
-	Local forceRoom2c = GetModdedINIInt(MapOptions, "facility", "force room2c")
+End Function
 
-	;force more room4s and room2Cs
+Function ForceRoom2CsAnd4s(desired2CCountPerZone%, desired4CountPerZone%)
+	Local y_min%, y_max%, x_min%, x_max%
+
 	For i = 0 To 2
-		
 		If i = 2 Then y_min = 1 Else y_min = I_Zone\Transition[i]
 		If i = 0 Then y_max = MapHeight - 2 Else y_max = I_Zone\Transition[i - 1] - 2
 		x_min = 1
 		x_max = MapWidth - 2
 		
-		temp = -RoomAmounts(ROOM4, i)+forceRoom4
+		temp = -RoomAmounts(ROOM4, i)+desired4CountPerZone
 
 		If temp > 0 Then
 			DebugLog "forcing a ROOM4 into zone "+i
@@ -7338,7 +7339,7 @@ Function ForceRooms()
 			If temp>0 Then DebugLog "Couldn't place all ROOM4s in zone "+i
 		EndIf
 		
-		temp = -RoomAmounts(ROOM2C, i)+forceRoom2c
+		temp = -RoomAmounts(ROOM2C, i)+desired2CCountPerZone
 
 		If temp>0 Then
 			DebugLog "forcing a ROOM2C into zone "+i
@@ -7426,8 +7427,17 @@ Function ForceRooms()
 			
 			If temp>0 Then DebugLog "Couldn't place all ROOM2C in zone "+i
 		EndIf
-		
 	Next
+End Function
+
+Function ForceRooms()
+	If MapForceRooms\Subscribers > 0 Then
+		PrepareFunction(0)
+		If CallHook(MapForceRooms) Then Return
+	EndIf
+
+	ForceRoom1s(GetModdedINIInt(MapOptions, "facility", "force room1"))
+	ForceRoom2CsAnd4s(GetModdedINIInt(MapOptions, "facility", "force room2c"), GetModdedINIInt(MapOptions, "facility", "force room4"))
 End Function
 
 Function InitializeRoomRanges()
@@ -7456,6 +7466,11 @@ Function InitializeRoomRanges()
 End Function
 
 Function SetRooms()
+	If MapSetRooms\Subscribers > 0 Then
+		PrepareFunction(0)
+		If CallHook(MapSetRooms) Then Return
+	EndIf
+
 	MapRoom(ROOM1, 0) = "start"	
 	
 	MapRoom(ROOM1, MaxPositions(ROOM1, 2)-2) = "exit1"
@@ -7479,6 +7494,13 @@ End Function
 Const spacing# = 8.0
 
 Function CreateRooms(loadingstart,loadingcount#)
+	If MapCreateRooms\Subscribers > 0 Then
+		PrepareFunction(2)
+		SetArgFloat(0, loadingstart)
+		SetArgFloat(1, loadingcount)
+		If CallHook(MapCreateRooms) Then Return
+	EndIf
+
 	Local r.Rooms
 	For y = MapHeight - 1 To 0 Step - 1
 		DrawLoading(loadingstart + Float(MapHeight - 1 - y) / (MapHeight - 1) * loadingcount)
@@ -7586,6 +7608,11 @@ Function CreateRooms(loadingstart,loadingcount#)
 End Function
 
 Function PreventRoomOverlaps()
+	If MapPreventRoomOverlaps\Subscribers > 0 Then
+		PrepareFunction(0)
+		If CallHook(MapPreventRoomOverlaps) Then Return
+	EndIf
+
 	; calling PreventRoomOverlap for the first time
 	For r.Rooms = Each Rooms
 		PreventRoomOverlap(r)
@@ -7678,6 +7705,11 @@ Function DrawDebugMap()
 End Function
 
 Function CreateDoors()
+	If MapCreateDoors\Subscribers > 0 Then
+		PrepareFunction(0)
+		If CallHook(MapCreateDoors) Then Return
+	EndIf
+
 	Local d.Doors
 	Local shouldSpawnDoor%
 	For y = MapHeight To 0 Step -1
@@ -7765,6 +7797,11 @@ Function CreateDoors()
 End Function
 
 Function ConnectAdjacentRooms()
+	If MapConnectAdjacentRooms\Subscribers > 0 Then
+		PrepareFunction(0)
+		If CallHook(MapConnectAdjacentRooms) Then Return
+	EndIf
+
 	For r.Rooms = Each Rooms
 		;If r\angle >= 360
         ;    r\angle = r\angle-360
@@ -7804,6 +7841,8 @@ Function CreateMap(loadingstart,loadingcount#)
 	
 	MapWidth% = GetModdedINIInt(MapOptions, "facility", "width")
 	MapHeight% = GetModdedINIInt(MapOptions, "facility", "height")
+
+	If MapInitializeDimensions\Subscribers > 0 Then PrepareFunction(0) : CallHook(MapInitializeDimensions)
 
 	I_Zone\Transition[0] = Floor(MapHeight * (2.0 / 3.0)) + 1
 	I_Zone\Transition[1] = Floor(MapHeight * (1.0 / 3.0)) + 1

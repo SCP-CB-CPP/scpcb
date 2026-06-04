@@ -10,6 +10,28 @@ void Hook_Initialize() {
     BonkAchv.InsertBefore(Achievement::AchvConsole);
 }
 
+bool isNested = false;
+
+// Remove checkpoints.
+bool Hook_MapCreateLayout() {
+    if (isNested) return false;
+
+    // Prevent infinite recursion.
+    isNested = true;
+    Map::CreateLayout();
+    isNested = false;
+
+    for (int x = 0; x < Map::Width; x++) {
+        for (int y = 0; y < Map::Height; y++) {
+            if (Map::Temporary[x, y] == 255) {
+                Map::Temporary[x, y] = 1;
+            }
+        }
+    }
+
+    return true;
+}
+
 void Hook_InitializeEvents() {
     Event::Create("guardspin", "room3pit", 0, 1);
 }
@@ -22,7 +44,7 @@ void Hook_UpdateEvent(CB::Event e) {
 
 bool Hook_FillRoom(CB::Room r) {
     if (r.Objects[1] == null) r.Objects[1] = CB::NPC::Create(NPC::Type::Guard, r.X, r.Y + 1, r.Z).Collider;
-    return false;
+    return true;
 }
 
 float configuredFOV = -1.f;
