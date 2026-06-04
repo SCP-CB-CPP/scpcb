@@ -357,7 +357,9 @@ B3D::Effect@ LoadEffect(string file);
 }
 
 namespace CB::Sound {
+CB::Sound@ Load(string file);
 CB::Sound@ LoadTemporary(string file);
+CB::Stream@ Stream(string file, float volume = 1, int customMode = 2);
 }
 
 namespace CB::Music {
@@ -375,9 +377,21 @@ CB::Waypoint@ get_First() property;
 CB::Waypoint@ get_Last() property;
 }
 
+namespace CB::Forest {
+CB::Forest@ get_First() property;
+CB::Forest@ get_Last() property;
+}
+
 namespace CB::NPC {
 CB::NPC@ get_First() property;
 CB::NPC@ get_Last() property;
+CB::NPC@ Create(Type, float x, float y, float z);
+int FindFreeID();
+void UpdateAll();
+void Shoot(float x, float y, float z, float hitProb = 1.0, bool impactParticles = true, bool instaKill = false);
+void ManipulateBones();
+string GetBoneManipulationValue(string npcName, string boneName, string section, int valueType = 0);
+float ChangeAngleValueForCorrectBoneAssignment(float value);
 }
 
 namespace CB::Room {
@@ -388,6 +402,7 @@ CB::Room@ get_Last() property;
 namespace CB::Door {
 CB::Door@ get_First() property;
 CB::Door@ get_Last() property;
+CB::Door@ Create(int lvl, float x, float y, float z, float yawAngle, CB::Room@ room, bool startOpen = false, int big = 0, int keycard = 0, string code = "", bool useCollisionMesh = false);
 }
 
 namespace CB::TempTriggerbox {
@@ -415,20 +430,43 @@ CB::TempWaypoint@ get_First() property;
 CB::TempWaypoint@ get_Last() property;
 }
 
+namespace CB::Waypoint {
+CB::Waypoint@ f(float x, float y, float z, CB::Door@ door, CB::Room@ room);
+}
+
 namespace CB::Triggerbox {
 CB::Triggerbox@ get_First() property;
 CB::Triggerbox@ get_Last() property;
 string Check(CB::Room@ room, float x, float y, float z);
 }
 
-namespace CB::Forest {
-CB::Forest@ get_First() property;
-CB::Forest@ get_Last() property;
-}
-
 namespace CB::MaintenanceTunnel {
 CB::MaintenanceTunnel@ get_First() property;
 CB::MaintenanceTunnel@ get_Last() property;
+}
+
+namespace CB::Map {
+void Create(int loadingStart, float loadingCount);
+void CreateLayout();
+void CountRooms();
+void ForceRooms();
+void ForceRoom1s(int desiredCountPerZone);
+void ForceRoom2CsAnd4s(int desired2CCountPerZone, int desired4CountPerZone);
+void InitializeRoomRanges();
+void SetRooms();
+void CreateRooms(int loadingStart, float loadingCount);
+void PreventRoomOverlaps();
+void DrawDebug();
+void CreateDoors();
+void ConnectAdjacentRooms();
+}
+
+namespace CB::Room {
+CB::Room@ Create(int zone, int shape, float x, float y, float z, int angle, string name);
+}
+
+namespace CB::Map {
+void SetupTriggerBoxes(CB::Room@ room);
 }
 
 namespace CB {
@@ -438,6 +476,7 @@ B3D::Pivot@ LoadRMesh(string file, RoomTemplate@ template = null);
 namespace CB::Decal {
 CB::Decal@ get_First() property;
 CB::Decal@ get_Last() property;
+CB::Decal@ Create(int id, float x, float y, float z, float pitch, float yaw, float roll);
 }
 
 namespace CB::ItemTemplate {
@@ -456,8 +495,14 @@ CB::Inventory@ get_Last() property;
 }
 
 namespace CB::Item {
-CB::ItemTemplate@ FindTemplate(string name);
+CB::Item@ Create(string name, float x, float y, float z);
 CB::Item@ CreateCup(string drinkName, float x, float y, float z, int r, int g, int b, float a = 1);
+CB::ItemTemplate@ FindTemplate(string name);
+}
+
+namespace CB::Player {
+void MoveToPocketDimension();
+bool IsInReachableRoom(bool is049ChamberReachable = false);
 }
 
 namespace CB::Dreamfilter {
@@ -471,6 +516,15 @@ CB::Console::Msg@ get_Last() property;
 
 namespace CB::Console {
 void CreateMessage(string txt, int r = -1, int g = -1, int b = -1, bool isCommand = false);
+CB::NPC::Type NPCNameToType(string name);
+string NPCTypeToName(CB::NPC::Type, bool plural = false);
+void ListNPCTypes();
+void SpawnNPC(CB::NPC::Type, string stateStr = "");
+void ChangeNPCSpeed(CB::NPC::Type, float speed);
+void PrintNPCState(CB::NPC::Type);
+bool CheckCanToggleNPC(CB::NPC::Type);
+void EnableNPC(CB::NPC::Type);
+void DisableNPC(CB::NPC::Type);
 }
 
 namespace CB::Event {
@@ -551,6 +605,21 @@ CB::SubtitleColor@ InternColor(CB::SubtitleColor@ color);
 void CleanupColors();
 }
 
+namespace CB::Achievement {
+CB::Achievement@ get_First() property;
+CB::Achievement@ get_Last() property;
+}
+
+namespace CB::AchievementMessage {
+CB::AchievementMessage@ get_First() property;
+CB::AchievementMessage@ get_Last() property;
+}
+
+namespace CB::Achievement {
+CB::Achievement@ Create(string name, bool isSCP = false);
+void UpdateMessages();
+}
+
 namespace Steam {
 bool Init();
 bool RestartAppIfNecessary(int appID);
@@ -559,6 +628,8 @@ void Shutdown();
 cstr@ GetGameLanguage();
 bool GetOverlayState();
 bool GetOverlayUpdated();
+void SetOverlayNotificationInset(int x, int y);
+void SetOverlayNotificationPosition(int pos);
 bool SetRichPresence(cstr@ key, cstr@ value);
 void PublishItem(cstr@ name, cstr@ desc, cstr@ path, cstr@ imgPath);
 void UpdateItem(cstr@ fileID, cstr@ name, cstr@ desc, cstr@ path, cstr@ imgPath, cstr@ changelog, bool updateTags);
@@ -2015,6 +2086,21 @@ class Waypoint {
     void InsertBefore(CB::Waypoint@);
 }
 
+class Forest {
+    carray<B3D::Mesh@> TileMesh;
+    carray<B3D::Entity@> DetailMesh;
+    carray<int> Grid;
+    carray<B3D::Mesh@> TileEntities;
+    B3D::Pivot@ Pivot;
+    carray<B3D::Pivot@> Door;
+    carray<B3D::Mesh@> DetailEntities;
+    void Delete();
+    CB::Forest@ get_Next() const property;
+    CB::Forest@ get_Previous() const property;
+    void InsertAfter(CB::Forest@);
+    void InsertBefore(CB::Forest@);
+}
+
 class NPC {
     B3D::Entity@ Object;
     B3D::Entity@ Object2;
@@ -2105,10 +2191,16 @@ class NPC {
     bool SeesNPC(CB::NPC@ other);
     bool SeesPlayer(bool disableSoundOnCrouch = false);
     bool PlayerSees096Face();
+    void PlayMTFSound(CB::Sound@);
     void Animate(float startFrame, float endFrame, float speed, bool loop = true);
     void SetNPCFrame(float frame);
     void FinishWalking(float startFrame, float endFrame, float speed);
     void ChangeNPCTexture(int textureID);
+    void ForceSetID(int newID);
+    float Find860Angle(CB::Forest@);
+    void EnableNPC();
+    void DisableNPC();
+    void ApplyDifficultySpeedScale();
 }
 
 class Room {
@@ -2203,12 +2295,6 @@ class TempTriggerbox {
     B3D::Mesh@ Object;
     string Name;
     CB::TempTriggerbox@ Successor;
-    float MinX;
-    float MinY;
-    float MinZ;
-    float MaxX;
-    float MaxY;
-    float MaxZ;
     void Delete();
     CB::TempTriggerbox@ get_Next() const property;
     CB::TempTriggerbox@ get_Previous() const property;
@@ -2321,6 +2407,12 @@ class TempWaypoint {
 
 class Triggerbox {
     B3D::Mesh@ Object;
+    float MinX;
+    float MinY;
+    float MinZ;
+    float MaxX;
+    float MaxY;
+    float MaxZ;
     string Name;
     CB::Triggerbox@ Successor;
     void Delete();
@@ -2328,21 +2420,6 @@ class Triggerbox {
     CB::Triggerbox@ get_Previous() const property;
     void InsertAfter(CB::Triggerbox@);
     void InsertBefore(CB::Triggerbox@);
-}
-
-class Forest {
-    carray<B3D::Mesh@> TileMesh;
-    carray<B3D::Entity@> DetailMesh;
-    carray<int> Grid;
-    carray<B3D::Mesh@> TileEntities;
-    B3D::Pivot@ Pivot;
-    carray<B3D::Pivot@> Door;
-    carray<B3D::Mesh@> DetailEntities;
-    void Delete();
-    CB::Forest@ get_Next() const property;
-    CB::Forest@ get_Previous() const property;
-    void InsertAfter(CB::Forest@);
-    void InsertBefore(CB::Forest@);
 }
 
 class MaintenanceTunnel {
@@ -2585,6 +2662,36 @@ class SubtitleMsg {
     void InsertAfter(CB::SubtitleMsg@);
     void InsertBefore(CB::SubtitleMsg@);
 }
+
+class Achievement {
+    string Name;
+    bool IsSCP;
+    string DisplayName;
+    string Description;
+    B3D::Image@ Image;
+    bool Unlocked;
+    void Delete();
+    CB::Achievement@ get_Next() const property;
+    CB::Achievement@ get_Previous() const property;
+    void InsertAfter(CB::Achievement@);
+    void InsertBefore(CB::Achievement@);
+    void Award(bool showMessage = true);
+    void DrawTooltip();
+    void DrawImage(int x, int y);
+    CB::AchievementMessage@ CreateMessage();
+}
+
+class AchievementMessage {
+    CB::Achievement@ Achievement;
+    float X;
+    float Time;
+    int ID;
+    void Delete();
+    CB::AchievementMessage@ get_Next() const property;
+    CB::AchievementMessage@ get_Previous() const property;
+    void InsertAfter(CB::AchievementMessage@);
+    void InsertBefore(CB::AchievementMessage@);
+}
 float FPSFactor;
 bool HasNumericSeed;
 string RandomSeed;
@@ -2794,6 +2901,52 @@ B3D::Font@ Font1Bold;
 B3D::Font@ Font1Italic;
 B3D::Font@ Font1BoldItalic;
 CB::SubtitleBox@ Box;
+}
+
+namespace CB::Achievement {
+int TotalCount;
+CB::Achievement@ Achv008;
+CB::Achievement@ Achv012;
+CB::Achievement@ Achv035;
+CB::Achievement@ Achv049;
+CB::Achievement@ Achv055;
+CB::Achievement@ Achv066;
+CB::Achievement@ Achv079;
+CB::Achievement@ Achv096;
+CB::Achievement@ Achv106;
+CB::Achievement@ Achv148;
+CB::Achievement@ Achv205;
+CB::Achievement@ Achv294;
+CB::Achievement@ Achv372;
+CB::Achievement@ Achv420;
+CB::Achievement@ Achv427;
+CB::Achievement@ Achv500;
+CB::Achievement@ Achv513;
+CB::Achievement@ Achv714;
+CB::Achievement@ Achv789;
+CB::Achievement@ Achv860;
+CB::Achievement@ Achv895;
+CB::Achievement@ Achv914;
+CB::Achievement@ Achv939;
+CB::Achievement@ Achv966;
+CB::Achievement@ Achv970;
+CB::Achievement@ Achv1025;
+CB::Achievement@ Achv1048;
+CB::Achievement@ Achv1123;
+CB::Achievement@ Achv1162;
+CB::Achievement@ Achv1499;
+CB::Achievement@ AchvMaynard;
+CB::Achievement@ AchvHarp;
+CB::Achievement@ AchvSNAV;
+CB::Achievement@ AchvOmni;
+CB::Achievement@ AchvTesla;
+CB::Achievement@ AchvPD;
+CB::Achievement@ AchvConsole;
+CB::Achievement@ AchvKeter;
+bool UsedConsole;
+int CurrentPage;
+B3D::Image@ LockedImage;
+int CurrentAchievementMessageID;
 }
 
 namespace CB {
