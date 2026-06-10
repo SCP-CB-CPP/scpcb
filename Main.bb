@@ -3334,29 +3334,27 @@ Repeat
 		
 		;[End block]
 		
-		If KeyHit(KEY_INV) And VomitTimer >= 0 Then
-			If (Not UnableToMove) And (Not IsZombie) And (Not Using294) Then
-				Local W$ = ""
-				Local V# = 0
-				If SelectedItem<>Null
-					W$ = SelectedItem\itemtemplate\tempname
-					V# = SelectedItem\state
+		If KeyHit(KEY_INV) And VomitTimer >= 0 And (Not UnableToMove) And (Not IsZombie) And (Not Using294) And KillTimer >= 0 And (Not MenuOpen) And (Not ConsoleOpen) Then
+			Local W$ = ""
+			Local V# = 0
+			If SelectedItem<>Null
+				W$ = SelectedItem\itemtemplate\tempname
+				V# = SelectedItem\state
+			EndIf
+			If (W<>"vest" And W<>"finevest" And W<>"hazmatsuit" And W<>"hazmatsuit2" And W<>"hazmatsuit3") Or V=0 Or V=100
+				If InvOpen Then
+					ResumeSounds()
+					MouseXSpeed() : MouseYSpeed() : MouseZSpeed() : mouse_x_speed_1#=0.0 : mouse_y_speed_1#=0.0
+				Else
+					PauseSounds()
 				EndIf
-				If (W<>"vest" And W<>"finevest" And W<>"hazmatsuit" And W<>"hazmatsuit2" And W<>"hazmatsuit3") Or V=0 Or V=100
-					If InvOpen Then
-						ResumeSounds()
-						MouseXSpeed() : MouseYSpeed() : MouseZSpeed() : mouse_x_speed_1#=0.0 : mouse_y_speed_1#=0.0
-					Else
-						PauseSounds()
-					EndIf
-					InvOpen = Not InvOpen
-					If OtherOpen<>Null Then OtherOpen=Null
-					SelectedItem = Null
-				EndIf
+				InvOpen = Not InvOpen
+				If OtherOpen<>Null Then OtherOpen=Null
+				SelectedItem = Null
 			EndIf
 		EndIf
 		
-		If KeyHit(KEY_SAVE) Then
+		If KeyHit(KEY_SAVE) And (Not ConsoleOpen) Then
 			If SelectedDifficulty\saveType = SAVEANYWHERE Then
 				RN$ = PlayerRoom\RoomTemplate\Name$
 				If RN$ = "173" Or (RN$ = "exit1" And EntityY(Collider)>1040.0*RoomScale) Or RN$ = "gatea"
