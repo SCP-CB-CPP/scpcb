@@ -6650,17 +6650,19 @@ Function DrawGUI()
 								Text(x+97, y+16, Rand(0,9),True,True)
 								
 							Else
-								For i = 2 To 6
-									If KeyHit(i) Then
-										If SelectedItem\state2 <> i-2 Then ;pausetetaan nykyinen radiokanava
-											PlaySound_Strict RadioSquelch
-											If RadioCHN(Int(SelectedItem\state2)) <> 0 Then PauseChannel(RadioCHN(Int(SelectedItem\state2)))
+								If Not ConsoleOpen Then
+									For i = 2 To 6
+										If KeyHit(i) Then
+											If SelectedItem\state2 <> i-2 Then ;pausetetaan nykyinen radiokanava
+												PlaySound_Strict RadioSquelch
+												If RadioCHN(Int(SelectedItem\state2)) <> 0 Then PauseChannel(RadioCHN(Int(SelectedItem\state2)))
+											EndIf
+											SelectedItem\state2 = i-2
+											;jos nykyistä kanavaa ollaan soitettu, laitetaan jatketaan toistoa samasta kohdasta
+											If RadioCHN(SelectedItem\state2)<>0 Then ResumeChannel(RadioCHN(SelectedItem\state2))
 										EndIf
-										SelectedItem\state2 = i-2
-										;jos nykyistä kanavaa ollaan soitettu, laitetaan jatketaan toistoa samasta kohdasta
-										If RadioCHN(SelectedItem\state2)<>0 Then ResumeChannel(RadioCHN(SelectedItem\state2))
-									EndIf
-								Next
+									Next
+								EndIf
 								
 								SetFont Font4
 								Text(x+97, y+16, Int(SelectedItem\state2+1),True,True)
