@@ -9497,11 +9497,8 @@ Function UpdateEndings()
 							Curr106\PathTimer = 70*1000
 							Curr106\CurrSpeed = 0
 							Curr106\PathLocation = 0
-							PositionEntity Curr106\Collider, EntityX(e\room\Objects[3],True), EntityY(Collider)-50.0, EntityZ(e\room\Objects[3],True), True
-							ResetEntity Curr106\Collider
+							PlaySound_Strict LoadTempSound("SFX\Ending\GateA\106Escape.ogg")
 						EndIf
-
-						If (Not Contained106) Then PlaySound_Strict LoadTempSound("SFX\Ending\GateA\106Escape.ogg") 
 						
 						DrawLoading(100)
 					Else
