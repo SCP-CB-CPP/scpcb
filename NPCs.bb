@@ -987,7 +987,7 @@ Function UpdateNPCs()
 					
 					If (Not n\Idle) And spawn106%
 						If n\State <= 0 Then	;attacking	
-							If EntityY(n\Collider) < EntityY(Collider) - 20.0 - 0.55 Then
+							If EntityY(n\Collider) < EntityY(Collider) - 20.0 - 0.55 And PlayerRoom\RoomTemplate\Name <> "gatea" Then
 								If Not PlayerRoom\RoomTemplate\DisableDecals Then
 									de.Decals = CreateDecal(0, EntityX(Collider), 0.01, EntityZ(Collider), 90, Rand(360), 0)
 									de\Size = 0.05 : de\SizeChange = 0.001 : EntityAlpha(de\obj, 0.8) : UpdateDecals
