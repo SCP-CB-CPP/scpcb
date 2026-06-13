@@ -3154,14 +3154,6 @@ While IsRunning
 
 	If IsPaused() Then FPSfactor = 0
 	
-	If Framelimit > 0 Then
-	    ;Framelimit
-		Local WaitingTime% = (1000.0 / Framelimit) - (MilliSecs() - LoopDelay)
-		Delay WaitingTime%
-		
-		LoopDelay = MilliSecs()
-	EndIf
-	
 	;Counting the fps
 	If CheckFPS < MilliSecs() Then
 		FPS = ElapsedLoops
@@ -3761,7 +3753,16 @@ While IsRunning
 		BlitzcordRunCallbacks()
 	EndIf
 
+	If Framelimit > 0 Then
+		;Framelimit
+		Local WaitingTime# = (1000.0 / Framelimit) - (MilliSecs() - LoopDelay)
+		If WaitingTime > 1.0 Then Delay Int(WaitingTime - 1.0)
+		While (MilliSecs() - LoopDelay) < (1000.0 / Framelimit) : Wend
+	EndIf
+
 	Flip Vsync Lor MainMenuOpen
+
+	LoopDelay = MilliSecs()
 Wend
 
 If ShouldRestart Then
