@@ -1,4 +1,4 @@
-Const VersionNumber$ = "1.3.12.4"
+Const VersionNumber$ = "1.3.12.5"
 ;Only change this if the version given isn't working with the current build version - ENDSHN
 Const CompatibleNumber$ = "1.3.12"
 
@@ -826,7 +826,7 @@ Function UpdateConsole()
 						Case "gamma"
 							CreateConsoleMsg("HELP - gamma")
 							CreateConsoleMsg("******************************")
-							CreateConsoleMsg("Sets the gamma correction.")
+							CreateConsoleMsg("Sets the screen gamma.")
 							CreateConsoleMsg("Should be set to a value between 0.0 and 2.0.")
 							CreateConsoleMsg("Default is 1.0.")
 							CreateConsoleMsg("******************************")
@@ -3221,6 +3221,14 @@ While IsRunning
 	Cls
 	
 	CurTime = MilliSecs()
+	If Framelimit > 0 Then
+	    ;Framelimit
+		Local WaitingTime% = (1000.0 / Framelimit) - (MilliSecs() - LoopDelay)
+		Delay WaitingTime% - 1
+		
+		LoopDelay = MilliSecs()
+		CurTime = LoopDelay
+	EndIf
 
 	Local ElapsedTime% = CurTime - PrevTime
 	PrevTime = CurTime
@@ -3231,19 +3239,11 @@ While IsRunning
 
 	If IsPaused() Then FPSfactor = 0
 	
-	If Framelimit > 0 Then
-	    ;Framelimit
-		Local WaitingTime% = (1000.0 / Framelimit) - (MilliSecs() - LoopDelay)
-		Delay WaitingTime%
-		
-		LoopDelay = MilliSecs()
-	EndIf
-	
 	;Counting the fps
-	If CheckFPS < MilliSecs() Then
+	If CheckFPS < CurTime Then
 		FPS = ElapsedLoops
 		ElapsedLoops = 0
-		CheckFPS = MilliSecs()+1000
+		CheckFPS = CurTime+1000
 	EndIf
 	ElapsedLoops = ElapsedLoops + 1
 	
@@ -3251,8 +3251,8 @@ While IsRunning
 		DoubleClick = False
 		MouseHit1 = MouseHit(1)
 		If MouseHit1 Then
-			If MilliSecs() - LastMouseHit1 < 800 And Abs(MouseX() - LastMouseHit1X) < 4 And Abs(MouseY() - LastMouseHit1Y) < 4 Then DoubleClick = True
-			LastMouseHit1 = MilliSecs()
+			If CurTime - LastMouseHit1 < 800 And Abs(MouseX() - LastMouseHit1X) < 4 And Abs(MouseY() - LastMouseHit1Y) < 4 Then DoubleClick = True
+			LastMouseHit1 = CurTime
 			LastMouseHit1X = MouseX()
 			LastMouseHit1Y = MouseY()
 		EndIf
@@ -3520,6 +3520,7 @@ While IsRunning
 			EndIf
 			
 			If FallTimer < 0 Then
+				CanSave = False
 				If SelectedItem <> Null Then
 					If SelectedItem\itemtemplate\group = "hazmat" Or SelectedItem\itemtemplate\group = "vest" Then
 						If WearingHazmat=0 And WearingVest=0 Then
@@ -3556,7 +3557,7 @@ While IsRunning
 		
 		;[End block]
 		
-		If KeyHit(KEY_INV) And VomitTimer >= 0 And (Not UnableToMove) And (Not IsZombie) And (Not Using294) And KillTimer >= 0 And (Not MenuOpen) Then
+		If KeyHit(KEY_INV) And VomitTimer >= 0 And (Not UnableToMove) And (Not IsZombie) And (Not Using294) And KillTimer >= 0 And (Not MenuOpen) And (Not ConsoleOpen) Then
 			Local W$ = ""
 			Local V# = 0
 			If SelectedItem<>Null
@@ -3572,7 +3573,7 @@ While IsRunning
 			EndIf
 		EndIf
 		
-		If KeyHit(KEY_SAVE) Then
+		If KeyHit(KEY_SAVE) And (Not ConsoleOpen) Then
 			If SelectedDifficulty\saveType = SAVEANYWHERE Then
 				RN$ = PlayerRoom\RoomTemplate\Name$
 				If RN$ = "173" Or (RN$ = "exit1" And EntityY(Collider)>1040.0*RoomScale) Or RN$ = "gatea"
@@ -6733,21 +6734,23 @@ Function DrawGUI()
 								Text(x+97*HUDScale, y+16*HUDScale, Rand(0,9),True,True)
 								
 							Else
-								For i = 2 To 6
-									If KeyHit(i) Then
-										If SelectedItem\state2 <> i-2 Then ;pausetetaan nykyinen radiokanava
-											PlaySound_Strict RadioSquelch
-											If RadioCHN(Int(SelectedItem\state2)) <> 0 Then
-												PauseChannelWithSubtitles(RadioCHN(Int(SelectedItem\state2)))
+								If Not ConsoleOpen Then
+									For i = 2 To 6
+										If KeyHit(i) Then
+											If SelectedItem\state2 <> i-2 Then ;pausetetaan nykyinen radiokanava
+												PlaySound_Strict RadioSquelch
+												If RadioCHN(Int(SelectedItem\state2)) <> 0 Then
+													PauseChannelWithSubtitles(RadioCHN(Int(SelectedItem\state2)))
+												EndIf
+											EndIf
+											SelectedItem\state2 = i-2
+											;jos nykyistä kanavaa ollaan soitettu, laitetaan jatketaan toistoa samasta kohdasta
+											If RadioCHN(SelectedItem\state2)<>0 Then
+												ResumeChannelWithSubtitles(RadioCHN(SelectedItem\state2))
 											EndIf
 										EndIf
-										SelectedItem\state2 = i-2
-										;jos nykyistä kanavaa ollaan soitettu, laitetaan jatketaan toistoa samasta kohdasta
-										If RadioCHN(SelectedItem\state2)<>0 Then
-											ResumeChannelWithSubtitles(RadioCHN(SelectedItem\state2))
-										EndIf
-									EndIf
-								Next
+									Next
+								EndIf
 								
 								SetFont Font4
 								Text(x+97*HUDScale, y+16*HUDScale, Int(SelectedItem\state2+1),True,True)
