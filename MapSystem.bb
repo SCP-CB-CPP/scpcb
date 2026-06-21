@@ -572,9 +572,9 @@ Function ReadMesh%(file$, f%, blankTexture%, Alpha%, Opaque%, coll% = True)
 			If tex[j]=0 Then ;texture is not in cache
 				Select True
 					Case temp1i<3
-						tex[j]=LoadModdedTextureNonStrict(file+temp1s,1)
+						tex[j]=LoadTexture(file+temp1s,1)
 					Default
-						tex[j]=LoadModdedTextureNonStrict(file+temp1s,3)
+						tex[j]=LoadTexture(file+temp1s,3)
 				End Select
 				
 				If tex[j]<>0 Then

@@ -8889,7 +8889,7 @@ Function LoadEntities()
 	InitMaterials()
 
 	If IsBirthday Then
-		tex = LoadModdedTextureNonStrict("GFX\map\miscsigns3.ae", 1)
+		tex = LoadTexture("GFX\map\miscsigns3.ae", 1)
 		TextureBlend(tex, 5)
 		AddTextureToCache(tex, "GFX\map\miscsigns3.jpg")
 	EndIf

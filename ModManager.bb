@@ -169,10 +169,20 @@ Function UpdateActiveMods()
     UsesDubbedAudio = HasDubbedAudio And DubbedAudio
 End Function
 
-Function LoadModdedTextureNonStrict%(file$, flags%)
+Function DetermineModdedTexturePath$(file$)
+    If Instr(file, "Mods\") = 1 Then file = Right(file, Len(file) - Instr(file, "\", 6))
+    If Instr(file, ":") = 2 Then
+        ; Could be a mod load path.. Check if any of them fit.
+        For m.ActiveMods = Each ActiveMods
+            If Instr(file, m\Path) = 1 Then
+                file = Right(file, Len(file) - Len(m\Path))
+                Exit
+            EndIf
+        Next
+    EndIf
+
     Local ext$ = File_GetExtension(File)
 	Local fileNoExt$ = Left(File, Len(File) - Len(ext))
-	Local tmp%
 
 	For m.ActiveMods = Each ActiveMods
 		For i = 0 To ImageExtensionCount
@@ -184,30 +194,15 @@ Function LoadModdedTextureNonStrict%(file$, flags%)
 			EndIf
 			Local modPath$ = m\Path + fileNoExt + usedExtension
 			If FileType(modPath) = 1 Then
-				tmp = LoadTexture(modPath, flags)
-				If tmp <> 0 Then
-					Return tmp
-				Else
-					RuntimeErrorExt("Failed to load texture " + Chr(34) + modPath + Chr(34) + ".")
-				EndIf
+				Return modPath
 			EndIf
 		Next
 	Next
 
-    tmp = LoadTexture(file, flags)
-    If tmp <> 0 Then Return tmp
-
-    For i = 0 To ImageExtensionCount-1
-        usedExtension$ = ImageExtensions[i]
-        Local path$ = fileNoExt + usedExtension
-        If FileType(path) = 1 Then
-            tmp = LoadTexture(path, flags)
-            If tmp <> 0 Then Return tmp
-        EndIf
-    Next
-
-    Return 0
+    Return file
 End Function
+
+SetTextureLoadPathMutator(@DetermineModdedTexturePath)
 
 Function LoadModdedMeshNonStrict%(File$, parent%=0)
 	Local ext$ = File_GetExtension(File)
