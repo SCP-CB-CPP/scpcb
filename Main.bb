@@ -4953,7 +4953,7 @@ Function MouseLook()
 		End If
 	EndIf
 	
-	MoveMouse viewport_center_x, viewport_center_y
+	If SelectedEnding = "" Then MoveMouse viewport_center_x, viewport_center_y
 	
 	If WearingGasMask Or WearingHazmat Or Wearing1499 Then
 		If Wearing714 = False Then
@@ -7653,8 +7653,8 @@ Function DrawMenu()
 	
 	Local x%, y%, width%, height%
 	Local steamOverlayActive = SteamActive And Steam_GetOverlayState()
-	If api_GetFocus() = 0 Lor steamOverlayActive Then ;Game is out of focus -> pause the game
-		If (Not Using294) And EndingTimer=0 And SelectedEnding="" Then
+	If (api_GetFocus() = 0 Lor steamOverlayActive) And EndingTimer=0 And SelectedEnding="" Then ;Game is out of focus -> pause the game
+		If (Not Using294) Then
 			MenuOpen = True
 			UpdateMenuState()
 		EndIf
