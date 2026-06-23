@@ -4984,7 +4984,7 @@ Function MouseLook()
 		End If
 	EndIf
 	
-	MoveMouse viewport_center_x, viewport_center_y
+	If SelectedEnding = "" Then MoveMouse viewport_center_x, viewport_center_y
 	
 	If WearingGasMask Or WearingHazmat Or Wearing1499 Then
 		If Wearing714 = False Then
@@ -7671,8 +7671,8 @@ Function DrawMenu()
 	
 	Local x%, y%, width%, height%
 	Local steamOverlayActive = SteamActive And Steam_GetOverlayState()
-	If api_GetFocus() = 0 Lor steamOverlayActive Then ;Game is out of focus -> pause the game
-		If (Not Using294) And EndingTimer=0 And SelectedEnding="" Then
+	If (api_GetFocus() = 0 Lor steamOverlayActive) And EndingTimer=0 And SelectedEnding="" Then ;Game is out of focus -> pause the game
+		If (Not Using294) Then
 			MenuOpen = True
 			UpdateMenuState()
 		EndIf
@@ -8199,11 +8199,9 @@ Function DrawMenu()
 				MouseHit1 = False
 			EndIf
 		Else
+			Local backPressed% = False			
 			If DrawButton(x+101*MenuScale, y + 344*MenuScale, 230*MenuScale, 60*MenuScale, I_Loc\Menu_Back) Then
-				AchievementsMenu = 0
-				OptionsMenu = 0
-				QuitMSG = 0
-				MouseHit1 = False
+				backPressed = True
 			EndIf
 			
 			If AchievementsMenu>0 Then
@@ -8252,7 +8250,7 @@ Function DrawMenu()
 		
 		y = y+10
 		
-		If AchievementsMenu<=0 And OptionsMenu<=0 And QuitMSG<=0 Then
+		If AchievementsMenu<=0 And OptionsMenu<=0 And QuitMSG<=0 And EndingTimer >= 0 Then
 			If KillTimer >= 0 Then	
 				
 				y = y+ 72*MenuScale
@@ -8387,6 +8385,13 @@ Function DrawMenu()
 			
 			SetFont Font1
 			If KillTimer < 0 Then RowText(DeathMSG$, x, y + 80*MenuScale, 390*MenuScale, 600*MenuScale)
+		EndIf
+
+		If backPressed Then
+			AchievementsMenu = 0
+			OptionsMenu = 0
+			QuitMSG = 0
+			MouseHit1 = False
 		EndIf
 		
 		If Fullscreen Then DrawImage CursorIMG, ScaledMouseX(),ScaledMouseY()

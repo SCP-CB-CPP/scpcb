@@ -2,6 +2,8 @@
 
 Global AchievementCount% = 0
 
+Delete Each Achievements
+
 Type Achievements
 	Field Name$
 	Field IsSCP%
