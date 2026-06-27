@@ -13,3 +13,4 @@ error_log_*
 updates/
 Thumbs.db
 *.SI
+*.dmp

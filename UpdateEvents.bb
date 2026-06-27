@@ -4898,24 +4898,50 @@ Function UpdateEvents()
 				;[Block]
 				If e\EventState < MilliSecs() Then
 					If PlayerRoom <> e\room Then
-						If Distance(EntityX(Collider),EntityZ(Collider),EntityX(e\room\obj),EntityZ(e\room\obj))<16.0 Then
-							For n.NPCs = Each NPCs
-								If n\NPCtype = NPCtype049 Then
-									If n\State = 2 And EntityDistance(Collider,n\Collider)>16.0 Then
-										TFormVector(368, 528, 176, e\room\obj, 0)
-										PositionEntity n\Collider, EntityX(e\room\obj)+TFormedX(), TFormedY(), EntityZ(e\room\obj)+TFormedZ()
-										DebugLog TFormedX()+", "+ TFormedY()+", "+ TFormedZ()
-										ResetEntity n\Collider
-										n\PathStatus = 0
-										n\State = 4
-										n\State2 = 0
-										n\State3 = 0
-										RemoveEvent(e)
-									EndIf
-									Exit
+						Local closeEnough% = Distance(EntityX(Collider),EntityZ(Collider),EntityX(e\room\obj),EntityZ(e\room\obj))<16.0
+
+						For n.NPCs = Each NPCs
+							If n\NPCtype <> NPCtype049 Then Continue
+							If e\EventState2 Then
+								If n\State <> 4 Then
+									; It teleported away on its own, concludes the event.
+									RemoveEvent(e)
+									e = Null
+								Else If Not closeEnough
+									; Reset 049.
+									n\State = 2
+									n\State3 = 0
+									n\PathStatus = 0
+									n\PathTimer = 0.0
+									n\PathLocation = 0
+									n\State2 = 0
+									n\PrevState = 0
+									
+									For r.Rooms = Each Rooms
+										If EntityDistance(r\obj,n\Collider)<4.0 Then
+											TeleportEntity(n\Collider,EntityX(r\obj),0.1,EntityZ(r\obj),n\CollRadius,True)
+											Exit
+										EndIf
+									Next
+
+									e\EventState2 = 0
 								EndIf
-							Next
-						EndIf
+							Else If closeEnough
+								If n\State = 2 And EntityDistance(Collider,n\Collider)>16.0 Then
+									TFormVector(368, 528, 176, e\room\obj, 0)
+									PositionEntity n\Collider, EntityX(e\room\obj)+TFormedX(), TFormedY(), EntityZ(e\room\obj)+TFormedZ()
+									DebugLog (EntityX(e\room\obj)+TFormedX())+", "+ TFormedY()+", "+ (EntityZ(e\room\obj)+TFormedZ())
+									ResetEntity n\Collider
+									n\PathStatus = 0
+									n\State = 4
+									n\State2 = 0
+									n\State3 = 0
+									n\Idle = 0
+									e\EventState2 = 1
+								EndIf
+							EndIf
+							Exit
+						Next
 					EndIf
 					If e<>Null Then e\EventState = MilliSecs()+5000
 				EndIf
