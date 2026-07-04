@@ -10163,11 +10163,34 @@ Function Animate2#(entity%, curr#, start%, quit%, speed#, loop=True)
 	
 End Function 
 
+Const SCP914_ROUGH% = 0
+Const SCP914_COARSE% = 1
+Const SCP914_ONE_TO_ONE% = 2
+Const SCP914_FINE% = 3
+Const SCP914_VERY_FINE% = 4
 
 Function Use914(item.Items, setting$, x#, y#, z#)
-	
 	RefinedItems = RefinedItems+1
 	
+	If Use914\Subscribers > 0 Then
+		Local settingEnum%
+		Select setting
+			Case "rough" settingEnum = SCP914_ROUGH
+			Case "coarse" settingEnum = SCP914_COARSE
+			Case "1:1" settingEnum = SCP914_ONE_TO_ONE
+			Case "fine" settingEnum = SCP914_FINE
+			Case "very fine" settingEnum = SCP914_VERY_FINE
+		End Select
+		Local ii.Items = item
+		PrepareFunction(5)
+		SetArgObj(0, &ii)
+		SetArgInt(1, settingEnum)
+		SetArgFloat(2, x)
+		SetArgFloat(3, y)
+		SetArgFloat(4, z)
+		If CallHook(Use914) Then Return
+	EndIf
+
 	Local it2.Items
 	Select item\itemtemplate\name
 		Case "gasmask", "supergasmask", "gasmask3"

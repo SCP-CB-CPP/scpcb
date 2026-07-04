@@ -44,6 +44,7 @@ Global FillRoom.Hooks = CreateHook("Hook_FillRoom", HOOK_TYPE_OVERRIDABLE)
 Global PostFillRoom.Hooks = CreateHook("Hook_PostFillRoom")
 Global LoadRoomTemplateEntity.Hooks = CreateHook("Hook_LoadRoomTemplateEntity", HOOK_TYPE_OVERRIDABLE)
 Global PostLoad.Hooks = CreateHook("Hook_PostLoad")
+
 Global CreateItem.Hooks = CreateHook("Hook_CreateItem", HOOK_TYPE_OVERRIDABLE)
 Global UpdateItem.Hooks = CreateHook("Hook_UpdateItem", HOOK_TYPE_OVERRIDABLE)
 Global RemoveItem.Hooks = CreateHook("Hook_RemoveItem")
@@ -51,6 +52,7 @@ Global PickItem.Hooks = CreateHook("Hook_PickItem", HOOK_TYPE_OVERRIDABLE)
 Global DropItem.Hooks = CreateHook("Hook_DropItem", HOOK_TYPE_OVERRIDABLE)
 Global SelectItem.Hooks = CreateHook("Hook_SelectItem")
 Global CombineItems.Hooks = CreateHook("Hook_CombineItems")
+
 Global CreateNPC.Hooks = CreateHook("Hook_CreateNPC")
 Global PostCreateNPC.Hooks = CreateHook("Hook_PostCreateNPC")
 Global RemoveNPC.Hooks = CreateHook("Hook_RemoveNPC", HOOK_TYPE_OVERRIDABLE)
@@ -62,6 +64,8 @@ Global ConsoleCheckCanChangeNPCSpeed.Hooks = CreateHook("Hook_ConsoleCheckCanCha
 Global ConsoleCheckCanToggleNPC.Hooks = CreateHook("Hook_ConsoleCheckCanToggleNPC", HOOK_TYPE_RETURN_INT)
 Global EnableNPC.Hooks = CreateHook("Hook_EnableNPC", HOOK_TYPE_OVERRIDABLE)
 Global DisableNPC.Hooks = CreateHook("Hook_DisableNPC", HOOK_TYPE_OVERRIDABLE)
+
+Global Use914.Hooks = CreateHook("Hook_Use914", HOOK_TYPE_OVERRIDABLE)
 
 Dim HookFuncs%(HookCount, 0)
 

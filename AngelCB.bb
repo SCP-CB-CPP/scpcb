@@ -1301,6 +1301,24 @@ Function RegisterAchievements()
     SetDefaultNamespace(ns)
 End Function
 
+Function Register914()
+    Local ns$ = GetDefaultNamespace()
+    If ns <> "" Then SetDefaultNamespace(ns + "::SCP914") Else SetDefaultNamespace("SCP914")
+
+    RegisterEnum("Setting")
+    RegisterEnumValue("Setting", "Rough", 0)
+    RegisterEnumValue("Setting", "Coarse", 1)
+    RegisterEnumValue("Setting", "OneToOne", 2)
+    RegisterEnumValue("Setting", "Fine", 3)
+    RegisterEnumValue("Setting", "VeryFine", 4)
+
+    RegisterGlobalFunction("void Use(Item@ item, Setting setting, float x, float y, float z)", @Use914)
+
+    RegisterGlobalProperty("int RefinedItems", &RefinedItems)
+
+    SetDefaultNamespace(ns)
+End Function
+
 Global HasRegisteredCB%
 Function RegisterCB()
     If HasRegisteredCB Then Return
@@ -1328,6 +1346,7 @@ Function RegisterCB()
     RegisterEvent()
     RegisterSubtitles()
     RegisterAchievements()
+    Register914()
     SetDefaultNamespace("")
 End Function
 

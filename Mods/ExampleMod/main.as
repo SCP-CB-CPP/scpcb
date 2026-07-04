@@ -33,19 +33,23 @@ bool Hook_MapCreateLayout() {
     return true;
 }
 
-void Hook_InitializeEvents() {
+bool Hook_InitializeEvents() {
     Event::Create("guardspin", "room3pit", 0, 1);
+    Event::Create("914", "914", 0, 1);
+    return true;
 }
 
-void Hook_UpdateEvent(CB::Event e) {
+bool Hook_UpdateEvent(CB::Event e) {
     if (e.Name == "guardspin") {
         e.Room.Objects[1].Turn(0, FPSFactor * 10, 0);
     }
+    return false;
 }
 
 bool Hook_FillRoom(CB::Room r) {
     if (r.Objects[1] == null) r.Objects[1] = CB::NPC::Create(NPC::Type::Guard, r.X, r.Y + 1, r.Z).Collider;
-    return true;
+    // Clear all rooms except SCP-914's.
+    return r.Template.Name != "914";
 }
 
 void Hook_LoadEntities() {
@@ -142,5 +146,15 @@ bool Hook_ExecuteConsoleCommand(string cmd) {
         Console::CreateMessage("Pong!");
         return true;
     }
+    return false;
+}
+
+bool Hook_Use914(CB::Item item, CB::SCP914::Setting setting, float x, float y, float z) {
+    if (item.Template.Name.Substring(0, 3) == "key" && setting == CB::SCP914::Setting::VeryFine) {
+        Item::Create("key6", x, y, z);
+        item.Remove();
+        return true;
+    }
+
     return false;
 }
