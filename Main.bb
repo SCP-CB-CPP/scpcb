@@ -2,7 +2,7 @@ Const VersionNumber$ = "1.3.12.5-s11"
 ;Only change this if the version given isn't working with the current build version - ENDSHN
 Const CompatibleNumber$ = "1.3.12"
 
-InitErrorMsgs(11, True)
+InitErrorMsgs(12, True)
 SetErrorMsg(0, "An error occured in SCP - Containment Breach v" + VersionNumber)
 SetErrorMsg(1, "Please send us the generated minidump along with a screenshot of this window!")
 SetErrorMsg(2, "---------------------------------------------------")
@@ -10,6 +10,7 @@ SetErrorMsg(3, "OS: " + SystemProperty("os") + " " + (32 + (GetEnv("ProgramFiles
 SetErrorMsg(4, "CPU: " + Trim(SystemProperty("cpuname")) + " (Arch: " + SystemProperty("cpuarch") + ", " + GetEnv("NUMBER_OF_PROCESSORS") + " Threads)")
 
 SetErrorMsg(8, "Caught exception: " + "_CaughtError_")
+SetErrorMsg(11, "AngelScript stack trace: " + "_AS_Stacktrace_")
 
 Function CatchErrors(location$)
 	SetErrorMsg(9, location)
