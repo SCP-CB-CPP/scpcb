@@ -3,6 +3,7 @@ using namespace B3D;
 
 Music m;
 Achievement BonkAchv;
+Skybox Sky;
 
 void Hook_Initialize() {
     m = Music::RegisterCustom("SFX\\Radio\\scpradio0.ogg");
@@ -45,6 +46,14 @@ void Hook_UpdateEvent(CB::Event e) {
 bool Hook_FillRoom(CB::Room r) {
     if (r.Objects[1] == null) r.Objects[1] = CB::NPC::Create(NPC::Type::Guard, r.X, r.Y + 1, r.Z).Collider;
     return true;
+}
+
+void Hook_LoadEntities() {
+    Sky = Skybox::Create("GFX/map/sky/sky");
+}
+
+void Hook_NullGame() {
+    Sky = null;
 }
 
 float configuredFOV = -1.f;
@@ -97,6 +106,7 @@ void Hook_Update() {
         }
     }
     Music::ShouldPlay = m;
+    Sky.Update();
 }
 
 void Hook_CombineItems(Item dragged, Item onto) {

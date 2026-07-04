@@ -160,32 +160,7 @@ Function RegisterB3DBrush()
 End Function
 
 Function RegisterB3DMesh()
-    RegisterB3DModelSubtype("Mesh")
-
-    RegisterObjectMethod("Mesh", "Mesh@ CreateCube(Entity@ parent=null)", @CreateMeshCube)
-    RegisterObjectMethod("Mesh", "Mesh@ CopyMesh(Entity@ parent=null)", @CopyMesh)
-    RegisterObjectMethod("Mesh", "void ScaleMesh(float xScale, float yScale, float zScale)", @ScaleMesh)
-    RegisterObjectMethod("Mesh", "void RotateMesh(float pitch, float yaw, float roll)", @RotateMesh)
-    RegisterObjectMethod("Mesh", "void PositionMesh(float x, float y, float z)", @PositionMesh)
-    RegisterObjectMethod("Mesh", "void Fit(float x, float y, float z, float width, float height, float depth, int uniform=0)", @FitMesh)
-    RegisterObjectMethod("Mesh", "void Flip()", @FlipMesh)
-    RegisterObjectMethod("Mesh", "void PaintMesh(Brush@ brush)", @PaintMesh)
-    RegisterObjectMethod("Mesh", "void Add(Mesh@ destMesh)", @AddMesh)
-    RegisterObjectMethod("Mesh", "int Weld(float epsilon)", @WeldMesh)
-    RegisterObjectMethod("Mesh", "void UpdateNormals(int flat=0)", @UpdateNormals)
-    RegisterObjectMethod("Mesh", "void UpdateTB()", @UpdateTB)
-    RegisterObjectMethod("Mesh", "void Light(float red, float green, float blue, float range=0, float x=0, float y=0, float z=0)", @LightMesh)
-    RegisterObjectMethod("Mesh", "float get_Width() const property", @MeshWidth)
-    RegisterObjectMethod("Mesh", "float get_Height() const property", @MeshHeight)
-    RegisterObjectMethod("Mesh", "float get_Depth() const property", @MeshDepth)
-    RegisterObjectMethod("Mesh", "int Intersects(Mesh@ meshB)", @MeshesIntersect)
-    RegisterObjectMethod("Mesh", "Surface@ CreateSurface(Brush@ brush=null, int dynamic=0)", @CreateSurface)
-    RegisterObjectMethod("Mesh", "Surface@ FindSurface(Brush@ brush)", @FindSurface)
-    RegisterObjectMethod("Mesh", "int get_SurfaceCount() const property", @CountSurfaces)
-    RegisterObjectMethod("Mesh", "Surface@ GetSurface(int surfaceIndex)", @GetSurface)
-    RegisterObjectMethod("Mesh", "void SetCullBox(float x, float y, float z, float width, float height, float depth)", @MeshCullBox)
-    ; TODO: Test if this works as expected.
-    RegisterObjectMethod("Mesh", "void GetBox(float& out, float& out, float& out, float& out, float& out, float& out)", @GetMeshBox)
+    RegisterB3DMeshSubtype("Mesh", False)
 
     Local ns$ = GetDefaultNamespace()
     If ns <> "" Then SetDefaultNamespace(ns + "::Mesh") Else SetDefaultNamespace("Mesh")
@@ -461,7 +436,7 @@ Function RegisterB3DEntitySubtype(name$, isActualSubType%=True)
     RegisterObjectMethod(name, "int get_Mask() const property", @EntityMask)
     ;RegisterObjectMethod(name, "void SetDestructor(int handl)", @EntityDestructor)
 
-    If isActualSubtype Then RegisterTypeInheritance(name, "Entity")
+    If isActualSubtype Then RegisterTypeInheritance(name, "B3D::Entity")
 End Function
 
 Function RegisterB3DEntityMisc()
@@ -488,8 +463,8 @@ Function RegisterB3DEntityMisc()
     RegisterGlobalFunction("int get_PickedTriangle() property", @PickedTriangle)
 End Function
 
-Function RegisterB3DModelSubtype(name$, isActualSubType%=True)
-    RegisterB3DEntitySubtype(name, True)
+Function RegisterB3DModelSubtype(name$, isActualSubType%=True, propagateDown%=True)
+    RegisterB3DEntitySubtype(name, propagateDown)
 
     RegisterObjectMethod(name, "float get_Alpha() const property", @GetEntityAlpha)
     RegisterObjectMethod(name, "void set_Alpha(float alpha) property", @EntityAlpha)
@@ -502,22 +477,53 @@ Function RegisterB3DModelSubtype(name$, isActualSubType%=True)
     RegisterObjectMethod(name, "int get_Blend() const property", @GetEntityBlend)
     RegisterObjectMethod(name, "void set_Blend(int blend) property", @EntityBlend)
 
-    RegisterObjectMethod(name, "Texture@ GetTexture(int tid)", @GetEntityTexture)
-    RegisterObjectMethod(name, "Buffer@ GetTextureBuffer(int tid, int bid=0)", @GetEntityTextureBuffer)
-    RegisterObjectMethod(name, "void SetTexture(Texture@ texture, int frame=0, int index=0)", @EntityTexture)
+    RegisterObjectMethod(name, "B3D::Texture@ GetTexture(int tid)", @GetEntityTexture)
+    RegisterObjectMethod(name, "B3D::Buffer@ GetTextureBuffer(int tid, int bid=0)", @GetEntityTextureBuffer)
+    RegisterObjectMethod(name, "void SetTexture(B3D::Texture@ texture, int frame=0, int index=0)", @EntityTexture)
 
-    RegisterObjectMethod(name, "Brush@ get_Brush() const property", @GetEntityBrush)
-    RegisterObjectMethod(name, "void set_Brush(Brush@ brush) property", @PaintEntity)
+    RegisterObjectMethod(name, "B3D::Brush@ get_Brush() const property", @GetEntityBrush)
+    RegisterObjectMethod(name, "void set_Brush(B3D::Brush@ brush) property", @PaintEntity)
 
     RegisterObjectMethod(name, "void SetOrder(int order)", @EntityOrder)
 
     RegisterObjectMethod(name, "void SetShininess(float shininess, float power=1)", @EntityShininess)
     RegisterObjectMethod(name, "void SetMaterial(float roughness, float metallic)", @EntityMaterial)
-    RegisterObjectMethod(name, "void SetEffect(Effect@ effect)", @EntityEffect)
+    RegisterObjectMethod(name, "void SetEffect(B3D::Effect@ effect)", @EntityEffect)
     RegisterObjectMethod(name, "void SetFX(int fx)", @EntityFX)
     RegisterObjectMethod(name, "void SetAutoFade(float near, float far)", @EntityAutoFade)
 
-    If isActualSubtype Then RegisterTypeInheritance(name, "Model")
+    If isActualSubtype Then RegisterTypeInheritance(name, "B3D::Model")
+End Function
+
+Function RegisterB3DMeshSubtype(name$, isActualSubType%=True, propagateDown%=True)
+    RegisterB3DModelSubtype(name, propagateDown, propagateDown)
+
+    RegisterObjectMethod(name, "B3D::Mesh@ CreateCube(B3D::Entity@ parent=null)", @CreateMeshCube)
+    RegisterObjectMethod(name, "B3D::Mesh@ CopyMesh(B3D::Entity@ parent=null)", @CopyMesh)
+    RegisterObjectMethod(name, "void ScaleMesh(float xScale, float yScale, float zScale)", @ScaleMesh)
+    RegisterObjectMethod(name, "void RotateMesh(float pitch, float yaw, float roll)", @RotateMesh)
+    RegisterObjectMethod(name, "void PositionMesh(float x, float y, float z)", @PositionMesh)
+    RegisterObjectMethod(name, "void Fit(float x, float y, float z, float width, float height, float depth, int uniform=0)", @FitMesh)
+    RegisterObjectMethod(name, "void Flip()", @FlipMesh)
+    RegisterObjectMethod(name, "void PaintMesh(B3D::Brush@ brush)", @PaintMesh)
+    RegisterObjectMethod(name, "void Add(B3D::Mesh@ destMesh)", @AddMesh)
+    RegisterObjectMethod(name, "int Weld(float epsilon)", @WeldMesh)
+    RegisterObjectMethod(name, "void UpdateNormals(int flat=0)", @UpdateNormals)
+    RegisterObjectMethod(name, "void UpdateTB()", @UpdateTB)
+    RegisterObjectMethod(name, "void Light(float red, float green, float blue, float range=0, float x=0, float y=0, float z=0)", @LightMesh)
+    RegisterObjectMethod(name, "float get_Width() const property", @MeshWidth)
+    RegisterObjectMethod(name, "float get_Height() const property", @MeshHeight)
+    RegisterObjectMethod(name, "float get_Depth() const property", @MeshDepth)
+    RegisterObjectMethod(name, "int Intersects(B3D::Mesh@ meshB)", @MeshesIntersect)
+    RegisterObjectMethod(name, "B3D::Surface@ CreateSurface(B3D::Brush@ brush=null, int dynamic=0)", @CreateSurface)
+    RegisterObjectMethod(name, "B3D::Surface@ FindSurface(B3D::Brush@ brush)", @FindSurface)
+    RegisterObjectMethod(name, "int get_SurfaceCount() const property", @CountSurfaces)
+    RegisterObjectMethod(name, "B3D::Surface@ GetSurface(int surfaceIndex)", @GetSurface)
+    RegisterObjectMethod(name, "void SetCullBox(float x, float y, float z, float width, float height, float depth)", @MeshCullBox)
+    ; TODO: Test if this works as expected.
+    RegisterObjectMethod(name, "void GetBox(float& out, float& out, float& out, float& out, float& out, float& out)", @GetMeshBox)
+
+    If isActualSubtype Then RegisterTypeInheritance(name, "B3D::Mesh")
 End Function
 
 Function RegisterB3D()

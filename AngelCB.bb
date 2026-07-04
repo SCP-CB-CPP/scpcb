@@ -801,6 +801,21 @@ Function RegisterDecal()
     RegisterTypeField("Decal", "float Roll", %Decals\roll)
 End Function
 
+Function RegisterSkybox()
+    RegisterB3DMeshSubtype("Skybox", False, False)
+    RegisterTypeInheritance("CB::Skybox", "B3D::Mesh")
+    RegisterTypeInheritance("CB::Skybox", "B3D::Model")
+    RegisterTypeInheritance("CB::Skybox", "B3D::Entity")
+    RegisterObjectMethod("Skybox", "void Update()", @sky_Update)
+
+    Local ns$ = GetDefaultNamespace()
+    If ns <> "" Then SetDefaultNamespace(ns + "::Skybox") Else SetDefaultNamespace("Skybox")
+    RegisterGlobalFunction("Skybox@ Create(string filename, B3D::Entity@ parent=null)", @sky_CreateSky)
+    RegisterGlobalProperty("Skybox@ Sky", &Sky)
+    RegisterGlobalProperty("Skybox@ Sky1499", &NTF_1499Sky)
+    SetDefaultNamespace(ns)
+End Function
+
 Function RegisterItem()
     RegisterTypeFromPtr("ItemTemplate", %ItemTemplates)
 
@@ -1305,6 +1320,7 @@ Function RegisterCB()
     RegisterNPC()
     RegisterMap()
     RegisterDecal()
+    RegisterSkybox()
     RegisterItem()
     RegisterPlayer()
     RegisterDreamfilter()

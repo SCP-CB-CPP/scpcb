@@ -25,6 +25,10 @@ Function sky_CreateSky(filename$,parent%=0)
 	Return sky
 End Function
 
+Function sky_Update(sky%)
+	PositionEntity sky, EntityX(Camera),EntityY(Camera),EntityZ(Camera), True
+End Function
+
 Function UpdateSky()
 	PositionEntity Sky, EntityX(Camera),EntityY(Camera),EntityZ(Camera), True
 End Function

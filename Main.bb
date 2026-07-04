@@ -9639,6 +9639,8 @@ Function NullGame(playbuttonsfx%=True)
 	Collider = 0
 	Sky = 0
 	InitFastResize()
+
+	If NullGame\Subscribers > 0 Then PrepareFunction(0) : CallHook(NullGame)
 	
 	CatchErrors("NullGame")
 End Function
