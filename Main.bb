@@ -1889,6 +1889,7 @@ Function UpdateConsole()
 				Case "reload"
 					CreateConsoleMsg("Reloading all scripts...")
 					LoadScripts()
+					If Initialize\Subscribers > 0 Then PrepareFunction(0) : CallHook(Initialize)
 					CreateConsoleMsg("Reloaded all scripts.")
 				Case "exec"
 					StrTemp$ = Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " "))
