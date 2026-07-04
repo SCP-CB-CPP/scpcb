@@ -1656,7 +1656,7 @@ Function UpdateLauncher()
 
 	Local height% = 18
 	
-	If SteamActive Then Steam_SetOverlayNotificationPosition(1)
+	If SteamActive Then Steam_SetOverlayNotificationPosition(2)
 
 	If InitializeLauncher\Subscribers > 0 Then PrepareFunction(0) : CallHook(InitializeLauncher)
 

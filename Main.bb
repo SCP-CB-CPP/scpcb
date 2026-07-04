@@ -1,4 +1,4 @@
-Const VersionNumber$ = "1.3.12.4-s10"
+Const VersionNumber$ = "1.3.12.5-s11"
 ;Only change this if the version given isn't working with the current build version - ENDSHN
 Const CompatibleNumber$ = "1.3.12"
 
@@ -869,7 +869,7 @@ Function UpdateConsole()
 						Case "gamma"
 							CreateConsoleMsg("HELP - gamma")
 							CreateConsoleMsg("******************************")
-							CreateConsoleMsg("Sets the gamma correction.")
+							CreateConsoleMsg("Sets the screen gamma.")
 							CreateConsoleMsg("Should be set to a value between 0.0 and 2.0.")
 							CreateConsoleMsg("Default is 1.0.")
 							CreateConsoleMsg("******************************")
@@ -3281,6 +3281,14 @@ While IsRunning
 	Cls
 	
 	CurTime = MilliSecs()
+	If Framelimit > 0 Then
+	    ;Framelimit
+		Local WaitingTime% = (1000.0 / Framelimit) - (MilliSecs() - LoopDelay)
+		Delay WaitingTime% - 1
+		
+		LoopDelay = MilliSecs()
+		CurTime = LoopDelay
+	EndIf
 
 	Local ElapsedTime% = CurTime - PrevTime
 	PrevTime = CurTime
@@ -3291,19 +3299,11 @@ While IsRunning
 
 	If IsPaused() Then FPSfactor = 0
 	
-	If Framelimit > 0 Then
-	    ;Framelimit
-		Local WaitingTime% = (1000.0 / Framelimit) - (MilliSecs() - LoopDelay)
-		Delay WaitingTime%
-		
-		LoopDelay = MilliSecs()
-	EndIf
-	
 	;Counting the fps
-	If CheckFPS < MilliSecs() Then
+	If CheckFPS < CurTime Then
 		FPS = ElapsedLoops
 		ElapsedLoops = 0
-		CheckFPS = MilliSecs()+1000
+		CheckFPS = CurTime+1000
 	EndIf
 	ElapsedLoops = ElapsedLoops + 1
 	
@@ -3311,8 +3311,8 @@ While IsRunning
 		DoubleClick = False
 		MouseHit1 = MouseHit(1)
 		If MouseHit1 Then
-			If MilliSecs() - LastMouseHit1 < 800 And Abs(MouseX() - LastMouseHit1X) < 4 And Abs(MouseY() - LastMouseHit1Y) < 4 Then DoubleClick = True
-			LastMouseHit1 = MilliSecs()
+			If CurTime - LastMouseHit1 < 800 And Abs(MouseX() - LastMouseHit1X) < 4 And Abs(MouseY() - LastMouseHit1Y) < 4 Then DoubleClick = True
+			LastMouseHit1 = CurTime
 			LastMouseHit1X = MouseX()
 			LastMouseHit1Y = MouseY()
 		EndIf
@@ -3583,6 +3583,7 @@ While IsRunning
 			EndIf
 			
 			If FallTimer < 0 Then
+				CanSave = False
 				If SelectedItem <> Null Then
 					If SelectedItem\itemtemplate\group = "hazmat" Or SelectedItem\itemtemplate\group = "vest" Then
 						If WearingHazmat=0 And WearingVest=0 Then
@@ -3619,7 +3620,7 @@ While IsRunning
 		
 		;[End block]
 		
-		If KeyHit(KEY_INV) And VomitTimer >= 0 And (Not UnableToMove) And (Not IsZombie) And (Not Using294) And KillTimer >= 0 And (Not MenuOpen) Then
+		If KeyHit(KEY_INV) And VomitTimer >= 0 And (Not UnableToMove) And (Not IsZombie) And (Not Using294) And KillTimer >= 0 And (Not MenuOpen) And (Not ConsoleOpen) Then
 			Local W$ = ""
 			Local V# = 0
 			If SelectedItem<>Null
@@ -3635,7 +3636,7 @@ While IsRunning
 			EndIf
 		EndIf
 		
-		If KeyHit(KEY_SAVE) Then
+		If KeyHit(KEY_SAVE) And (Not ConsoleOpen) Then
 			If SelectedDifficulty\saveType = SAVEANYWHERE Then
 				RN$ = PlayerRoom\RoomTemplate\Name$
 				If RN$ = "173" Or (RN$ = "exit1" And EntityY(Collider)>1040.0*RoomScale) Or RN$ = "gatea"
@@ -4315,7 +4316,7 @@ Function DrawEnding()
 				
 				Color(255, 255, 255)
 				SetFont Font2
-				Text(x + width / 2 + 40*MenuScale, y + 20*MenuScale, I_Loc\Menu_End, True)
+				Text(x + width / 2 + 40*MenuScale, y + 30*MenuScale, I_Loc\Menu_End, True)
 				SetFont Font1
 				
 				If AchievementsMenu<=0 Then 
@@ -5042,7 +5043,7 @@ Function MouseLook()
 		
 	EndIf
 	
-	MoveMouse viewport_center_x, viewport_center_y
+	If SelectedEnding = "" Then MoveMouse viewport_center_x, viewport_center_y
 End Function
 
 Function UpdateDust()
@@ -6831,21 +6832,23 @@ Function DrawGUI()
 								Text(x+97*HUDScale, y+16*HUDScale, Rand(0,9),True,True)
 								
 							Else
-								For i = 2 To 6
-									If KeyHit(i) Then
-										If SelectedItem\state2 <> i-2 Then ;pausetetaan nykyinen radiokanava
-											PlaySound_Strict RadioSquelch
-											If RadioCHN(Int(SelectedItem\state2)) <> 0 Then
-												PauseChannelWithSubtitles(RadioCHN(Int(SelectedItem\state2)))
+								If Not ConsoleOpen Then
+									For i = 2 To 6
+										If KeyHit(i) Then
+											If SelectedItem\state2 <> i-2 Then ;pausetetaan nykyinen radiokanava
+												PlaySound_Strict RadioSquelch
+												If RadioCHN(Int(SelectedItem\state2)) <> 0 Then
+													PauseChannelWithSubtitles(RadioCHN(Int(SelectedItem\state2)))
+												EndIf
+											EndIf
+											SelectedItem\state2 = i-2
+											;jos nykyistä kanavaa ollaan soitettu, laitetaan jatketaan toistoa samasta kohdasta
+											If RadioCHN(SelectedItem\state2)<>0 Then
+												ResumeChannelWithSubtitles(RadioCHN(SelectedItem\state2))
 											EndIf
 										EndIf
-										SelectedItem\state2 = i-2
-										;jos nykyistä kanavaa ollaan soitettu, laitetaan jatketaan toistoa samasta kohdasta
-										If RadioCHN(SelectedItem\state2)<>0 Then
-											ResumeChannelWithSubtitles(RadioCHN(SelectedItem\state2))
-										EndIf
-									EndIf
-								Next
+									Next
+								EndIf
 								
 								SetFont Font4
 								Text(x+97*HUDScale, y+16*HUDScale, Int(SelectedItem\state2+1),True,True)
@@ -7771,8 +7774,8 @@ Function DrawMenu()
 	
 	Local x%, y%, width%, height%
 	Local steamOverlayActive = SteamActive And Steam_GetOverlayState()
-	If api_GetFocus() = 0 Lor steamOverlayActive Then ;Game is out of focus -> pause the game
-		If (Not Using294) And EndingTimer=0 And SelectedEnding="" Then
+	If (api_GetFocus() = 0 Lor steamOverlayActive) And EndingTimer=0 And SelectedEnding="" Then ;Game is out of focus -> pause the game
+		If (Not Using294) Then
 			MenuOpen = True
 			UpdateMenuState()
 		EndIf
@@ -8299,11 +8302,9 @@ Function DrawMenu()
 				MouseHit1 = False
 			EndIf
 		Else
+			Local backPressed% = False			
 			If DrawButton(x+101*MenuScale, y + 344*MenuScale, 230*MenuScale, 60*MenuScale, I_Loc\Menu_Back) Then
-				AchievementsMenu = 0
-				OptionsMenu = 0
-				QuitMSG = 0
-				MouseHit1 = False
+				backPressed = True
 			EndIf
 			
 			If AchievementsMenu>0 Then
@@ -8352,7 +8353,7 @@ Function DrawMenu()
 		
 		y = y+10
 		
-		If AchievementsMenu<=0 And OptionsMenu<=0 And QuitMSG<=0 Then
+		If AchievementsMenu<=0 And OptionsMenu<=0 And QuitMSG<=0 And EndingTimer >= 0 Then
 			If KillTimer >= 0 Then	
 				
 				y = y+ 72*MenuScale
@@ -8487,6 +8488,13 @@ Function DrawMenu()
 			
 			SetFont Font1
 			If KillTimer < 0 Then RowText(DeathMSG$, x, y + 80*MenuScale, 390*MenuScale, 600*MenuScale)
+		EndIf
+
+		If backPressed Then
+			AchievementsMenu = 0
+			OptionsMenu = 0
+			QuitMSG = 0
+			MouseHit1 = False
 		EndIf
 		
 		If Fullscreen Then DrawImage CursorIMG, ScaledMouseX(),ScaledMouseY()
@@ -8994,7 +9002,7 @@ Function LoadEntities()
 	InitMaterials()
 
 	If IsBirthday Then
-		tex = LoadModdedTextureNonStrict("GFX\map\miscsigns3.ae", 1)
+		tex = LoadTexture("GFX\map\miscsigns3.ae", 1)
 		TextureBlend(tex, 5)
 		AddTextureToCache(tex, "GFX\map\miscsigns3.jpg")
 	EndIf

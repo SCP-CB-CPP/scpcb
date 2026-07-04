@@ -101,8 +101,8 @@ Function CreateNPC.NPCs(NPCtype%, x#, y#, z#)
 			n\obj = LoadMesh_Strict("GFX\npcs\173_2.b3d")
 			
 			;On Halloween set jack-o-latern texture.
-			If (Left(CurrentDate(), 7) = "31 Oct ") Then
-				HalloweenTex = True
+			HalloweenTex = Left(CurrentDate(), 7) = "31 Oct "
+			If HalloWeenTex Then
 				Local texFestive = LoadTexture_Strict("GFX\npcs\173h.pt", 1)
 				EntityTexture n\obj, texFestive, 0, 0
 				FreeTexture texFestive
@@ -2038,9 +2038,7 @@ Function UpdateNPCs()
 						Case 4 ;Standing on catwalk in room4
 							;[Block]
 							If dist < 8.0 Then
-								AnimateNPC(n, 18, 19, 0.05)
-								
-								;Animate2(n\obj, AnimTime(n\obj), 18, 19, 0.05)
+								SetNPCFrame(n, 18)
 								PointEntity n\obj, Collider	
 								RotateEntity n\Collider, 0, CurveAngle(EntityYaw(n\obj), EntityYaw(n\Collider), 45.0), 0
 								
