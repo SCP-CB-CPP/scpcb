@@ -7163,6 +7163,8 @@ Function CreateMapLayout()
 End Function
 
 Function CountRooms()
+	Dim RoomAmounts(ROOM4 + 1, ZONEAMOUNT)
+
 	For y = 1 To MapHeight - 1
 		Local zone% = GetZone(y)
 		

@@ -4246,7 +4246,7 @@ Function DrawEnding()
 				
 				Color(255, 255, 255)
 				SetFont Font2
-				Text(x + width / 2 + 40*MenuScale, y + 20*MenuScale, I_Loc\Menu_End, True)
+				Text(x + width / 2 + 40*MenuScale, y + 30*MenuScale, I_Loc\Menu_End, True)
 				SetFont Font1
 				
 				If AchievementsMenu<=0 Then 
