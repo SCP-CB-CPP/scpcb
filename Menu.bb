@@ -1234,7 +1234,7 @@ Function UpdateMainMenu()
 
 								DrawFrame(x,y,490* MenuScale, 70 * MenuScale)
 								If m\Icon = 0 And m\Iconpath <> "" Then
-									m\Icon = LoadImage_Strict(m\IconPath, 0, 1)
+									m\Icon = LoadImage_Strict(m\IconPath, 0, 3)
 									m\DisabledIcon = CreateGrayScaleImage(m\Icon)
 									ResizeImage(m\Icon, 64 * MenuScale, 64 * MenuScale)
 									ResizeImage(m\DisabledIcon, 64 * MenuScale, 64 * MenuScale)
@@ -1518,7 +1518,7 @@ Function DrawTagSelection(x%, y%, width%)
 End Function
 
 Function CreateGrayScaleImage%(img%)
-	Local ret% = CreateImage(ImageWidth(img), ImageHeight(img), 1, 1)
+	Local ret% = CreateImage(ImageWidth(img), ImageHeight(img), 1, 3)
 	Local rbuf% = ImageBuffer(img)
 	Local buf% = ImageBuffer(ret)
 	LockBuffer(rbuf)
