@@ -320,7 +320,12 @@ Function LoadFont_Strict(file$, height)
 	Return tmp
 End Function
 
-
+Function LoadEffect_Strict%(file$)
+	If FileType(file$)<>1 Then RuntimeErrorExt "Shader " + file$ + " not found."
+	tmp = LoadEffect(file)
+	If tmp = 0 Then RuntimeErrorExt "Failed to load Shader: " + file$ + ". Error: " + GetEffectError() + Chr(10)
+	Return tmp
+End Function
 
 
 

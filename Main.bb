@@ -20,7 +20,6 @@ Function RuntimeErrorExt%(Message$)
 End Function
 
 Include "StrictLoads.bb"
-Include "KeyName.bb"
 
 Global DataDir$ = InitDataDir()
 Global OptionFile$ = InitOptionsFile()
@@ -130,11 +129,6 @@ If GraphicHeight <= 0 Then GraphicHeight = DesktopHeight()
 Global Depth% = 0
 Global Fullscreen% = GetOptionInt("graphics", "fullscreen")
 
-Global SelectedGFXDriver% = Min(Max(GetOptionInt("graphics", "gfx driver"), 1), CountGfxDrivers())
-
-Global fresize_image%, fresize_texture%, fresize_texture2%
-Global fresize_cam%
-
 Global ShowFPS = GetOptionInt("graphics", "show FPS")
 
 Global WireframeState
@@ -142,7 +136,10 @@ Global HalloweenTex
 
 Global BorderlessWindowed% = GetOptionInt("graphics", "borderless windowed")
 Global RealGraphicWidth%,RealGraphicHeight%
-Global AspectRatioRatio#
+
+; For borderless windowed
+Global ScaledGraphicWidth%,ScaledGraphicHeight%
+Global ScaledOffsetX%=0,ScaledOffsetY%=0
 
 ApplyWindowModeCLIOverrides()
 
@@ -171,14 +168,11 @@ End Select
 Global ConsoleOpening% = GetOptionInt("console", "auto opening")
 Global SFXVolume# = GetOptionFloat("audio", "sound volume")
 
-Global Bit16Mode = GetOptionInt("graphics", "16bit")
-
 ; Exclusive fullscreen ONLY supports the reported resolutions
-If (LauncherEnabled Lor HasCLIFlag("launcher")) And (Not HasCLIFlag("nolauncher")) Lor Fullscreen And (Not GfxMode3DExists(GraphicWidth, GraphicHeight, 32-16*Bit16Mode)) Then
+If (LauncherEnabled Lor HasCLIFlag("launcher")) And (Not HasCLIFlag("nolauncher")) Lor Fullscreen And (Not GfxMode3DExists(GraphicWidth, GraphicHeight, 32)) Then
 	UpdateLauncher()
 EndIf
-SetGfxDriver(SelectedGFXDriver)
-Global GFXDriverName$ = GFXDriverName(SelectedGFXDriver)
+Global GFXDriverName$ = GFXDriverName(1)
 	
 ;New "fake fullscreen" - ENDSHN Psst, it's called borderless windowed mode --Love Mark,
 If BorderlessWindowed
@@ -188,15 +182,24 @@ If BorderlessWindowed
 	RealGraphicWidth = DesktopWidth()
 	RealGraphicHeight = DesktopHeight()
 	
-	AspectRatioRatio = (Float(GraphicWidth)/Float(GraphicHeight))/(Float(RealGraphicWidth)/Float(RealGraphicHeight))
-	
+	Local scaleX# = Float(RealGraphicWidth) / GraphicWidth, scaleY# = Float(RealGraphicHeight) / GraphicHeight
+	Local scale# = Min(scaleX, scaleY)
+	ScaledGraphicWidth% = scale * GraphicWidth
+	ScaledGraphicHeight% = scale * GraphicHeight
+	If scaleX > scaleY Then
+		ScaledOffsetX = (RealGraphicWidth - ScaledGraphicWidth) / 2
+	Else
+		ScaledOffsetY = (RealGraphicHeight - ScaledGraphicHeight) / 2
+	EndIf
+
 	Fullscreen = False
 Else
-	AspectRatioRatio = 1.0
 	RealGraphicWidth = GraphicWidth
 	RealGraphicHeight = GraphicHeight
+	ScaledGraphicWidth = GraphicWidth
+	ScaledGraphicHeight = GraphicHeight
 	If Fullscreen Then
-		Graphics3DExt(GraphicWidth, GraphicHeight, (16*Bit16Mode), 1)
+		Graphics3DExt(GraphicWidth, GraphicHeight, 0, 1)
 	Else
 		Graphics3DExt(GraphicWidth, GraphicHeight, 0, 2)
 	End If
@@ -1740,8 +1743,6 @@ Global StoredCameraFogFar# = CameraFogFar
 
 Global MouseSens# = GetOptionFloat("controls", "mouse sensitivity")
 
-Global EnableVRam% = GetOptionInt("graphics", "enable vram")
-
 Include "dreamfilter.bb"
 
 Dim LightSpriteTex(10)
@@ -1929,8 +1930,9 @@ Global NoTarget% = False
 
 Global GuaranteedOmni% = False
 
-Global NVGImages = LoadAnimImage("GFX\battery.png",64,64,0,2)
-MaskImage NVGImages,255,0,255
+Global NVGImages[2]
+NVGImages[0] = LoadImage_Strict("GFX\battery_green.png")
+NVGImages[1] = LoadImage_Strict("GFX\battery_blue.png")
 
 Global Wearing1499% = False
 Global AmbientLightRoomTex%, AmbientLightRoomVal%
@@ -1973,11 +1975,11 @@ Global ParticleAmount% = GetOptionInt("graphics","particle amount")
 Dim NavImages(5)
 For i = 0 To 3
 	NavImages(i) = LoadImage_Strict("GFX\navigator\roomborder"+i+".png")
-	MaskImage NavImages(i),255,0,255
 Next
+Global NavSize% = ImageWidth(NavImages(0))
 NavImages(4) = LoadImage_Strict("GFX\navigator\batterymeter.png")
 
-Global NavBG = CreateImage(GraphicWidth,GraphicHeight)
+Global NavBG%
 
 Global LightConeModel
 
@@ -2895,6 +2897,13 @@ Collisions HIT_DEAD, HIT_MAP, 2, 2
 DrawLoading(90, True)
 
 ;----------------------------------- meshes and textures ----------------------------------------------------------------
+Include "Effects.bb"
+Global ResizeTexture%
+
+Function InitFastResize()
+	ResizeTexture = CreateTexture(SMALLEST_POWER_TWO, SMALLEST_POWER_TWO, 1 + 2 + 256 + 1024)
+	InitPostProcess()
+End Function
 
 Global FogTexture%, Fog%
 Global GasMaskTexture%, GasMaskOverlay%
@@ -3408,9 +3417,9 @@ Repeat
 			EndIf
 		Else If SelectedDifficulty\saveType = SAVEONSCREENS And (SelectedScreen<>Null Or SelectedMonitor<>Null)
 			If (Msg<>"Game progress saved." And Msg<>"You cannot save in this location."And Msg<>"You cannot save at this moment.") Or MsgTimer<=0 Then
-				Msg = "Press "+KeyName(KEY_SAVE)+" to save."
+				Msg = "Press "+GetKeyName(KEY_SAVE)+" to save."
 				MsgTimer = 70*4
-				;SetSaveMSG("Press "+KeyName(KEY_SAVE)+" to save.")
+				;SetSaveMSG("Press "+GetKeyName(KEY_SAVE)+" to save.")
 			EndIf
 			
 			If MouseHit2 Then SelectedMonitor = Null
@@ -3502,51 +3511,7 @@ Repeat
 		;UpdateSaveMSG()
 	End If
 	
-	If BorderlessWindowed Then
-		If (RealGraphicWidth<>GraphicWidth) Or (RealGraphicHeight<>GraphicHeight) Then
-			SetBuffer TextureBuffer(fresize_texture)
-			ClsColor 0,0,0 : Cls
-			CopyRect 0,0,GraphicWidth,GraphicHeight,1024-GraphicWidth/2,1024-GraphicHeight/2,BackBuffer(),TextureBuffer(fresize_texture)
-			SetBuffer BackBuffer()
-			ClsColor 0,0,0 : Cls
-			ScaleRender(0,0,2050.0 / Float(GraphicWidth) * AspectRatioRatio, 2050.0 / Float(GraphicWidth) * AspectRatioRatio)
-			;might want to replace Float(GraphicWidth) with Max(GraphicWidth,GraphicHeight) if portrait sizes cause issues
-			;everyone uses landscape so it's probably a non-issue
-		EndIf
-	EndIf
-	
-	;not by any means a perfect solution
-	;Not even proper gamma correction but it's a nice looking alternative that works in windowed mode
-	If ScreenGamma>1.0 Then
-		CopyRect 0,0,RealGraphicWidth,RealGraphicHeight,1024-RealGraphicWidth/2,1024-RealGraphicHeight/2,BackBuffer(),TextureBuffer(fresize_texture)
-		EntityBlend fresize_image,1
-		ClsColor 0,0,0 : Cls
-		ScaleRender(-1.0/Float(RealGraphicWidth),1.0/Float(RealGraphicWidth),2048.0 / Float(RealGraphicWidth),2048.0 / Float(RealGraphicWidth))
-		EntityFX fresize_image,1+32
-		EntityBlend fresize_image,3
-		EntityAlpha fresize_image,ScreenGamma-1.0
-		ScaleRender(-1.0/Float(RealGraphicWidth),1.0/Float(RealGraphicWidth),2048.0 / Float(RealGraphicWidth),2048.0 / Float(RealGraphicWidth))
-	ElseIf ScreenGamma<1.0 Then ;todo: maybe optimize this if it's too slow, alternatively give players the option to disable gamma
-		CopyRect 0,0,RealGraphicWidth,RealGraphicHeight,1024-RealGraphicWidth/2,1024-RealGraphicHeight/2,BackBuffer(),TextureBuffer(fresize_texture)
-		EntityBlend fresize_image,1
-		ClsColor 0,0,0 : Cls
-		ScaleRender(-1.0/Float(RealGraphicWidth),1.0/Float(RealGraphicWidth),2048.0 / Float(RealGraphicWidth),2048.0 / Float(RealGraphicWidth))
-		EntityFX fresize_image,1+32
-		EntityBlend fresize_image,2
-		EntityAlpha fresize_image,1.0
-		SetBuffer TextureBuffer(fresize_texture2)
-		ClsColor 255*ScreenGamma,255*ScreenGamma,255*ScreenGamma
-		Cls
-		SetBuffer BackBuffer()
-		ScaleRender(-1.0/Float(RealGraphicWidth),1.0/Float(RealGraphicWidth),2048.0 / Float(RealGraphicWidth),2048.0 / Float(RealGraphicWidth))
-		SetBuffer(TextureBuffer(fresize_texture2))
-		ClsColor 0,0,0
-		Cls
-		SetBuffer(BackBuffer())
-	EndIf
-	EntityFX fresize_image,1
-	EntityBlend fresize_image,1
-	EntityAlpha fresize_image,1.0
+	ApplyBorderlessResizing()
 	
 	CatchErrors("Main loop / uncaught")
 
@@ -6065,45 +6030,39 @@ Function DrawGUI()
 				Case "paper", "ticket"
 					;[Block]
 					If SelectedItem\itemtemplate\img = 0 Then
+						SelectedItem\itemtemplate\img = LoadImage_Strict(SelectedItem\itemtemplate\imgpath)
+						ScaleImage(SelectedItem\itemtemplate\img, MenuScale, MenuScale)
+						Local buf%
 						Select SelectedItem\itemtemplate\name
 							Case "Burnt Note" 
-								SelectedItem\itemtemplate\img = LoadImage_Strict("GFX\items\bn.it")
-								SetBuffer ImageBuffer(SelectedItem\itemtemplate\img)
-								Color 0,0,0
-								Text 277, 469, AccessCode, True, True
+								SetBuffer(TextureBuffer(ResizeTexture))
+								DrawImage(SelectedItem\itemtemplate\img, 0, 0)
+								Color(0, 0, 0)
+								Text 277*MenuScale, 469*MenuScale, AccessCode, True, True
 								Color 255,255,255
 								SetBuffer BackBuffer()
+								buf = ImageBuffer(SelectedItem\itemtemplate\img)
+								CopyRectStretch(0, 0, ImageWidth(SelectedItem\itemtemplate\img), ImageHeight(SelectedItem\itemtemplate\img), 0, 0, BufferWidth(buf), BufferHeight(buf), TextureBuffer(ResizeTexture), buf)
 							Case "Document SCP-372"
-								SelectedItem\itemtemplate\img = LoadImage_Strict(SelectedItem\itemtemplate\imgpath)
-								SelectedItem\itemtemplate\img = ResizeImage2(SelectedItem\itemtemplate\img, ImageWidth(SelectedItem\itemtemplate\img) * MenuScale, ImageHeight(SelectedItem\itemtemplate\img) * MenuScale)
-								
-								SetBuffer ImageBuffer(SelectedItem\itemtemplate\img)
-								Color 37,45,137
+								SetBuffer(TextureBuffer(ResizeTexture))
+								DrawImage(SelectedItem\itemtemplate\img, 0, 0)
+								Color(37,45,137)
 								SetFont Font5
 								temp = ((Int(AccessCode)*3) Mod 10000)
 								If temp < 1000 Then temp = temp+1000
 								Text 383*MenuScale, 734*MenuScale, temp, True, True
 								Color 255,255,255
 								SetBuffer BackBuffer()
+								buf = ImageBuffer(SelectedItem\itemtemplate\img)
+								CopyRectStretch(0, 0, ImageWidth(SelectedItem\itemtemplate\img), ImageHeight(SelectedItem\itemtemplate\img), 0, 0, BufferWidth(buf), BufferHeight(buf), TextureBuffer(ResizeTexture), buf)
 							Case "Movie Ticket"
-								;don't resize because it messes up the masking
-								SelectedItem\itemtemplate\img=LoadImage_Strict(SelectedItem\itemtemplate\imgpath)
-								
 								If (SelectedItem\state = 0) Then
 									Msg = Chr(34)+"Hey, I remember this movie!"+Chr(34)
 									MsgTimer = 70*10
 									PlaySound_Strict LoadTempSound("SFX\SCP\1162\NostalgiaCancer"+Rand(1,5)+".ogg")
 									SelectedItem\state = 1
 								EndIf
-							Case "Leaflet"
-								;don't resize because it messes up the masking
-								SelectedItem\itemtemplate\img=LoadImage_Strict(SelectedItem\itemtemplate\imgpath)
-							Default 
-								SelectedItem\itemtemplate\img=LoadImage_Strict(SelectedItem\itemtemplate\imgpath)
-								SelectedItem\itemtemplate\img = ResizeImage2(SelectedItem\itemtemplate\img, ImageWidth(SelectedItem\itemtemplate\img) * MenuScale, ImageHeight(SelectedItem\itemtemplate\img) * MenuScale)
 						End Select
-						
-						MaskImage(SelectedItem\itemtemplate\img, 255, 0, 255)
 					EndIf
 					
 					DrawImage(SelectedItem\itemtemplate\img, GraphicWidth / 2 - ImageWidth(SelectedItem\itemtemplate\img) / 2, GraphicHeight / 2 - ImageHeight(SelectedItem\itemtemplate\img) / 2)
@@ -6114,9 +6073,7 @@ Function DrawGUI()
 					If SelectedItem\itemtemplate\img=0 Then
 						SelectedItem\state = Rand(0,5)
 						SelectedItem\itemtemplate\img=LoadImage_Strict("GFX\items\1025\1025_"+Int(SelectedItem\state)+".jpg")	
-						SelectedItem\itemtemplate\img = ResizeImage2(SelectedItem\itemtemplate\img, ImageWidth(SelectedItem\itemtemplate\img) * MenuScale, ImageHeight(SelectedItem\itemtemplate\img) * MenuScale)
-						
-						MaskImage(SelectedItem\itemtemplate\img, 255, 0, 255)
+						ScaleImage(SelectedItem\itemtemplate\img, MenuScale, MenuScale)
 					EndIf
 					
 					If (Not Wearing714) Then SCP1025state[SelectedItem\state]=Max(1,SCP1025state[SelectedItem\state])
@@ -6238,8 +6195,7 @@ Function DrawGUI()
 					If SelectedItem\state <= 100 Then SelectedItem\state = Max(0, SelectedItem\state - FPSfactor * 0.004)
 					
 					If SelectedItem\itemtemplate\img=0 Then
-						SelectedItem\itemtemplate\img=LoadImage_Strict(SelectedItem\itemtemplate\imgpath)	
-						MaskImage(SelectedItem\itemtemplate\img, 255, 0, 255)
+						SelectedItem\itemtemplate\img=LoadImage_Strict(SelectedItem\itemtemplate\imgpath)
 					EndIf
 					
 					;radiostate(5) = has the "use the number keys" -message been shown yet (true/false)
@@ -6526,7 +6482,7 @@ Function DrawGUI()
 								Next
 								
 								SetFont Font4
-								Text(x+97, y+16, Rand(0,9),True,True)
+								Text(x+97*HUDScale, y+16*HUDScale, Rand(0,9),True,True)
 								
 							Else
 								If Not ConsoleOpen Then
@@ -6544,13 +6500,13 @@ Function DrawGUI()
 								EndIf
 								
 								SetFont Font4
-								Text(x+97, y+16, Int(SelectedItem\state2+1),True,True)
+								Text(x+97*HUDScale, y+16*HUDScale, Int(SelectedItem\state2+1),True,True)
 							EndIf
 							
 							SetFont Font3
 							If strtemp <> "" Then
 								strtemp = Right(Left(strtemp, (Int(MilliSecs()/300) Mod Len(strtemp))),10)
-								Text(x+32, y+33, strtemp)
+								Text(x+32*HUDScale, y+33*HUDScale, strtemp)
 							EndIf
 							
 							SetFont Font1
@@ -6752,7 +6708,6 @@ Function DrawGUI()
 
 					If SelectedItem\itemtemplate\img=0 Then
 						SelectedItem\itemtemplate\img=LoadImage_Strict(SelectedItem\itemtemplate\imgpath)	
-						MaskImage(SelectedItem\itemtemplate\img, 255, 0, 255)
 					EndIf
 					
 					If SelectedItem\state <= 100 Then SelectedItem\state = Max(0, SelectedItem\state - FPSfactor * 0.005)
@@ -6795,7 +6750,7 @@ Function DrawGUI()
 							PlayerX% = Floor((EntityX(PlayerRoom\obj)+8) / 8.0 + 0.5)
 							PlayerZ% = Floor((EntityZ(PlayerRoom\obj)+8) / 8.0 + 0.5)
 							
-							SetBuffer ImageBuffer(NavBG)
+							SetBuffer TextureBuffer(NavBG)
 							Local xx = x-ImageWidth(SelectedItem\itemtemplate\img)/2
 							Local yy = y-ImageHeight(SelectedItem\itemtemplate\img)/2+85
 							DrawImage(SelectedItem\itemtemplate\img, xx, yy)
@@ -6844,7 +6799,7 @@ Function DrawGUI()
 							Next
 							
 							SetBuffer BackBuffer()
-							DrawImageRect NavBG,xx+80,yy+70,xx+80,yy+70,270,230
+							DrawBufferRect TextureBuffer(NavBG),xx+80,yy+70,270,230,xx+80,yy+70,270,230
 							Color 30,30,30
 							If SelectedItem\itemtemplate\name = "S-NAV Navigator" Then Color(100, 0, 0)
 							Rect xx+80,yy+70,270,230,False
@@ -7055,9 +7010,6 @@ Function DrawGUI()
 					;[Block]
 					If SelectedItem\itemtemplate\img=0 Then
 						SelectedItem\itemtemplate\img=LoadImage_Strict(SelectedItem\itemtemplate\imgpath)	
-						;SelectedItem\itemtemplate\img = ResizeImage2(SelectedItem\itemtemplate\img, ImageWidth(SelectedItem\itemtemplate\img) * MenuScale, ImageHeight(SelectedItem\itemtemplate\img) * MenuScale)
-						
-						MaskImage(SelectedItem\itemtemplate\img, 255, 0, 255)
 					EndIf
 					
 					DrawImage(SelectedItem\itemtemplate\img, GraphicWidth / 2 - ImageWidth(SelectedItem\itemtemplate\img) / 2, GraphicHeight / 2 - ImageHeight(SelectedItem\itemtemplate\img) / 2)
@@ -7089,9 +7041,7 @@ Function DrawGUI()
 					;[Block]
 					If SelectedItem\itemtemplate\img = 0 Then
 						SelectedItem\itemtemplate\img = LoadImage_Strict(SelectedItem\itemtemplate\imgpath)	
-						SelectedItem\itemtemplate\img = ResizeImage2(SelectedItem\itemtemplate\img, ImageWidth(SelectedItem\itemtemplate\img) * MenuScale, ImageHeight(SelectedItem\itemtemplate\img) * MenuScale)
-						
-						MaskImage(SelectedItem\itemtemplate\img, 255, 0, 255)
+						ScaleImage(SelectedItem\itemtemplate\img, MenuScale, MenuScale)
 					EndIf
 					
 					DrawImage(SelectedItem\itemtemplate\img, GraphicWidth / 2 - ImageWidth(SelectedItem\itemtemplate\img) / 2, GraphicHeight / 2 - ImageHeight(SelectedItem\itemtemplate\img) / 2)
@@ -7539,7 +7489,6 @@ Function DrawMenu()
 				MouseHit1 = False
 				SaveOptionsINI()
 				
-				AntiAlias Opt_AntiAlias
 				TextureLodBias TextureFloat#
 			EndIf
 			
@@ -7646,15 +7595,6 @@ Function DrawMenu()
 					If (MouseOn(x+270*MenuScale,y-6*MenuScale,100*MenuScale+14,20) And OnSliderID=0) Or OnSliderID=3
 						DrawOptionsTooltip(tx,ty,tw,th+100*MenuScale,"texquality")
 					EndIf
-					
-					y=y+50*MenuScale
-					Color 100,100,100
-					Text(x, y, "Save textures in the VRAM:")	
-					EnableVRam = DrawTick(x + 270 * MenuScale, y + MenuScale, EnableVRam, True)
-					If MouseOn(x + 270 * MenuScale, y + MenuScale, 20*MenuScale,20*MenuScale) And OnSliderID=0
-						DrawOptionsTooltip(tx,ty,tw,th,"vram")
-					EndIf
-					
 					;[End Block]
 				Case 2 ;Audio
 					SetFont Font1
@@ -7752,26 +7692,26 @@ Function DrawMenu()
 					y = y + 10*MenuScale
 					
 					Text(x, y + 20 * MenuScale, "Move Forward")
-					InputBox(x + 200 * MenuScale, y + 20 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_UP,210)),5)		
+					InputBox(x + 200 * MenuScale, y + 20 * MenuScale,100*MenuScale,20*MenuScale,GetKeyName(Min(KEY_UP,210)),5)		
 					Text(x, y + 40 * MenuScale, "Strafe Left")
-					InputBox(x + 200 * MenuScale, y + 40 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_LEFT,210)),3)	
+					InputBox(x + 200 * MenuScale, y + 40 * MenuScale,100*MenuScale,20*MenuScale,GetKeyName(Min(KEY_LEFT,210)),3)	
 					Text(x, y + 60 * MenuScale, "Move Backward")
-					InputBox(x + 200 * MenuScale, y + 60 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_DOWN,210)),6)				
+					InputBox(x + 200 * MenuScale, y + 60 * MenuScale,100*MenuScale,20*MenuScale,GetKeyName(Min(KEY_DOWN,210)),6)				
 					Text(x, y + 80 * MenuScale, "Strafe Right")
-					InputBox(x + 200 * MenuScale, y + 80 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_RIGHT,210)),4)
+					InputBox(x + 200 * MenuScale, y + 80 * MenuScale,100*MenuScale,20*MenuScale,GetKeyName(Min(KEY_RIGHT,210)),4)
 					
 					Text(x, y + 100 * MenuScale, "Manual Blink")
-					InputBox(x + 200 * MenuScale, y + 100 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_BLINK,210)),7)				
+					InputBox(x + 200 * MenuScale, y + 100 * MenuScale,100*MenuScale,20*MenuScale,GetKeyName(Min(KEY_BLINK,210)),7)				
 					Text(x, y + 120 * MenuScale, "Sprint")
-					InputBox(x + 200 * MenuScale, y + 120 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_SPRINT,210)),8)
+					InputBox(x + 200 * MenuScale, y + 120 * MenuScale,100*MenuScale,20*MenuScale,GetKeyName(Min(KEY_SPRINT,210)),8)
 					Text(x, y + 140 * MenuScale, "Open/Close Inventory")
-					InputBox(x + 200 * MenuScale, y + 140 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_INV,210)),9)
+					InputBox(x + 200 * MenuScale, y + 140 * MenuScale,100*MenuScale,20*MenuScale,GetKeyName(Min(KEY_INV,210)),9)
 					Text(x, y + 160 * MenuScale, "Crouch")
-					InputBox(x + 200 * MenuScale, y + 160 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_CROUCH,210)),10)
+					InputBox(x + 200 * MenuScale, y + 160 * MenuScale,100*MenuScale,20*MenuScale,GetKeyName(Min(KEY_CROUCH,210)),10)
 					Text(x, y + 180 * MenuScale, "Quick Save")
-					InputBox(x + 200 * MenuScale, y + 180 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_SAVE,210)),11)	
+					InputBox(x + 200 * MenuScale, y + 180 * MenuScale,100*MenuScale,20*MenuScale,GetKeyName(Min(KEY_SAVE,210)),11)	
 					Text(x, y + 200 * MenuScale, "Open/Close Console")
-					InputBox(x + 200 * MenuScale, y + 200 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_CONSOLE,210)),12)
+					InputBox(x + 200 * MenuScale, y + 200 * MenuScale,100*MenuScale,20*MenuScale,GetKeyName(Min(KEY_CONSOLE,210)),12)
 
 					If MouseOn(x,y,300*MenuScale,220*MenuScale) And OnSliderID=0
 						DrawOptionsTooltip(tx,ty,tw,th,"controls")
@@ -8161,7 +8101,6 @@ Function LoadEntities()
 	Next
 	
 	PauseMenuIMG% = LoadImage_Strict("GFX\menu\pausemenu.jpg")
-	MaskImage PauseMenuIMG, 255,255,0
 	ScaleImage PauseMenuIMG,MenuScale,MenuScale
 	
 	If SprintIcon = 0 Then
@@ -8196,7 +8135,7 @@ Function LoadEntities()
 	
 	;TextureLodBias
 	
-	AmbientLightRoomTex% = CreateTexture(2,2,257)
+	AmbientLightRoomTex% = CreateTexture(2,2,1+256+1024)
 	TextureBlend AmbientLightRoomTex,5
 	SetBuffer(TextureBuffer(AmbientLightRoomTex))
 	ClsColor 0,0,0
@@ -8214,8 +8153,9 @@ Function LoadEntities()
 	CameraFogColor (Camera, 0, 0, 0)
 	AmbientLight Brightness, Brightness, Brightness
 	
-	ScreenTexs[0] = CreateTexture(512, 512, 1+256)
-	ScreenTexs[1] = CreateTexture(512, 512, 1+256)
+	ScreenTexs[0] = CreateTexture(512, 512, 1+256+1024)
+	ScreenTexs[1] = CreateTexture(512, 512, 1+256+1024)
+	ScreenTexs[2] = CreateTexture(512, 512, 8192)
 	
 	CreateBlurImage()
 	CameraProjMode ark_blur_cam,0
@@ -8228,7 +8168,7 @@ Function LoadEntities()
 	EntityTexture(Fog, FogTexture)
 	EntityBlend (Fog, 2)
 	EntityOrder Fog, -1000
-	MoveEntity(Fog, 0, 0, 1.0)
+	MoveEntity(Fog, -PixelWidth, PixelHeight, 1.0)
 	
 	GasMaskTexture = LoadTexture_Strict("GFX\GasmaskOverlay.jpg", 1)
 	GasMaskOverlay = CreateSprite(ark_blur_cam)
@@ -8237,7 +8177,7 @@ Function LoadEntities()
 	EntityBlend (GasMaskOverlay, 2)
 	EntityFX(GasMaskOverlay, 1)
 	EntityOrder GasMaskOverlay, -1003
-	MoveEntity(GasMaskOverlay, 0, 0, 1.0)
+	MoveEntity(GasMaskOverlay, -PixelWidth, PixelHeight, 1.0)
 	HideEntity(GasMaskOverlay)
 	
 	InfectTexture = LoadTexture_Strict("GFX\InfectOverlay.jpg", 1)
@@ -8247,7 +8187,7 @@ Function LoadEntities()
 	EntityBlend (InfectOverlay, 3)
 	EntityFX(InfectOverlay, 1)
 	EntityOrder InfectOverlay, -1003
-	MoveEntity(InfectOverlay, 0, 0, 1.0)
+	MoveEntity(InfectOverlay, -PixelWidth, PixelHeight, 1.0)
 	;EntityAlpha (InfectOverlay, 255.0)
 	HideEntity(InfectOverlay)
 	
@@ -8258,21 +8198,21 @@ Function LoadEntities()
 	EntityBlend (NVOverlay, 2)
 	EntityFX(NVOverlay, 1)
 	EntityOrder NVOverlay, -1003
-	MoveEntity(NVOverlay, 0, 0, 1.0)
+	MoveEntity(NVOverlay, -PixelWidth, PixelHeight, 1.0)
 	HideEntity(NVOverlay)
 	NVBlink = CreateSprite(ark_blur_cam)
 	ScaleSprite(NVBlink, Max(GraphicWidth / 1024.0, 1.0), Max(GraphicHeight / 1024.0 * 0.8, 0.8))
 	EntityColor(NVBlink,0,0,0)
 	EntityFX(NVBlink, 1)
 	EntityOrder NVBlink, -1005
-	MoveEntity(NVBlink, 0, 0, 1.0)
+	MoveEntity(NVBlink, -PixelWidth, PixelHeight, 1.0)
 	HideEntity(NVBlink)
 	
 	FogNVTexture = LoadTexture_Strict("GFX\fogNV.jpg", 1)
 	
 	DrawLoading(5)
 	
-	DarkTexture = CreateTexture(1024, 1024, 1 + 2)
+	DarkTexture = CreateTexture(1, 1, 1 + 2)
 	SetBuffer TextureBuffer(DarkTexture)
 	Cls
 	SetBuffer BackBuffer()
@@ -8282,10 +8222,10 @@ Function LoadEntities()
 	EntityTexture(Dark, DarkTexture)
 	EntityBlend (Dark, 1)
 	EntityOrder Dark, -1002
-	MoveEntity(Dark, 0, 0, 1.0)
+	MoveEntity(Dark, -PixelWidth, PixelHeight, 1.0)
 	EntityAlpha Dark, 0.0
 	
-	LightTexture = CreateTexture(1024, 1024, 1 + 2+256)
+	LightTexture = CreateTexture(1, 1, 1 + 2+256)
 	SetBuffer TextureBuffer(LightTexture)
 	ClsColor 255, 255, 255
 	Cls
@@ -8299,7 +8239,7 @@ Function LoadEntities()
 	EntityTexture(Light, LightTexture)
 	EntityBlend (Light, 1)
 	EntityOrder Light, -1002
-	MoveEntity(Light, 0, 0, 1.0)
+	MoveEntity(Light, -PixelWidth, PixelHeight, 1.0)
 	HideEntity Light
 	
 	Collider = CreatePivot()
@@ -8461,7 +8401,7 @@ Function LoadEntities()
 	For i = 0 To 6
 		DecalTextures(i) = LoadTexture_Strict("GFX\decal" + (i + 1) + ".png", 1 + 2)
 	Next
-	DecalTextures(7) = LoadTexture_Strict("GFX\items\INVpaperstrips.jpg", 1 + 2)
+	DecalTextures(7) = LoadTexture_Strict("GFX\items\INVpaperstrips.png", 1 + 2)
 	For i = 8 To 12
 		DecalTextures(i) = LoadTexture_Strict("GFX\decalpd"+(i-7)+".jpg", 1 + 2)	
 	Next
@@ -8563,7 +8503,7 @@ Function LoadEntities()
 	
 	ParticleTextures(0) = LoadTexture_Strict("GFX\smoke.png", 1 + 2)
 	ParticleTextures(1) = LoadTexture_Strict("GFX\flash.jpg", 1 + 2)
-	ParticleTextures(2) = LoadTexture_Strict("GFX\dust.jpg", 1 + 2)
+	ParticleTextures(2) = LoadTexture_Strict("GFX\dust.png", 1 + 2)
 	ParticleTextures(3) = LoadTexture_Strict("GFX\npcs\hg.pt", 1 + 2)
 	ParticleTextures(4) = LoadTexture_Strict("GFX\map\sun.jpg", 1 + 2)
 	ParticleTextures(5) = LoadTexture_Strict("GFX\bloodsprite.png", 1 + 2)
@@ -8573,6 +8513,8 @@ Function LoadEntities()
 	
 	SetChunkDataValues()
 	
+	NavBG = CreateTexture(GraphicWidth,GraphicHeight, 1 + 1024)
+
 	;NPCtypeD - different models with different textures (loaded using "CopyEntity") - ENDSHN
 	;[Block]
 	For i=1 To MaxDTextures-1
@@ -9144,6 +9086,7 @@ Function NullGame(playbuttonsfx%=True)
 	For itt.ItemTemplates = Each ItemTemplates
 		FreeImage(itt\invimg)
 		If itt\invimg2 <> 0 Then FreeImage(itt\invimg2)
+		If itt\img <> 0 Then FreeImage(itt\img)
 		Delete itt
 	Next
 
@@ -9224,7 +9167,8 @@ Function NullGame(playbuttonsfx%=True)
 
 	;DeInitExt
 	
-	ClearWorld
+	; Don't clear shaders
+	ClearWorld(1, 1, 1, 0)
 	Camera = 0
 	ark_blur_cam = 0
 	Collider = 0
@@ -10932,9 +10876,6 @@ Function CurveAngle#(val#, old#, smooth#)
    Return WrapAngle(old + diff * (1.0 / smooth * FPSfactor))
 End Function
 
-
-
-
 Function WrapAngle#(angle#)
 	If angle = INFINITY Then Return 0.0
 	While angle < 0
@@ -10971,6 +10912,14 @@ Function angleDist#(a0#,a1#)
 		bb = b
 	EndIf
 	Return bb
+End Function
+
+Function Lerp#(a#, b#, f#)
+    Return a * (1.0 - f) + (b * f)
+End Function
+
+Function Unlerp#(a#, b#, f#)
+	Return (f - a) / (b - a)
 End Function
 
 ;--------------------------------------- decals -------------------------------------------------------
@@ -11373,7 +11322,6 @@ Function SaveOptionsINI()
 	PutINIValue(OptionFile, "console", "auto opening", ConsoleOpening%)
 	PutINIValue(OptionFile, "general", "speed run mode", SpeedRunMode%)
 	PutINIValue(OptionFile, "general", "numeric seeds", UseNumericSeeds%)
-	PutINIValue(OptionFile, "graphics", "enable vram", EnableVRam)
 	PutINIValue(OptionFile, "controls", "mouse smoothing", MouseSmooth)
 	PutINIValue(OptionFile, "graphics", "hud offset", HUDOffsetScale)
 	PutINIValue(OptionFile, "graphics", "fov", FOV)
@@ -11467,29 +11415,25 @@ Function EntityScaleZ#(entity%, globl% = False)
 	Return Sqr(TFormedX() * TFormedX() + TFormedY() * TFormedY() + TFormedZ() * TFormedZ())
 End Function 
 
+Global SMALLEST_POWER_TWO#
+
 Function Graphics3DExt%(width%,height%,depth%=32,mode%=2)
-	;If FE_InitExtFlag = 1 Then DeInitExt() ;prevent FastExt from breaking itself
 	Graphics3D width,height,depth,mode
+	SMALLEST_POWER_TWO = 512.0
+	While SMALLEST_POWER_TWO < Width Lor SMALLEST_POWER_TWO < Height
+		SMALLEST_POWER_TWO = SMALLEST_POWER_TWO * 2.0
+	Wend
 	InitFastResize()
-	;InitExt()
-	AntiAlias GetOptionInt("graphics","antialias")
 	;TextureAnisotropy% (GetOptionInt("graphics","anisotropy"),-1)
 End Function
 
-Function ResizeImage2(image%,width%,height%)
-    img% = CreateImage(width,height)
-	
-	oldWidth% = ImageWidth(image)
-	oldHeight% = ImageHeight(image)
-	CopyRect 0,0,oldWidth,oldHeight,1024-oldWidth/2,1024-oldHeight/2,ImageBuffer(image),TextureBuffer(fresize_texture)
-	SetBuffer BackBuffer()
-	ScaleRender(0,0,2048.0 / Float(RealGraphicWidth) * Float(width) / Float(oldWidth), 2048.0 / Float(RealGraphicWidth) * Float(height) / Float(oldHeight))
-	;might want to replace Float(GraphicWidth) with Max(GraphicWidth,GraphicHeight) if portrait sizes cause issues
-	;everyone uses landscape so it's probably a non-issue
-	CopyRect RealGraphicWidth/2-width/2,RealGraphicHeight/2-height/2,width,height,0,0,BackBuffer(),ImageBuffer(img)
-	
-    FreeImage image
-    Return img
+Function ApplyBorderlessResizing()
+	If BorderlessWindowed And (RealGraphicWidth<>GraphicWidth Lor RealGraphicHeight<>GraphicHeight) Then
+		CopyRectStretch(0, 0, GraphicWidth, GraphicHeight, 0, 0, ScaledGraphicWidth, ScaledGraphicHeight, BackBuffer(), TextureBuffer(ResizeTexture))
+		; We need to move the picture into the center of the screen, need to clear the rest.
+		If ScaledOffsetX<>0 Lor ScaledOffsetY<>0 Then Cls
+		CopyRect(0, 0, ScaledGraphicWidth, ScaledGraphicHeight, ScaledOffsetX, ScaledOffsetY, TextureBuffer(ResizeTexture), BackBuffer())
+	EndIf
 End Function
 
 
@@ -11542,6 +11486,8 @@ Function RenderWorld2()
 	
 	CurrTrisAmount = TrisRendered()
 
+	UpdatePostProcess()
+
 	If hasBattery=0 And WearingNightVision<>3
 		IsNVGBlinking% = True
 		ShowEntity NVBlink%
@@ -11560,8 +11506,8 @@ Function RenderWorld2()
 				IsNVGBlinking% = True
 				ShowEntity NVBlink%
 				If NVTimer<=-10
-				NVTimer = 600.0
-			EndIf
+					NVTimer = 600.0
+				EndIf
 			EndIf
 			
 			Color 255,255,255
@@ -11624,7 +11570,7 @@ Function RenderWorld2()
 			For l=0 To Floor((power%+50)*0.01)
 				Rect 45,GraphicHeight*0.5-(l*20),54,10,True
 			Next
-			DrawImage NVGImages,40,GraphicHeight*0.5+30,1
+			DrawImage NVGImages[1],40,GraphicHeight*0.5+30
 			
 			Color 255,255,255
 		ElseIf WearingNightVision=1 And hasBattery<>0
@@ -11636,7 +11582,7 @@ Function RenderWorld2()
 			For l=0 To Floor((power%+50)*0.01)
 				Rect 45,GraphicHeight*0.5-(l*20),54,10,True
 			Next
-			DrawImage NVGImages,40,GraphicHeight*0.5+30,0
+			DrawImage NVGImages[0],40,GraphicHeight*0.5+30
 		EndIf
 	EndIf
 	
@@ -11657,65 +11603,6 @@ Function RenderWorld2()
 	EndIf
 End Function
 
-
-Function ScaleRender(x#,y#,hscale#=1.0,vscale#=1.0)
-	If Camera<>0 Then HideEntity Camera
-	WireFrame 0
-	ShowEntity fresize_image
-	ScaleEntity fresize_image,hscale,vscale,1.0
-	PositionEntity fresize_image, x, y, 1.0001
-	ShowEntity fresize_cam
-	RenderWorld()
-	HideEntity fresize_cam
-	HideEntity fresize_image
-	WireFrame WireframeState
-	If Camera<>0 Then ShowEntity Camera
-End Function
-
-Function InitFastResize()
-    ;Create Camera
-	Local cam% = CreateCamera()
-	CameraProjMode cam, 2
-	CameraZoom cam, 0.1
-	CameraClsMode cam, 0, 0
-	CameraRange cam, 0.1, 1.5
-	MoveEntity cam, 0, 0, -10000
-	
-	fresize_cam = cam
-	
-    ;ark_sw = GraphicsWidth()
-    ;ark_sh = GraphicsHeight()
-	
-    ;Create sprite
-	Local spr% = CreateMesh(cam)
-	Local sf% = CreateSurface(spr)
-	AddVertex sf, -1, 1, 0, 0, 0
-	AddVertex sf, 1, 1, 0, 1, 0
-	AddVertex sf, -1, -1, 0, 0, 1
-	AddVertex sf, 1, -1, 0, 1, 1
-	AddTriangle sf, 0, 1, 2
-	AddTriangle sf, 3, 2, 1
-	EntityFX spr, 17
-	ScaleEntity spr, 2048.0 / Float(RealGraphicWidth), 2048.0 / Float(RealGraphicHeight), 1
-	PositionEntity spr, 0, 0, 1.0001
-	EntityOrder spr, -100001
-	EntityBlend spr, 1
-	fresize_image = spr
-	
-    ;Create texture
-	fresize_texture = CreateTexture(2048, 2048, 1+256)
-	fresize_texture2 = CreateTexture(2048, 2048, 1+256)
-	TextureBlend fresize_texture2,3
-	SetBuffer(TextureBuffer(fresize_texture2))
-	ClsColor 0,0,0
-	Cls
-	SetBuffer(BackBuffer())
-	;TextureAnisotropy(fresize_texture)
-	EntityTexture spr, fresize_texture,0,0
-	EntityTexture spr, fresize_texture2,0,1
-	
-	HideEntity fresize_cam
-End Function
 
 ;--------------------------------------- Some new 1.3 -functions -------------------------------------------------------
 
@@ -11902,11 +11789,11 @@ Function CheckTriggers$()
 End Function
 
 Function ScaledMouseX%()
-	Return Float(MouseX()-(RealGraphicWidth*0.5*(1.0-AspectRatioRatio)))*Float(GraphicWidth)/Float(RealGraphicWidth*AspectRatioRatio)
+	Return Float(MouseX()-ScaledOffsetX)/ScaledGraphicWidth*GraphicWidth
 End Function
 
 Function ScaledMouseY%()
-	Return Float(MouseY())*Float(GraphicHeight)/Float(RealGraphicHeight)
+	Return Float(MouseY()-ScaledOffsetY)/ScaledGraphicHeight*GraphicHeight
 End Function
 
 Function PlayAnnouncement(file$) ;This function streams the announcement currently playing
@@ -12008,7 +11895,7 @@ Function PlayMovie(moviefile$)
 		DebugLog "Scaled: "+ScaledGraphicHeight
 	EndIf
 
-	Local SplashScreenVideo = OpenMovie(moviefile$+".avi")
+	Local SplashScreenVideo = OpenMovie(moviefile$+".webm")
 	If SplashScreenVideo = 0 Then Return
 
 	DebugLog(RealGraphicHeight)

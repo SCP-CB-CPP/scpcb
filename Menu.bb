@@ -3,13 +3,12 @@ Global MenuText% = LoadImage_Strict("GFX\menu\scptext.jpg")
 Global Menu173% = LoadImage_Strict("GFX\menu\173back.png")
 MenuWhite = LoadImage_Strict("GFX\menu\menuwhite.jpg")
 MenuBlack = LoadImage_Strict("GFX\menu\menublack.jpg")
-MaskImage MenuBlack, 255,255,0
 Global QuickLoadIcon% = LoadImage_Strict("GFX\menu\QuickLoading.png")
 
-ResizeImage(MenuBack, ImageWidth(MenuBack) * MenuScale, ImageHeight(MenuBack) * MenuScale)
-ResizeImage(MenuText, ImageWidth(MenuText) * MenuScale, ImageHeight(MenuText) * MenuScale)
-ResizeImage(Menu173, ImageWidth(Menu173) * MenuScale, ImageHeight(Menu173) * MenuScale)
-ResizeImage(QuickLoadIcon, ImageWidth(QuickLoadIcon) * MenuScale, ImageHeight(QuickLoadIcon) * MenuScale)
+ScaleImage(MenuBack, MenuScale, MenuScale)
+ScaleImage(MenuText, MenuScale, MenuScale)
+ScaleImage(Menu173, MenuScale, MenuScale)
+ScaleImage(QuickLoadIcon, MenuScale, MenuScale)
 
 For i = 0 To 3
 	ArrowIMG(i) = LoadImage_Strict("GFX\menu\arrow.png")
@@ -242,7 +241,6 @@ Function UpdateMainMenu()
 					UserTrackCheck% = 0
 					UserTrackCheck2% = 0
 					
-					AntiAlias Opt_AntiAlias
 					MainMenuTab = 0
 				Case 4 ;move back to the "new game" tab
 					MainMenuTab = 1
@@ -701,16 +699,6 @@ Function UpdateMainMenu()
 					If (MouseOn(x+310*MenuScale,y-6*MenuScale,150*MenuScale+14,20) And OnSliderID=0) Or OnSliderID=3
 						DrawOptionsTooltip(tx,ty,tw,th+100*MenuScale,"texquality")
 					EndIf
-					
-					y=y+50*MenuScale
-					
-					Color 255,255,255
-					Text(x + 20 * MenuScale, y, "Save textures in the VRAM:")
-					EnableVRam = DrawTick(x + 310 * MenuScale, y + MenuScale, EnableVRam)
-					If MouseOn(x+310*MenuScale,y+MenuScale,20*MenuScale,20*MenuScale) And OnSliderID=0
-						DrawOptionsTooltip(tx,ty,tw,th,"vram")
-					EndIf
-					
 					;[End Block]
 				ElseIf MainMenuTab = 5 ;Audio
 					;[Block]
@@ -871,26 +859,26 @@ Function UpdateMainMenu()
 					y = y + 10*MenuScale
 					
 					Text(x + 20 * MenuScale, y + 20 * MenuScale, "Move Forward")
-					InputBox(x + 160 * MenuScale, y + 20 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_UP,210)),5)		
+					InputBox(x + 160 * MenuScale, y + 20 * MenuScale,100*MenuScale,20*MenuScale,GetKeyName(Min(KEY_UP,210)),5)		
 					Text(x + 20 * MenuScale, y + 40 * MenuScale, "Strafe Left")
-					InputBox(x + 160 * MenuScale, y + 40 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_LEFT,210)),3)	
+					InputBox(x + 160 * MenuScale, y + 40 * MenuScale,100*MenuScale,20*MenuScale,GetKeyName(Min(KEY_LEFT,210)),3)	
 					Text(x + 20 * MenuScale, y + 60 * MenuScale, "Move Backward")
-					InputBox(x + 160 * MenuScale, y + 60 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_DOWN,210)),6)				
+					InputBox(x + 160 * MenuScale, y + 60 * MenuScale,100*MenuScale,20*MenuScale,GetKeyName(Min(KEY_DOWN,210)),6)				
 					Text(x + 20 * MenuScale, y + 80 * MenuScale, "Strafe Right")
-					InputBox(x + 160 * MenuScale, y + 80 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_RIGHT,210)),4)	
+					InputBox(x + 160 * MenuScale, y + 80 * MenuScale,100*MenuScale,20*MenuScale,GetKeyName(Min(KEY_RIGHT,210)),4)	
 					Text(x + 20 * MenuScale, y + 100 * MenuScale, "Quick Save")
-					InputBox(x + 160 * MenuScale, y + 100 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_SAVE,210)),11)
+					InputBox(x + 160 * MenuScale, y + 100 * MenuScale,100*MenuScale,20*MenuScale,GetKeyName(Min(KEY_SAVE,210)),11)
 
 					Text(x + 280 * MenuScale, y + 20 * MenuScale, "Manual Blink")
-					InputBox(x + 470 * MenuScale, y + 20 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_BLINK,210)),7)				
+					InputBox(x + 470 * MenuScale, y + 20 * MenuScale,100*MenuScale,20*MenuScale,GetKeyName(Min(KEY_BLINK,210)),7)				
 					Text(x + 280 * MenuScale, y + 40 * MenuScale, "Sprint")
-					InputBox(x + 470 * MenuScale, y + 40 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_SPRINT,210)),8)
+					InputBox(x + 470 * MenuScale, y + 40 * MenuScale,100*MenuScale,20*MenuScale,GetKeyName(Min(KEY_SPRINT,210)),8)
 					Text(x + 280 * MenuScale, y + 60 * MenuScale, "Open/Close Inventory")
-					InputBox(x + 470 * MenuScale, y + 60 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_INV,210)),9)
+					InputBox(x + 470 * MenuScale, y + 60 * MenuScale,100*MenuScale,20*MenuScale,GetKeyName(Min(KEY_INV,210)),9)
 					Text(x + 280 * MenuScale, y + 80 * MenuScale, "Crouch")
-					InputBox(x + 470 * MenuScale, y + 80 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_CROUCH,210)),10)	
+					InputBox(x + 470 * MenuScale, y + 80 * MenuScale,100*MenuScale,20*MenuScale,GetKeyName(Min(KEY_CROUCH,210)),10)	
 					Text(x + 280 * MenuScale, y + 100 * MenuScale, "Open/Close Console")
-					InputBox(x + 470 * MenuScale, y + 100 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_CONSOLE,210)),12)
+					InputBox(x + 470 * MenuScale, y + 100 * MenuScale,100*MenuScale,20*MenuScale,GetKeyName(Min(KEY_CONSOLE,210)),12)
 					
 					If MouseOn(x+20*MenuScale,y,width-40*MenuScale,120*MenuScale) And OnSliderID=0
 						DrawOptionsTooltip(tx,ty,tw,th,"controls")
@@ -1138,8 +1126,6 @@ Dim GfxModeCountPerAspectRatio%(0)
 Dim GfxModeWidthsByAspectRatio%(0, 0), GfxModeHeightsByAspectRatio%(0, 0)
 
 Function UpdateLauncher()
-	AspectRatioRatio = 1.0
-
 	MenuScale = 1
 	
 	Graphics3DExt(LauncherWidth, LauncherHeight, 0, 2)
@@ -1150,6 +1136,9 @@ Function UpdateLauncher()
 	
 	RealGraphicWidth = GraphicWidth
 	RealGraphicHeight = GraphicHeight
+
+	ScaledGraphicWidth = GraphicWidth
+	ScaledGraphicHeight = GraphicHeight
 
 	Local TotalGfxModes% = CountGfxModes3D()
 
@@ -1170,15 +1159,8 @@ Function UpdateLauncher()
 	SetFont Font1
 	MenuWhite = LoadImage_Strict("GFX\menu\menuwhite.jpg")
 	MenuBlack = LoadImage_Strict("GFX\menu\menublack.jpg")	
-	MaskImage MenuBlack, 255,255,0
 	Local LauncherIMG% = LoadImage_Strict("GFX\menu\launcher.png")
 	Local i%	
-	
-	For i = 0 To 3
-		ArrowIMG(i) = LoadImage_Strict("GFX\menu\arrow.png")
-		RotateImage(ArrowIMG(i), 90 * i)
-		HandleImage(ArrowIMG(i), 0, 0)
-	Next
 	
 	For i% = 1 To TotalGfxModes
 		Local w% = GfxModeWidth(i), h% = GfxModeHeight(i)
@@ -1230,7 +1212,7 @@ Function UpdateLauncher()
 
 	Local height% = 18
 	
-	If SteamActive Then Steam_SetOverlayNotificationPosition(1)
+	If SteamActive Then Steam_SetOverlayNotificationPosition(2)
 
 	Repeat
 		;Cls
@@ -1302,61 +1284,26 @@ Function UpdateLauncher()
 		Next
 		
 		;-----------------------------------------------------------------
-		Color 255, 255, 255
-		x = 30
-		y = 369
-		Rect(x - 10, y, 340, 95)
-		Text(x - 10, y - 25, "Graphics:")
-		
-		y=y+10
-		For i = 1 To gfxDriverCount
-			Color 0, 0, 0
-			txt$ = EllipsisLeft(GfxDrivers(i), 30)
-			txtW% = StringWidth(txt)
-			If SelectedGFXDriver = i Then Rect(x - 4, y - 4, txtW + 8, height, False)
-			Text(x, y, txt)
-			If MouseOn(x - 4, y - 4, txtW + 8, height) Then
-				Color 100, 100, 100
-				Rect(x - 4, y - 4, txtW + 8, height, False)
-				If MouseHit1 Then SelectedGFXDriver = i
-			EndIf
-			
-			y=y+20
-		Next
-		
+
 		Fullscreen = DrawTick(40 + 430 - 15, 260 - 55 + 5 - 8, Fullscreen)
 		If Fullscreen Then BorderlessWindowed = False
 		BorderlessWindowed = DrawTick(40 + 430 - 15, 260 - 55 + 35, BorderlessWindowed)
 		If BorderlessWindowed Then Fullscreen = False
 
-		lock% = False
-
-		If BorderlessWindowed Or (Not Fullscreen) Then lock% = True
-		Bit16Mode = DrawTick(40 + 430 - 15, 260 - 55 + 65 + 8, Bit16Mode,lock%)
 		LauncherEnabled = DrawTick(40 + 430 - 15, 260 - 55 + 95 + 8, LauncherEnabled)
 
 		Text(40 + 430 + 15, 262 - 55 + 5 - 8, "Fullscreen")
 		Color 255, 255, 255
 		Text(40 + 430 + 15, 262 - 55 + 35 - 8, "Borderless",False,False)
 		Text(40 + 430 + 15, 262 - 55 + 35 + 12, "windowed mode",False,False)
-
-		If BorderlessWindowed Or (Not Fullscreen)
- 		   Color 255, 0, 0
- 		   Bit16Mode = False
-		Else
-		    Color 255, 255, 255
-		EndIf
-
-		Text(40 + 430 + 15, 262 - 55 + 65 + 8, "16 Bit")
-		Color 255, 255, 255
 		Text(40 + 430 + 15, 262 - 55 + 95 + 8, "Use launcher")
 		
 		gfxWidth% = GfxModeWidthsByAspectRatio(SelectedAspectRatio, SelectedGfxMode) : gfxHeight% = GfxModeHeightsByAspectRatio(SelectedAspectRatio, SelectedGfxMode)
 
 		If Fullscreen
-			Text(260 + 15, 262 - 55 + 140, "Current Resolution: "+gfxWidth + "x" + gfxHeight + "," + (16+(16*(Not Bit16Mode))))
+			Text(260 + 15, 262 - 55 + 140, "Current Resolution: "+gfxWidth + "x" + gfxHeight)
 		Else
-			Text(260 + 15, 262 - 55 + 140, "Current Resolution: "+gfxWidth + "x" + gfxHeight + ",32")
+			Text(260 + 15, 262 - 55 + 140, "Current Resolution: "+gfxWidth + "x" + gfxHeight)
 		EndIf
 
 		If DrawButton(LauncherWidth - 30 - 90 - 130 - 15, LauncherHeight - 50 - 55, 130, 30, "MAP CREATOR", False, False, False) Then
@@ -1398,12 +1345,6 @@ Function UpdateLauncher()
 	Else
 		PutINIValue(OptionFile, "graphics", "borderless windowed", "false")
 	EndIf
-	If Bit16Mode Then
-		PutINIValue(OptionFile, "graphics", "16bit", "true")
-	Else
-		PutINIValue(OptionFile, "graphics", "16bit", "false")
-	EndIf
-	PutINIValue(OptionFile, "graphics", "gfx driver", SelectedGFXDriver)
 	
 	FreeImage(LauncherIMG) : LauncherIMG = 0
 	
@@ -1701,51 +1642,7 @@ Function DrawLoading(percent%, shortloading=False)
 			FlushMouse()
 		EndIf
 		
-		If BorderlessWindowed Then
-			If (RealGraphicWidth<>GraphicWidth) Or (RealGraphicHeight<>GraphicHeight) Then
-				SetBuffer TextureBuffer(fresize_texture)
-				ClsColor 0,0,0 : Cls
-				CopyRect 0,0,GraphicWidth,GraphicHeight,1024-GraphicWidth/2,1024-GraphicHeight/2,BackBuffer(),TextureBuffer(fresize_texture)
-				SetBuffer BackBuffer()
-				ClsColor 0,0,0 : Cls
-				ScaleRender(0,0,2050.0 / Float(GraphicWidth) * AspectRatioRatio, 2050.0 / Float(GraphicWidth) * AspectRatioRatio)
-				;might want to replace Float(GraphicWidth) with Max(GraphicWidth,GraphicHeight) if portrait sizes cause issues
-				;everyone uses landscape so it's probably a non-issue
-			EndIf
-		EndIf
-		
-		;not by any means a perfect solution
-		;Not even proper gamma correction but it's a nice looking alternative that works in windowed mode
-		If ScreenGamma>1.0 Then
-			CopyRect 0,0,RealGraphicWidth,RealGraphicHeight,1024-RealGraphicWidth/2,1024-RealGraphicHeight/2,BackBuffer(),TextureBuffer(fresize_texture)
-			EntityBlend fresize_image,1
-			ClsColor 0,0,0 : Cls
-			ScaleRender(-1.0/Float(RealGraphicWidth),1.0/Float(RealGraphicWidth),2048.0 / Float(RealGraphicWidth),2048.0 / Float(RealGraphicWidth))
-			EntityFX fresize_image,1+32
-			EntityBlend fresize_image,3
-			EntityAlpha fresize_image,ScreenGamma-1.0
-			ScaleRender(-1.0/Float(RealGraphicWidth),1.0/Float(RealGraphicWidth),2048.0 / Float(RealGraphicWidth),2048.0 / Float(RealGraphicWidth))
-		ElseIf ScreenGamma<1.0 Then ;todo: maybe optimize this if it's too slow, alternatively give players the option to disable gamma
-			CopyRect 0,0,RealGraphicWidth,RealGraphicHeight,1024-RealGraphicWidth/2,1024-RealGraphicHeight/2,BackBuffer(),TextureBuffer(fresize_texture)
-			EntityBlend fresize_image,1
-			ClsColor 0,0,0 : Cls
-			ScaleRender(-1.0/Float(RealGraphicWidth),1.0/Float(RealGraphicWidth),2048.0 / Float(RealGraphicWidth),2048.0 / Float(RealGraphicWidth))
-			EntityFX fresize_image,1+32
-			EntityBlend fresize_image,2
-			EntityAlpha fresize_image,1.0
-			SetBuffer TextureBuffer(fresize_texture2)
-			ClsColor 255*ScreenGamma,255*ScreenGamma,255*ScreenGamma
-			Cls
-			SetBuffer BackBuffer()
-			ScaleRender(-1.0/Float(RealGraphicWidth),1.0/Float(RealGraphicWidth),2048.0 / Float(RealGraphicWidth),2048.0 / Float(RealGraphicWidth))
-			SetBuffer(TextureBuffer(fresize_texture2))
-			ClsColor 0,0,0
-			Cls
-			SetBuffer(BackBuffer())
-		EndIf
-		EntityFX fresize_image,1
-		EntityBlend fresize_image,1
-		EntityAlpha fresize_image,1.0
+		ApplyBorderlessResizing()
 		
 		Flip False
 		
@@ -2157,8 +2054,6 @@ Function DrawOptionsTooltip(x%,y%,width%,height%,option$,value#=0,ingame%=False)
 			txt = txt + "screen tearing. This ties the game's frame rate to your display's refresh rate and may cause some input lag."
 		Case "antialias"
 			txt = Chr(34)+"Anti-Aliasing"+Chr(34)+" is used to smooth the rendered image before displaying in order to reduce aliasing around the edges of models."
-			txt2 = "This option only takes effect in fullscreen."
-			R = 255
 		Case "roomlights"
 			txt = "Toggles the artificial lens flare effect generated over specific light sources."
 		Case "gamma"
@@ -2184,10 +2079,6 @@ Function DrawOptionsTooltip(x%,y%,width%,height%,option$,value#=0,ingame%=False)
 					G = 255
 					txt2 = "All particles are rendered."
 			End Select
-		Case "vram"
-			txt = "Textures that are stored in the Video-RAM will load faster, but this also has negative effects on the texture quality as well."
-			txt2 = "This option cannot be changed in-game."
-			R = 255
 			;[End Block]
 		;Sound options
 			;[Block]
@@ -2245,7 +2136,7 @@ Function DrawOptionsTooltip(x%,y%,width%,height%,option$,value#=0,ingame%=False)
 		Case "hud"
 			txt = "Display the blink and stamina meters."
 		Case "consoleenable"
-			txt = "Toggles the use of the developer console. Can be used in-game by pressing " + KeyName(KEY_CONSOLE) + "."
+			txt = "Toggles the use of the developer console. Can be used in-game by pressing " + GetKeyName(KEY_CONSOLE) + "."
 		Case "consoleerror"
 			txt = Chr(34)+"Open console on error"+Chr(34)+" is self-explanatory."
 		Case "speedrunmode"

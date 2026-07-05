@@ -28,11 +28,11 @@ For i = 0 To MAXACHIEVEMENTS-1
 	Local image$ = GetINIString2("Data\achievementstrings.ini", loc2, "image") 
 	
 	AchvIMG(i) = LoadImage_Strict("GFX\menu\achievements\"+image+".jpg")
-	AchvIMG(i) = ResizeImage2(AchvIMG(i),ImageWidth(AchvIMG(i))*GraphicHeight/768.0,ImageHeight(AchvIMG(i))*GraphicHeight/768.0)
+	ResizeImage(AchvIMG(i),ImageWidth(AchvIMG(i))*GraphicHeight/768.0,ImageHeight(AchvIMG(i))*GraphicHeight/768.0)
 Next
 
 Global AchvLocked = LoadImage_Strict("GFX\menu\achievements\achvlocked.jpg")
-AchvLocked = ResizeImage2(AchvLocked,ImageWidth(AchvLocked)*GraphicHeight/768.0,ImageHeight(AchvLocked)*GraphicHeight/768.0)
+ResizeImage(AchvLocked,ImageWidth(AchvLocked)*GraphicHeight/768.0,ImageHeight(AchvLocked)*GraphicHeight/768.0)
 
 Function GiveAchievement(achvname%, showMessage%=True)
 	If Achievements(achvname)<>True Then
