@@ -1502,16 +1502,6 @@ Function LoadRoomTemplates(file$)
 				Case "g" rt\G = Int(value)
 				Case "b" rt\B = Int(value)
 			End Select
-			
-			For i = 0 To 4
-				rt\zone[i]= GetINIInt(file, TemporaryString, "zone"+(i+1))
-			Next
-			
-			rt\Commonness = Max(Min(GetINIInt(file, TemporaryString, "commonness"), 100), 0)
-			rt\Large = GetINIInt(file, TemporaryString, "large")
-			rt\DisableDecals = GetINIInt(file, TemporaryString, "disabledecals")
-			rt\UseLightCones = GetINIInt(file, TemporaryString, "usevolumelighting")
-			rt\DisableOverlapCheck = GetINIInt(file, TemporaryString, "disableoverlapcheck")
 		EndIf
 	Wend
 	

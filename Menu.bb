@@ -58,6 +58,11 @@ LoadSaveGames()
 
 Global CurrLoadGamePage% = 0
 
+Function EllipsisLeft$(txt$, maxLen%)
+	If Len(txt) > maxLen Then Return Left(txt, maxLen-3) + "…"
+	Return txt
+End Function
+
 Function UpdateMainMenu()
 	Local x%, y%, width%, height%, temp%
 	
@@ -135,72 +140,80 @@ Function UpdateMainMenu()
 	EndIf
 	
 	If MainMenuTab = 0 Then
-		For i% = 0 To 3
-			temp = False
-			x = 159 * MenuScale
-			y = (286 + 100 * i) * MenuScale
+		x = 159 * MenuScale
+		y = 286 * MenuScale
 			
-			width = 400 * MenuScale
-			height = 70 * MenuScale
-			
-			temp = (MouseHit1 And MouseOn(x, y, width, height))
-			
-			Local txt$
-			Select i
-				Case 0
-					txt = "NEW GAME"
-					If temp Then
-						HasNumericSeed = UseNumericSeeds
-						If HasNumericSeed Then
-							RandomSeedNumeric = MilliSecs()
+		width = 400 * MenuScale
+		height = 70 * MenuScale
+
+		spacing% = 100 * MenuScale
+
+		If DrawButton(x, y, width, height, "NEW GAME") Then
+			HasNumericSeed = UseNumericSeeds
+			If HasNumericSeed Then
+				RandomSeedNumeric = 0
+			Else
+				RandomSeed = ""
+				If Rand(15)=1 Then 
+					Select Rand(13)
+						Case 1 
+							RandomSeed = "NIL"
+						Case 2
+							RandomSeed = "NO"
+						Case 3
+							RandomSeed = "d9341"
+						Case 4
+							RandomSeed = "5CP_I73"
+						Case 5
+							RandomSeed = "DONTBLINK"
+						Case 6
+							RandomSeed = "CRUNCH"
+						Case 7
+							RandomSeed = "die"
+						Case 8
+							RandomSeed = "HTAED"
+						Case 9
+							RandomSeed = "rustledjim"
+						Case 10
+							RandomSeed = "larry"
+						Case 11
+							RandomSeed = "JORGE"
+						Case 12
+							RandomSeed = "dirtymetal"
+						Case 13
+							RandomSeed = "whatpumpkin"
+					End Select
+				Else
+					n = Rand(4,8)
+					For i = 1 To n
+						If Rand(3)=1 Then
+							RandomSeed = RandomSeed + Rand(0,9)
 						Else
 							RandomSeed = RandomSeed + Chr(Rand(97,122))
 						EndIf
-						
-						MainMenuTab = 1
-					EndIf
-				Case 1
-					txt = "LOAD GAME"
-					If temp Then
-						LoadSaveGames()
-						MainMenuTab = 2
-					EndIf
-				Case 2
-					txt = "OPTIONS"
-					If temp Then MainMenuTab = 3 : OnSliderID = 66
-				Case 3
-					txt = "QUIT"
-					If temp Then
-						StopChannel(CurrMusicStream)
-						End
-					EndIf
-			End Select
+					Next							
+				EndIf
+			EndIf
 			
 			MainMenuTab = 1
 		EndIf
 
 		y = y + spacing
 
-		If DrawButton(x, y, width, height, I_Loc\Menu_LoadUpper) Then
+		If DrawButton(x, y, width, height, "LOAD GAME") Then
 			LoadSaveGames()
 			MainMenuTab = 2
 		EndIf
 
 		y = y + spacing
 
-		If DrawButton(x, y, width, height, I_Loc\Menu_ModsUpper, True, False, Not ModsEnabled) Then
-			MainMenuTab = 8
-		EndIf
-
-		y = y + spacing
-
-		If DrawButton(x, y, width, height, I_Loc\Menu_OptionsUpper) Then
+		If DrawButton(x, y, width, height, "OPTIONS") Then
 			MainMenuTab = 3 : OnSliderID = 66
 		EndiF
 
 		y = y + spacing
 
-		If DrawButton(x, y, width, height, I_Loc\Menu_QuitUpper) Then
+		If DrawButton(x, y, width, height, "QUIT") Then
 			StopChannel(CurrMusicStream)
 			End
 		EndIf
@@ -1125,6 +1138,8 @@ Dim GfxModeCountPerAspectRatio%(0)
 Dim GfxModeWidthsByAspectRatio%(0, 0), GfxModeHeightsByAspectRatio%(0, 0)
 
 Function UpdateLauncher()
+	AspectRatioRatio = 1.0
+
 	MenuScale = 1
 	
 	Graphics3DExt(LauncherWidth, LauncherHeight, 0, 2)
@@ -1156,7 +1171,7 @@ Function UpdateLauncher()
 	MenuWhite = LoadImage_Strict("GFX\menu\menuwhite.jpg")
 	MenuBlack = LoadImage_Strict("GFX\menu\menublack.jpg")	
 	MaskImage MenuBlack, 255,255,0
-	Local LauncherIMG% = LoadImage_Strict("GFX\menu\launcher.jpg")
+	Local LauncherIMG% = LoadImage_Strict("GFX\menu\launcher.png")
 	Local i%	
 	
 	For i = 0 To 3
@@ -1386,7 +1401,7 @@ Function UpdateLauncher()
 	If Bit16Mode Then
 		PutINIValue(OptionFile, "graphics", "16bit", "true")
 	Else
-		PutINIValue(OptionFile, "optiographicsns", "16bit", "false")
+		PutINIValue(OptionFile, "graphics", "16bit", "false")
 	EndIf
 	PutINIValue(OptionFile, "graphics", "gfx driver", SelectedGFXDriver)
 	
@@ -1424,6 +1439,18 @@ Function GreatestCommonDivsior(u%, v%)
 	Return u Shl k
 End Function
 
+
+Function DrawBar(img%, x%, y%, width%, filled#, centerX% = False)
+	Local spacing = ImageWidth(img) + 2
+	width = Int(width / spacing) * spacing + 3
+	Local height = ImageHeight(img) + 6
+	If centerX Then x = x - width / 2
+	Color 255, 255, 255
+	Rect (x, y, width, height, False)
+	For i = 1 To Int(((width - 6) * filled) / spacing)
+		DrawImage(img, x + 3 + spacing * (i - 1), y + 3)
+	Next
+End Function
 
 Function DrawTiledImageRect(img%, srcX%, srcY%, srcwidth#, srcheight#, x%, y%, width%, height%)
 	
@@ -2261,13 +2288,6 @@ Function DrawOptionsTooltip(x%,y%,width%,height%,option$,value#=0,ingame%=False)
 	EndIf
 End Function
 
-Function DrawFramedRowText(txt$, x%, y%, width%)
-	Local fw% = width - 12*MenuScale
-	Local lines% = GetLineAmount(txt, fw, 0)
-	DrawFrame(x, y, width, ((StringHeight(txt)*lines)+(10+lines)*MenuScale), 0, 0, False)
-	RowText(txt, x + 6*MenuScale, y + 6*MenuScale, fw, 0)
-End Function
-
 Function DrawMapCreatorTooltip(x%,y%,width%,height%,mapname$)
 	Local fx# = x+6*MenuScale
 	Local fy# = y+6*MenuScale
@@ -2336,24 +2356,6 @@ Function DrawMapCreatorTooltip(x%,y%,width%,height%,mapname$)
 	Text(fx,fy+((StringHeight(txt[0])*2)+StringHeight(txt[2])*lines+5*MenuScale),txt[3])
 	Text(fx,fy+((StringHeight(txt[0])*3)+StringHeight(txt[2])*lines+5*MenuScale),txt[4])
 	Text(fx,fy+((StringHeight(txt[0])*4)+StringHeight(txt[2])*lines+5*MenuScale),txt[5])
-	
-End Function
-
-Function ChangeMenu_TestIMG(change$)
-	
-	If Menu_TestIMG <> 0 Then FreeImage Menu_TestIMG
-	AmbientLightRoomTex% = CreateTexture(2,2,257)
-	TextureBlend AmbientLightRoomTex,5
-	SetBuffer(TextureBuffer(AmbientLightRoomTex))
-	ClsColor 0,0,0
-	Cls
-	SetBuffer BackBuffer()
-	Menu_TestIMG = Create3DIcon(200,200,"GFX\map\room3z3_opt.rmesh",0,-0.75,1,0,0,0,menuroomscale#,menuroomscale#,menuroomscale#,True)
-	ScaleImage Menu_TestIMG,MenuScale,MenuScale
-	MaskImage Menu_TestIMG,255,0,255
-	FreeTexture AmbientLightRoomTex : AmbientLightRoomTex = 0
-	
-	CurrMenu_TestIMG = change$
 	
 End Function
 
