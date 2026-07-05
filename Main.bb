@@ -111,7 +111,7 @@ Global EnableSFXRelease_Prev% = EnableSFXRelease%
 
 Global CanOpenConsole% = GetOptionInt("console", "enabled")
 
-Global UseNumericSeeds% = GetOptionInt("options", "numeric seeds")
+Global UseNumericSeeds% = GetOptionInt("general", "numeric seeds")
 
 Dim ArrowIMG(4)
 
@@ -129,17 +129,17 @@ If GraphicHeight <= 0 Then GraphicHeight = DesktopHeight()
 Global Depth% = 0
 Global Fullscreen% = GetOptionInt("graphics", "fullscreen")
 
-Global SelectedGFXDriver% = Min(Max(GetOptionInt("options", "gfx driver"), 1), CountGfxDrivers())
+Global SelectedGFXDriver% = Min(Max(GetOptionInt("graphics", "gfx driver"), 1), CountGfxDrivers())
 
 Global fresize_image%, fresize_texture%, fresize_texture2%
 Global fresize_cam%
 
-Global ShowFPS = GetOptionInt("options", "show FPS")
+Global ShowFPS = GetOptionInt("graphics", "show FPS")
 
 Global WireframeState
 Global HalloweenTex
 
-Global BorderlessWindowed% = GetOptionInt("options", "borderless windowed")
+Global BorderlessWindowed% = GetOptionInt("graphics", "borderless windowed")
 Global RealGraphicWidth%,RealGraphicHeight%
 Global AspectRatioRatio#
 
@@ -153,7 +153,7 @@ End Function
 
 Global EnableRoomLights% = GetOptionInt("graphics", "room lights enabled")
 
-Global TextureDetails% = GetOptionInt("options", "texture details")
+Global TextureDetails% = GetOptionInt("graphics", "texture details")
 Global TextureFloat#
 Select TextureDetails%
 	Case 0
@@ -170,7 +170,7 @@ End Select
 Global ConsoleOpening% = GetOptionInt("console", "auto opening")
 Global SFXVolume# = GetOptionFloat("audio", "sound volume")
 
-Global Bit16Mode = GetOptionInt("options", "16bit")
+Global Bit16Mode = GetOptionInt("graphics", "16bit")
 
 ; Exclusive fullscreen ONLY supports the reported resolutions
 If (LauncherEnabled Lor HasCLIFlag("launcher")) And (Not HasCLIFlag("nolauncher")) Lor Fullscreen And (Not GfxMode3DExists(GraphicWidth, GraphicHeight, 32-16*Bit16Mode)) Then
@@ -208,14 +208,14 @@ SetBuffer(BackBuffer())
 Global CurTime%, PrevTime%, LoopDelay%, FPSfactor#, FPSfactor2#, PrevFPSFactor#
 Local CheckFPS%, ElapsedLoops%, FPS%
 
-Global Framelimit% = GetOptionInt("options", "framelimit")
-Global Vsync% = GetOptionInt("options", "vsync")
+Global Framelimit% = GetOptionInt("graphics", "framelimit")
+Global Vsync% = GetOptionInt("graphics", "vsync")
 
-Global Opt_AntiAlias = GetOptionInt("options", "antialias")
+Global Opt_AntiAlias = GetOptionInt("graphics", "antialias")
 
 Global CurrFrameLimit# = (Framelimit%-19)/100.0
 
-Global ScreenGamma# = GetOptionFloat("options", "screengamma")
+Global ScreenGamma# = GetOptionFloat("graphics", "screengamma")
 ;If Fullscreen Then UpdateScreenGamma()
 
 Const HIT_MAP% = 1, HIT_PLAYER% = 2, HIT_ITEM% = 3, HIT_APACHE% = 4, HIT_178% = 5, HIT_DEAD% = 6
@@ -284,7 +284,7 @@ Global KEY_CROUCH = GetOptionInt("binds", "Crouch key")
 Global KEY_SAVE = GetOptionInt("binds", "Save key")
 Global KEY_CONSOLE = GetOptionInt("binds", "Console key")
 
-Global MouseSmooth# = GetOptionFloat("options", "mouse smoothing")
+Global MouseSmooth# = GetOptionFloat("controls", "mouse smoothing")
 
 Const NAN# = (-1.0) ^ (0.5)
 
@@ -330,8 +330,8 @@ Global PlayerZone%, PlayerRoom.Rooms
 
 Global GrabbedEntity%
 
-Global InvertMouse% = GetOptionInt("options", "invert mouse y")
-Global MouseHit1%, MouseDown1%, MouseHit2%, DoubleClick%, LastMouseHit1%, MouseUp1%
+Global InvertMouse% = GetOptionInt("controls", "invert mouse y")
+Global MouseHit1%, MouseDown1%, MouseHit2%, DoubleClick%, LastMouseHit1%, LastMouseHit1X%, LastMouseHit1Y%, MouseUp1%
 
 Global GodMode%, NoClip%, NoClipSpeed# = 2.0
 
@@ -1726,8 +1726,8 @@ Global BlurVolume#, BlurTimer#
 
 Global LightBlink#, LightFlash#
 
-Global BumpEnabled% = GetOptionInt("options", "bump mapping enabled")
-Global HUDenabled% = GetOptionInt("options", "HUD enabled")
+Global BumpEnabled% = GetOptionInt("graphics", "bump mapping enabled")
+Global HUDenabled% = GetOptionInt("graphics", "HUD enabled")
 
 Global Camera%, CameraShake#, CurrCameraZoom#
 
@@ -1737,9 +1737,9 @@ Global CameraFogFar#
 
 Global StoredCameraFogFar# = CameraFogFar
 
-Global MouseSens# = GetOptionFloat("options", "mouse sensitivity")
+Global MouseSens# = GetOptionFloat("controls", "mouse sensitivity")
 
-Global EnableVRam% = GetOptionInt("options", "enable vram")
+Global EnableVRam% = GetOptionInt("graphics", "enable vram")
 
 Include "dreamfilter.bb"
 
@@ -1967,7 +1967,7 @@ Global room2gw_z# = 0.0
 Global Menu_TestIMG
 Global menuroomscale# = 8.0 / 2048.0
 
-Global ParticleAmount% = GetOptionInt("options","particle amount")
+Global ParticleAmount% = GetOptionInt("graphics","particle amount")
 
 Dim NavImages(5)
 For i = 0 To 3
@@ -8312,9 +8312,9 @@ Function LoadEntities()
 	EndIf
 	
 	
-	Brightness% = GetINIFloat("options.ini", "options", "brightness")
-	CameraFogNear# = GetINIFloat("options.ini", "options", "camera fog near")
-	CameraFogFar# = GetINIFloat("options.ini", "options", "camera fog far")
+	Brightness% = 50
+	CameraFogNear# = 0.5
+	CameraFogFar# = 6.0
 	StoredCameraFogFar# = CameraFogFar
 	
 	;TextureLodBias
@@ -8334,7 +8334,7 @@ Function LoadEntities()
 	CameraRange(Camera, 0.05, CameraFogFar)
 	CameraFogMode (Camera, 1)
 	CameraFogRange (Camera, CameraFogNear, CameraFogFar)
-	CameraFogColor (Camera, GetINIInt("options.ini", "options", "fog r"), GetINIInt("options.ini", "options", "fog g"), GetINIInt("options.ini", "options", "fog b"))
+	CameraFogColor (Camera, 0, 0, 0)
 	AmbientLight Brightness, Brightness, Brightness
 	
 	ScreenTexs[0] = CreateTexture(512, 512, 1+256)
@@ -11477,26 +11477,25 @@ End Function
 ;Save options to .ini.
 Function SaveOptionsINI()
 	
-	PutINIValue(OptionFile, "options", "mouse sensitivity", MouseSens)
-	PutINIValue(OptionFile, "options", "invert mouse y", InvertMouse)
-	PutINIValue(OptionFile, "options", "bump mapping enabled", BumpEnabled)			
-	PutINIValue(OptionFile, "options", "HUD enabled", HUDenabled)
-	PutINIValue(OptionFile, "options", "screengamma", ScreenGamma)
-	PutINIValue(OptionFile, "options", "antialias", Opt_AntiAlias)
-	PutINIValue(OptionFile, "options", "vsync", Vsync)
-	PutINIValue(OptionFile, "options", "show FPS", ShowFPS)
-	PutINIValue(OptionFile, "options", "framelimit", Framelimit%)
-	PutINIValue(OptionFile, "options", "achievement popup enabled", AchvMSGenabled%)
+	PutINIValue(OptionFile, "controls", "mouse sensitivity", MouseSens)
+	PutINIValue(OptionFile, "controls", "invert mouse y", InvertMouse)
+	PutINIValue(OptionFile, "graphics", "HUD enabled", HUDenabled)
+	PutINIValue(OptionFile, "graphics", "screengamma", ScreenGamma)
+	PutINIValue(OptionFile, "graphics", "antialias", Opt_AntiAlias)
+	PutINIValue(OptionFile, "graphics", "vsync", Vsync)
+	PutINIValue(OptionFile, "graphics", "show FPS", ShowFPS)
+	PutINIValue(OptionFile, "graphics", "framelimit", Framelimit%)
+	PutINIValue(OptionFile, "general", "achievement popup enabled", AchvMSGenabled%)
 	PutINIValue(OptionFile, "launcher", "launcher enabled", LauncherEnabled%)
-	PutINIValue(OptionFile, "options", "room lights enabled", EnableRoomLights%)
-	PutINIValue(OptionFile, "options", "texture details", TextureDetails%)
+	PutINIValue(OptionFile, "graphics", "texture details", TextureDetails%)
 	PutINIValue(OptionFile, "console", "enabled", CanOpenConsole%)
 	PutINIValue(OptionFile, "console", "auto opening", ConsoleOpening%)
-	PutINIValue(OptionFile, "options", "speed run mode", SpeedRunMode%)
-	PutINIValue(OptionFile, "options", "numeric seeds", UseNumericSeeds%)
-	PutINIValue(OptionFile, "options", "particle amount", ParticleAmount)
-	PutINIValue(OptionFile, "options", "enable vram", EnableVRam)
-	PutINIValue(OptionFile, "options", "mouse smoothing", MouseSmooth)
+	PutINIValue(OptionFile, "general", "speed run mode", SpeedRunMode%)
+	PutINIValue(OptionFile, "general", "numeric seeds", UseNumericSeeds%)
+	PutINIValue(OptionFile, "graphics", "enable vram", EnableVRam)
+	PutINIValue(OptionFile, "controls", "mouse smoothing", MouseSmooth)
+	PutINIValue(OptionFile, "graphics", "hud offset", HUDOffsetScale)
+	PutINIValue(OptionFile, "graphics", "fov", FOV)
 	
 	PutINIValue(OptionFile, "audio", "music volume", MusicVolume)
 	PutINIValue(OptionFile, "audio", "sound volume", PrevSFXVolume)
@@ -11592,8 +11591,8 @@ Function Graphics3DExt%(width%,height%,depth%=32,mode%=2)
 	Graphics3D width,height,depth,mode
 	InitFastResize()
 	;InitExt()
-	AntiAlias GetOptionInt("options","antialias")
-	;TextureAnisotropy% (GetOptionInt("options","anisotropy"),-1)
+	AntiAlias GetOptionInt("graphics","antialias")
+	;TextureAnisotropy% (GetOptionInt("graphics","anisotropy"),-1)
 End Function
 
 Function ResizeImage2(image%,width%,height%)

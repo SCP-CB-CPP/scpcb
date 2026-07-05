@@ -16,7 +16,7 @@ Const AchvKeter% = 36
 Global UsedConsole
 
 Global AchievementsMenu%
-Global AchvMSGenabled% = GetOptionInt("options", "achievement popup enabled")
+Global AchvMSGenabled% = GetOptionInt("general", "achievement popup enabled")
 Dim AchievementStrings$(MAXACHIEVEMENTS)
 Dim AchievementDescs$(MAXACHIEVEMENTS)
 Dim AchvIMG%(MAXACHIEVEMENTS)
