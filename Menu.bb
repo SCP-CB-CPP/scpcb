@@ -1535,7 +1535,6 @@ Function CreateGrayScaleImage%(img%)
 	Return ret
 End Function
 
-Dim GfxDrivers$(0)
 Dim AspectRatioWidths%(0), AspectRatioHeights%(0)
 Dim GfxModeCountPerAspectRatio%(0)
 Dim GfxModeWidthsByAspectRatio%(0, 0), GfxModeHeightsByAspectRatio%(0, 0)
@@ -1613,14 +1612,6 @@ Function UpdateLauncher()
 
 	If SelectedGfxMode = -1 Then SelectedGfxMode = nativeGfxMode : SelectedAspectRatio = nativeAspectRatio
 
-	Local gfxDriverCount = CountGfxDrivers()
-	Dim GfxDrivers$(gfxDriverCount + 1)
-	For i = 1 To gfxDriverCount
-		GfxDrivers(i) = GfxDriverName(i)
-	Next
-
-	MenuMeterIMG% = LoadImage_Strict("GFX\blinkmeter.png", 1.0)
-	
 	AppTitle "SCP - Containment Breach Launcher"
 
 	Local quit% = False
