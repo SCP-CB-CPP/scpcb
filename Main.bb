@@ -2187,7 +2187,7 @@ Function CreateDoor.Doors(lvl, x#, y#, z#, angle#, room.Rooms, dopen% = False,  
 	
 	EntityPickMode d\frameobj,2
 	
-	If d\open And big = False And Rand(8) = 1 Then d\AutoClose = True
+	If Rand(8) = 1 And d\open And big = False Then d\AutoClose = True
 	d\dir=big
 	d\room=room
 	

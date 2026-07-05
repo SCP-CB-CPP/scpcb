@@ -4871,7 +4871,7 @@ Function FillRoom(r.Rooms)
 					EndIf
 				EndIf
 				
-				If (room2gw_brokendoor = 0 And Rand(1,2)=1) Or bd_temp%
+				If (Rand(1,2)=1 And room2gw_brokendoor = 0) Or bd_temp%
 					r\Objects[1] = CopyEntity(DoorOBJ)
 					ScaleEntity(r\Objects[1], (204.0 * RoomScale) / MeshWidth(r\Objects[1]), 312.0 * RoomScale / MeshHeight(r\Objects[1]), 16.0 * RoomScale / MeshDepth(r\Objects[1]))
 					EntityType r\Objects[1], HIT_MAP
