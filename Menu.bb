@@ -1518,7 +1518,7 @@ Function DrawTagSelection(x%, y%, width%)
 End Function
 
 Function CreateGrayScaleImage%(img%)
-	Local ret% = CreateImage(ImageWidth(img), ImageHeight(img))
+	Local ret% = CreateImage(ImageWidth(img), ImageHeight(img), 1, 1)
 	Local rbuf% = ImageBuffer(img)
 	Local buf% = ImageBuffer(ret)
 	LockBuffer(rbuf)
