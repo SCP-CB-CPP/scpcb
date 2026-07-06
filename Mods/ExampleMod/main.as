@@ -81,6 +81,8 @@ bool wasCrouched = true;
 CB::Sound bonk;
 
 void Hook_Update() {
+    if (Player::Collider == null) { return; }
+
     if (configuredFOV == -1.f) {
         configuredFOV = Options::FOV;
     }
