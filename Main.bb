@@ -656,7 +656,6 @@ Function UpdateConsole()
 							CreateConsoleMsg("- showfps")
 							CreateConsoleMsg("- debughud")
 							CreateConsoleMsg("- camerafog [near] [far]")
-							CreateConsoleMsg("- fov [value]")
 							CreateConsoleMsg("- gamma [value]")
 							CreateConsoleMsg("- playmusic [clip + .wav/.ogg]")
 							CreateConsoleMsg("- camerapick")
@@ -3435,6 +3434,7 @@ Repeat
 					PauseSounds()
 				EndIf
 				ConsoleOpen = (Not ConsoleOpen)
+				FlushKeys()
 				If SteamActive Then
 					If ConsoleOpen Then
 						Steam_OpenOnScreenKeyboard(0, GraphicWidth / 2, GraphicHeight / 2, GraphicWidth / 2, GraphicHeight / 2)
@@ -11319,12 +11319,9 @@ Function SaveOptionsINI()
 	PutINIValue(OptionFile, "launcher", "launcher enabled", LauncherEnabled%)
 	PutINIValue(OptionFile, "graphics", "texture details", TextureDetails%)
 	PutINIValue(OptionFile, "console", "enabled", CanOpenConsole%)
-	PutINIValue(OptionFile, "console", "auto opening", ConsoleOpening%)
 	PutINIValue(OptionFile, "general", "speed run mode", SpeedRunMode%)
 	PutINIValue(OptionFile, "general", "numeric seeds", UseNumericSeeds%)
 	PutINIValue(OptionFile, "controls", "mouse smoothing", MouseSmooth)
-	PutINIValue(OptionFile, "graphics", "hud offset", HUDOffsetScale)
-	PutINIValue(OptionFile, "graphics", "fov", FOV)
 	
 	PutINIValue(OptionFile, "audio", "music volume", MusicVolume)
 	PutINIValue(OptionFile, "audio", "sound volume", PrevSFXVolume)

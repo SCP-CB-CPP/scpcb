@@ -871,20 +871,22 @@ Function PlaceForest(fr.Forest,x#,y#,z#,r.Rooms)
 	Local PathTexture = LoadTexture_Strict("GFX\map\forest\forestpath.jpg")
 	;TextureBlend PathTexture, FE_ALPHACURRENT
 	
-	hmap[ROOM1]=LoadTexture_Strict("GFX\map\forest\forest1h.png")
-	mask[ROOM1]=LoadTexture_Strict("GFX\map\forest\forest1h_mask.png",1+2+256)
+	Local hmapFlags% = 1+16+32+256+512+16384
+	Local maskFlags% = hmapFlags+2
+	hmap[ROOM1]=LoadTexture_Strict("GFX\map\forest\forest1h.png",hmapFlags)
+	mask[ROOM1]=LoadTexture_Strict("GFX\map\forest\forest1h_mask.png",maskFlags%)
 	
-	hmap[ROOM2]=LoadTexture_Strict("GFX\map\forest\forest2h.png")
-	mask[ROOM2]=LoadTexture_Strict("GFX\map\forest\forest2h_mask.png",1+2+256)
+	hmap[ROOM2]=LoadTexture_Strict("GFX\map\forest\forest2h.png",hmapFlags)
+	mask[ROOM2]=LoadTexture_Strict("GFX\map\forest\forest2h_mask.png",maskFlags)
 	
-	hmap[ROOM2C]=LoadTexture_Strict("GFX\map\forest\forest2Ch.png")
-	mask[ROOM2C]=LoadTexture_Strict("GFX\map\forest\forest2Ch_mask.png",1+2+256)
+	hmap[ROOM2C]=LoadTexture_Strict("GFX\map\forest\forest2Ch.png",hmapFlags)
+	mask[ROOM2C]=LoadTexture_Strict("GFX\map\forest\forest2Ch_mask.png",maskFlags)
 	
-	hmap[ROOM3]=LoadTexture_Strict("GFX\map\forest\forest3h.png")
-	mask[ROOM3]=LoadTexture_Strict("GFX\map\forest\forest3h_mask.png",1+2+256)
+	hmap[ROOM3]=LoadTexture_Strict("GFX\map\forest\forest3h.png",hmapFlags)
+	mask[ROOM3]=LoadTexture_Strict("GFX\map\forest\forest3h_mask.png",maskFlags)
 	
-	hmap[ROOM4]=LoadTexture_Strict("GFX\map\forest\forest4h.png")
-	mask[ROOM4]=LoadTexture_Strict("GFX\map\forest\forest4h_mask.png",1+2+256)
+	hmap[ROOM4]=LoadTexture_Strict("GFX\map\forest\forest4h.png",hmapFlags)
+	mask[ROOM4]=LoadTexture_Strict("GFX\map\forest\forest4h_mask.png",maskFlags)
 	
 	For i = ROOM1 To ROOM4
 		;TextureBlend mask[i], FE_ALPHAMODULATE
