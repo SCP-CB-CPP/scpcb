@@ -18,7 +18,7 @@ End Function
 
 Function RuntimeErrorExt%(Message$)
 	SetErrorMsg(8, "Caught exception: " + Message)
-	MemoryAccessViolation()
+	MemoryAccessViolation(Message)
 End Function
 
 Include "StrictLoads.bb"
@@ -138,6 +138,7 @@ Function ScriptMessageCallback(severity%, line%, column%, section$, message$)
 	Local r%, g%, b%
 	Local prefix$
 	Select severity
+		Case -1 r = 200 : g = 0 : b = 0 : prefix = "[Exception]"
 		Case 0 r = 255 : g = 0 : b = 0 : prefix = "[Error]"
 		Case 1 r = 255 : g = 255 : b = 0 : prefix = "[Warning]"
 		Case 2 r = 255 : g = 255 : b = 255 : prefix = "[Info]"
