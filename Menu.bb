@@ -662,7 +662,7 @@ Function UpdateMainMenu()
 					y=y+30*MenuScale
 					
 					;Local prevGamma# = ScreenGamma
-					ScreenGamma = (SlideBar(x + 310*MenuScale, y+6*MenuScale, 150*MenuScale, ScreenGamma*50.0, 1)/50.0)
+					ScreenGamma = (SlideBar(x + 310*MenuScale, y+6*MenuScale, 150*MenuScale, (ScreenGamma-1.0)*100.0, 1)/100.0+1.0)
 					Color 255,255,255
 					Text(x + 20 * MenuScale, y, "Screen gamma")
 					If (MouseOn(x+310*MenuScale,y+6*MenuScale,150*MenuScale+14,20) And OnSliderID=0) Lor OnSliderID=1

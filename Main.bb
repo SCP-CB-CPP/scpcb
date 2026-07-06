@@ -7556,7 +7556,7 @@ Function DrawMenu()
 					
 					y=y+30*MenuScale
 					
-					ScreenGamma = (SlideBar(x + 270*MenuScale, y+6*MenuScale, 100*MenuScale, ScreenGamma*50.0, 1)/50.0)
+					ScreenGamma = (SlideBar(x + 270*MenuScale, y+6*MenuScale, 100*MenuScale, (ScreenGamma-1.0)*100.0, 1)/100.0+1.0)
 					Color 255,255,255
 					Text(x, y, "Screen gamma")
 					If (MouseOn(x+270*MenuScale,y+6*MenuScale,100*MenuScale+14,20) And OnSliderID=0) Lor OnSliderID=1

@@ -3,7 +3,6 @@
 float4x4 ViewProj 		: MATRIX_VIEWPROJ;
 
 uniform float Gamma = 0.5f;
-static const float correction = 1.0 / Gamma;
 
 sampler ColorMap : register(s0) = sampler_state
 {
@@ -23,7 +22,7 @@ void VS_Gamma(VS_INPUT input, out float4 Pos : POSITION, out float2 TexCoord : T
 
 float4 PS_Gamma(float4 Pos : POSITION, float2 TexCoord : TEXCOORD0) : COLOR
 {
-	return pow(tex2D(ColorMap, TexCoord), correction);
+	return tex2D(ColorMap, TexCoord) * Gamma;
 }
 
 technique Main
