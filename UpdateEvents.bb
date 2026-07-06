@@ -367,7 +367,7 @@ Function UpdateEvents()
 								CurrMusicVolume = MusicVolume
 								
 								StopStream_Strict(MusicCHN)
-								MusicCHN = StreamSound_Strict("SFX\Music\"+Music(13)+".ogg",CurrMusicVolume,Mode)
+								MusicCHN = StreamSound_Strict("SFX\Music\"+Music(13)+".ogg",CurrMusicVolume)
 								NowPlaying = ShouldPlay
 								
 								PlaySound_Strict(IntroSFX(11))
@@ -9211,7 +9211,7 @@ Function UpdateEndings()
 							If e\EventState => 45.0*70 Then
 								If e\EventState < 75.0*70 Then
 									If e\SoundCHN2=0
-										e\SoundCHN2 = StreamSound_Strict("SFX\Ending\GateB\Siren.ogg",SFXVolume,Mode)
+										e\SoundCHN2 = StreamSound_Strict("SFX\Ending\GateB\Siren.ogg",SFXVolume)
 										e\SoundCHN2_isStream = True
 									EndIf
 								Else
