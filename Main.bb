@@ -6123,6 +6123,8 @@ Function DrawGUI()
 											PlaySound_Strict(Use914SFX)
 											DropSpeed = 0
 											Curr106\State = -2500
+											PositionEntity(Curr106\Collider, EntityX(r\obj), 500, EntityZ(r\obj))
+											ResetEntity(Curr106\Collider)
 											Exit
 										EndIf
 									Next
