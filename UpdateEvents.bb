@@ -66,15 +66,31 @@ Function UpdateEvents()
 						AmbientLight Brightness, Brightness, Brightness
 						CameraFogRange(Camera, CameraFogNear, CameraFogFar)
 						CameraFogMode(Camera, 1)
-						If SelectedDifficulty\saveType = SAVEANYWHERE Then
-							Msg = "Press "+GetKeyName(KEY_SAVE)+" to save."
-							MsgTimer = 70*4
-							;SetSaveMSG("Press "+GetKeyName(KEY_SAVE)+" to save.")
-						ElseIf SelectedDifficulty\saveType = SAVEONSCREENS Then
-							Msg = "Saving is only permitted on clickable monitors scattered throughout the facility."
-							MsgTimer = 70 * 8
-							;SetSaveMSG("Saving is only permitted on clickable monitors scattered throughout the facility.")
+
+						Local isBeatable% = False
+						Local hadToilets% = False
+						Local requiredRoomCount% = 22
+						For r.Rooms = Each Rooms
+							Select r\RoomTemplate\Name
+								Case "room2ccont" isBeatable = True : requiredRoomCount = requiredRoomCount - 1
+								; There may exist multiple instances of this room.
+								Case "room2toilets" If Not hadToilets Then hadToilets = True : requiredRoomCount = requiredRoomCount - 1
+								Case "008", "room012", "room035", "room2sl", "room079", "room205" requiredRoomCount = requiredRoomCount - 1
+								Case "room2cafeteria", "roompj", "room2sroom", "room513", "room2scps", "coffin" requiredRoomCount = requiredRoomCount - 1
+								Case "914", "room3storage", "room966", "room2storage", "room1123", "room2poffices" requiredRoomCount = requiredRoomCount - 1
+								Case "room1162", "room2scps2" requiredRoomCount = requiredRoomCount - 1
+							End Select
+							If requiredRoomCount = 0 Then Exit
+						Next
+
+						If requiredRoomCount = 0 Then
+							Msg = "This seed is 100%-completable."
+						ElseIf isBeatable Then
+							Msg = "This seed is beatable."
+						Else
+							Msg = "This seed is not beatable."
 						EndIf
+						MsgTimer = 70 * 8
 						
 						Curr173\Idle=False
 						
