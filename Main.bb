@@ -129,7 +129,7 @@ If GraphicHeight <= 0 Then GraphicHeight = DesktopHeight()
 Global Depth% = 0
 Global Fullscreen% = GetOptionInt("graphics", "fullscreen")
 
-Global ShowFPS = GetOptionInt("graphics", "show FPS")
+Global ShowFPS = True ;GetOptionInt("graphics", "show FPS")
 
 Global WireframeState
 Global HalloweenTex
@@ -213,6 +213,7 @@ Global CurTime%, PrevTime%, LoopDelay%, FPSfactor#, FPSfactor2#, PrevFPSFactor#
 Local CheckFPS%, ElapsedLoops%, FPS%
 
 Global Framelimit% = GetOptionInt("graphics", "framelimit")
+If Framelimit = 0 Then Framelimit = 120
 Global Vsync% = GetOptionInt("graphics", "vsync")
 
 Global Opt_AntiAlias = GetOptionInt("graphics", "antialias")
@@ -653,7 +654,7 @@ Function UpdateConsole()
 							CreateConsoleMsg("LIST OF COMMANDS - PAGE 3/3")
 							CreateConsoleMsg("******************************")
 							CreateConsoleMsg("- wireframe")
-							CreateConsoleMsg("- showfps")
+							;CreateConsoleMsg("- showfps")
 							CreateConsoleMsg("- debughud")
 							CreateConsoleMsg("- camerafog [near] [far]")
 							CreateConsoleMsg("- gamma [value]")
@@ -1205,10 +1206,10 @@ Function UpdateConsole()
 					
 					DropSpeed = 0
 					;[End Block]
-				Case "showfps"
+				;Case "showfps"
 					;[Block]
-					ShowFPS = Not ShowFPS
-					CreateConsoleMsg("ShowFPS: "+Str(ShowFPS))
+					;ShowFPS = Not ShowFPS
+					;CreateConsoleMsg("ShowFPS: "+Str(ShowFPS))
 					;[End Block]
 				Case "096state"
 					;[Block]
@@ -7806,35 +7807,15 @@ Function DrawMenu()
 					y = y + 50*MenuScale
 					
 					Color 255,255,255
-					Text(x, y, "Show FPS:")
-					ShowFPS% = DrawTick(x + 270 * MenuScale, y, ShowFPS%)
-					If MouseOn(x+270*MenuScale,y+MenuScale,20*MenuScale,20*MenuScale) And OnSliderID=0
-						DrawOptionsTooltip(tx,ty,tw,th,"showfps")
-					EndIf
-					
-					y = y + 30*MenuScale
-					
-					Color 255,255,255
 					Text(x, y, "Framelimit:")
 					
 					Color 255,255,255
-					If DrawTick(x + 270 * MenuScale, y, CurrFrameLimit > 0.0) Then
-						;CurrFrameLimit# = (SlideBar(x + 150*MenuScale, y+30*MenuScale, 100*MenuScale, CurrFrameLimit#*50.0, 1)/50.0)
-						;CurrFrameLimit = Max(CurrFrameLimit, 0.1)
-						;Framelimit% = CurrFrameLimit#*100.0
-						CurrFrameLimit# = (SlideBar(x + 150*MenuScale, y+30*MenuScale, 100*MenuScale, CurrFrameLimit#*99.0, 1)/99.0)
-						CurrFrameLimit# = Max(CurrFrameLimit, 0.01)
-						Framelimit% = 19+(CurrFrameLimit*100.0)
-						Color 255,255,0
-						Text(x + 5 * MenuScale, y + 25 * MenuScale, Framelimit%+" FPS")
-						If (MouseOn(x+150*MenuScale,y+30*MenuScale,100*MenuScale+14,20) And OnSliderID=0) Lor OnSliderID=1
-							DrawOptionsTooltip(tx,ty,tw,th,"framelimit",Framelimit)
-						EndIf
-					Else
-						CurrFrameLimit# = 0.0
-						Framelimit = 0
-					EndIf
-					If MouseOn(x+270*MenuScale,y+MenuScale,20*MenuScale,20*MenuScale) And OnSliderID=0
+					CurrFrameLimit# = (SlideBar(x + 250*MenuScale, y, 100*MenuScale, CurrFrameLimit#*99.0, 1)/99.0)
+					CurrFrameLimit# = Max(CurrFrameLimit, 0.01)
+					Framelimit% = 19+(CurrFrameLimit*100.0)
+					Color 255,255,0
+					Text(x + 5 * MenuScale, y + 25 * MenuScale, Framelimit%+" FPS")
+					If (MouseOn(x+250*MenuScale,y,100*MenuScale+14,20) And OnSliderID=0) Lor OnSliderID=1
 						DrawOptionsTooltip(tx,ty,tw,th,"framelimit",Framelimit)
 					EndIf
 					;[End Block]
@@ -11313,7 +11294,7 @@ Function SaveOptionsINI()
 	PutINIValue(OptionFile, "graphics", "screengamma", ScreenGamma)
 	PutINIValue(OptionFile, "graphics", "antialias", Opt_AntiAlias)
 	PutINIValue(OptionFile, "graphics", "vsync", Vsync)
-	PutINIValue(OptionFile, "graphics", "show FPS", ShowFPS)
+	;PutINIValue(OptionFile, "graphics", "show FPS", ShowFPS)
 	PutINIValue(OptionFile, "graphics", "framelimit", Framelimit%)
 	PutINIValue(OptionFile, "general", "achievement popup enabled", AchvMSGenabled%)
 	PutINIValue(OptionFile, "launcher", "launcher enabled", LauncherEnabled%)
