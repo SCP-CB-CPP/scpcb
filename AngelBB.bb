@@ -101,6 +101,8 @@ End Function
 Function RegisterB3DTexture()
     RegisterType("Texture")
     RegisterObjectMethod("Texture", "void Free()", @FreeTexture)
+    RegisterObjectMethod("Texture", "void PinTexture()", @PinTexture)
+    RegisterObjectMethod("Texture", "void UnpinTexture()", @UnpinTexture)
     RegisterObjectMethod("Texture", "void SetBlend(int blend)", @TextureBlend)
     RegisterObjectMethod("Texture", "void SetCoords(int coords)", @TextureCoords)
     RegisterObjectMethod("Texture", "void SetBumpEnvMat(int x, int y, float envmat)", @TextureBumpEnvMat)
@@ -427,6 +429,9 @@ Function RegisterB3DEntitySubtype(name$, isActualSubType%=True)
     RegisterObjectMethod(name, "int get_Exists() const property", @EntityExist)
     
     RegisterObjectMethod(name, "void Free()", @FreeEntity)
+
+    RegisterObjectMethod(name, "void PinEntity()", @PinEntity)
+    RegisterObjectMethod(name, "void UnpinEntity()", @UnpinEntity)
     
     RegisterObjectMethod(name, "void set_Name(string name) property", @NameEntity)
     RegisterObjectMethod(name, "string get_Name() const property", @EntityName)
