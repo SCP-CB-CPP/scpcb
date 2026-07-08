@@ -391,7 +391,7 @@ Function CreateNPC.NPCs(NPCtype%, x#, y#, z#)
 			FreeTexture tex
 			
 			EntityFX(n\obj2, 1 + 8)
-			EntityBlend(n\obj2, BLEND_ADD)
+			EntityBlend(n\obj2, 3)
 			SpriteViewMode(n\obj2, 2)
 			
 			n\Speed = 0.08
