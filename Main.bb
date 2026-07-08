@@ -212,7 +212,7 @@ SetBuffer(BackBuffer())
 Global CurTime%, PrevTime%, LoopDelay%, FPSfactor#, FPSfactor2#, PrevFPSFactor#
 Local CheckFPS%, ElapsedLoops%, FPS%
 
-Global Framelimit% = GetOptionInt("graphics", "framelimit")
+Global Framelimit% = Min(120, GetOptionInt("graphics", "framelimit"))
 If Framelimit = 0 Then Framelimit = 120
 Global Vsync% = GetOptionInt("graphics", "vsync")
 

@@ -301,7 +301,7 @@ End Function
 ;don't use in LoadRMesh, as Reg does this manually there. If you wanna fuck around with the logic in that function, be my guest 
 Function LoadTexture_Strict(File$,flags=1)
 	If FileType(File$) <> 1 Then RuntimeError "Texture " + File$ + " not found."
-	tmp = LoadTexture(File$, flags+(256*(EnableVRam=True)))
+	tmp = LoadTexture(File$, flags)
 	If tmp = 0 Then RuntimeErrorExt "Failed to load Texture: " + File$
 	Return tmp
 End Function
