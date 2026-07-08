@@ -1794,7 +1794,7 @@ MusicCHN = StreamSound_Strict("SFX\Music\"+Music(2)+".ogg",MusicVolume)
 Global CurrMusicVolume# = 1.0, NowPlaying%=2, ShouldPlay%=11
 Global CurrMusic% = 1
 
-DrawLoading(10, True)
+DrawLoading(1, True)
 
 Dim OpenDoorSFX%(3,3), CloseDoorSFX%(3,3)
 
@@ -1830,8 +1830,6 @@ Global EndBreathSFX%
 Dim DecaySFX%(5)
 
 Global BurstSFX 
-
-DrawLoading(20, True)
 
 Dim RustleSFX%(3)
 
@@ -1871,8 +1869,6 @@ Dim Scp173SFX%(3)
 Dim HorrorSFX%(20)
 
 
-DrawLoading(25, True)
-
 Dim IntroSFX%(20)
 
 ;IntroSFX(13) = LoadSound_Strict("SFX\intro\shoot1.ogg")
@@ -1906,8 +1902,6 @@ Global CurrStepSFX
 Dim StepSFX%(5, 2, 8) ;(normal/metal, walk/run, id)
 
 Dim Step2SFX(6)
-
-DrawLoading(30, True)
 
 ;[End block]
 
@@ -2009,8 +2003,6 @@ Global HandIcon2%
 Global StaminaMeterIMG%
 
 Global Panel294, Using294%, Input294$
-
-DrawLoading(35, True)
 
 ;----------------------------------------------  Items  -----------------------------------------------------
 
@@ -2620,11 +2612,7 @@ Function RemoveDoor(d.Doors)
 	Delete d
 End Function
 
-DrawLoading(40,True)
-
 Include "MapSystem.bb"
-
-DrawLoading(80,True)
 
 Include "NPCs.bb"
 
@@ -2894,7 +2882,12 @@ Collisions HIT_178, HIT_MAP, 2, 2
 Collisions HIT_178, HIT_178, 1, 3
 Collisions HIT_DEAD, HIT_MAP, 2, 2
 
-DrawLoading(90, True)
+DrawLoading(5, True)
+
+Include "LoadAllSounds.bb"
+LoadAllSounds()
+
+DrawLoading(10, True)
 
 ;----------------------------------- meshes and textures ----------------------------------------------------------------
 Include "Effects.bb"
@@ -2943,6 +2936,8 @@ Global Save_MSG_Y# = 0.0
 
 Global MTF_CameraCheckTimer# = 0.0
 Global MTF_CameraCheckDetected% = False
+
+LoadPinnedEntities()
 
 ;---------------------------------------------------------------------------------------------------
 
@@ -8082,88 +8077,45 @@ End Function
 
 ;----------------------------------------------------------------------------------------------
 
-Include "LoadAllSounds.bb"
-Function LoadEntities()
-	CatchErrors("Uncaught (LoadEntities)")
-	DrawLoading(0)
-	
-	Local i%
-	
-	For i=0 To 9
-		TempSounds[i]=0
-	Next
-	
+Function LoadPinnedEntities()
 	PauseMenuIMG% = LoadImage_Strict("GFX\menu\pausemenu.jpg")
 	ScaleImage PauseMenuIMG,MenuScale,MenuScale
-	
-	If SprintIcon = 0 Then
-		SprintIcon% = LoadImage_Strict("GFX\sprinticon.png")
-	EndIf
-	If BlinkIcon = 0 Then
-		BlinkIcon% = LoadImage_Strict("GFX\blinkicon.png")
-	EndIf
-	If CrouchIcon = 0 Then
-		CrouchIcon% = LoadImage_Strict("GFX\sneakicon.png")
-	EndIf
-	If HandIcon = 0 Then
-		HandIcon% = LoadImage_Strict("GFX\handsymbol.png")
-	EndIf
-	If HandIcon2 = 0 Then
-		HandIcon2% = LoadImage_Strict("GFX\handsymbol2.png")
-	EndIf
 
-	If StaminaMeterIMG = 0 Then
-		StaminaMeterIMG% = LoadImage_Strict("GFX\staminameter.jpg")
-	EndIf
+	SprintIcon% = LoadImage_Strict("GFX\sprinticon.png")
+	BlinkIcon% = LoadImage_Strict("GFX\blinkicon.png")
+	CrouchIcon% = LoadImage_Strict("GFX\sneakicon.png")
+	HandIcon% = LoadImage_Strict("GFX\handsymbol.png")
+	HandIcon2% = LoadImage_Strict("GFX\handsymbol2.png")
+	StaminaMeterIMG% = LoadImage_Strict("GFX\staminameter.jpg")
+	Panel294 = LoadImage_Strict("GFX\294panel.jpg")
 
-	If Panel294 = 0 Then
-		Panel294 = LoadImage_Strict("GFX\294panel.jpg")
-	EndIf
-	
-	
-	Brightness% = 50
-	CameraFogNear# = 0.5
-	CameraFogFar# = 6.0
-	StoredCameraFogFar# = CameraFogFar
-	
-	;TextureLodBias
-	
 	AmbientLightRoomTex% = CreateTexture(2,2,1+256+1024)
 	TextureBlend AmbientLightRoomTex,5
 	SetBuffer(TextureBuffer(AmbientLightRoomTex))
 	ClsColor 0,0,0
 	Cls
 	SetBuffer BackBuffer()
-	AmbientLightRoomVal = 0
-	
-	SoundEmitter = CreatePivot()
-	
-	Camera = CreateCamera()
-	CameraViewport Camera,0,0,GraphicWidth,GraphicHeight
-	CameraRange(Camera, 0.05, CameraFogFar)
-	CameraFogMode (Camera, 1)
-	CameraFogRange (Camera, CameraFogNear, CameraFogFar)
-	CameraFogColor (Camera, 0, 0, 0)
-	AmbientLight Brightness, Brightness, Brightness
-	
+	PinTexture(AmbientLightRoomTex)
+
 	ScreenTexs[0] = CreateTexture(512, 512, 1+256+1024)
+	PinTexture(ScreenTexs[0])
 	ScreenTexs[1] = CreateTexture(512, 512, 1+256+1024)
+	PinTexture(ScreenTexs[1])
 	ScreenTexs[2] = CreateTexture(512, 512, 8192)
-	
-	CreateBlurImage()
-	CameraProjMode ark_blur_cam,0
-	;Listener = CreateListener(Camera)
-	
+	PinTexture(ScreenTexs[2])
+
 	FogTexture = LoadTexture_Strict("GFX\fog.jpg", 1)
-	
+	PinTexture(FogTexture)
 	Fog = CreateSprite(ark_blur_cam)
 	ScaleSprite(Fog, Max(GraphicWidth / 1240.0, 1.0), Max(GraphicHeight / 960.0 * 0.8, 0.8))
 	EntityTexture(Fog, FogTexture)
 	EntityBlend (Fog, 2)
 	EntityOrder Fog, -1000
 	MoveEntity(Fog, -PixelWidth, PixelHeight, 1.0)
+	PinEntity(Fog)
 	
 	GasMaskTexture = LoadTexture_Strict("GFX\GasmaskOverlay.jpg", 1)
+	PinTexture(GasMaskTexture)
 	GasMaskOverlay = CreateSprite(ark_blur_cam)
 	ScaleSprite(GasMaskOverlay, Max(GraphicWidth / 1024.0, 1.0), Max(GraphicHeight / 1024.0 * 0.8, 0.8))
 	EntityTexture(GasMaskOverlay, GasMaskTexture)
@@ -8172,8 +8124,10 @@ Function LoadEntities()
 	EntityOrder GasMaskOverlay, -1003
 	MoveEntity(GasMaskOverlay, -PixelWidth, PixelHeight, 1.0)
 	HideEntity(GasMaskOverlay)
-	
+	PinEntity(GasMaskOverlay)
+
 	InfectTexture = LoadTexture_Strict("GFX\InfectOverlay.jpg", 1)
+	PinTexture(InfectTexture)
 	InfectOverlay = CreateSprite(ark_blur_cam)
 	ScaleSprite(InfectOverlay, Max(GraphicWidth / 1024.0, 1.0), Max(GraphicHeight / 1024.0 * 0.8, 0.8))
 	EntityTexture(InfectOverlay, InfectTexture)
@@ -8183,8 +8137,10 @@ Function LoadEntities()
 	MoveEntity(InfectOverlay, -PixelWidth, PixelHeight, 1.0)
 	;EntityAlpha (InfectOverlay, 255.0)
 	HideEntity(InfectOverlay)
+	PinEntity(InfectOverlay)
 	
 	NVTexture = LoadTexture_Strict("GFX\NightVisionOverlay.jpg", 1)
+	PinTexture(NVTexture)
 	NVOverlay = CreateSprite(ark_blur_cam)
 	ScaleSprite(NVOverlay, Max(GraphicWidth / 1024.0, 1.0), Max(GraphicHeight / 1024.0 * 0.8, 0.8))
 	EntityTexture(NVOverlay, NVTexture)
@@ -8193,6 +8149,7 @@ Function LoadEntities()
 	EntityOrder NVOverlay, -1003
 	MoveEntity(NVOverlay, -PixelWidth, PixelHeight, 1.0)
 	HideEntity(NVOverlay)
+	PinEntity(NVOverlay)
 	NVBlink = CreateSprite(ark_blur_cam)
 	ScaleSprite(NVBlink, Max(GraphicWidth / 1024.0, 1.0), Max(GraphicHeight / 1024.0 * 0.8, 0.8))
 	EntityColor(NVBlink,0,0,0)
@@ -8200,15 +8157,16 @@ Function LoadEntities()
 	EntityOrder NVBlink, -1005
 	MoveEntity(NVBlink, -PixelWidth, PixelHeight, 1.0)
 	HideEntity(NVBlink)
+	PinEntity(NVBlink)
 	
 	FogNVTexture = LoadTexture_Strict("GFX\fogNV.jpg", 1)
-	
-	DrawLoading(5)
-	
+	PinTexture(FogNVTexture)
+
 	DarkTexture = CreateTexture(1, 1, 1 + 2)
 	SetBuffer TextureBuffer(DarkTexture)
 	Cls
 	SetBuffer BackBuffer()
+	PinTexture(DarkTexture)
 	
 	Dark = CreateSprite(Camera)
 	ScaleSprite(Dark, Max(GraphicWidth / 1240.0, 1.0), Max(GraphicHeight / 960.0 * 0.8, 0.8))
@@ -8217,6 +8175,7 @@ Function LoadEntities()
 	EntityOrder Dark, -1002
 	MoveEntity(Dark, -PixelWidth, PixelHeight, 1.0)
 	EntityAlpha Dark, 0.0
+	PinEntity(Dark)
 	
 	LightTexture = CreateTexture(1, 1, 1 + 2+256)
 	SetBuffer TextureBuffer(LightTexture)
@@ -8224,8 +8183,10 @@ Function LoadEntities()
 	Cls
 	ClsColor 0, 0, 0
 	SetBuffer BackBuffer()
-	
+	PinTexture(LightTexture)
+
 	TeslaTexture = LoadTexture_Strict("GFX\map\tesla.jpg", 1+2)
+	PinTexture(TeslaTexture)
 	
 	Light = CreateSprite(Camera)
 	ScaleSprite(Light, Max(GraphicWidth / 1240.0, 1.0), Max(GraphicHeight / 960.0 * 0.8, 0.8))
@@ -8234,47 +8195,14 @@ Function LoadEntities()
 	EntityOrder Light, -1002
 	MoveEntity(Light, -PixelWidth, PixelHeight, 1.0)
 	HideEntity Light
-	
-	Collider = CreatePivot()
-	EntityRadius Collider, 0.15, 0.30
-	EntityPickMode(Collider, 1)
-	EntityType Collider, HIT_PLAYER
-	
-	Head = CreatePivot()
-	EntityRadius Head, 0.15
-	EntityType Head, HIT_PLAYER
-	
-	
+	PinEntity(Light)
+
 	LiquidObj = LoadMesh_Strict("GFX\items\cupliquid.x") ;optimized the cups dispensed by 294
 	HideEntity LiquidObj
+	PinEntity(LiquidObj)
 	
 	MTFObj = LoadAnimMesh_Strict("GFX\npcs\MTF2.b3d") ;optimized MTFs
 	GuardObj = LoadAnimMesh_Strict("GFX\npcs\guard.b3d") ;optimized Guards
-	;GuardTex = LoadTexture_Strict("GFX\npcs\body.jpg") ;optimized the guards even more
-	
-	;If BumpEnabled Then
-	;	bump1 = LoadTexture_Strict("GFX\npcs\mtf_newnormal01.png")
-	;	;TextureBlend bump1, FE_BUMP ;USE DOT3
-	;		
-	;	For i = 2 To CountSurfaces(MTFObj)
-	;		sf = GetSurface(MTFObj,i)
-	;		b = GetSurfaceBrush( sf )
-	;		t1 = GetBrushTexture(b,0)
-	;		
-	;		Select Lower(StripPath(TextureName(t1)))
-	;			Case "MTF_newdiffuse02.png"
-	;				
-	;				BrushTexture b, bump1, 0, 0
-	;				BrushTexture b, t1, 0, 1
-	;				PaintSurface sf,b
-	;		End Select
-	;		FreeBrush b
-	;		FreeTexture t1
-	;	Next
-	;	FreeTexture bump1	
-	;EndIf
-	
-	
 	
 	ClassDObj = LoadAnimMesh_Strict("GFX\npcs\classd.b3d") ;optimized Class-D's and scientists/researchers
 	ApacheObj = LoadAnimMesh_Strict("GFX\apache.b3d") ;optimized Apaches (helicopters)
@@ -8286,154 +8214,145 @@ Function LoadEntities()
 	HideEntity ApacheObj
 	HideEntity ApacheRotorObj
 	
+	PinEntity(MTFObj)
+	PinEntity(GuardObj)
+	PinEntity(ClassDObj)
+	PinEntity(ApacheObj)
+	PinEntity(ApacheRotorObj)
+
 	;Other NPCs pre-loaded
 	;[Block]
 	NPC049OBJ = LoadAnimMesh_Strict("GFX\npcs\scp-049.b3d")
 	HideEntity NPC049OBJ
+	PinEntity NPC049OBJ
 	NPC0492OBJ = LoadAnimMesh_Strict("GFX\npcs\zombie1.b3d")
 	HideEntity NPC0492OBJ
+	PinEntity NPC0492OBJ
 	ClerkOBJ = LoadAnimMesh_Strict("GFX\npcs\clerk.b3d")
 	HideEntity ClerkOBJ	
+	PinEntity ClerkOBJ
 	;[End Block]
-	
-;	For i=0 To 4
-;		Select True
-;			Case i=2
-;				tempStr="2c"
-;			Case i>2
-;				tempStr=Str(i)
-;			Default
-;				tempStr=Str(i+1)
-;		End Select
-;		OBJTunnel(i)=LoadRMesh("GFX\map\mt"+tempStr+".rmesh",Null)
-;		HideEntity OBJTunnel(i)
-;	Next
-	
-;	OBJTunnel(0)=LoadRMesh("GFX\map\mt1.rmesh",Null)	
-;	HideEntity OBJTunnel(0)				
-;	OBJTunnel(1)=LoadRMesh("GFX\map\mt2.rmesh",Null)	
-;	HideEntity OBJTunnel(1)
-;	OBJTunnel(2)=LoadRMesh("GFX\map\mt2c.rmesh",Null)	
-;	HideEntity OBJTunnel(2)				
-;	OBJTunnel(3)=LoadRMesh("GFX\map\mt3.rmesh",Null)	
-;	HideEntity OBJTunnel(3)	
-;	OBJTunnel(4)=LoadRMesh("GFX\map\mt4.rmesh",Null)	
-;	HideEntity OBJTunnel(4)				
-;	OBJTunnel(5)=LoadRMesh("GFX\map\mt_elevator.rmesh",Null)
-;	HideEntity OBJTunnel(5)
-;	OBJTunnel(6)=LoadRMesh("GFX\map\mt_generator.rmesh",Null)
-;	HideEntity OBJTunnel(6)
-	
-	LightSpriteTex(0) = LoadTexture_Strict("GFX\light1.jpg", 1)
-	LightSpriteTex(1) = LoadTexture_Strict("GFX\light2.jpg", 1)
-	LightSpriteTex(2) = LoadTexture_Strict("GFX\lightsprite.jpg",1)
-	
-	DrawLoading(10)
-	
+
 	DoorOBJ = LoadMesh_Strict("GFX\map\door01.x")
 	HideEntity DoorOBJ
+	PinEntity(DoorOBJ)
 	DoorFrameOBJ = LoadMesh_Strict("GFX\map\doorframe.x")
 	HideEntity DoorFrameOBJ
-	
+	PinEntity(DoorFrameOBJ)
+
 	HeavyDoorObj(0) = LoadMesh_Strict("GFX\map\heavydoor1.x")
 	HideEntity HeavyDoorObj(0)
+	PinEntity(HeavyDoorObj(0))
 	HeavyDoorObj(1) = LoadMesh_Strict("GFX\map\heavydoor2.x")
 	HideEntity HeavyDoorObj(1)
+	PinEntity(HeavyDoorObj(1))
 	
 	DoorColl = LoadMesh_Strict("GFX\map\doorcoll.x")
 	HideEntity DoorColl
+	PinEntity(DoorColl)
 	
 	ButtonOBJ = LoadMesh_Strict("GFX\map\Button.x")
 	HideEntity ButtonOBJ
+	PinEntity(ButtonOBJ)
 	ButtonKeyOBJ = LoadMesh_Strict("GFX\map\ButtonKeycard.x")
 	HideEntity ButtonKeyOBJ
+	PinEntity(ButtonKeyOBJ)
 	ButtonCodeOBJ = LoadMesh_Strict("GFX\map\ButtonCode.x")
 	HideEntity ButtonCodeOBJ	
+	PinEntity(ButtonCodeOBJ)
 	ButtonScannerOBJ = LoadMesh_Strict("GFX\map\ButtonScanner.x")
 	HideEntity ButtonScannerOBJ	
+	PinEntity(ButtonScannerOBJ)
 	
 	BigDoorOBJ(0) = LoadMesh_Strict("GFX\map\ContDoorLeft.x")
 	HideEntity BigDoorOBJ(0)
+	PinEntity(BigDoorOBJ(0))
 	BigDoorOBJ(1) = LoadMesh_Strict("GFX\map\ContDoorRight.x")
 	HideEntity BigDoorOBJ(1)
+	PinEntity(BigDoorOBJ(1))
 	
 	LeverBaseOBJ = LoadMesh_Strict("GFX\map\leverbase.x")
 	HideEntity LeverBaseOBJ
+	PinEntity(LeverBaseOBJ)
 	LeverOBJ = LoadMesh_Strict("GFX\map\leverhandle.x")
 	HideEntity LeverOBJ
-	
-	;For i = 0 To 1
-	;	HideEntity BigDoorOBJ(i)
-	;	;If BumpEnabled And 0 Then
-	;	If BumpEnabled
-	;		
-	;		Local bumptex = LoadTexture_Strict("GFX\map\containmentdoorsbump.jpg")
-	;		;TextureBlend bumptex, FE_BUMP
-	;		Local tex = LoadTexture_Strict("GFX\map\containment_doors.jpg")	
-	;		EntityTexture BigDoorOBJ(i), bumptex, 0, 0
-	;		EntityTexture BigDoorOBJ(i), tex, 0, 1
-	;		
-	;		;FreeEntity tex
-	;		;FreeEntity bumptex
-	;		FreeTexture tex
-	;		FreeTexture bumptex
-	;	EndIf
-	;Next
-	
-	DrawLoading(15)
-	
+	PinEntity(LeverOBJ)
+
 	For i = 0 To 5
 		GorePics(i) = LoadTexture_Strict("GFX\895pics\pic" + (i + 1) + ".jpg")
+		PinTexture(GorePics(i))
 	Next
 	
 	OldAiPics(0) = LoadTexture_Strict("GFX\AIface.jpg")
+	PinTexture(OldAiPics(0))
 	OldAiPics(1) = LoadTexture_Strict("GFX\AIface2.jpg")	
+	PinTexture(OldAiPics(1))
 	
 	DrawLoading(20)
 	
 	For i = 0 To 6
 		DecalTextures(i) = LoadTexture_Strict("GFX\decal" + (i + 1) + ".png", 1 + 2)
+		PinTexture(DecalTextures(i))
 	Next
 	DecalTextures(7) = LoadTexture_Strict("GFX\items\INVpaperstrips.png", 1 + 2)
+	PinTexture(DecalTextures(7))
 	For i = 8 To 12
 		DecalTextures(i) = LoadTexture_Strict("GFX\decalpd"+(i-7)+".jpg", 1 + 2)	
+		PinTexture(DecalTextures(i))
 	Next
 	For i = 13 To 14
 		DecalTextures(i) = LoadTexture_Strict("GFX\bullethole"+(i-12)+".jpg", 1 + 2)	
+		PinTexture(DecalTextures(i))
 	Next	
 	For i = 15 To 16
 		DecalTextures(i) = LoadTexture_Strict("GFX\blooddrop"+(i-14)+".png", 1 + 2)	
+		PinTexture(DecalTextures(i))
 	Next
 	DecalTextures(17) = LoadTexture_Strict("GFX\decal8.png", 1 + 2)	
+	PinTexture(DecalTextures(17))
 	DecalTextures(18) = LoadTexture_Strict("GFX\decalpd6.dc", 1 + 2)	
+	PinTexture(DecalTextures(18))
 	DecalTextures(19) = LoadTexture_Strict("GFX\decal19.png", 1 + 2)
+	PinTexture(DecalTextures(19))
 	DecalTextures(20) = LoadTexture_Strict("GFX\decal427.png", 1 + 2)
+	PinTexture(DecalTextures(20))
 	
 	DrawLoading(25)
 	
 	Monitor = LoadMesh_Strict("GFX\map\monitor.b3d")
 	HideEntity Monitor
+	PinEntity(Monitor)
 	MonitorTexture = LoadTexture_Strict("GFX\monitortexture.jpg")
-	
+	PinTexture(MonitorTexture)
+
 	CamBaseOBJ = LoadMesh_Strict("GFX\map\cambase.x")
 	HideEntity(CamBaseOBJ)
+	PinEntity(CamBaseOBJ)
 	CamOBJ = LoadMesh_Strict("GFX\map\CamHead.b3d")
 	HideEntity(CamOBJ)
+	PinEntity(CamOBJ)
 	
 	Monitor2 = LoadMesh_Strict("GFX\map\monitor_checkpoint.b3d")
 	HideEntity Monitor2
+	PinEntity(Monitor2)
 	Monitor3 = LoadMesh_Strict("GFX\map\monitor_checkpoint.b3d")
 	HideEntity Monitor3
+	PinEntity(Monitor3)
 	MonitorTexture2 = LoadTexture_Strict("GFX\map\LockdownScreen2.jpg")
+	PinTexture(MonitorTexture2)
 	MonitorTexture3 = LoadTexture_Strict("GFX\map\LockdownScreen.jpg")
+	PinTexture(MonitorTexture3)
 	MonitorTexture4 = LoadTexture_Strict("GFX\map\LockdownScreen3.jpg")
+	PinTexture(MonitorTexture4)
 	MonitorTextureOff = CreateTexture(1,1)
 	SetBuffer TextureBuffer(MonitorTextureOff)
 	ClsColor 0,0,0
 	Cls
 	SetBuffer BackBuffer()
+	PinTexture(MonitorTextureOff)
 	LightConeModel = LoadMesh_Strict("GFX\lightcone.b3d")
 	HideEntity LightConeModel
+	PinEntity(LightConeModel)
 	
 	For i = 2 To CountSurfaces(Monitor2)
 		sf = GetSurface(Monitor2,i)
@@ -8467,6 +8386,90 @@ Function LoadEntities()
 			FreeBrush b
 		EndIf
 	Next
+
+	LoadRoomTemplates("Data\rooms.ini")
+	DrawLoading(30)
+	LoadMaterials("DATA\materials.ini")
+	LoadRoomMeshes()
+
+	DrawLoading(90)
+
+	OBJTunnel(0)=LoadRMesh("GFX\map\mt1.rmesh",Null)	
+	HideEntity OBJTunnel(0) 
+	PinEntity OBJTunnel(0)			
+	OBJTunnel(1)=LoadRMesh("GFX\map\mt2.rmesh",Null)	
+	HideEntity OBJTunnel(1)
+	PinEntity OBJTunnel(1)
+	OBJTunnel(2)=LoadRMesh("GFX\map\mt2c.rmesh",Null)	
+	HideEntity OBJTunnel(2)				
+	PinEntity OBJTunnel(2)
+	OBJTunnel(3)=LoadRMesh("GFX\map\mt3.rmesh",Null)	
+	HideEntity OBJTunnel(3)	
+	PinEntity OBJTunnel(3)
+	OBJTunnel(4)=LoadRMesh("GFX\map\mt4.rmesh",Null)	
+	HideEntity OBJTunnel(4)				
+	PinEntity OBJTunnel(4)
+	OBJTunnel(5)=LoadRMesh("GFX\map\mt_elevator.rmesh",Null)
+	HideEntity OBJTunnel(5)
+	PinEntity OBJTunnel(5)
+	OBJTunnel(6)=LoadRMesh("GFX\map\mt_generator.rmesh",Null)
+	HideEntity OBJTunnel(6)
+	PinEntity OBJTunnel(6)
+
+	DrawLoading(95)
+
+	InitItemTemplates()
+End Function
+
+Function LoadEntities()
+	CatchErrors("Uncaught (LoadEntities)")
+	DrawLoading(0)
+	
+	Local i%
+	
+	For i=0 To 9
+		TempSounds[i]=0
+	Next
+	
+	Brightness% = 50
+	CameraFogNear# = 0.5
+	CameraFogFar# = 6.0
+	StoredCameraFogFar# = CameraFogFar
+	
+	;TextureLodBias
+	
+	AmbientLightRoomVal = 0
+	
+	SoundEmitter = CreatePivot()
+	
+	Camera = CreateCamera()
+	CameraViewport Camera,0,0,GraphicWidth,GraphicHeight
+	CameraRange(Camera, 0.05, CameraFogFar)
+	CameraFogMode (Camera, 1)
+	CameraFogRange (Camera, CameraFogNear, CameraFogFar)
+	CameraFogColor (Camera, 0, 0, 0)
+	AmbientLight Brightness, Brightness, Brightness
+	
+	CreateBlurImage()
+	CameraProjMode ark_blur_cam,0
+	;Listener = CreateListener(Camera)
+	
+	DrawLoading(5)
+	
+	Collider = CreatePivot()
+	EntityRadius Collider, 0.15, 0.30
+	EntityPickMode(Collider, 1)
+	EntityType Collider, HIT_PLAYER
+	
+	Head = CreatePivot()
+	EntityRadius Head, 0.15
+	EntityType Head, HIT_PLAYER
+	
+	LightSpriteTex(0) = LoadTexture_Strict("GFX\light1.jpg", 1)
+	LightSpriteTex(1) = LoadTexture_Strict("GFX\light2.jpg", 1)
+	LightSpriteTex(2) = LoadTexture_Strict("GFX\lightsprite.jpg",1)
+	
+	DrawLoading(10)
 	
 	UserTrackMusicAmount% = 0
 	If EnableUserTracks Then
@@ -8491,8 +8494,6 @@ Function LoadEntities()
 		CloseDir Dir
 	EndIf
 	If EnableUserTracks Then DebugLog "User Tracks found: "+UserTrackMusicAmount
-	
-	InitItemTemplates()
 	
 	ParticleTextures(0) = LoadTexture_Strict("GFX\smoke.png", 1 + 2)
 	ParticleTextures(1) = LoadTexture_Strict("GFX\flash.jpg", 1 + 2)
@@ -8549,23 +8550,6 @@ Function LoadEntities()
 	
 	;[End Block]
 	
-	LoadMaterials("DATA\materials.ini")
-	
-	OBJTunnel(0)=LoadRMesh("GFX\map\mt1.rmesh",Null)	
-	HideEntity OBJTunnel(0)				
-	OBJTunnel(1)=LoadRMesh("GFX\map\mt2.rmesh",Null)	
-	HideEntity OBJTunnel(1)
-	OBJTunnel(2)=LoadRMesh("GFX\map\mt2c.rmesh",Null)	
-	HideEntity OBJTunnel(2)				
-	OBJTunnel(3)=LoadRMesh("GFX\map\mt3.rmesh",Null)	
-	HideEntity OBJTunnel(3)	
-	OBJTunnel(4)=LoadRMesh("GFX\map\mt4.rmesh",Null)	
-	HideEntity OBJTunnel(4)				
-	OBJTunnel(5)=LoadRMesh("GFX\map\mt_elevator.rmesh",Null)
-	HideEntity OBJTunnel(5)
-	OBJTunnel(6)=LoadRMesh("GFX\map\mt_generator.rmesh",Null)
-	HideEntity OBJTunnel(6)
-	
 	;TextureLodBias TextureBias
 	TextureLodBias TextureFloat#
 	;Devil Particle System
@@ -8618,8 +8602,6 @@ Function LoadEntities()
 	HideEntity(Room2slCam)
 	
 	DrawLoading(30)
-	
-	;LoadRoomMeshes()
 	
 	CatchErrors("LoadEntities")
 End Function
@@ -8727,21 +8709,6 @@ Function InitNewGame()
 		
 	Next
 	
-	Local rt.RoomTemplates
-	For rt.RoomTemplates = Each RoomTemplates
-		FreeEntity (rt\obj)
-	Next	
-	
-	Local tw.TempWayPoints
-	For tw.TempWayPoints = Each TempWayPoints
-		Delete tw
-	Next
-	
-	Local ts.TempScreens
-	For ts.TempScreens = Each TempScreens
-		Delete ts
-	Next
-	
 	TurnEntity(Collider, 0, Rand(160, 200), 0)
 	
 	ResetEntity Collider
@@ -8833,20 +8800,6 @@ Function InitLoadGame()
 	BlinkTimer = BLINKFREQ
 	Stamina = 100
 	
-	For rt.RoomTemplates = Each RoomTemplates
-		If rt\obj <> 0 Then FreeEntity(rt\obj) : rt\obj = 0
-	Next
-	
-	Local tw.TempWayPoints
-	For tw.TempWayPoints = Each TempWayPoints
-		Delete tw
-	Next
-	
-	Local ts.TempScreens
-	For ts.TempScreens = Each TempScreens
-		Delete ts
-	Next
-	
 	DropSpeed = 0.0
 	
 	For e.Events = Each Events
@@ -8904,8 +8857,8 @@ End Function
 Function NullGame(playbuttonsfx%=True)
 	CatchErrors("Uncaught (NullGame)")
 	Local i%, x%, y%, lvl
-	Local itt.ItemTemplates, s.Screens, lt.LightTemplates, d.Doors, m.Materials
-	Local wp.WayPoints, twp.TempWayPoints, r.Rooms, it.Items
+	Local itt.ItemTemplates, s.Screens, d.Doors
+	Local wp.WayPoints, r.Rooms, it.Items
 	
 	KillSounds()
 	If playbuttonsfx Then PlaySound_Strict ButtonSFX
@@ -9069,19 +9022,9 @@ Function NullGame(playbuttonsfx%=True)
 	
 	;ClearWorld
 	
-	Delete Each LightTemplates
-	Delete Each Materials
 	Delete Each WayPoints
-	Delete Each TempWayPoints
 	Delete Each Rooms	
 	Delete Each Items
-
-	For itt.ItemTemplates = Each ItemTemplates
-		FreeImage(itt\invimg)
-		If itt\invimg2 <> 0 Then FreeImage(itt\invimg2)
-		If itt\img <> 0 Then FreeImage(itt\img)
-		Delete itt
-	Next
 
 	Delete Each Props
 	Delete Each Decals
@@ -9113,10 +9056,6 @@ Function NullGame(playbuttonsfx%=True)
 	
 	For p.particles = Each Particles
 		Delete p
-	Next
-	
-	For rt.RoomTemplates = Each RoomTemplates
-		rt\obj = 0
 	Next
 	
 	For i = 0 To 5

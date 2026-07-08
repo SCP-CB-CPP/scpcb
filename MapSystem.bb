@@ -349,6 +349,7 @@ Function LoadRMesh(file$,rt.RoomTemplates)
 		rt\TempTriggerboxAmount = ReadInt(f)
 		For tb = 0 To rt\TempTriggerboxAmount-1
 			rt\TempTriggerbox[tb] = CreateMesh(rt\obj)
+			PinEntity(rt\TempTriggerbox[tb])
 			count = ReadInt(f)
 			For i%=1 To count
 				surf=CreateSurface(rt\TempTriggerbox[tb])
@@ -1522,20 +1523,6 @@ Function LoadRoomTemplates(file$)
 End Function
 
 
-Function LoadRoomMesh(rt.RoomTemplates)
-	
-	If Instr(rt\objPath,".rmesh")<>0 Then
-		rt\obj = LoadRMesh(rt\objPath, rt)
-	EndIf
-	
-	If (Not rt\obj) Then RuntimeErrorExt "Failed to load map file "+Chr(34)+mapfile+Chr(34)+"."
-	
-	CalculateRoomTemplateExtents(rt)
-	
-	HideEntity(rt\obj)
-	
-End Function
-
 Function LoadRoomMeshes()
 	Local temp% = 0
 	For rt.RoomTemplates = Each RoomTemplates
@@ -1547,16 +1534,16 @@ Function LoadRoomMeshes()
 		If Instr(rt\objpath,".rmesh")<>0 Then
 			rt\obj = LoadRMesh(rt\objPath, rt)
 		EndIf
-		If (Not rt\obj) Then RuntimeErrorExt "Failed to load map file "+Chr(34)+mapfile+Chr(34)+"."
-		
-		HideEntity(rt\obj)
-		DrawLoading(Int(30 + (15.0 / temp)*i))
+		If (rt\obj) Then
+			PinEntity(rt\obj)
+			CalculateRoomTemplateExtents(rt)
+			HideEntity(rt\obj)
+		EndIf
+		DrawLoading(Int(30 + (60.0 / temp)*i))
 		i=i+1
 	Next
 End Function
 
-
-LoadRoomTemplates("Data\rooms.ini")
 
 Global RoomScale# = 8.0 / 2048.0
 Const ZONEAMOUNT = 3
@@ -1845,8 +1832,6 @@ Function CreateRoom.Rooms(zone%, roomshape%, x#, y#, z#, name$ = "")
 			If rt\Name = name Then
 				r\RoomTemplate = rt
 				
-				If rt\obj=0 Then LoadRoomMesh(rt)
-				
 				r\obj = CopyEntity(rt\obj)
 				ScaleEntity(r\obj, RoomScale, RoomScale, RoomScale)
 				EntityType(r\obj, HIT_MAP)
@@ -1884,8 +1869,6 @@ Function CreateRoom.Rooms(zone%, roomshape%, x#, y#, z#, name$ = "")
 				temp=temp+rt\Commonness
 				If RandomRoom > temp - rt\Commonness And RandomRoom <= temp Then
 					r\RoomTemplate = rt
-					
-					If rt\obj=0 Then LoadRoomMesh(rt)
 					
 					r\obj = CopyEntity(rt\obj)
 					ScaleEntity(r\obj, RoomScale, RoomScale, RoomScale)

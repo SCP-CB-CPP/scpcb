@@ -48,6 +48,7 @@ Function CreateItemTemplate.ItemTemplates(name$, tempname$, objpath$, invimgpath
 		it\objpath = objpath
 	EndIf
 	it\objpath = objpath
+	PinEntity(it\obj)
 	
 	Local texture%
 	
