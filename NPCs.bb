@@ -1048,7 +1048,7 @@ Function UpdateNPCs()
 									n\State=n\State-FPSfactor
 								End If
 								
-								If dist > 0.8 Then
+								If dist > 0.8 Lor PlayerRoom\RoomTemplate\Name = "gatea" Then
 									If (dist > 25.0 Or PlayerRoom\RoomTemplate\Name = "pocketdimension" Or Visible Or n\PathStatus <> 1) And PlayerRoom\RoomTemplate\Name <> "gatea" Then 
 										
 										If (dist > 40 Or PlayerRoom\RoomTemplate\Name = "pocketdimension") Then
@@ -1129,7 +1129,7 @@ Function UpdateNPCs()
 										
 									EndIf
 									
-								ElseIf PlayerRoom\RoomTemplate\Name <> "gatea" And (Not NoTarget) ;dist < 0.8
+								ElseIf Not NoTarget ;dist < 0.8
 									
 									If dist > 0.5 Then 
 										n\CurrSpeed = CurveValue(n\Speed * 2.5,n\CurrSpeed,10.0)
