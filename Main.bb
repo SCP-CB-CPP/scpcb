@@ -1776,7 +1776,7 @@ Function UpdateConsole()
 				Case "clear", "cls"
 					Delete Each ConsoleMsg
 				Case "mav"
-					RuntimeErrorExt("Memory Access Violation")
+					RuntimeErrorExt("Violation Access Memory")
 				Case Chr($6A)+Chr($6F)+Chr($72)+Chr($67)+Chr($65)
 					;[Block]
 					ConsoleFlush = True 
