@@ -264,6 +264,9 @@ Function UpdateMainMenu()
 					Else
 						RandomSeed = Left(InputBox(x+150*MenuScale, y+55*MenuScale, 200*MenuScale, 30*MenuScale, RandomSeed, 3),15)
 					EndIf
+					Local toggleButtonText$
+					If UseNumericSeeds Then toggleButtonText = "Numeric" Else toggleButtonText = "Textual"
+					If DrawButton(x+360*MenuScale, y+55*MenuScale, 100*MenuScale, 30*MenuScale, toggleButtonText, False) Then UseNumericSeeds = Not UseNumericSeeds
 				Else
 					Text (x + 20 * MenuScale, y + 60 * MenuScale, "Selected map:")
 					Color (255, 255, 255)
@@ -904,15 +907,6 @@ Function UpdateMainMenu()
 						DrawOptionsTooltip(tx,ty,tw,th,"speedrunmode")
 					EndIf
 
-					y = y + 30*MenuScale
-
-					Color 255,255,255
-					Text(x + 20 * MenuScale, y, "Use numeric seeds:")
-					UseNumericSeeds = DrawTick(x + 310 * MenuScale, y + MenuScale, UseNumericSeeds)
-					If MouseOn(x+310*MenuScale,y+MenuScale,20*MenuScale,20*MenuScale) And OnSliderID=0
-						DrawOptionsTooltip(tx,ty,tw,th,"numericseeds")
-					EndIf
-					
 					y = y + 50*MenuScale
 					
 					Color 255,255,255
