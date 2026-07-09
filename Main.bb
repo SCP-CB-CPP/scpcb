@@ -3299,6 +3299,9 @@ Repeat
 					If SelectedEnding <> "" Then EndingTimer = Min(KillTimer,-0.1)
 				EndIf
 				darkA = Max(darkA, Min(Abs(KillTimer / 400.0), 1.0))
+				If DeathTime < 0 Then DeathTime = PlayTime
+			Else
+				DeathTime = -1
 			EndIf
 			
 			If FallTimer < 0 Then
@@ -3909,7 +3912,6 @@ Function Kill()
 		PositionEntity(Head, EntityX(Camera, True), EntityY(Camera, True), EntityZ(Camera, True), True)
 		ResetEntity (Head)
 		RotateEntity(Head, 0, EntityYaw(Camera), 0)		
-		DeathTime = PlayTime
 	EndIf
 End Function
 
