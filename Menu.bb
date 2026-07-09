@@ -153,45 +153,6 @@ Function UpdateMainMenu()
 				RandomSeedNumeric = 0
 			Else
 				RandomSeed = ""
-				If Rand(15)=1 Then 
-					Select Rand(13)
-						Case 1 
-							RandomSeed = "NIL"
-						Case 2
-							RandomSeed = "NO"
-						Case 3
-							RandomSeed = "d9341"
-						Case 4
-							RandomSeed = "5CP_I73"
-						Case 5
-							RandomSeed = "DONTBLINK"
-						Case 6
-							RandomSeed = "CRUNCH"
-						Case 7
-							RandomSeed = "die"
-						Case 8
-							RandomSeed = "HTAED"
-						Case 9
-							RandomSeed = "rustledjim"
-						Case 10
-							RandomSeed = "larry"
-						Case 11
-							RandomSeed = "JORGE"
-						Case 12
-							RandomSeed = "dirtymetal"
-						Case 13
-							RandomSeed = "whatpumpkin"
-					End Select
-				Else
-					n = Rand(4,8)
-					For i = 1 To n
-						If Rand(3)=1 Then
-							RandomSeed = RandomSeed + Rand(0,9)
-						Else
-							RandomSeed = RandomSeed + Chr(Rand(97,122))
-						EndIf
-					Next							
-				EndIf
 			EndIf
 			
 			MainMenuTab = 1
