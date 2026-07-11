@@ -720,8 +720,10 @@ Function UpdateMainMenu()
 					;[End Block]
 				ElseIf MainMenuTab = 5 ;Audio
 					;[Block]
-					height = 290 * MenuScale
+					height = 225 * MenuScale
 					If HasDubbedAudio Then height = height + 50*MenuScale
+					If EnableUserTracks Then height = height + 65*MenuScale
+					If UserTrackCheck>0 Then height = height + 25*MenuScale
 					DrawFrame(x, y, width, height)
 					
 					y = y + 20*MenuScale
@@ -837,7 +839,7 @@ Function UpdateMainMenu()
 							DrawOptionsTooltip(tx,ty,tw,th,"usertrackscan")
 						EndIf
 						If UserTrackCheck%>0
-							Text x + 20 * MenuScale, y + 100 * MenuScale, Format(I_Loc\OptionName_UsertrackscanFound, UserTrackCheck2, UserTrackCheck)
+							Text x + 20 * MenuScale, y + 70 * MenuScale, Format(I_Loc\OptionName_UsertrackscanFound, UserTrackCheck2, UserTrackCheck)
 						EndIf
 					Else
 						UserTrackCheck%=0
@@ -1199,7 +1201,7 @@ Function UpdateMainMenu()
 
 								DrawFrame(x,y,490* MenuScale, 70 * MenuScale)
 								If m\Icon = 0 And m\Iconpath <> "" Then
-									m\Icon = LoadImage_Strict(m\IconPath, 0, 1)
+									m\Icon = LoadImage_Strict(m\IconPath, 0, 3)
 									m\DisabledIcon = CreateGrayScaleImage(m\Icon)
 									ResizeImage(m\Icon, 64 * MenuScale, 64 * MenuScale)
 									ResizeImage(m\DisabledIcon, 64 * MenuScale, 64 * MenuScale)
@@ -1547,7 +1549,7 @@ Function DrawTagSelection(x%, y%, width%)
 End Function
 
 Function CreateGrayScaleImage%(img%)
-	Local ret% = CreateImage(ImageWidth(img), ImageHeight(img))
+	Local ret% = CreateImage(ImageWidth(img), ImageHeight(img), 1, 3)
 	Local rbuf% = ImageBuffer(img)
 	Local buf% = ImageBuffer(ret)
 	LockBuffer(rbuf)
@@ -1564,7 +1566,6 @@ Function CreateGrayScaleImage%(img%)
 	Return ret
 End Function
 
-Dim GfxDrivers$(0)
 Dim AspectRatioWidths%(0), AspectRatioHeights%(0)
 Dim GfxModeCountPerAspectRatio%(0)
 Dim GfxModeWidthsByAspectRatio%(0, 0), GfxModeHeightsByAspectRatio%(0, 0)
@@ -1642,14 +1643,6 @@ Function UpdateLauncher()
 
 	If SelectedGfxMode = -1 Then SelectedGfxMode = nativeGfxMode : SelectedAspectRatio = nativeAspectRatio
 
-	Local gfxDriverCount = CountGfxDrivers()
-	Dim GfxDrivers$(gfxDriverCount + 1)
-	For i = 1 To gfxDriverCount
-		GfxDrivers(i) = GfxDriverName(i)
-	Next
-
-	MenuMeterIMG% = LoadImage_Strict("GFX\blinkmeter.png", 1.0)
-	
 	AppTitle "SCP - Containment Breach Launcher"
 
 	Local quit% = False

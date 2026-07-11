@@ -1074,11 +1074,11 @@ Function UpdateNPCs()
 									n\State=n\State-FPSfactor
 								End If
 								
-								If dist > 0.8 Then
+								If dist > 0.8 Lor PlayerRoom\RoomTemplate\Name = "gatea" Then
 									If (dist > 25.0 Or PlayerRoom\RoomTemplate\Name = "pocketdimension" Or Visible Or n\PathStatus <> 1) And PlayerRoom\RoomTemplate\Name <> "gatea" Then 
 										
 										If (dist > 40 Or PlayerRoom\RoomTemplate\Name = "pocketdimension") Then
-											TranslateEntity n\Collider, 0, ((EntityY(Collider) - 0.14) - EntityY(n\Collider)) / 50.0, 0
+											TranslateEntity n\Collider, 0, ((EntityY(Collider) - 0.14) - EntityY(n\Collider)) * FPSFactor / 50.0, 0
 										EndIf
 										
 										n\CurrSpeed = CurveValue(n\Speed,n\CurrSpeed,10.0)
@@ -1155,7 +1155,7 @@ Function UpdateNPCs()
 										
 									EndIf
 									
-								ElseIf PlayerRoom\RoomTemplate\Name <> "gatea" And (Not NoTarget) ;dist < 0.8
+								ElseIf Not NoTarget ;dist < 0.8
 									
 									If dist > 0.5 Then 
 										n\CurrSpeed = CurveValue(n\Speed * 2.5,n\CurrSpeed,10.0)
@@ -1226,8 +1226,6 @@ Function UpdateNPCs()
                             EndIf
                             n\Reload = Max(0, n\Reload - FPSfactor)
                             DebugLog "106 in... "+n\Reload 
-							
-							UpdateSoundOrigin(n\SoundChn2,Camera,n\Collider)
 						Else ;idling outside the map
 							n\CurrSpeed = 0
 							MoveEntity n\Collider, 0, ((EntityY(Collider) - 30) - EntityY(n\Collider)) / 200.0, 0
@@ -1743,7 +1741,7 @@ Function UpdateNPCs()
 									If n\PrevState <= 1 And ChannelPlaying(n\SoundChn2)=False
 										If n\Sound2 <> 0 Then FreeSound_Strict(n\Sound2)
 										n\Sound2 = LoadSound_Strict("SFX\SCP\049\Spotted"+Rand(1,7)+".ogg")
-										n\SoundChn2 = LoopSound2(n\Sound2,n\SoundChn2,Camera,n\obj)
+										n\SoundChn2 = PlaySound2(n\Sound2,Camera,n\obj)
 										n\PrevState = 2
 									EndIf
 									n\PathStatus = 0
@@ -1759,7 +1757,7 @@ Function UpdateNPCs()
 											BlurTimer = BlurTimer+FPSfactor*2.5
 											If BlurTimer>250 And BlurTimer-FPSfactor*2.5 <= 250 And n\PrevState<>3 Then
 												If n\SoundChn2 <> 0 Then StopChannel(n\SoundChn2)
-												n\SoundChn2 = PlaySound_Strict(LoadTempSound("SFX\SCP\049\TakeOffHazmat.ogg"))
+												n\SoundChn2 = PlaySound2(LoadTempSound("SFX\SCP\049\TakeOffHazmat.ogg"),Camera,n\obj)
 												n\PrevState=3
 											ElseIf BlurTimer => 500
 												For i = 0 To MaxItemAmount-1
@@ -1782,7 +1780,7 @@ Function UpdateNPCs()
 											BlurTimer = BlurTimer+FPSfactor*2.5
 											If BlurTimer>250 And BlurTimer-FPSfactor*2.5 <= 250 And n\PrevState<>3 Then
 												If n\SoundChn2 <> 0 Then StopChannel(n\SoundChn2)
-												n\SoundChn2 = PlaySound_Strict(LoadTempSound("SFX\SCP\049\714Equipped.ogg"))
+												n\SoundChn2 = PlaySound2(LoadTempSound("SFX\SCP\049\714Equipped.ogg"),Camera,n\obj)
 												n\PrevState=3
 											ElseIf BlurTimer => 500
 												Wearing714=False
@@ -1804,7 +1802,7 @@ Function UpdateNPCs()
 												PlaySound_Strict HorrorSFX(13)
 												If n\Sound2 <> 0 Then FreeSound_Strict(n\Sound2)
 												n\Sound2 = LoadSound_Strict("SFX\SCP\049\Kidnap"+Rand(1,2)+".ogg")
-												n\SoundChn2 = LoopSound2(n\Sound2,n\SoundChn2,Camera,n\obj)
+												n\SoundChn2 = PlaySound2(n\Sound2,Camera,n\obj)
 												n\State = 3
 											EndIf										
 										EndIf
@@ -1890,7 +1888,7 @@ Function UpdateNPCs()
 												Else
 													n\Sound2 = LoadSound_Strict("SFX\SCP\049\Searching"+Rand(1,6)+".ogg")
 												EndIf
-												n\SoundChn2 = LoopSound2(n\Sound2,n\SoundChn2,Camera,n\obj)
+												n\SoundChn2 = PlaySound2(n\Sound2,Camera,n\obj)
 												n\PrevState = 1
 											EndIf
 											
@@ -2010,8 +2008,6 @@ Function UpdateNPCs()
 										PlaySound2(StepSFX(3,0,Rand(0,2)),Camera, n\Collider, 8.0, Rnd(0.8,1.0))
 									EndIf
 								EndIf
-								
-								UpdateSoundOrigin(n\SoundChn2,Camera,n\obj)
 							ElseIf (Not n\Idle)
 								If ChannelPlaying(n\SoundChn) Then
 									StopChannel(n\SoundChn)
@@ -2153,8 +2149,6 @@ Function UpdateNPCs()
 									PlaySound2(StepSFX(3,0,Rand(0,2)),Camera, n\Collider, 8.0, Rnd(0.8,1.0))
 								EndIf
 							EndIf
-							
-							UpdateSoundOrigin(n\SoundChn2,Camera,n\obj)
 							;[End Block]
 					End Select
 				EndIf
@@ -2694,8 +2688,6 @@ Function UpdateNPCs()
 						RotateEntity(pvt, Min(EntityPitch(pvt), 40), EntityYaw(n\Collider), 0)
 						
 						FreeEntity(pvt)
-						
-						UpdateSoundOrigin(n\SoundChn,Camera,n\Collider,20)
 						;[End Block]
 					Case 13
 						;[Block]
@@ -3957,7 +3949,7 @@ Function UpdateNPCs()
 									Select Rand(1,6)
 										Case 1
 											If n\Sound2=0 Then n\Sound2=LoadSound_Strict("SFX\SCP\066\Beethoven.ogg")
-											n\SoundChn2 = PlaySound2(n\Sound2, Camera, n\Collider)
+											n\SoundChn2 = PlaySound2(n\Sound2, Camera, n\Collider, 20.0, 1.0, False)
 											DeafTimer# = 70*(45+(15*SelectedDifficulty\aggressiveNPCs))
 											DeafPlayer = True
 											CameraShake = 10.0
@@ -4061,7 +4053,6 @@ Function UpdateNPCs()
 				If ChannelPlaying(n\SoundChn2)
 					BlurTimer = Max((5.0-dist)*300,0)
 				EndIf
-				UpdateSoundOrigin(n\SoundChn2,Camera,n\Collider,20,1.0,False)
 				
 				PositionEntity(n\obj, EntityX(n\Collider), EntityY(n\Collider) - 0.2, EntityZ(n\Collider))
 				
@@ -4834,8 +4825,6 @@ Function UpdateNPCs()
 							EndIf
 							;[End Block]
 					End Select
-					
-					UpdateSoundOrigin(n\SoundChn,Camera,n\Collider,20.0)
 					
 					MoveEntity n\Collider,0,0,n\CurrSpeed*FPSfactor
 					
