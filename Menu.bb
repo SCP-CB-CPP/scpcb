@@ -755,8 +755,10 @@ Function UpdateMainMenu()
 					;[End Block]
 				ElseIf MainMenuTab = 5 ;Audio
 					;[Block]
-					height = 290 * MenuScale
+					height = 225 * MenuScale
 					If HasDubbedAudio Then height = height + 50*MenuScale
+					If EnableUserTracks Then height = height + 65*MenuScale
+					If UserTrackCheck>0 Then height = height + 25*MenuScale
 					DrawFrame(x, y, width, height)
 					
 					y = y + 20*MenuScale
@@ -872,7 +874,7 @@ Function UpdateMainMenu()
 							DrawOptionsTooltip(tx,ty,tw,th,"usertrackscan")
 						EndIf
 						If UserTrackCheck%>0
-							Text x + 20 * MenuScale, y + 100 * MenuScale, Format(I_Loc\OptionName_UsertrackscanFound, UserTrackCheck2, UserTrackCheck)
+							Text x + 20 * MenuScale, y + 70 * MenuScale, Format(I_Loc\OptionName_UsertrackscanFound, UserTrackCheck2, UserTrackCheck)
 						EndIf
 					Else
 						UserTrackCheck%=0

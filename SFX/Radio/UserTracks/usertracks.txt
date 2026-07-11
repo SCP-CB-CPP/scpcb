@@ -1,3 +1,8 @@
-Place .ogg/.wav files in this folder to play them through the radio. Go into the options menu and click the "Check user tracks" button to have the game re-check this directory for new files.
+Place .ogg/.wav files in this folder to play them through the radio or as custom music while in game.
 
+Radio:
 When you find a radio, go to channel 1 to listen to your tracks.
+To have the game re-check this directory for new files, go into the options menu and click the "Check user tracks" button.
+
+Custom Music:
+Simply go into the console and type "playmusic $filename.ogg/.wav".

@@ -452,8 +452,6 @@ Function UpdateEvents()
 									DebugLog "Playing guard sound before cell opening"
 								EndIf
 								
-								UpdateSoundOrigin(e\room\NPC[3]\SoundChn2,Camera,e\room\NPC[3]\Collider)
-								
 								If (Not ChannelPlaying(e\room\NPC[3]\SoundChn2))
 									;BlinkTimer = -10
 									
@@ -713,10 +711,6 @@ Function UpdateEvents()
 										EndIf
 									EndIf
 								EndIf
-							EndIf
-							
-							If e\room\NPC[5]\State = 11
-								UpdateSoundOrigin(e\room\NPC[5]\SoundChn2,Camera,e\room\NPC[5]\Collider)
 							EndIf
 							
 							If e\room\NPC[3]\State <> 11 Then
@@ -1283,7 +1277,6 @@ Function UpdateEvents()
 									PointEntity(e\room\NPC[0]\Collider, Curr173\Collider)
 									MoveEntity(e\room\NPC[0]\Collider, 0, 0, -0.002)
 									e\room\NPC[0]\State = 2
-									UpdateSoundOrigin(e\room\NPC[0]\SoundChn,Camera,e\room\NPC[0]\Collider,20)
 									If e\EventState > 20260 And e\EventState - FPSfactor < 20260 Then PlaySound_Strict(IntroSFX(12))
 								Else ;lights out, guard dies
 									
@@ -1538,9 +1531,6 @@ Function UpdateEvents()
 				EndIf
 				
 				e\EventState = e\room\RoomDoors[0]\open
-				
-				UpdateSoundOrigin(e\SoundCHN,Camera,e\room\RoomDoors[0]\obj)
-				UpdateSoundOrigin(e\SoundCHN2,Camera,e\room\RoomDoors[1]\obj)
 				;[End Block]
 			Case "coffin", "coffin106"
 				;[Block]
@@ -1586,7 +1576,7 @@ Function UpdateEvents()
 							SetNPCFrame(e\room\NPC[0],270)
 							e\room\NPC[0]\GravityMult = 0.0
 							e\room\NPC[0]\Sound = LoadSound_Strict("SFX\Room\895Chamber\GuardIdle"+Rand(1,3)+".ogg")
-							e\room\NPC[0]\SoundChn = PlaySound2(e\room\NPC[0]\Sound,Camera,e\room\NPC[0]\Collider)
+							e\room\NPC[0]\SoundChn = PlaySound2(e\room\NPC[0]\Sound,Camera,e\room\NPC[0]\Collider,100)
 							e\room\NPC[0]\IsDead = True
 							e\room\NPC[0]\FallingPickDistance = 0.0
 						EndIf
@@ -1606,7 +1596,6 @@ Function UpdateEvents()
 					EndIf
 					
 					If e\room\NPC[0]<>Null Then
-						UpdateSoundOrigin(e\room\NPC[0]\SoundChn,Camera,e\room\NPC[0]\Collider,100)
 						If e\room\NPC[0]\PrevState = 0 Then
 							e\room\NPC[0]\GravityMult = 0.0
 						ElseIf e\room\NPC[0]\PrevState = 1 Then
@@ -4856,8 +4845,6 @@ Function UpdateEvents()
 									e\room\NPC[2]\IgnorePlayer = True
 							End Select
 							
-							UpdateSoundOrigin(e\SoundCHN2,Camera,e\room\RoomDoors[4]\obj,400)
-							
 							PlayerFallingPickDistance = 0.0
 							
 							If EntityY(Collider)<-6400*RoomScale And KillTimer >= 0 And FallTimer >= 0 Then
@@ -7001,7 +6988,6 @@ Function UpdateEvents()
 							e\room\NPC[0]\Sound = LoadSound_Strict("SFX\Character\Guard\SuicideGuard2.ogg")
 							e\SoundCHN2 = PlaySound2(e\room\NPC[0]\Sound, Camera, e\room\NPC[0]\Collider, 15.0)
 						EndIf
-						UpdateSoundOrigin(e\SoundCHN2,Camera,e\room\NPC[0]\Collider,15.0)
 					EndIf
 					If e\EventState2 And (e\SoundCHN2 = 0 Lor (Not ChannelPlaying(e\SoundCHN2))) Then RemoveEvent(e)
 				EndIf
@@ -7454,7 +7440,6 @@ Function UpdateEvents()
 					EndIf
 					
 				EndIf
-				UpdateSoundOrigin(e\SoundCHN,Camera,e\room\Objects[1])
 				;[End Block]
 			Case "1048a"
 				;[Block]
@@ -7531,7 +7516,6 @@ Function UpdateEvents()
 								e\EventState = 2.0
 								e\room\RoomDoors[0]\locked = False
 							EndIf
-							UpdateSoundOrigin(e\SoundCHN,Camera,e\room\Objects[0],100,1.0)
 						EndIf
 					Else
 						DebugLog "Removed 'room2scps2' event"
@@ -7882,11 +7866,6 @@ Function UpdateEvents()
 							EndIf
 						EndIf
 					EndIf
-					
-					If brokendoor
-						UpdateSoundOrigin(e\SoundCHN2,Camera,e\room\Objects[1],5)
-					EndIf
-					UpdateSoundOrigin(e\SoundCHN,Camera,e\room\Objects[0],5)
 				Else
 					e\EventState3 = 0.0
 				EndIf

@@ -516,7 +516,7 @@ Dim RadioCHN%(8)
 Dim OldAiPics%(5)
 
 Global SpeedRunMode% = GetOptionInt("general", "speed run mode")
-Global PlayTime%
+Global PlayTime%, DeathTime%
 ; 0 = Running; 1 = Stopped; 2 = Pre-made save loaded; 3 = Ending reached
 Global TimerStopped% = True
 Global PreMadeSaveLoaded% = False
@@ -925,7 +925,7 @@ Function UpdateConsole()
 							CreateConsoleMsg("HELP - playmusic")
 							CreateConsoleMsg("******************************")
 							CreateConsoleMsg("Will play tracks in .ogg/.wav format")
-							CreateConsoleMsg("from "+Chr(34)+"SFX\Music\Custom\"+Chr(34)+".")
+							CreateConsoleMsg("from "+Chr(34)+"SFX\Radio\UserTracks\"+Chr(34)+".")
 							CreateConsoleMsg("******************************")
 						Case "setblinkeffect", "blinkeffect"
 							CreateConsoleMsg("HELP - blinkeffect")
@@ -1624,7 +1624,7 @@ Function UpdateConsole()
 						PlayCustomMusic% = True
 						If CustomMusic <> 0 Then FreeSound_Strict CustomMusic : CustomMusic = 0
 						If MusicCHN <> 0 Then StopChannel MusicCHN
-						CustomMusic = LoadSound_Strict("SFX\Music\Custom\"+StrTemp$)
+						CustomMusic = LoadSound_Strict("SFX\Radio\UserTracks\"+StrTemp$)
 						If CustomMusic = 0
 							PlayCustomMusic% = False
 						EndIf
@@ -1728,7 +1728,7 @@ Function UpdateConsole()
 							EndIf
 						Next
 						If (Not pl_room_found)
-							CreateConsoleMsg("The current room doesn't has any event applied.",255,150,0)
+							CreateConsoleMsg("The current room doesn't have any event applied.",255,150,0)
 						EndIf
 					EndIf
 					;[End Block]
@@ -1763,7 +1763,7 @@ Function UpdateConsole()
 					For a.Achievements = Each Achievements
 						If i = searched%
 							a\Unlocked = True
-							CreateConsoleMsg("Achievemt "+a\LocalName+" unlocked.")
+							CreateConsoleMsg("Achievement "+a\LocalName+" unlocked.")
 							i = -1
 							Exit
 						EndIf
@@ -1846,21 +1846,18 @@ Function UpdateConsole()
 					Delete Each ConsoleMsg
 				Case "mav"
 					RuntimeErrorExt("Violation Access Memory")
-				Case "jorge"
-					;[Block]	
-					CreateConsoleMsg(Chr(74)+Chr(79)+Chr(82)+Chr(71)+Chr(69)+Chr(32)+Chr(72)+Chr(65)+Chr(83)+Chr(32)+Chr(66)+Chr(69)+Chr(69)+Chr(78)+Chr(32)+Chr(69)+Chr(88)+Chr(80)+Chr(69)+Chr(67)+Chr(84)+Chr(73)+Chr(78)+Chr(71)+Chr(32)+Chr(89)+Chr(79)+Chr(85)+Chr(46))
-;					Return
-;					ConsoleFlush = True 
-;					
-;					If ConsoleFlushSnd = 0 Then
-;						ConsoleFlushSnd = LoadSound(Chr(83)+Chr(70)+Chr(88)+Chr(92)+Chr(83)+Chr(67)+Chr(80)+Chr(92)+Chr(57)+Chr(55)+Chr(48)+Chr(92)+Chr(116)+Chr(104)+Chr(117)+Chr(109)+Chr(98)+Chr(115)+Chr(46)+Chr(100)+Chr(98))
-;						;FMOD_Pause(MusicCHN)
-;						;FSOUND_Stream_Stop()
-;						ConsoleMusFlush% = LoadSound(Chr(83)+Chr(70)+Chr(88)+Chr(92)+Chr(77)+Chr(117)+Chr(115)+Chr(105)+Chr(99)+Chr(92)+Chr(116)+Chr(104)+Chr(117)+Chr(109)+Chr(98)+Chr(115)+Chr(46)+Chr(100)+Chr(98))
-;						ConsoleMusPlay = PlaySound(ConsoleMusFlush)
-;					Else
-;						CreateConsoleMsg(Chr(74)+Chr(32)+Chr(79)+Chr(32)+Chr(82)+Chr(32)+Chr(71)+Chr(32)+Chr(69)+Chr(32)+Chr(32)+Chr(67)+Chr(32)+Chr(65)+Chr(32)+Chr(78)+Chr(32)+Chr(78)+Chr(32)+Chr(79)+Chr(32)+Chr(84)+Chr(32)+Chr(32)+Chr(66)+Chr(32)+Chr(69)+Chr(32)+Chr(32)+Chr(67)+Chr(32)+Chr(79)+Chr(32)+Chr(78)+Chr(32)+Chr(84)+Chr(32)+Chr(65)+Chr(32)+Chr(73)+Chr(32)+Chr(78)+Chr(32)+Chr(69)+Chr(32)+Chr(68)+Chr(46))
-;					EndIf
+				Case Chr($6A)+Chr($6F)+Chr($72)+Chr($67)+Chr($65)
+					;[Block]
+					ConsoleFlush = True 
+					
+					If ConsoleFlushSnd = 0 Then
+						ConsoleFlushSnd = LoadSound(Chr(83)+Chr(70)+Chr(88)+Chr(92)+Chr(83)+Chr(67)+Chr(80)+Chr(92)+Chr(57)+Chr(55)+Chr(48)+Chr(92)+Chr(116)+Chr(104)+Chr(117)+Chr(109)+Chr(98)+Chr(115)+Chr(46)+Chr(100)+Chr(98))
+						ConsoleMusFlush% = LoadSound(Chr(83)+Chr(70)+Chr(88)+Chr(92)+Chr(77)+Chr(117)+Chr(115)+Chr(105)+Chr(99)+Chr(92)+Chr(116)+Chr(104)+Chr(117)+Chr(109)+Chr(98)+Chr(115)+Chr(46)+Chr(100)+Chr(98))
+						ConsoleMusPlay = PlaySound(ConsoleMusFlush)
+						CreateConsoleMsg(Chr(74)+Chr(79)+Chr(82)+Chr(71)+Chr(69)+Chr(32)+Chr(72)+Chr(65)+Chr(83)+Chr(32)+Chr(66)+Chr(69)+Chr(69)+Chr(78)+Chr(32)+Chr(69)+Chr(88)+Chr(80)+Chr(69)+Chr(67)+Chr(84)+Chr(73)+Chr(78)+Chr(71)+Chr(32)+Chr(89)+Chr(79)+Chr(85)+Chr(46))
+					Else
+						CreateConsoleMsg(Chr(74)+Chr(32)+Chr(79)+Chr(32)+Chr(82)+Chr(32)+Chr(71)+Chr(32)+Chr(69)+Chr(32)+Chr(32)+Chr(67)+Chr(32)+Chr(65)+Chr(32)+Chr(78)+Chr(32)+Chr(78)+Chr(32)+Chr(79)+Chr(32)+Chr(84)+Chr(32)+Chr(32)+Chr(66)+Chr(32)+Chr(69)+Chr(32)+Chr(32)+Chr(67)+Chr(32)+Chr(79)+Chr(32)+Chr(78)+Chr(32)+Chr(84)+Chr(32)+Chr(65)+Chr(32)+Chr(73)+Chr(32)+Chr(78)+Chr(32)+Chr(69)+Chr(32)+Chr(68)+Chr(46))
+					EndIf
 					;[End Block]
 				Default
 					;[Block]
@@ -2614,7 +2611,6 @@ Function UpdateDoors()
 			EndIf
 			
 		EndIf
-		UpdateSoundOrigin(d\SoundCHN,Camera,d\frameobj)
 		
 		If d\DoorHitOBJ<>0 Then
 			If DebugHUD Then
@@ -2637,7 +2633,7 @@ Function UseDoor(d.Doors, showmsg%=True, playsfx%=True)
 				If Not HasKeyCardMsg() Then
 					Msg = I_Loc\MessageButton_KeyRequired
 					MsgTimer = 70 * 7
-					ActiveKeyCardMsgCooldown()
+					ActivateKeyCardMsgCooldown()
 				EndIf
 			EndIf
 			Return
@@ -2664,7 +2660,7 @@ Function UseDoor(d.Doors, showmsg%=True, playsfx%=True)
 					If Not HasKeyCardMsg() Then
 						Msg = I_Loc\MessageButton_KeyRequired
 						MsgTimer = 70 * 7
-						ActiveKeyCardMsgCooldown()
+						ActivateKeyCardMsgCooldown()
 					EndIf
 				EndIf
 				Return				
@@ -2675,13 +2671,14 @@ Function UseDoor(d.Doors, showmsg%=True, playsfx%=True)
 						PlaySound_Strict KeyCardSFX2
 						Msg = I_Loc\MessageButton_KeyNothing
 						MsgTimer = 70 * 7
+						ActivateKeyCardMsgCooldown()
 						Return
 					Else
 						PlaySound_Strict KeyCardSFX1
 						Msg = I_Loc\MessageButton_KeyInserted
 						MsgTimer = 70 * 7	
+						ActivateKeyCardMsgCooldown()
 					EndIf
-					ActiveKeyCardMsgCooldown()
 				EndIf
 			Else
 				SelectedItem = Null
@@ -2693,7 +2690,7 @@ Function UseDoor(d.Doors, showmsg%=True, playsfx%=True)
 						Msg = Format(I_Loc\MessageButton_KeyRequiredLevel, d\KeyCard)
 					EndIf
 					MsgTimer = 70 * 7					
-					ActiveKeyCardMsgCooldown()
+					ActivateKeyCardMsgCooldown()
 				EndIf
 				Return
 			End If
@@ -2799,7 +2796,6 @@ Function UseDoor(d.Doors, showmsg%=True, playsfx%=True)
 		Else
 			d\SoundCHN = PlaySound2 (CloseDoorSFX(d\dir, sound), Camera, d\obj)
 		EndIf
-		UpdateSoundOrigin(d\SoundCHN,Camera,d\obj)
 	Else
 		If d\open Then
 			If d\LinkedDoor <> Null Then d\LinkedDoor\timerstate = d\LinkedDoor\timer
@@ -2811,7 +2807,7 @@ End Function
 
 
 Global KeyCardMsgCooldown% = 0
-Function ActiveKeyCardMsgCooldown()
+Function ActivateKeyCardMsgCooldown()
 	KeyCardMsgCooldown = MilliSecs() + 4000
 End Function
 
@@ -3288,6 +3284,10 @@ While IsRunning
 	Else
 		UpdateStreamSounds()
 		
+		For s.FireAndForgetSounds = Each FireAndForgetSounds
+			UpdateFireAndForgetSounds(s)
+		Next
+
 		ShouldPlay = Min(PlayerZone,2)
 		
 		DrawHandIcon = False
@@ -3340,7 +3340,6 @@ While IsRunning
 				
 				AmbientSFXCHN = PlaySound2(AmbientSFX(PlayerZone,CurrAmbientSFX), Camera, SoundEmitter)
 			EndIf
-			UpdateSoundOrigin(AmbientSFXCHN,Camera, SoundEmitter)
 			
 			If Rand(50000) = 3 Then
 				Local RN$ = PlayerRoom\RoomTemplate\Name$
@@ -3517,6 +3516,9 @@ While IsRunning
 					If SelectedEnding <> "" Then EndingTimer = Min(KillTimer,-0.1)
 				EndIf
 				darkA = Max(darkA, Min(Abs(KillTimer / 400.0), 1.0))
+				If DeathTime < 0 Then DeathTime = PlayTime
+			Else
+				DeathTime = -1
 			EndIf
 			
 			If FallTimer < 0 Then
@@ -6157,6 +6159,8 @@ Function DrawGUI()
 											PlaySound_Strict(Use914SFX)
 											DropSpeed = 0
 											Curr106\State = -2500
+											PositionEntity(Curr106\Collider, EntityX(r\obj), 500, EntityZ(r\obj))
+											ResetEntity(Curr106\Collider)
 											Exit
 										EndIf
 									Next
@@ -7755,6 +7759,7 @@ Function DrawMenu()
 			Text x, y, I_Loc\Menu_Difficulty+" "+SelectedDifficulty\localName
 			Text x, y+20*MenuScale, I_Loc\Menu_Save+" "+CurrSave
 			Text x, y+40*MenuScale, GetSeedString()
+			Text x, y+60*MenuScale, I_Loc\Menu_EndTime+" " + FormatDuration(DeathTime, SpeedRunMode)
 		ElseIf AchievementsMenu <= 0 And OptionsMenu > 0 And QuitMSG <= 0 And KillTimer >= 0
 			If DrawButton(x + 101 * MenuScale, y + 390 * MenuScale, 230 * MenuScale, 60 * MenuScale, I_Loc\Menu_Back) Then
 				AchievementsMenu = 0
@@ -9541,22 +9546,42 @@ Include "save.bb"
 
 ;--------------------------------------- music & sounds ----------------------------------------------
 
-Function PlaySound2%(SoundHandle%, cam%, entity%, range# = 10, volume# = 1.0)
+Type FireAndForgetSounds
+	Field Chn%
+	Field Camera%
+	Field Entity%
+	Field Range#
+	Field Volume#
+	Field UseSFXVolume%
+End Type
+
+Function PlaySound2%(SoundHandle%, cam%, entity%, range# = 10, volume# = 1.0, useSFXVolume% = True)
 	range# = Max(range, 1.0)
 	Local soundchn% = 0
 	
 	If volume > 0 Then 
-		Local dist# = EntityDistance(cam, entity) / range#
-		If 1 - dist# > 0 And 1 - dist# < 1
-			Local panvalue# = Sin(-DeltaYaw(cam,entity))
-			soundchn% = PlaySound_Strict (SoundHandle)
-			
-			UpdateChannelVolumeWithSubtitles(soundchn, volume# * (1 - dist#))
-			ChannelPan(soundchn, panvalue)			
-		EndIf
+		Local s.FireAndForgetSounds = New FireAndForgetSounds
+		s\Chn = PlaySound_Strict (SoundHandle)
+		s\Camera = cam
+		s\Entity = entity
+		s\Range = range
+		s\Volume = volume
+		s\UseSFXVolume = useSFXVolume
+		UpdateFireAndForgetSounds(s)
+		soundchn = s\Chn
 	EndIf
 	
 	Return soundchn
+End Function
+
+Function UpdateFireAndForgetSounds(s.FireAndForgetSounds)
+	If (Not ChannelPlaying(s\Chn)) Lor (Not EntityExist(s\Entity)) Lor (Not EntityExist(s\Camera)) Then UpdateChannelVolumeWithSubtitles(s\Chn, 0) : Delete s : Return
+
+	Local dist# = EntityDistance(s\Camera, s\Entity) / s\Range
+	Local panvalue# = Sin(-DeltaYaw(s\Camera,s\Entity))
+	
+	UpdateChannelVolumeWithSubtitles(s\Chn, s\Volume * Max(0, 1 - dist), False, s\UseSFXVolume)
+	ChannelPan(s\Chn, panvalue)	
 End Function
 
 Function LoopSound2%(SoundHandle%, Chn%, cam%, entity%, range# = 10, volume# = 1.0)
@@ -9647,6 +9672,9 @@ Function UpdateMusic()
 End Function 
 
 Function PauseSounds()
+	For s.FireAndForgetSounds = Each FireAndForgetSounds
+		PauseChannel(s\Chn)
+	Next
 	For e.events = Each Events
 		If e\soundchn <> 0 Then
 			If (Not e\soundchn_isstream)
@@ -9715,6 +9743,10 @@ Function PauseSounds()
 End Function
 
 Function ResumeSounds()
+	For s.FireAndForgetSounds = Each FireAndForgetSounds
+		ResumeChannel(s\Chn)
+		UpdateFireAndForgetSounds(s)
+	Next
 	For e.events = Each Events
 		If e\soundchn <> 0 Then
 			If (Not e\soundchn_isstream)
@@ -9785,6 +9817,10 @@ End Function
 Function KillSounds()
 	Local i%,e.Events,n.NPCs,d.Doors,dem.DevilEmitters,snd.Sound
 	
+	For s.FireAndForgetSounds = Each FireAndForgetSounds
+		StopChannel(s\Chn)
+		Delete s
+	Next
 	For i=0 To 9
 		If TempSounds[i]<>0 Then FreeSound_Strict TempSounds[i] : TempSounds[i]=0
 	Next
@@ -9935,29 +9971,6 @@ Function GetStepSound(entity%)
     Return 0
 End Function
 
-Function UpdateSoundOrigin(Chn%, cam%, entity%, range# = 10, volume# = 1.0, isSFX = True)
-	If Chn <> 0 Then
-		If ChannelPlaying(Chn) Then
-			range# = Max(range,1.0)
-			
-			If volume>0 Then
-				
-				Local dist# = EntityDistance(cam, entity) / range#
-				If 1 - dist# > 0 And 1 - dist# < 1 Then
-					
-					Local panvalue# = Sin(-DeltaYaw(cam,entity))
-					
-					UpdateChannelVolumeWithSubtitles(Chn, volume# * (1 - dist#), False, isSFX)
-					ChannelPan(Chn, panvalue)
-				Else
-					UpdateChannelVolumeWithSubtitles(Chn, 0)
-				EndIf
-			Else
-				UpdateChannelVolumeWithSubtitles(Chn, 0)
-			EndIf
-		EndIf
-	EndIf
-End Function
 ;--------------------------------------- random -------------------------------------------------------
 
 Function f2s$(n#, count%)
