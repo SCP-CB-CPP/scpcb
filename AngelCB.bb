@@ -958,7 +958,7 @@ Function RegisterPlayer()
     RegisterGlobalProperty("bool Crouch", &Crouch)
     RegisterGlobalProperty("float CrouchState", &CrouchState)
 
-    RegisterGlobalProperty("int PlayerZone", &PlayerZone)
+    RegisterGlobalProperty("int CurrentZone", &PlayerZone)
     RegisterGlobalProperty("Room@ CurrentRoom", &PlayerRoom)
 
     RegisterGlobalProperty("int GrabbedEntity", &GrabbedEntity)
@@ -986,6 +986,47 @@ Function RegisterPlayer()
 
     RegisterGlobalFunction("bool IsInReachableRoom(bool is049ChamberReachable=false)", @PlayerInReachableRoom)
 
+    SetDefaultNamespace(ns)
+End Function
+
+Function RegisterDifficulty()
+    RegisterTypeFromPtr("Difficulty", %Difficulty)
+
+    Local ns$ = GetDefaultNamespace()
+    If ns <> "" Then SetDefaultNamespace(ns + "::Difficulty") Else SetDefaultNamespace("Difficulty")
+    RegisterEnum("SaveType")
+    RegisterEnumValue("SaveType", "Anywhere", 0)
+    RegisterEnumValue("SaveType", "OnQuit", 1)
+    RegisterEnumValue("SaveType", "OnScreens", 2)
+
+    RegisterEnum("OtherFactors")
+    RegisterEnumValue("OtherFactors", "Easy", 0)
+    RegisterEnumValue("OtherFactors", "Normal", 1)
+    RegisterEnumValue("OtherFactors", "Hard", 2)
+
+    RegisterTypeField("Difficulty", "string Name", %Difficulty\name)
+    RegisterTypeField("Difficulty", "string LocalName", %Difficulty\localName)
+    RegisterTypeField("Difficulty", "string Description", %Difficulty\description)
+    RegisterTypeField("Difficulty", "bool PermaDeath", %Difficulty\permaDeath)
+    RegisterTypeField("Difficulty", "bool AggressiveNPCs", %Difficulty\aggressiveNPCs)
+    RegisterTypeField("Difficulty", "Difficulty::SaveType Save", %Difficulty\saveType)
+    RegisterTypeField("Difficulty", "Difficulty::OtherFactors Other", %Difficulty\otherFactors)
+
+    RegisterTypeField("Difficulty", "int R", %Difficulty\r)
+    RegisterTypeField("Difficulty", "int G", %Difficulty\g)
+    RegisterTypeField("Difficulty", "int B", %Difficulty\b)
+
+    RegisterTypeField("Difficulty", "bool Customizable", %Difficulty\customizable)
+
+    RegisterGlobalProperty("Difficulty@ Current", &SelectedDifficulty)
+    Local safe.Difficulty = Difficulties[SAFE]
+    Local euclid.Difficulty = Difficulties[EUCLID]
+    Local keter.Difficulty = Difficulties[KETER]
+    Local custom.Difficulty = Difficulties[CUSTOM]
+    RegisterGlobalProperty("Difficulty@ Safe", &safe)
+    RegisterGlobalProperty("Difficulty@ Euclid", &euclid)
+    RegisterGlobalProperty("Difficulty@ Keter", &keter)
+    RegisterGlobalProperty("Difficulty@ Custom", &custom)
     SetDefaultNamespace(ns)
 End Function
 
@@ -1353,6 +1394,7 @@ Function RegisterCB()
     RegisterSkybox()
     RegisterItem()
     RegisterPlayer()
+    RegisterDifficulty()
     RegisterDreamfilter()
     RegisterConsole()
     RegisterEvent()
