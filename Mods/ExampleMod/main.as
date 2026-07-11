@@ -33,6 +33,15 @@ bool Hook_MapCreateLayout() {
     return true;
 }
 
+int Hook_CanUseDoor(Door d, bool showMsg, bool playSFX) {
+    // The key is secretly also SCP-005!
+    if (Player::SelectedItem != null && Player::SelectedItem.Template.Name == "scp860") {
+        Player::SelectedItem = null;
+        return 1;
+    }
+    return -1;
+}
+
 bool Hook_InitializeEvents() {
     Event::Create("guardspin", "room3pit", 0, 1);
     Event::Create("914", "914", 0, 1);

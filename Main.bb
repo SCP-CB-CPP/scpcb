@@ -2685,7 +2685,21 @@ End Function
 Global ElevatorButtonLastPressMillis%
 Global ElevatorButtonSpamCount%
 
-Function UseDoor(d.Doors, showmsg%=True, playsfx%=True)
+Function CanUseDoor%(d.Doors, showmsg, playsfx)
+	If CanUseDoor\Subscribers > 0 Then
+		Local dd.Doors = d
+		PrepareFunction(3)
+		SetArgObj(0, &dd)
+		SetArgInt(1, showmsg)
+		SetArgInt(2, playsfx)
+		Select CallHook(CanUseDoor)
+			Case 0
+				Return False
+			Case 1
+				Return True
+		End Select
+	EndIf
+
 	Local temp% = 0
 	If d\KeyCard > 0 Then
 		If SelectedItem = Null Then
@@ -2693,10 +2707,10 @@ Function UseDoor(d.Doors, showmsg%=True, playsfx%=True)
 				If Not HasKeyCardMsg() Then
 					Msg = I_Loc\MessageButton_KeyRequired
 					MsgTimer = 70 * 7
-					ActiveKeyCardMsgCooldown()
+					ActivateKeyCardMsgCooldown()
 				EndIf
 			EndIf
-			Return
+			Return False
 		Else
 			Select SelectedItem\itemtemplate\name
 				Case "key1"
@@ -2720,10 +2734,10 @@ Function UseDoor(d.Doors, showmsg%=True, playsfx%=True)
 					If Not HasKeyCardMsg() Then
 						Msg = I_Loc\MessageButton_KeyRequired
 						MsgTimer = 70 * 7
-						ActiveKeyCardMsgCooldown()
+						ActivateKeyCardMsgCooldown()
 					EndIf
 				EndIf
-				Return				
+				Return False
 			ElseIf temp >= d\KeyCard 
 				SelectedItem = Null
 				If showmsg = True Then
@@ -2731,13 +2745,14 @@ Function UseDoor(d.Doors, showmsg%=True, playsfx%=True)
 						PlaySound_Strict KeyCardSFX2
 						Msg = I_Loc\MessageButton_KeyNothing
 						MsgTimer = 70 * 7
-						Return
+						ActivateKeyCardMsgCooldown()
+						Return False
 					Else
 						PlaySound_Strict KeyCardSFX1
 						Msg = I_Loc\MessageButton_KeyInserted
 						MsgTimer = 70 * 7	
+						ActivateKeyCardMsgCooldown()
 					EndIf
-					ActiveKeyCardMsgCooldown()
 				EndIf
 			Else
 				SelectedItem = Null
@@ -2749,9 +2764,9 @@ Function UseDoor(d.Doors, showmsg%=True, playsfx%=True)
 						Msg = Format(I_Loc\MessageButton_KeyRequiredLevel, d\KeyCard)
 					EndIf
 					MsgTimer = 70 * 7					
-					ActiveKeyCardMsgCooldown()
+					ActivateKeyCardMsgCooldown()
 				EndIf
-				Return
+				Return False
 			End If
 		EndIf	
 	ElseIf d\KeyCard < 0
@@ -2771,7 +2786,7 @@ Function UseDoor(d.Doors, showmsg%=True, playsfx%=True)
 				Msg = I_Loc\MessageButton_DnaSelf
 				MsgTimer = 70 * 10
 			EndIf
-			Return			
+			Return False
 		EndIf
 	Else
 		If d\locked Then
@@ -2836,10 +2851,25 @@ Function UseDoor(d.Doors, showmsg%=True, playsfx%=True)
 				EndIf
 				
 			EndIf
-			Return
+			Return False
 		EndIf	
 	EndIf
+
+	Return True
+End Function
+
+Function UseDoor(d.Doors, showmsg%=True, playsfx%=True)
+	If Not CanUseDoor(d, showmsg, playsfx) Then Return
 	
+	If UseDoor\Subscribers > 0 Then
+		Local dd.Doors = d
+		PrepareFunction(3)
+		SetArgObj(0, &dd)
+		SetArgInt(1, showmsg)
+		SetArgInt(2, playsfx)
+		If CallHook(UseDoor) Then Return
+	EndIf
+
 	d\open = (Not d\open)
 	If d\LinkedDoor <> Null Then d\LinkedDoor\open = (Not d\LinkedDoor\open)
 	
@@ -2867,7 +2897,7 @@ End Function
 
 
 Global KeyCardMsgCooldown% = 0
-Function ActiveKeyCardMsgCooldown()
+Function ActivateKeyCardMsgCooldown()
 	KeyCardMsgCooldown = MilliSecs() + 4000
 End Function
 
