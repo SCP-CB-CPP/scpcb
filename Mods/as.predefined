@@ -3167,6 +3167,11 @@ namespace CB::SCP914 {
 int RefinedItems;
 }
 
+namespace CB::Ending {
+float Timer;
+string Selected;
+}
+
 namespace CB {
 enum Music {
     LightContainmentZone,

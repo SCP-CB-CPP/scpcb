@@ -1372,6 +1372,16 @@ Function Register914()
     SetDefaultNamespace(ns)
 End Function
 
+Function RegisterEnding()
+    Local ns$ = GetDefaultNamespace()
+    If ns <> "" Then SetDefaultNamespace(ns + "::Ending") Else SetDefaultNamespace("Ending")
+
+    RegisterGlobalProperty("float Timer", &EndingTimer)
+    RegisterGlobalProperty("string Selected", &SelectedEnding)
+
+    SetDefaultNamespace(ns)
+End Function
+
 Global HasRegisteredCB%
 Function RegisterCB()
     If HasRegisteredCB Then Return
@@ -1401,6 +1411,7 @@ Function RegisterCB()
     RegisterSubtitles()
     RegisterAchievements()
     Register914()
+    RegisterEnding()
     SetDefaultNamespace("")
 End Function
 
