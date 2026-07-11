@@ -2565,7 +2565,7 @@ Function UseDoor(d.Doors, showmsg%=True, playsfx%=True)
 				If Not HasKeyCardMsg() Then
 					Msg = I_Loc\MessageButton_KeyRequired
 					MsgTimer = 70 * 7
-					ActiveKeyCardMsgCooldown()
+					ActivateKeyCardMsgCooldown()
 				EndIf
 			EndIf
 			Return
@@ -2592,7 +2592,7 @@ Function UseDoor(d.Doors, showmsg%=True, playsfx%=True)
 					If Not HasKeyCardMsg() Then
 						Msg = I_Loc\MessageButton_KeyRequired
 						MsgTimer = 70 * 7
-						ActiveKeyCardMsgCooldown()
+						ActivateKeyCardMsgCooldown()
 					EndIf
 				EndIf
 				Return				
@@ -2603,13 +2603,14 @@ Function UseDoor(d.Doors, showmsg%=True, playsfx%=True)
 						PlaySound_Strict KeyCardSFX2
 						Msg = I_Loc\MessageButton_KeyNothing
 						MsgTimer = 70 * 7
+						ActivateKeyCardMsgCooldown()
 						Return
 					Else
 						PlaySound_Strict KeyCardSFX1
 						Msg = I_Loc\MessageButton_KeyInserted
 						MsgTimer = 70 * 7	
+						ActivateKeyCardMsgCooldown()
 					EndIf
-					ActiveKeyCardMsgCooldown()
 				EndIf
 			Else
 				SelectedItem = Null
@@ -2621,7 +2622,7 @@ Function UseDoor(d.Doors, showmsg%=True, playsfx%=True)
 						Msg = Format(I_Loc\MessageButton_KeyRequiredLevel, d\KeyCard)
 					EndIf
 					MsgTimer = 70 * 7					
-					ActiveKeyCardMsgCooldown()
+					ActivateKeyCardMsgCooldown()
 				EndIf
 				Return
 			End If
@@ -2738,7 +2739,7 @@ End Function
 
 
 Global KeyCardMsgCooldown% = 0
-Function ActiveKeyCardMsgCooldown()
+Function ActivateKeyCardMsgCooldown()
 	KeyCardMsgCooldown = MilliSecs() + 4000
 End Function
 
