@@ -320,7 +320,7 @@ Function RegisterDoor()
     If ns <> "" Then SetDefaultNamespace(ns + "::Door") Else SetDefaultNamespace("Door")
     RegisterGlobalFunction("Door@+ Create(int lvl, float x, float y, float z, float yawAngle, Room@ room, bool startOpen=false, int big=0, int keycard=0, string code=" + Chr(34) + Chr(34) + ", bool useCollisionMesh=false)", @CreateDoor)
 
-    RegisterGlobalFunction("void ActivateKeyCardMessageMessageCooldown()", @ActivateKeyCardMsgCooldown)
+    RegisterGlobalFunction("void ActivateKeyCardMessageCooldown()", @ActivateKeyCardMsgCooldown)
     RegisterGlobalFunction("void HasKeyCardMessage()", @HasKeyCardMsg)
     RegisterGlobalProperty("int KeyCardMessageCooldownUntilMillis", &KeyCardMsgCooldown)
 
