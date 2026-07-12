@@ -379,7 +379,7 @@ PlayStartupVideos()
 Global CursorIMG% = LoadImage_Strict("GFX\cursor.png", 1.0)
 
 Global SelectedLoadingScreen.LoadingScreens, LoadingScreenAmount% = 0, LoadingScreenText%
-Global LoadingBack% = LoadImage_Strict("Loadingscreens\loadingback.jpg", 1.0)
+Global LoadingBack% = LoadImage_Strict("Loadingscreens\loadingback.jpg", MenuScale)
 InitLoadingScreens()
 
 Font1% = LoadFont_Strict("GFX\font\cour\Courier New.ttf", Int(19 * MenuScale))
