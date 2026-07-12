@@ -6569,7 +6569,6 @@ Function UpdateSecurityCams()
 						If BlinkTimer > - 5 And EntityInView(sc\ScrObj, Camera)Then
 							If EntityVisible(Camera,sc\ScrObj) Then
 								;sc\InSight = True
-								SetBufferDepth(TextureBuffer(ScreenTexs[sc\ScrTexture]), TextureBuffer(ScreenTexs[2]))
 								If CoffinCam = Null Or Rand(5)=5 Or sc\CoffinEffect <> 3 Then
 									HideEntity(Camera)
 									ShowEntity(sc\Cam)
@@ -6577,7 +6576,9 @@ Function UpdateSecurityCams()
 									
 									UpdateRoomLights(sc\Cam)
 									
+									SetBuffer BackBuffer()
 									RenderWorld
+									CopyRect 0,0,512,512,0,0,BackBuffer(),TextureBuffer(ScreenTexs[sc\ScrTexture])
 									
 									HideEntity(sc\Cam)
 									ShowEntity(Camera)										
@@ -6590,13 +6591,14 @@ Function UpdateSecurityCams()
 									
 									UpdateRoomLights(CoffinCam\Cam)
 									
+									SetBuffer BackBuffer()
 									RenderWorld
+									CopyRect 0,0,512,512,0,0,BackBuffer(),TextureBuffer(ScreenTexs[sc\ScrTexture])
 									
 									HideEntity (CoffinCam\room\obj)
 									HideEntity(CoffinCam\Cam)
 									ShowEntity(Camera)										
 								EndIf
-								SetBuffer BackBuffer()
 							EndIf
 						EndIf
 						sc\State = 0
