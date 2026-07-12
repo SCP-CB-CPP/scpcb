@@ -37,6 +37,38 @@ Function RegisterMenu()
     SetDefaultNamespace(ns)
 End Function
 
+Function RegisterLoadingScreens()
+    RegisterTypeFromPtr("LoadingScreen", %LoadingScreens)
+
+    RegisterTypeField("LoadingScreen", "string ImagePath", %LoadingScreens\imgpath)
+    RegisterTypeField("LoadingScreen", "B3D::Image@ Image", %LoadingScreens\img)
+    RegisterTypeField("LoadingScreen", "int ID", %LoadingScreens\ID)
+    RegisterTypeField("LoadingScreen", "int Title", %LoadingScreens\Title)
+    RegisterTypeField("LoadingScreen", "int AlignX", %LoadingScreens\alignx)
+    RegisterTypeField("LoadingScreen", "int AlignY", %LoadingScreens\aligny)
+    RegisterTypeField("LoadingScreen", "bool DisableBackground", %LoadingScreens\DisableBackground)
+    RegisterTypeField("LoadingScreen", "carray<string> Text", %LoadingScreens\txt)
+    RegisterTypeField("LoadingScreen", "int TextAmount", %LoadingScreens\txtamount)
+    RegisterTypeField("LoadingScreen", "carray<int> TextDelay", %LoadingScreens\txtDelay)
+    RegisterTypeField("LoadingScreen", "int TotalTextDelay", %LoadingScreens\totalTxtDelay)
+
+    Local ns$ = GetDefaultNamespace()
+    If ns <> "" Then SetDefaultNamespace(ns + "::LoadingScreen") Else SetDefaultNamespace("LoadingScreen")
+
+    RegisterGlobalFunction("void Initialize()", @InitLoadingScreens)
+    RegisterGlobalFunction("void LoadFromFile(string file)", @LoadLoadingScreens)
+    RegisterGlobalFunction("void Draw(int percent, bool shortLoading=false)", @DrawLoading)
+
+    RegisterGlobalProperty("int StartTime", &LoadingScreenStartTime)
+    RegisterGlobalProperty("LoadingScreen@ Selected", &SelectedLoadingScreen)
+
+    RegisterGlobalProperty("B3D::Channel@ CWMChannel", &LoadingScreenCHN)
+    RegisterGlobalProperty("int CWMState", &LoadingScreenCWM)
+    RegisterGlobalFunction("string GetRandomDefaultWidthCharacter(int minCharCode, int maxCharCode, string def)", @RandomDefaultWidthChar)
+
+    SetDefaultNamespace(ns)
+End Function
+
 Function RegisterOptions()
     Local ns$ = GetDefaultNamespace()
     If ns <> "" Then SetDefaultNamespace(ns + "::Options") Else SetDefaultNamespace("Options")
@@ -1390,6 +1422,7 @@ Function RegisterCB()
     SetDefaultNamespace("CB")
     RegisterCommon()
     RegisterMenu()
+    RegisterLoadingScreens()
     RegisterOptions()
     RegisterIO()
     RegisterCBAudio()

@@ -169,3 +169,8 @@ bool Hook_Use914(CB::Item item, CB::SCP914::Setting setting, float x, float y, f
 
     return false;
 }
+
+bool Hook_DrawLoading(int percentage, bool isShortLoading) {
+    B3D::Text(0, 0, "Hello, my name is ExampleMod and I'm also in this loading screen!", 5, 5);
+    return false;
+}

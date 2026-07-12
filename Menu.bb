@@ -1964,6 +1964,13 @@ Function DrawLoading(percent%, shortloading=False)
 		
 		;Cls(True,False)
 		
+		If DrawLoading\Subscribers > 0 Then
+			PrepareFunction(2)
+			SetArgInt(0, percent)
+			SetArgInt(1, shortloading)
+			If CallHook(DrawLoading) Then Exit
+		EndIf
+
 		If percent > 20 Then
 			UpdateMusic()
 		EndIf
