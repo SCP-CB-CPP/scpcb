@@ -8545,6 +8545,8 @@ End Function
 
 Function UpdateDimension1499()
 
+	If NTF_1499PrevRoom\RoomTemplate\Name = "pocketdimension" Then CanSave = False
+
 	Local e.Events,n.NPCs,n2.NPCs,r.Rooms,it.Items,i%,j%,du.Dummy1499,du2.Dummy1499,temp%,scale#,x%,y%
 	
 	For e.Events = Each Events
@@ -8927,9 +8929,6 @@ Function UpdateDimension1499()
 				EndIf
 			EndIf
 			;[End Block]
-		EndIf
-		If e\EventName = "pocketdimension"
-			CanSave = False
 		EndIf
 		If e\EventName = "room1123"
 			If e\EventState > 0 And e\EventState < 7
