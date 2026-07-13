@@ -8163,6 +8163,9 @@ Function LoadPinnedEntities()
 	SetBuffer BackBuffer()
 	PinTexture(DarkTexture)
 	
+	Camera = CreateCamera()
+	PinEntity(Camera)
+
 	Dark = CreateSprite(Camera)
 	ScaleSprite(Dark, Max(GraphicWidth / 1240.0, 1.0), Max(GraphicHeight / 960.0 * 0.8, 0.8))
 	EntityTexture(Dark, DarkTexture)
@@ -8437,7 +8440,6 @@ Function LoadEntities()
 	
 	SoundEmitter = CreatePivot()
 	
-	Camera = CreateCamera()
 	CameraViewport Camera,0,0,GraphicWidth,GraphicHeight
 	CameraRange(Camera, 0.05, CameraFogFar)
 	CameraFogMode (Camera, 1)
