@@ -8,7 +8,7 @@ http://creativecommons.org/licenses/by-sa/3.0/
 
 Requirements:
 
--	[BlitzX3D](https://github.com/krimbopple/BlitzX3D)
+-	[BlitzX3D v1.2.0](https://github.com/krimbopple/BlitzX3D/releases/tag/DX9_V1.2.0_STABLE)
 
 > [!IMPORTANT]
 > Make sure to copy all .decls files from this repo's `Userlibs` folder to your Blitz3D installation's `userlibs` folder before compiling.
