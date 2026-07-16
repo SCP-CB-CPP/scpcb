@@ -1558,12 +1558,12 @@ Function UpdateLauncher()
 
 	Local TotalGfxModes% = CountGfxModes3D()
 
-	Local selectedGdc% = GreatestCommonDivsior(GraphicWidth, GraphicHeight)
+	Local selectedGdc% = GreatestCommonDivisor(GraphicWidth, GraphicHeight)
 	Local SelectedAspectRatioWidth% = GraphicWidth / selectedGdc, SelectedAspectRatioHeight% = GraphicHeight / selectedGdc
 	
 	Local SelectedGfxMode% = -1, AspectRatioCount%
 	Local SelectedAspectRatio% = -1
-	Local nativeGdc% = GreatestCommonDivsior(DesktopWidth(), DesktopHeight())
+	Local nativeGdc% = GreatestCommonDivisor(DesktopWidth(), DesktopHeight())
 	Local NativeAspectRatioWidth = DesktopWidth() / nativeGdc : NativeAspectRatioHeight = DesktopHeight() / nativeGdc
 	Local nativeAspectRatio%, nativeGfxMode
 
@@ -1587,7 +1587,7 @@ Function UpdateLauncher()
 	
 	For i% = 1 To TotalGfxModes
 		Local w% = GfxModeWidth(i), h% = GfxModeHeight(i)
-		Local gdc% = GreatestCommonDivsior(w, h)
+		Local gdc% = GreatestCommonDivisor(w, h)
 		Local aw% = w / gdc, ah% = h / gdc
 		If (aw < 50 And ah < 50) Lor (aw = NativeAspectRatioWidth And ah = NativeAspectRatioHeight) Lor (aw = SelectedAspectRatioWidth And ah = SelectedAspectRatioHeight) Then
 			Local ai% = -1
@@ -1820,7 +1820,7 @@ Function UpdateLauncher()
 	If SteamActive Then Steam_SetOverlayNotificationPosition(3)
 End Function
 
-Function GreatestCommonDivsior(u%, v%)
+Function GreatestCommonDivisor(u%, v%)
 	If u <= 0 Lor v <= 0 Then Return 1
 
 	Local k% = 0, t% = u Or v, d
