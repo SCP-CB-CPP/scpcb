@@ -2319,6 +2319,32 @@ Function CreateDoor.Doors(lvl, x#, y#, z#, angle#, room.Rooms, dopen% = False,  
 	Local d2.Doors
 	
 	d.Doors = New Doors
+	
+	d\ID = DoorTempID
+	DoorTempID=DoorTempID+1
+	
+	d\KeyCard = keycard
+	d\Code = code
+	
+	d\Level = lvl
+	d\LevelDest = 66
+
+	d\angle = angle
+	d\open = dopen
+
+	d\dir=big
+	d\room=room
+
+	If CreateDoor\Subscribers > 0 Then
+		PrepareFunction(5)
+		SetArgObj(0, &d)
+		SetArgFloat(1, x)
+		SetArgFloat(2, y)
+		SetArgFloat(3, z)
+		SetArgInt(4, useCollisionMesh)
+		If CallHook(CreateDoor) Then Return d
+	EndIf
+
 	If big=1 Then
 		d\obj = CopyEntity(BigDoorOBJ(0))
 		ScaleEntity(d\obj, 55 * RoomScale, 55 * RoomScale, 55 * RoomScale)
@@ -2371,15 +2397,6 @@ Function CreateDoor.Doors(lvl, x#, y#, z#, angle#, room.Rooms, dopen% = False,  
 	EntityType d\obj, HIT_MAP
 	EntityType d\obj2, HIT_MAP
 	
-	d\ID = DoorTempID
-	DoorTempID=DoorTempID+1
-	
-	d\KeyCard = keycard
-	d\Code = code
-	
-	d\Level = lvl
-	d\LevelDest = 66
-	
 	For i% = 0 To 1
 		If code <> "" Then 
 			d\buttons[i]= CopyEntity(ButtonCodeOBJ)
@@ -2428,10 +2445,7 @@ Function CreateDoor.Doors(lvl, x#, y#, z#, angle#, room.Rooms, dopen% = False,  
 	EndIf
 	
 	EntityParent(d\frameobj, parent)
-	EntityParent(d\obj, parent)
-	
-	d\angle = angle
-	d\open = dopen		
+	EntityParent(d\obj, parent)	
 	
 	EntityPickMode(d\obj, 2)
 	If d\obj2 <> 0 Then
@@ -2441,8 +2455,6 @@ Function CreateDoor.Doors(lvl, x#, y#, z#, angle#, room.Rooms, dopen% = False,  
 	EntityPickMode d\frameobj,2
 	
 	If d\open And big = False And Rand(8) = 1 Then d\AutoClose = True
-	d\dir=big
-	d\room=room
 	
 	d\MTFClose = True
 	
@@ -2470,6 +2482,12 @@ Function CreateDoor.Doors(lvl, x#, y#, z#, angle#, room.Rooms, dopen% = False,  
 		EndIf
 	EndIf
 	
+	If PostCreateDoor\Subscribers > 0 Then
+		PrepareFunction(1)
+		SetArgObj(0, &d)
+		CallHook(PostCreateDoor)
+	EndIf
+
 	Return d
 	
 End Function
@@ -2531,6 +2549,12 @@ Function UpdateDoors()
 	ClosestDoor = Null
 	
 	For d.Doors = Each Doors
+		If UpdateDoor\Subscribers > 0 Then
+			PrepareFunction(1)
+			SetArgObj(0, &d)
+			If CallHook(UpdateDoor) Then Continue
+		EndIf
+
 		If d\dist < HideDistance*2 Or d\IsElevatorDoor>0 Then ;Make elevator doors update everytime because if not, this can cause a bug where the elevators suddenly won't work, most noticeable in room2tunnel - ENDSHN
 			
 			If (d\openstate >= 180 Or d\openstate <= 0) And GrabbedEntity = 0 Then

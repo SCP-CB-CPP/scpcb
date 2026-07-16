@@ -66,6 +66,9 @@ Global ConsoleCheckCanToggleNPC.Hooks = CreateHook("Hook_ConsoleCheckCanToggleNP
 Global EnableNPC.Hooks = CreateHook("Hook_EnableNPC", HOOK_TYPE_OVERRIDABLE)
 Global DisableNPC.Hooks = CreateHook("Hook_DisableNPC", HOOK_TYPE_OVERRIDABLE)
 
+Global CreateDoor.Hooks = CreateHook("Hook_CreateDoor", HOOK_TYPE_OVERRIDABLE)
+Global PostCreateDoor.Hooks = CreateHook("Hook_PostCreateDoor")
+Global UpdateDoor.Hooks = CreateHook("Hook_UpdateDoor", HOOK_TYPE_OVERRIDABLE)
 Global CanUseDoor.Hooks = CreateHook("Hook_CanUseDoor", HOOK_TYPE_RETURN_INT)
 Global UseDoor.Hooks = CreateHook("Hook_UseDoor", HOOK_TYPE_OVERRIDABLE)
 Global Use914.Hooks = CreateHook("Hook_Use914", HOOK_TYPE_OVERRIDABLE)

@@ -342,7 +342,7 @@ Function RegisterDoor()
     RegisterTypeField("Door", "bool IsElevatorDoor", %Doors\IsElevatorDoor)
     RegisterTypeField("Door", "bool MTFClose", %Doors\MTFClose)
     RegisterTypeField("Door", "bool NPCCalledElevator", %Doors\NPCCalledElevator) ; TODO: Dead code?
-    RegisterTypeField("Door", "B3D::Mesh@ DoorHitObject", %Doors\DoorHitOBJ)
+    RegisterTypeField("Door", "B3D::Mesh@ HitObject", %Doors\DoorHitOBJ)
 
     RegisterObjectMethod("Door", "void Remove()", @RemoveDoor)
     RegisterObjectMethod("Door", "bool CanUse(bool showMsg=true, bool playSFX=true)", @CanUseDoor)
@@ -351,6 +351,11 @@ Function RegisterDoor()
     Local ns$ = GetDefaultNamespace()
     If ns <> "" Then SetDefaultNamespace(ns + "::Door") Else SetDefaultNamespace("Door")
     RegisterGlobalFunction("Door@+ Create(int lvl, float x, float y, float z, float yawAngle, Room@ room, bool startOpen=false, int big=0, int keycard=0, string code=" + Chr(34) + Chr(34) + ", bool useCollisionMesh=false)", @CreateDoor)
+
+    RegisterGlobalFunction("void UpdateAll()", @UpdateDoors)
+
+    RegisterGlobalProperty("Door@ Closest", &ClosestDoor)
+    RegisterGlobalProperty("B3D::Mesh@ ClosestButton", &ClosestButton)
 
     RegisterGlobalFunction("void ActivateKeyCardMessageCooldown()", @ActivateKeyCardMsgCooldown)
     RegisterGlobalFunction("void HasKeyCardMessage()", @HasKeyCardMsg)
