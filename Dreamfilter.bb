@@ -10,6 +10,7 @@ Function CreateBlurImage()
 	CameraRange cam, 0.1, 1.5
 	MoveEntity cam, 0, 0, 10000
 	ark_blur_cam = cam
+	PinEntity(ark_blur_cam)
 	
 	ark_sw = GraphicWidth;GraphicsWidth()
 	ark_sh = GraphicHeight;GraphicsHeight()
@@ -30,10 +31,12 @@ Function CreateBlurImage()
 	EntityOrder spr, -100000
 	EntityBlend spr, 1
 	ark_blur_image = spr
+	PinEntity(ark_blur_image)
 	
 	;Create blur texture
 	ark_blur_texture = CreateTexture(SMALLEST_POWER_TWO, SMALLEST_POWER_TWO, 1 + 256 + 1024)
 	EntityTexture spr, ark_blur_texture
+	PinTexture(ark_blur_texture)
 End Function
 
 Function UpdateBlur(power#)

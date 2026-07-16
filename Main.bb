@@ -8099,6 +8099,8 @@ Function LoadPinnedEntities()
 	ScreenTexs[2] = CreateTexture(512, 512, 8192)
 	PinTexture(ScreenTexs[2])
 
+	CreateBlurImage()
+
 	FogTexture = LoadTexture_Strict("GFX\fog.jpg", 1)
 	PinTexture(FogTexture)
 	Fog = CreateSprite(ark_blur_cam)
@@ -8447,7 +8449,6 @@ Function LoadEntities()
 	CameraFogColor (Camera, 0, 0, 0)
 	AmbientLight Brightness, Brightness, Brightness
 	
-	CreateBlurImage()
 	CameraProjMode ark_blur_cam,0
 	;Listener = CreateListener(Camera)
 	
@@ -9098,7 +9099,6 @@ Function NullGame(playbuttonsfx%=True)
 	
 	; Don't clear shaders
 	ClearWorld(1, 1, 1, 0)
-	ark_blur_cam = 0
 	Collider = 0
 	Sky = 0
 	InitFastResize()
