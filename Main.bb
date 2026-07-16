@@ -9799,7 +9799,11 @@ Function LoadEventSound(e.Events,file$,num%=0)
 End Function
 
 Function UpdateMusic()
-	
+	If UpdateMusic\Subscribers > 0 Then
+		PrepareFunction(0)
+		If CallHook(UpdateMusic) Then Return
+	EndIf
+
 	If ConsoleFlush Then
 		If Not ChannelPlaying(ConsoleMusPlay) Then ConsoleMusPlay = PlaySound(ConsoleMusFlush)
 	ElseIf (Not PlayCustomMusic)

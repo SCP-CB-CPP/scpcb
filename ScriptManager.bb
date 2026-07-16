@@ -29,6 +29,7 @@ Global ExecuteConsoleCommand.Hooks = CreateHook("Hook_ExecuteConsoleCommand", HO
 Global LoadEntities.Hooks = CreateHook("Hook_LoadEntities")
 Global NullGame.Hooks = CreateHook("Hook_NullGame")
 Global DrawLoading.Hooks = CreateHook("Hook_DrawLoading", HOOK_TYPE_OVERRIDABLE)
+Global UpdateMusic.Hooks = CreateHook("Hook_UpdateMusic", HOOK_TYPE_OVERRIDABLE)
 
 Global MapInitializeDimensions.Hooks = CreateHook("Hook_MapInitializeDimensions", HOOK_TYPE_OVERRIDABLE)
 Global MapCreateLayout.Hooks = CreateHook("Hook_MapCreateLayout", HOOK_TYPE_OVERRIDABLE)

@@ -238,6 +238,9 @@ Function RegisterCBAudio()
     RegisterGlobalFunction("Music RegisterCustom(string file)", @RegisterCustomMusic)
     RegisterGlobalProperty("Music NowPlaying", &NowPlaying)
     RegisterGlobalProperty("Music ShouldPlay", &ShouldPlay)
+
+    RegisterGlobalProperty("float CurrentVolume", &CurrMusicVolume)
+    RegisterGlobalProperty("CB::Stream@ Channel", &MusicCHN)
     SetDefaultNamespace(ns)
 End Function
 
