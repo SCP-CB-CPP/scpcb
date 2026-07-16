@@ -18,6 +18,7 @@ Function RegisterMenu()
     If ns <> "" Then SetDefaultNamespace(ns + "::Menu") Else SetDefaultNamespace("Menu")
 
     RegisterGlobalProperty("const float Scale", &MenuScale)
+    RegisterGlobalProperty("const float HUDScale", &HUDScale)
 
     RegisterGlobalProperty("const bool IsMainMenuOpen", &MainMenuOpen)
     RegisterGlobalProperty("int MainMenuTab", &MainMenuTab)
