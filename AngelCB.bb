@@ -1023,6 +1023,9 @@ Function RegisterPlayer()
     RegisterGlobalProperty("string Message", &Msg)
     RegisterGlobalProperty("string DeathMessage", &DeathMsg)
 
+    RegisterGlobalProperty("bool GameSaved", &GameSaved)
+    RegisterGlobalProperty("bool CanSave", &CanSave)
+
     RegisterGlobalFunction("void MoveToPocketDimension()", @MoveToPocketDimension)
 
     RegisterGlobalFunction("bool IsInReachableRoom(bool is049ChamberReachable=false)", @PlayerInReachableRoom)
