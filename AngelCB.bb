@@ -23,10 +23,12 @@ Function RegisterMenu()
     RegisterGlobalProperty("const bool IsMainMenuOpen", &MainMenuOpen)
     RegisterGlobalProperty("int MainMenuTab", &MainMenuTab)
     
+    RegisterGlobalFunction("void DrawTiledImageRect(B3D::Image@ img, int srcX, int srcY, float srcWidth, float srcHeight, int x, int y, int width, int height)", @DrawTiledImageRect)
     RegisterGlobalFunction("string InputBox(int x, int y, int width, int height, string text, int id=0, int virtualKeyboardMode=0)", @InputBox)
     RegisterGlobalFunction("void DrawFrame(int x, int y, int width, int height, int xOffset=0, int yOffset=0, bool scrollY=true)", @DrawFrame)
     RegisterGlobalFunction("bool DrawButton(int x, int y, int width, int height, string text, bool bigFont=true, bool waitForMouseUp=false, bool disabled=false)", @DrawButton)
     RegisterGlobalFunction("bool DrawTick(int x, int y, bool selected, bool locked=false)", @DrawTick)
+    RegisterGlobalFunction("void DrawBar(B3D::Image@ img, int x, int y, int width, float filled, bool centerX=false)", @DrawBar)
 
     RegisterGlobalProperty("int CurrentOpen", &MenuOpen)
     RegisterGlobalProperty("float StopHidingTimer", &StopHidingTimer)
