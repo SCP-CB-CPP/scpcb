@@ -32,6 +32,7 @@ Function InstantiateMod.Mods(id$, path$)
         Local l$ = Trim(ReadLine(ini))
         If l <> "" And Instr(l, "#") <> 1 And Instr(l, ";") <> 1 Then
             Local splitterPos = Instr(l, "=")
+            If splitterPos = 0 Then Continue
             Local key$ = Trim(Left(l, splitterPos - 1))
             Local value$ = Trim(Right(l, Len(l) - splitterPos))
             Select key
@@ -104,6 +105,7 @@ Function ReloadMods()
             l$ = Trim(ReadLine(mods))
             If l <> "" And Instr(l, "#") <> 1 And Instr(l, ";") <> 1 Then
                 splitterPos = Instr(l, "=")
+                If splitterPos = 0 Then Continue
                 key$ = Trim(Left(l, splitterPos - 1))
                 value$ = Trim(Right(l, Len(l) - splitterPos))
                 For m.Mods = Each Mods

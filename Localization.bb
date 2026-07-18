@@ -442,6 +442,7 @@ Function LoadLocalization(loc.LocalizationTable, file$)
             If splitterPos = 0 And Instr(l, "[") = 1 Then
                 section = Trim(Mid(l, 2, Len(l) - 2))
             Else
+				If splitterPos = 0 Then Continue
                 Local key$ = Trim(Left(l, splitterPos - 1))
                 Local value$ = Trim(Right(l, Len(l) - splitterPos))
                 Select section

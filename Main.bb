@@ -10690,6 +10690,7 @@ Function Load294()
 					RuntimeErrorExt("Layer " + Str(layer) + " out of range.")
 				EndIf
 			Else
+				If splitterPos = 0 Then Continue
 				Local key$ = Trim(Left(l, splitterPos - 1))
 				Local value$ = Trim(Right(l, Len(l) - splitterPos))
 				If row = -1 Then

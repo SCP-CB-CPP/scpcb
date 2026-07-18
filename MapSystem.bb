@@ -1667,6 +1667,7 @@ Function LoadRoomTemplates(file$)
 			If rt = Null Then rt = CreateRoomTemplate(l)
 		Else If l <> "" And Instr(l, "#") <> 1 And Instr(l, ";") <> 1 Then
 			Local splitterPos% = Instr(l, "=")
+			If splitterPos = 0 Then Continue
 			Local key$ = Lower(Trim(Left(l, splitterPos - 1)))
 			Local value$ = Trim(Right(l, Len(l) - splitterPos))
 			Select key
