@@ -246,7 +246,6 @@ Else
 	e\owner = owner
 EndIf
 e\ent = CreateMesh()
-NameEntity(e\ent,"Emitter3")
 e\surf = CreateSurface(e\ent)
 e\tmp = Object.Template(template)
 e\max_time = e\tmp\emitter_max_time
@@ -263,7 +262,7 @@ End Function
 
 Function FreeEmitter(ent, delete_particles = True)
 For e.Emitter = Each Emitter
-	If e\owner = ent Then
+	If e\ent = ent Then
 		If delete_particles Then
 			For p.Particle = Each Particle
 				If p\emitter = e Then Delete p
@@ -280,13 +279,13 @@ End Function
 
 Function FreezeEmitter(ent)
 For e.Emitter = Each Emitter
-	If e\owner = ent Then e\frozen = True
+	If e\ent = ent Then e\frozen = True
 Next
 End Function
 
 Function UnfreezeEmitter(ent)
 For e.Emitter = Each Emitter
-	If e\owner = ent Then e\frozen = False
+	If e\ent = ent Then e\frozen = False
 Next
 End Function
 

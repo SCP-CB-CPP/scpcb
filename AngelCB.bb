@@ -305,7 +305,9 @@ Function RegisterParticleSystem()
     RegisterObjectMethod("ParticleTemplate", "void SetColors(int col1, int col2)", @SetTemplateColors)
     RegisterObjectMethod("ParticleTemplate", "void SetFloor(float y, float bounce=0.5)", @SetTemplateFloor)
     RegisterObjectMethod("ParticleTemplate", "void SetFixAngles(int pitch, int yaw)", @SetTemplateFixAngles)
-    RegisterObjectMethod("ParticleTemplate", "void AddSubTemplate(ParticleTemplate@ template)", @SetTemplateSubTemplate)
+    ; Effectively, sub-templates can't be freed the original logic for freeing was just incorrect.
+    ; Since sub-templates don't do anything interesting (literally just spawning in another emitter), I believe excluding them in general is fine.
+    ;RegisterObjectMethod("ParticleTemplate", "void AddSubTemplate(ParticleTemplate@ template)", @SetTemplateSubTemplate)
 
     RegisterObjectMethod("ParticleTemplate", "ParticleEmitter@ Emit(B3D::Entity@ owner, bool fixed=false)", @SetParticleSystemEmitter)
 
