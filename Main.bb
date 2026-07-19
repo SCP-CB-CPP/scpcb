@@ -6447,227 +6447,229 @@ Function DrawGUI()
 							ResumeChannelWithSubtitles(RadioCHN(5))
 							If ChannelPlaying(RadioCHN(5)) = False Then RadioCHN(5) = PlaySound_Strict(RadioStatic)	
 						Else
-							Select Int(SelectedItem\state2)
-								Case 0 ;randomkanava
-									ResumeChannelWithSubtitles(RadioCHN(0))
-									strtemp = "        " + I_Loc\HUD_RadioUsertrack + " - "
-									If (Not EnableUserTracks)
-										If ChannelPlaying(RadioCHN(0)) = False Then RadioCHN(0) = PlaySound_Strict(RadioStatic)
-										strtemp = strtemp + I_Loc\HUD_RadioUsertrackDisabled + "     "
-									ElseIf UserTrackMusicAmount<1
-										If ChannelPlaying(RadioCHN(0)) = False Then RadioCHN(0) = PlaySound_Strict(RadioStatic)
-										strtemp = strtemp + I_Loc\HUD_RadioUsertrackNotracks + "     "
-									Else
-										If (Not ChannelPlaying(RadioCHN(0)))
-											If (Not UserTrackFlag%)
-												If UserTrackMode
-													If RadioState(0)<(UserTrackMusicAmount-1)
-														RadioState(0) = RadioState(0) + 1
-													Else
-														RadioState(0) = 0
-													EndIf
-													UserTrackFlag = True
-												Else
-													RadioState(0) = Rand(0,UserTrackMusicAmount-1)
-												EndIf
-											EndIf
-											If CurrUserTrack%<>0 Then FreeSound_Strict(CurrUserTrack%) : CurrUserTrack% = 0
-											CurrUserTrack% = LoadSound_Strict("SFX\Radio\UserTracks\"+UserTrackName$(RadioState(0)))
-											RadioCHN(0) = PlaySound_Strict(CurrUserTrack%)
-											DebugLog "CurrTrack: "+RadioState(0)
-											DebugLog UserTrackName$(RadioState(0))
+							If Not SelectedItem\itemtemplate\name = "veryfineradio" Then
+								Select Int(SelectedItem\state2)
+									Case 0 ;randomkanava
+										ResumeChannelWithSubtitles(RadioCHN(0))
+										strtemp = "        " + I_Loc\HUD_RadioUsertrack + " - "
+										If (Not EnableUserTracks)
+											If ChannelPlaying(RadioCHN(0)) = False Then RadioCHN(0) = PlaySound_Strict(RadioStatic)
+											strtemp = strtemp + I_Loc\HUD_RadioUsertrackDisabled + "     "
+										ElseIf UserTrackMusicAmount<1
+											If ChannelPlaying(RadioCHN(0)) = False Then RadioCHN(0) = PlaySound_Strict(RadioStatic)
+											strtemp = strtemp + I_Loc\HUD_RadioUsertrackNotracks + "     "
 										Else
-											strtemp = strtemp + Upper(UserTrackName$(RadioState(0))) + "          "
-											UserTrackFlag = False
-										EndIf
-										
-										If KeyHit(2) Then
-											PlaySound_Strict RadioSquelch
-											If (Not UserTrackFlag%)
-												If UserTrackMode
-													If RadioState(0)<(UserTrackMusicAmount-1)
-														RadioState(0) = RadioState(0) + 1
-													Else
-														RadioState(0) = 0
-													EndIf
-													UserTrackFlag = True
-												Else
-													RadioState(0) = Rand(0,UserTrackMusicAmount-1)
-												EndIf
-											EndIf
-											If CurrUserTrack%<>0 Then FreeSound_Strict(CurrUserTrack%) : CurrUserTrack% = 0
-											CurrUserTrack% = LoadSound_Strict("SFX\Radio\UserTracks\"+UserTrackName$(RadioState(0)))
-											RadioCHN(0) = PlaySound_Strict(CurrUserTrack%)
-											DebugLog "CurrTrack: "+RadioState(0)
-											DebugLog UserTrackName$(RadioState(0))
-										EndIf
-									EndIf
-								Case 1 ;hälytyskanava
-									DebugLog RadioState(1) 
-									
-									ResumeChannelWithSubtitles(RadioCHN(1))
-									strtemp = "        " + I_Loc\HUD_RadioCb + "          "
-									If ChannelPlaying(RadioCHN(1)) = False Then
-										
-										If RadioState(1) => 5 Then
-											RadioCHN(1) = PlaySound_Strict(RadioSFX(1,1))	
-											RadioState(1) = 0
-										Else
-											RadioState(1)=RadioState(1)+1	
-											RadioCHN(1) = PlaySound_Strict(RadioSFX(1,0))	
-										EndIf
-										
-									EndIf
-									
-								Case 2 ;scp-radio
-									ResumeChannelWithSubtitles(RadioCHN(2))
-									strtemp = "        " + I_Loc\HUD_RadioRadio + "          "
-									If ChannelPlaying(RadioCHN(2)) = False Then
-										RadioState(2)=RadioState(2)+1
-										If RadioState(2) = 17 Then RadioState(2) = 1
-										If Floor(RadioState(2)/2)=Ceil(RadioState(2)/2) Then ;parillinen, soitetaan normiviesti
-											RadioCHN(2) = PlaySound_Strict(RadioSFX(2,Int(RadioState(2)/2)))	
-										Else ;pariton, soitetaan musiikkia
-											RadioCHN(2) = PlaySound_Strict(RadioSFX(2,0))
-										EndIf
-									EndIf 
-								Case 3
-									ResumeChannelWithSubtitles(RadioCHN(3))
-									strtemp = "             " + I_Loc\HUD_RadioEmergency + "         "
-									If ChannelPlaying(RadioCHN(3)) = False Then RadioCHN(3) = PlaySound_Strict(RadioStatic)
-									
-									If MTFtimer > 0 Then 
-										RadioState(3)=RadioState(3)+Max(Rand(-10,1),0)
-										Select RadioState(3)
-											Case 40
-												If Not RadioState3(0) Then
-													RadioCHN(3) = PlaySound_Strict(LoadTempSound("SFX\Character\MTF\Random1.ogg"))
-													RadioState(3) = RadioState(3)+1	
-													RadioState3(0) = True	
-												EndIf											
-											Case 400
-												If Not RadioState3(1) Then
-													RadioCHN(3) = PlaySound_Strict(LoadTempSound("SFX\Character\MTF\Random2.ogg"))
-													RadioState(3) = RadioState(3)+1	
-													RadioState3(1) = True	
-												EndIf	
-											Case 800
-												If Not RadioState3(2) Then
-													RadioCHN(3) = PlaySound_Strict(LoadTempSound("SFX\Character\MTF\Random3.ogg"))
-													RadioState(3) = RadioState(3)+1	
-													RadioState3(2) = True
-												EndIf													
-											Case 1200
-												If Not RadioState3(3) Then
-													RadioCHN(3) = PlaySound_Strict(LoadTempSound("SFX\Character\MTF\Random4.ogg"))	
-													RadioState(3) = RadioState(3)+1	
-													RadioState3(3) = True
-												EndIf
-											Case 1600
-												If Not RadioState3(4) Then
-													RadioCHN(3) = PlaySound_Strict(LoadTempSound("SFX\Character\MTF\Random5.ogg"))	
-													RadioState(3) = RadioState(3)+1
-													RadioState3(4) = True
-												EndIf
-											Case 2000
-												If Not RadioState3(5) Then
-													RadioCHN(3) = PlaySound_Strict(LoadTempSound("SFX\Character\MTF\Random6.ogg"))	
-													RadioState(3) = RadioState(3)+1
-													RadioState3(5) = True
-												EndIf
-											Case 2400
-												If Not RadioState3(6) Then
-													RadioCHN(3) = PlaySound_Strict(LoadTempSound("SFX\Character\MTF\Random7.ogg"))	
-													RadioState(3) = RadioState(3)+1
-													RadioState3(6) = True
-												EndIf
-										End Select
-									EndIf
-								Case 4
-									ResumeChannelWithSubtitles(RadioCHN(6)) ;taustalle kohinaa
-									If ChannelPlaying(RadioCHN(6)) = False Then RadioCHN(6) = PlaySound_Strict(RadioStatic)									
-									
-									ResumeChannelWithSubtitles(RadioCHN(4))
-									If ChannelPlaying(RadioCHN(4)) = False Then 
-										If RemoteDoorOn = False And RadioState(8) = False Then
-											RadioCHN(4) = PlaySound_Strict(LoadTempSound("SFX\radio\Chatter3.ogg"))	
-											RadioState(8) = True
-										Else
-											RadioState(4)=RadioState(4)+Max(Rand(-10,1),0)
-											
-											Select RadioState(4)
-												Case 10
-													If (Not Contained106)
-														If Not RadioState4(0) Then
-															RadioCHN(4) = PlaySound_Strict(LoadTempSound("SFX\radio\OhGod.ogg"))
-															RadioState(4) = RadioState(4)+1
-															RadioState4(0) = True
+											If (Not ChannelPlaying(RadioCHN(0)))
+												If (Not UserTrackFlag%)
+													If UserTrackMode
+														If RadioState(0)<(UserTrackMusicAmount-1)
+															RadioState(0) = RadioState(0) + 1
+														Else
+															RadioState(0) = 0
 														EndIf
+														UserTrackFlag = True
+													Else
+														RadioState(0) = Rand(0,UserTrackMusicAmount-1)
 													EndIf
-												Case 100
-													If Not RadioState4(1) Then
-														RadioCHN(4) = PlaySound_Strict(LoadTempSound("SFX\radio\Chatter2.ogg"))
-														RadioState(4) = RadioState(4)+1
-														RadioState4(1) = True
-													EndIf		
-												Case 158
-													If MTFtimer = 0 And (Not RadioState4(2)) Then 
-														RadioCHN(4) = PlaySound_Strict(LoadTempSound("SFX\radio\franklin1.ogg"))
-														RadioState(4) = RadioState(4)+1
-														RadioState(2) = True
+												EndIf
+												If CurrUserTrack%<>0 Then FreeSound_Strict(CurrUserTrack%) : CurrUserTrack% = 0
+												CurrUserTrack% = LoadSound_Strict("SFX\Radio\UserTracks\"+UserTrackName$(RadioState(0)))
+												RadioCHN(0) = PlaySound_Strict(CurrUserTrack%)
+												DebugLog "CurrTrack: "+RadioState(0)
+												DebugLog UserTrackName$(RadioState(0))
+											Else
+												strtemp = strtemp + Upper(UserTrackName$(RadioState(0))) + "          "
+												UserTrackFlag = False
+											EndIf
+											
+											If KeyHit(2) Then
+												PlaySound_Strict RadioSquelch
+												If (Not UserTrackFlag%)
+													If UserTrackMode
+														If RadioState(0)<(UserTrackMusicAmount-1)
+															RadioState(0) = RadioState(0) + 1
+														Else
+															RadioState(0) = 0
+														EndIf
+														UserTrackFlag = True
+													Else
+														RadioState(0) = Rand(0,UserTrackMusicAmount-1)
 													EndIf
-												Case 200
-													If Not RadioState4(3) Then
-														RadioCHN(4) = PlaySound_Strict(LoadTempSound("SFX\radio\Chatter4.ogg"))
-														RadioState(4) = RadioState(4)+1
-														RadioState4(3) = True
-													EndIf		
-												Case 260
-													If Not RadioState4(4) Then
-														RadioCHN(4) = PlaySound_Strict(LoadTempSound("SFX\SCP\035\RadioHelp1.ogg"))
-														RadioState(4) = RadioState(4)+1
-														RadioState4(4) = True
-													EndIf		
-												Case 300
-													If Not RadioState4(5) Then
-														RadioCHN(4) = PlaySound_Strict(LoadTempSound("SFX\radio\Chatter1.ogg"))	
-														RadioState(4) = RadioState(4)+1	
-														RadioState4(5) = True
-													EndIf		
-												Case 350
-													If Not RadioState4(6) Then
-														RadioCHN(4) = PlaySound_Strict(LoadTempSound("SFX\radio\franklin2.ogg"))
-														RadioState(4) = RadioState(4)+1
-														RadioState4(6) = True
-													EndIf		
+												EndIf
+												If CurrUserTrack%<>0 Then FreeSound_Strict(CurrUserTrack%) : CurrUserTrack% = 0
+												CurrUserTrack% = LoadSound_Strict("SFX\Radio\UserTracks\"+UserTrackName$(RadioState(0)))
+												RadioCHN(0) = PlaySound_Strict(CurrUserTrack%)
+												DebugLog "CurrTrack: "+RadioState(0)
+												DebugLog UserTrackName$(RadioState(0))
+											EndIf
+										EndIf
+									Case 1 ;hälytyskanava
+										DebugLog RadioState(1) 
+										
+										ResumeChannelWithSubtitles(RadioCHN(1))
+										strtemp = "        " + I_Loc\HUD_RadioCb + "          "
+										If ChannelPlaying(RadioCHN(1)) = False Then
+											
+											If RadioState(1) => 5 Then
+												RadioCHN(1) = PlaySound_Strict(RadioSFX(1,1))	
+												RadioState(1) = 0
+											Else
+												RadioState(1)=RadioState(1)+1	
+												RadioCHN(1) = PlaySound_Strict(RadioSFX(1,0))	
+											EndIf
+											
+										EndIf
+										
+									Case 2 ;scp-radio
+										ResumeChannelWithSubtitles(RadioCHN(2))
+										strtemp = "        " + I_Loc\HUD_RadioRadio + "          "
+										If ChannelPlaying(RadioCHN(2)) = False Then
+											RadioState(2)=RadioState(2)+1
+											If RadioState(2) = 17 Then RadioState(2) = 1
+											If Floor(RadioState(2)/2)=Ceil(RadioState(2)/2) Then ;parillinen, soitetaan normiviesti
+												RadioCHN(2) = PlaySound_Strict(RadioSFX(2,Int(RadioState(2)/2)))	
+											Else ;pariton, soitetaan musiikkia
+												RadioCHN(2) = PlaySound_Strict(RadioSFX(2,0))
+											EndIf
+										EndIf 
+									Case 3
+										ResumeChannelWithSubtitles(RadioCHN(3))
+										strtemp = "             " + I_Loc\HUD_RadioEmergency + "         "
+										If ChannelPlaying(RadioCHN(3)) = False Then RadioCHN(3) = PlaySound_Strict(RadioStatic)
+										
+										If MTFtimer > 0 Then 
+											RadioState(3)=RadioState(3)+Max(Rand(-10,1),0)
+											Select RadioState(3)
+												Case 40
+													If Not RadioState3(0) Then
+														RadioCHN(3) = PlaySound_Strict(LoadTempSound("SFX\Character\MTF\Random1.ogg"))
+														RadioState(3) = RadioState(3)+1	
+														RadioState3(0) = True	
+													EndIf											
 												Case 400
-													If Not RadioState4(7) Then
-														RadioCHN(4) = PlaySound_Strict(LoadTempSound("SFX\SCP\035\RadioHelp2.ogg"))
-														RadioState(4) = RadioState(4)+1
-														RadioState4(7) = True
-													EndIf		
-												Case 450
-													If Not RadioState4(8) Then
-														RadioCHN(4) = PlaySound_Strict(LoadTempSound("SFX\radio\franklin3.ogg"))	
-														RadioState(4) = RadioState(4)+1		
-														RadioState4(8) = True
-													EndIf		
-												Case 600
-													If Not RadioState4(9) Then
-														RadioCHN(4) = PlaySound_Strict(LoadTempSound("SFX\radio\franklin4.ogg"))	
-														RadioState(4) = RadioState(4)+1	
-														RadioState4(9) = True
-													EndIf		
+													If Not RadioState3(1) Then
+														RadioCHN(3) = PlaySound_Strict(LoadTempSound("SFX\Character\MTF\Random2.ogg"))
+														RadioState(3) = RadioState(3)+1	
+														RadioState3(1) = True	
+													EndIf	
+												Case 800
+													If Not RadioState3(2) Then
+														RadioCHN(3) = PlaySound_Strict(LoadTempSound("SFX\Character\MTF\Random3.ogg"))
+														RadioState(3) = RadioState(3)+1	
+														RadioState3(2) = True
+													EndIf													
+												Case 1200
+													If Not RadioState3(3) Then
+														RadioCHN(3) = PlaySound_Strict(LoadTempSound("SFX\Character\MTF\Random4.ogg"))	
+														RadioState(3) = RadioState(3)+1	
+														RadioState3(3) = True
+													EndIf
+												Case 1600
+													If Not RadioState3(4) Then
+														RadioCHN(3) = PlaySound_Strict(LoadTempSound("SFX\Character\MTF\Random5.ogg"))	
+														RadioState(3) = RadioState(3)+1
+														RadioState3(4) = True
+													EndIf
+												Case 2000
+													If Not RadioState3(5) Then
+														RadioCHN(3) = PlaySound_Strict(LoadTempSound("SFX\Character\MTF\Random6.ogg"))	
+														RadioState(3) = RadioState(3)+1
+														RadioState3(5) = True
+													EndIf
+												Case 2400
+													If Not RadioState3(6) Then
+														RadioCHN(3) = PlaySound_Strict(LoadTempSound("SFX\Character\MTF\Random7.ogg"))	
+														RadioState(3) = RadioState(3)+1
+														RadioState3(6) = True
+													EndIf
 											End Select
 										EndIf
-									EndIf
-									
-									
-								Case 5
-									ResumeChannelWithSubtitles(RadioCHN(5))
-									If ChannelPlaying(RadioCHN(5)) = False Then RadioCHN(5) = PlaySound_Strict(RadioStatic)
-							End Select 
-							
+									Case 4
+										ResumeChannelWithSubtitles(RadioCHN(6)) ;taustalle kohinaa
+										If ChannelPlaying(RadioCHN(6)) = False Then RadioCHN(6) = PlaySound_Strict(RadioStatic)									
+										
+										ResumeChannelWithSubtitles(RadioCHN(4))
+										If ChannelPlaying(RadioCHN(4)) = False Then 
+											If RemoteDoorOn = False And RadioState(8) = False Then
+												RadioCHN(4) = PlaySound_Strict(LoadTempSound("SFX\radio\Chatter3.ogg"))	
+												RadioState(8) = True
+											Else
+												RadioState(4)=RadioState(4)+Max(Rand(-10,1),0)
+												
+												Select RadioState(4)
+													Case 10
+														If (Not Contained106)
+															If Not RadioState4(0) Then
+																RadioCHN(4) = PlaySound_Strict(LoadTempSound("SFX\radio\OhGod.ogg"))
+																RadioState(4) = RadioState(4)+1
+																RadioState4(0) = True
+															EndIf
+														EndIf
+													Case 100
+														If Not RadioState4(1) Then
+															RadioCHN(4) = PlaySound_Strict(LoadTempSound("SFX\radio\Chatter2.ogg"))
+															RadioState(4) = RadioState(4)+1
+															RadioState4(1) = True
+														EndIf		
+													Case 158
+														If MTFtimer = 0 And (Not RadioState4(2)) Then 
+															RadioCHN(4) = PlaySound_Strict(LoadTempSound("SFX\radio\franklin1.ogg"))
+															RadioState(4) = RadioState(4)+1
+															RadioState(2) = True
+														EndIf
+													Case 200
+														If Not RadioState4(3) Then
+															RadioCHN(4) = PlaySound_Strict(LoadTempSound("SFX\radio\Chatter4.ogg"))
+															RadioState(4) = RadioState(4)+1
+															RadioState4(3) = True
+														EndIf		
+													Case 260
+														If Not RadioState4(4) Then
+															RadioCHN(4) = PlaySound_Strict(LoadTempSound("SFX\SCP\035\RadioHelp1.ogg"))
+															RadioState(4) = RadioState(4)+1
+															RadioState4(4) = True
+														EndIf		
+													Case 300
+														If Not RadioState4(5) Then
+															RadioCHN(4) = PlaySound_Strict(LoadTempSound("SFX\radio\Chatter1.ogg"))	
+															RadioState(4) = RadioState(4)+1	
+															RadioState4(5) = True
+														EndIf		
+													Case 350
+														If Not RadioState4(6) Then
+															RadioCHN(4) = PlaySound_Strict(LoadTempSound("SFX\radio\franklin2.ogg"))
+															RadioState(4) = RadioState(4)+1
+															RadioState4(6) = True
+														EndIf		
+													Case 400
+														If Not RadioState4(7) Then
+															RadioCHN(4) = PlaySound_Strict(LoadTempSound("SFX\SCP\035\RadioHelp2.ogg"))
+															RadioState(4) = RadioState(4)+1
+															RadioState4(7) = True
+														EndIf		
+													Case 450
+														If Not RadioState4(8) Then
+															RadioCHN(4) = PlaySound_Strict(LoadTempSound("SFX\radio\franklin3.ogg"))	
+															RadioState(4) = RadioState(4)+1		
+															RadioState4(8) = True
+														EndIf		
+													Case 600
+														If Not RadioState4(9) Then
+															RadioCHN(4) = PlaySound_Strict(LoadTempSound("SFX\radio\franklin4.ogg"))	
+															RadioState(4) = RadioState(4)+1	
+															RadioState4(9) = True
+														EndIf		
+												End Select
+											EndIf
+										EndIf
+										
+										
+									Case 5
+										ResumeChannelWithSubtitles(RadioCHN(5))
+										If ChannelPlaying(RadioCHN(5)) = False Then RadioCHN(5) = PlaySound_Strict(RadioStatic)
+								End Select 
+							EndIf
+
 							x=x+66
 							y=y+419
 							
