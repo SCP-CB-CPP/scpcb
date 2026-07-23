@@ -147,8 +147,8 @@ Dim ArrowIMG(4)
 
 ;[Block]
 
-Global LauncherWidth%= Min(GetOptionInt("launcher", "launcher width"), 1024)
-Global LauncherHeight% = Min(GetOptionInt("launcher", "launcher height"), 768)
+Const LauncherWidth% = 640
+Const LauncherHeight% = 480
 Global LauncherEnabled% = GetOptionInt("launcher", "launcher enabled")
 
 Global GraphicWidth% = GetCLIInt("width", GetCLIInt("w", GetOptionInt("graphics", "width")))
