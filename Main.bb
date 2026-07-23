@@ -2067,7 +2067,7 @@ Global AmbientLightRoomTex%, AmbientLightRoomVal%
 
 Global EnableUserTracks% = GetOptionInt("audio", "enable user tracks")
 Global UserTrackMode% = GetOptionInt("audio", "user track setting")
-Global UserTrackCheck% = 0, UserTrackCheck2% = 0
+Global UserTrackCheck% = 0, UserTrackCheck2% = 0, UserTrackCheckDone% = False
 Global UserTrackMusicAmount% = 0, CurrUserTrack%, UserTrackFlag% = False
 Dim UserTrackName$(256)
 
