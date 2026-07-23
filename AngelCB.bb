@@ -362,9 +362,6 @@ Function RegisterDoor()
 
     RegisterGlobalFunction("void UpdateAll()", @UpdateDoors)
 
-    RegisterGlobalProperty("Door@ Closest", &ClosestDoor)
-    RegisterGlobalProperty("B3D::Mesh@ ClosestButton", &ClosestButton)
-
     RegisterGlobalFunction("void ActivateKeyCardMessageCooldown()", @ActivateKeyCardMsgCooldown)
     RegisterGlobalFunction("void HasKeyCardMessage()", @HasKeyCardMsg)
     RegisterGlobalProperty("int KeyCardMessageCooldownUntilMillis", &KeyCardMsgCooldown)
@@ -1006,7 +1003,9 @@ Function RegisterPlayer()
     RegisterGlobalProperty("int CurrentZone", &PlayerZone)
     RegisterGlobalProperty("Room@ CurrentRoom", &PlayerRoom)
 
-    RegisterGlobalProperty("int GrabbedEntity", &GrabbedEntity)
+    RegisterGlobalProperty("B3D::Entity@ GrabbedEntity", &GrabbedEntity)
+    RegisterGlobalProperty("Door@ ClosestDoor", &ClosestDoor)
+    RegisterGlobalProperty("B3D::Mesh@ ClosestButton", &ClosestButton)
 
     RegisterGlobalProperty("bool GodMode", &GodMode)
     RegisterGlobalProperty("bool NoClip", &NoClip)
