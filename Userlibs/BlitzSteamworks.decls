@@ -12,7 +12,7 @@ Steam_GetGameLanguage$():"_GetGameLanguage@0"
 
 Steam_GetOverlayState%():"_GetOverlayState@0"
 Steam_GetOverlayUpdated%():"_GetOverlayUpdated@0"
-Steam_SetOverlayNotificationInset(x#, y#):"_SetOverlayNotificationInset@8"
+Steam_SetOverlayNotificationInset(x%, y%):"_SetOverlayNotificationInset@8"
 Steam_SetOverlayNotificationPosition(pos%):"_SetOverlayNotificationPosition@4"
 
 Steam_SetRichPresence%(key$, value$):"_SetRichPresence@8"
@@ -56,6 +56,7 @@ Steam_GetSenderIDLower%():"_GetSenderIDLower@0"
 
 Steam_LoadPacket%():"_LoadPacket@0"
 Steam_SendPacketToUser%(upperID%, lowerID%):"_SendPacketToUser@8"
+Steam_SendPacketToUserReliable%(upperID%, lowerID%, reliable%):"_SendPacketToUserReliable@8"
 Steam_CloseConnection%(upperID%, lowerID%):"_CloseConnection@8"
 
 Steam_CreateLobby%(lobbyType%, maxMembers%):"_CreateLobby@8"

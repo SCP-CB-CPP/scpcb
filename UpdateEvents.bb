@@ -8547,8 +8547,8 @@ Function UpdateEvents()
 End Function
 
 Function UpdateDimension1499()
-	; Saving while wearing 1499 in the PD, 860 or the 1123 cutscene causes very weird behavior, bandaid fix.
-	If NTF_1499PrevRoom\RoomTemplate\Name = "pocketdimension" Lor NTF_1499PrevRoom\RoomTemplate\Name = "room860" Lor NTF_1499PrevRoom\RoomTemplate\Name = "room1123" Then CanSave = False
+	; Saving while wearing 1499 in the PD very weird behavior, bandaid fix.
+	If NTF_1499PrevRoom\RoomTemplate\Name = "pocketdimension" Then CanSave = False
 
 	Local e.Events,n.NPCs,n2.NPCs,r.Rooms,it.Items,i%,j%,du.Dummy1499,du2.Dummy1499,temp%,scale#,x%,y%
 	
@@ -8935,6 +8935,11 @@ Function UpdateDimension1499()
 				EndIf
 			EndIf
 			;[End Block]
+		; Saving while wearing 1499 in 860 or the 1123 cutscene also causes very weird behavior, another bandaid fix.
+		ElseIf e\EventName = "room1123" And e\EventState > 0 And e\EventState < 7 Then
+			CanSave = False
+		ElseIf e\EventName = "room860" And e\EventState = 1.0 Then
+			CanSave = False
 		EndIf
 	Next
 	

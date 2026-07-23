@@ -2454,7 +2454,7 @@ Function CreateDoor.Doors(lvl, x#, y#, z#, angle#, room.Rooms, dopen% = False,  
 	
 	EntityPickMode d\frameobj,2
 	
-	If d\open And big = False And Rand(8) = 1 Then d\AutoClose = True
+	If Rand(8) = 1 And d\open And big = False Then d\AutoClose = True
 	
 	d\MTFClose = True
 	
@@ -5049,17 +5049,26 @@ Function MouseLook()
 		;RotateEntity Collider, EntityPitch(Collider), EntityYaw(Collider), 0
 		;moveentity player, side, up, 0	
 		; -- Update the smoothing que To smooth the movement of the mouse.
-		mouse_x_speed_1# = CurveValue(MouseXSpeed() * (MouseSens + 0.6) , mouse_x_speed_1, (6.0 / (MouseSens + 1.0))*MouseSmooth) 
-		If IsNaN(mouse_x_speed_1) Then mouse_x_speed_1 = 0
-		If InvertMouse Then
-			mouse_y_speed_1# = CurveValue(-MouseYSpeed() * (MouseSens + 0.6), mouse_y_speed_1, (6.0/(MouseSens+1.0))*MouseSmooth) 
+		Local rawX# = MouseXSpeed() * (MouseSens + 0.6)
+		Local rawY# = MouseYSpeed() * (MouseSens + 0.6)
+		Local S# = (6.0 / (MouseSens + 1.0)) * MouseSmooth
+		Local tau# = S / 70.0
+
+		If MouseSmooth <= 0 Then
+			mouse_x_speed_1# = rawX
+			mouse_y_speed_1# = rawY
 		Else
-			mouse_y_speed_1# = CurveValue(MouseYSpeed () * (MouseSens + 0.6), mouse_y_speed_1, (6.0/(MouseSens+1.0))*MouseSmooth) 
+			mouse_x_speed_1# = SmoothMouseValue(rawX, mouse_x_speed_1, tau)
+			mouse_y_speed_1# = SmoothMouseValue(rawY, mouse_y_speed_1, tau)
 		EndIf
+
+		If IsNaN(mouse_x_speed_1) Then mouse_x_speed_1 = 0
 		If IsNaN(mouse_y_speed_1) Then mouse_y_speed_1 = 0
+
+		If InvertMouse Then mouse_y_speed_1 = -mouse_y_speed_1
 		
-		Local the_yaw# = ((mouse_x_speed_1#)) * mouselook_x_inc# / (1.0+WearingVest)
-		Local the_pitch# = ((mouse_y_speed_1#)) * mouselook_y_inc# / (1.0+WearingVest)
+		Local the_yaw# = mouse_x_speed_1 * mouselook_x_inc# / (1.0+WearingVest)
+		Local the_pitch# = mouse_y_speed_1 * mouselook_y_inc# / (1.0+WearingVest)
 		
 		TurnEntity Collider, 0.0, -the_yaw#, 0.0 ; Turn the user on the Y (yaw) axis.
 		user_camera_pitch# = user_camera_pitch# + the_pitch#
@@ -6618,7 +6627,9 @@ Function DrawGUI()
 					;radiostate(6) = a timer for the "code channel"
 					;RadioState(7) = another timer for the "code channel"
 					
-					If RadioState(5) = 0 And SelectedItem\state > 0 And SelectedItem\itemtemplate\name <> "veryfineradio" Then 
+					If SelectedItem\itemtemplate\name = "veryfineradio" Then
+						SelectedItem\state2 = 66
+					ElseIf RadioState(5) = 0 And SelectedItem\state > 0
 						Msg = I_Loc\MessageItem_RadioUse
 						MsgTimer = 70 * 5
 						RadioState(5) = 1
@@ -7926,7 +7937,7 @@ Function DrawMenu()
 			Text x, y, I_Loc\Menu_Difficulty+" "+SelectedDifficulty\localName
 			Text x, y+20*MenuScale, I_Loc\Menu_Save+" "+CurrSave
 			Text x, y+40*MenuScale, GetSeedString()
-			Text x, y+60*MenuScale, I_Loc\Menu_EndTime+" " + FormatDuration(DeathTime, SpeedRunMode)
+			If DeathTime >= 0 Then Text x, y+60*MenuScale, I_Loc\Menu_EndTime+" " + FormatDuration(DeathTime, SpeedRunMode)
 		ElseIf AchievementsMenu <= 0 And OptionsMenu > 0 And QuitMSG <= 0 And KillTimer >= 0
 			If DrawButton(x + 101 * MenuScale, y + 390 * MenuScale, 230 * MenuScale, 60 * MenuScale, I_Loc\Menu_Back) Then
 				AchievementsMenu = 0
@@ -10896,6 +10907,7 @@ Function Load294()
 					RuntimeErrorExt("Layer " + Str(layer) + " out of range.")
 				EndIf
 			Else
+				If splitterPos = 0 Then Continue
 				Local key$ = Trim(Left(l, splitterPos - 1))
 				Local value$ = Trim(Right(l, Len(l) - splitterPos))
 				If row = -1 Then
@@ -11500,6 +11512,13 @@ Function CurveAngle#(val#, old#, smooth#)
    Return WrapAngle(old + diff * (1.0 / smooth * FPSfactor))
 End Function
 
+Function SmoothMouseValue#(target#, current#, tau#)
+    If tau <= 0 Then Return target
+    Local dt# = FPSfactor / 70.0
+    Local alpha# = 1.0 - Exp(-dt / tau)
+    Return current + (target - current) * alpha
+End Function
+
 Function WrapAngle#(angle#)
 	If angle = INFINITY Then Return 0.0
 	While angle < 0
@@ -12077,7 +12096,6 @@ Function ApplyBorderlessResizing()
 		CopyRect(0, 0, ScaledGraphicWidth, ScaledGraphicHeight, ScaledOffsetX, ScaledOffsetY, TextureBuffer(ResizeTexture), BackBuffer())
 	EndIf
 End Function
-
 
 Function RenderWorld2()
 	CatchErrors("Uncaught (RenderWorld2)")
