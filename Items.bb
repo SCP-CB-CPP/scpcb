@@ -159,6 +159,7 @@ Function InitItemTemplatesFromFile(file$)
 				scale = 1.0
 				hasCustomColor = False
 			Else
+				If splitterPos = 0 Then Continue
 				Local key$ = Trim(Left(l, splitterPos - 1))
 				Local value$ = Trim(Right(l, Len(l) - splitterPos))
 				Select key

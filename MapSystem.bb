@@ -1671,6 +1671,7 @@ Function LoadRoomTemplates(file$)
 			If rt = Null Then rt = CreateRoomTemplate(l)
 		Else If l <> "" And Instr(l, "#") <> 1 And Instr(l, ";") <> 1 Then
 			Local splitterPos% = Instr(l, "=")
+			If splitterPos = 0 Then Continue
 			Local key$ = Lower(Trim(Left(l, splitterPos - 1)))
 			Local value$ = Trim(Right(l, Len(l) - splitterPos))
 			Select key
@@ -5173,7 +5174,7 @@ Function FillRoom(r.Rooms)
 					EndIf
 				EndIf
 				
-				If (room2gw_brokendoor = 0 And Rand(1,2)=1) Or bd_temp%
+				If (Rand(1,2)=1 And room2gw_brokendoor = 0) Or bd_temp%
 					r\Objects[1] = CopyEntity(DoorOBJ)
 					ScaleEntity(r\Objects[1], (204.0 * RoomScale) / MeshWidth(r\Objects[1]), 312.0 * RoomScale / MeshHeight(r\Objects[1]), 16.0 * RoomScale / MeshDepth(r\Objects[1]))
 					EntityType r\Objects[1], HIT_MAP
@@ -7897,10 +7898,19 @@ Function load_terrain(hmap,yscale#=0.7,t1%,t2%,mask%)
 	If t2 = 0 Then RuntimeErrorExt "load_terrain error: invalid texture 2"
 	If mask = 0 Then RuntimeErrorExt "load_terrain error: invalid texture mask"
 	
-	; auto scale the textures to the right size
-	If t1 Then ScaleTexture t1,x/4,y/4
-	If t2 Then ScaleTexture t2,x/4,y/4
-	If mask Then ScaleTexture mask,x,y
+	; fuck
+	Local maskZoom# = 1.4
+	
+	; offset to keep centered
+	Local maskW = TextureWidth(mask)
+	Local maskH = TextureHeight(mask)
+	Local offsetX# = (maskW * (1.0 - maskZoom)) / 2.0
+	Local offsetY# = (maskH * (1.0 - maskZoom)) / 2.0
+	
+	TextureCoords t1, 0
+	TextureCoords t2, 0
+	ScaleTexture t1, x/4.0, y/4.0
+	ScaleTexture t2, x/4.0, y/4.0
 	
 	; start building the terrain
 	Local mesh = CreateMesh()
@@ -7928,6 +7938,11 @@ Function load_terrain(hmap,yscale#=0.7,t1%,t2%,mask%)
 	PositionMesh mesh, -x/2.0,0,-y/2.0
 	PositionMesh mesh2, -x/2.0,0.01,-y/2.0
 	
+	EntityTexture mesh, t1, 0, 0
+	EntityTexture mesh2, t2, 0, 0
+	EntityFX mesh, 1
+	EntityFX mesh2, 1+2+32
+	
 	; alter vertice height to match the heightmap red channel
 	HeightMapBuffer = TextureBuffer(hmap)
 	MaskBuffer = TextureBuffer(mask)
@@ -7936,19 +7951,21 @@ Function load_terrain(hmap,yscale#=0.7,t1%,t2%,mask%)
 	;SetBuffer 
 	For lx = 0 To x
 		For ly = 0 To y
-			;using vertex alpha and two meshes instead of FE_ALPHAWHATEVER
-			;it doesn't look perfect but it does the job
-			;you might get better results by downscaling the mask to the same size as the heightmap
-			Local maskX# = Min(lx*Float(TextureWidth(mask))/Float(TextureWidth(hmap)),TextureWidth(mask)-1)
-			Local maskY# = TextureHeight(mask)-Min(ly*Float(TextureHeight(mask))/Float(TextureHeight(hmap)),TextureHeight(mask)-1)
-			RGB1=ReadPixelFast(Min(lx,x-1),y-Min(ly,y-1),HeightMapBuffer)
-			r=(RGB1 And $FF0000)Shr 16 ;separate out the red
-			Local alpha#=(((ReadPixelFast(Max(maskX-5,5),Max(maskY-5,5),MaskBuffer) And $FF000000) Shr 24)/$FF)
-			alpha#=alpha+(((ReadPixelFast(Min(maskX+5,TextureWidth(mask)-5),Min(maskY+5,TextureHeight(mask)-5),MaskBuffer) And $FF000000) Shr 24)/$FF)
-			alpha#=alpha+(((ReadPixelFast(Max(maskX-5,5),Min(maskY+5,TextureHeight(mask)-5),MaskBuffer) And $FF000000) Shr 24)/$FF)
-			alpha#=alpha+(((ReadPixelFast(Min(maskX+5,TextureWidth(mask)-5),Max(maskY-5,5),MaskBuffer) And $FF000000) Shr 24)/$FF)
-			alpha#=alpha*0.25
-			alpha#=Sqr(alpha)
+			Local maskX# = lx * Float(maskW) / Float(TextureWidth(hmap)) * maskZoom + offsetX
+			Local maskY# = (TextureWidth(hmap) - ly) * Float(maskH) / Float(TextureWidth(hmap)) * maskZoom + offsetY
+			maskX = Min(maskX, maskW-1)
+			maskY = Min(maskY, maskH-1)
+			
+			RGB1 = ReadPixelFast(Min(lx, x-1), y - Min(ly, y-1), HeightMapBuffer)
+			r = (RGB1 And $FF0000) Shr 16
+			
+			Local alpha# = ((ReadPixelFast(Clamp(maskX-5,0,maskW-1), Clamp(maskY-5,0,maskH-1), MaskBuffer) And $FF000000) Shr 24) / 255.0
+			alpha = alpha + ((ReadPixelFast(Clamp(maskX+5,0,maskW-1), Clamp(maskY+5,0,maskH-1), MaskBuffer) And $FF000000) Shr 24) / 255.0
+			alpha = alpha + ((ReadPixelFast(Clamp(maskX-5,0,maskW-1), Clamp(maskY+5,0,maskH-1), MaskBuffer) And $FF000000) Shr 24) / 255.0
+			alpha = alpha + ((ReadPixelFast(Clamp(maskX+5,0,maskW-1), Clamp(maskY-5,0,maskH-1), MaskBuffer) And $FF000000) Shr 24) / 255.0
+			alpha = alpha * 0.25
+			alpha = Sqr(alpha)
+			If alpha > 1.0 Then alpha = 1.0
 			
 			index = lx + ((x+1)*ly)
 			VertexCoords surf, index , VertexX(surf,index), r*yscale,VertexZ(surf,index)
@@ -7965,12 +7982,7 @@ Function load_terrain(hmap,yscale#=0.7,t1%,t2%,mask%)
 	UpdateNormals mesh
 	UpdateNormals mesh2
 	
-	EntityTexture mesh,t1,0,0
-	;EntityTexture mesh,mask,0,1
-	EntityTexture mesh2,t2,0,0;2
-	
-	EntityFX mesh, 1
-	EntityFX mesh2, 1+2+32
+	EntityBlend mesh2, 1
 	
 	Return mesh
 End Function
