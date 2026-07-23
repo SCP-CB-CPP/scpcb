@@ -1,4 +1,4 @@
-Const VersionNumber$ = "1.3.12.5-s15"
+Const VersionNumber$ = "1.3.12.5-s16"
 ;Only change this if the version given isn't working with the current build version - ENDSHN
 Const CompatibleNumber$ = "1.3.12"
 

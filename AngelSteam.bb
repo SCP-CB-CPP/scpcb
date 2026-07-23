@@ -60,7 +60,7 @@ Function RegisterSteamworks()
 	RegisterGlobalFunction("int GetSenderIDLower()", @Steam_GetSenderIDLower)
 
 	RegisterGlobalFunction("int LoadPacket()", @Steam_LoadPacket)
-	RegisterGlobalFunction("bool SendPacketToUser(int upperID, int lowerID)", @Steam_SendPacketToUser)
+	RegisterGlobalFunction("bool SendPacketToUser(int upperID, int lowerID, bool reliable=false)", @Steam_SendPacketToUser)
 	RegisterGlobalFunction("bool CloseConnection(int upperID, int lowerID)", @Steam_CloseConnection)
 
 	RegisterGlobalFunction("bool CreateLobby(int lobbyType, int maxMembers)", @Steam_CreateLobby)

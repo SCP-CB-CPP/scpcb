@@ -330,12 +330,23 @@ string FormatDuration(int ms, bool highPrecision = true);
 }
 
 namespace CB::Menu {
+void DrawTiledImageRect(B3D::Image@ img, int srcX, int srcY, float srcWidth, float srcHeight, int x, int y, int width, int height);
 string InputBox(int x, int y, int width, int height, string text, int id = 0, int virtualKeyboardMode = 0);
 void DrawFrame(int x, int y, int width, int height, int xOffset = 0, int yOffset = 0, bool scrollY = true);
 bool DrawButton(int x, int y, int width, int height, string text, bool bigFont = true, bool waitForMouseUp = false, bool disabled = false);
 bool DrawTick(int x, int y, bool selected, bool locked = false);
+void DrawBar(B3D::Image@ img, int x, int y, int width, float filled, bool centerX = false);
 bool IsAnyOpen();
 void StartNewGame();
+}
+
+namespace CB::LoadingScreen {
+CB::LoadingScreen@ get_First() property;
+CB::LoadingScreen@ get_Last() property;
+void Initialize();
+void LoadFromFile(string file);
+void Draw(int percent, bool shortLoading = false);
+string GetRandomDefaultWidthCharacter(int minCharCode, int maxCharCode, string def);
 }
 
 namespace CB::Options {
@@ -364,6 +375,16 @@ CB::Stream@ Stream(string file, float volume = 1, int customMode = 2);
 
 namespace CB::Music {
 CB::Music RegisterCustom(string file);
+}
+
+namespace CB::Effect {
+void Initialize();
+void Update();
+void ProcessGamma(float gamma);
+void ProcessFXAA();
+void SetQuadEffect(B3D::Effect@ effect);
+B3D::Sprite@ CreateFullscreenQuad(B3D::Entity@ parent = null);
+void RenderQuad(B3D::Effect@ effect, B3D::Texture@ buffer, string technique, int blend = 0);
 }
 
 namespace CB::Particles {
@@ -403,6 +424,7 @@ namespace CB::Door {
 CB::Door@ get_First() property;
 CB::Door@ get_Last() property;
 CB::Door@ Create(int lvl, float x, float y, float z, float yawAngle, CB::Room@ room, bool startOpen = false, int big = 0, int keycard = 0, string code = "", bool useCollisionMesh = false);
+void UpdateAll();
 void ActivateKeyCardMessageCooldown();
 void HasKeyCardMessage();
 void ActivateScannerMessageCooldown();
@@ -1990,6 +2012,25 @@ class Timer {
 
 namespace CB {
 
+class LoadingScreen {
+    string ImagePath;
+    B3D::Image@ Image;
+    int ID;
+    int Title;
+    int AlignX;
+    int AlignY;
+    bool DisableBackground;
+    carray<string> Text;
+    int TextAmount;
+    carray<int> TextDelay;
+    int TotalTextDelay;
+    void Delete();
+    CB::LoadingScreen@ get_Next() const property;
+    CB::LoadingScreen@ get_Previous() const property;
+    void InsertAfter(CB::LoadingScreen@);
+    void InsertBefore(CB::LoadingScreen@);
+}
+
 class Sound {
     void Free();
     B3D::Channel@ Play();
@@ -2111,7 +2152,6 @@ class ParticleTemplate {
     void SetColors(int col1, int col2);
     void SetFloor(float y, float bounce = 0.5);
     void SetFixAngles(int pitch, int yaw);
-    void AddSubTemplate(CB::ParticleTemplate@ template);
     CB::ParticleEmitter@ Emit(B3D::Entity@ owner, bool fixed = false);
 }
 
@@ -2330,7 +2370,7 @@ class Door {
     bool IsElevatorDoor;
     bool MTFClose;
     bool NPCCalledElevator;
-    B3D::Mesh@ DoorHitObject;
+    B3D::Mesh@ HitObject;
     void Delete();
     CB::Door@ get_Next() const property;
     CB::Door@ get_Previous() const property;
@@ -2898,10 +2938,18 @@ int PlayTime;
 
 namespace CB::Menu {
 float Scale;
+float HUDScale;
 bool IsMainMenuOpen;
 int MainMenuTab;
 int CurrentOpen;
 float StopHidingTimer;
+}
+
+namespace CB::LoadingScreen {
+int StartTime;
+CB::LoadingScreen@ Selected;
+B3D::Channel@ CWMChannel;
+int CWMState;
 }
 
 namespace CB::Options {
@@ -2963,6 +3011,8 @@ int ParticleAmount;
 namespace CB::Music {
 CB::Music NowPlaying;
 CB::Music ShouldPlay;
+float CurrentVolume;
+CB::Stream@ Channel;
 }
 
 namespace CB::Input {
@@ -2974,6 +3024,17 @@ int LastMouseHit1;
 int LastMouseHit1X;
 int LastMouseHit1Y;
 bool MouseUp1;
+}
+
+namespace CB::Effect {
+B3D::Effect@ Gamma;
+B3D::Effect@ FXAA;
+B3D::Camera@ Camera;
+B3D::Sprite@ Quad;
+B3D::Effect@ Active;
+B3D::Texture@ ScreenTexture;
+int PixelWidth;
+int PixelHeight;
 }
 
 namespace CB::NPC {
@@ -3062,7 +3123,9 @@ bool Crouch;
 float CrouchState;
 int CurrentZone;
 CB::Room@ CurrentRoom;
-int GrabbedEntity;
+B3D::Entity@ GrabbedEntity;
+CB::Door@ ClosestDoor;
+B3D::Mesh@ ClosestButton;
 bool GodMode;
 bool NoClip;
 float NoClipSpeed;
@@ -3076,6 +3139,8 @@ CB::Item@ OpenInventoryItem;
 float MessageTimer;
 string Message;
 string DeathMessage;
+bool GameSaved;
+bool CanSave;
 }
 
 namespace CB::Difficulty {
