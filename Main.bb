@@ -4485,10 +4485,18 @@ Function UpdateMenuState()
 End Function
 
 Function IsAnyMenuOpen()
+	If IsAnyMenuOpen\Subscribers > 0 Then
+		PrepareFunction(0)
+		If CallHook(IsAnyMenuOpen) Then Return True
+	EndIf
 	Return MenuOpen Lor ConsoleOpen Lor InvOpen Lor OtherOpen<>Null Lor (SelectedItem <> Null And SelectedItem\Inventory <> Null) Lor Using294
 End Function
 
 Function IsPaused()
+	If IsPaused\Subscribers > 0 Then
+		PrepareFunction(0)
+		If CallHook(IsPaused) Then Return True
+	EndIf
 	Return IsAnyMenuOpen() Lor SelectedDoor <> Null Lor SelectedScreen <> Null
 End Function
 
