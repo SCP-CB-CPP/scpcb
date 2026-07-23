@@ -263,6 +263,36 @@ Function RegisterCBInput()
     SetDefaultNamespace(ns)
 End Function
 
+Function RegisterPostProcess()
+    Local ns$ = GetDefaultNamespace()
+    If ns <> "" Then SetDefaultNamespace(ns + "::Effect") Else SetDefaultNamespace("Effect")
+
+    RegisterGlobalProperty("B3D::Effect@ Gamma", &GammaEffect)
+    RegisterGlobalProperty("B3D::Effect@ FXAA", &FXAAEffect)
+
+    RegisterGlobalProperty("B3D::Camera@ Camera", &QuadCamera)
+    RegisterGlobalProperty("B3D::Sprite@ Quad", &PostEffectQuad)
+
+    RegisterGlobalProperty("B3D::Effect@ Active", &PostEffect)
+
+    RegisterGlobalProperty("B3D::Texture@ ScreenTexture", &ScreenTexture)
+
+    RegisterGlobalProperty("int PixelWidth", &PixelWidth)
+    RegisterGlobalProperty("int PixelHeight", &PixelHeight)
+
+    RegisterGlobalFunction("void Initialize()", @InitPostProcess)
+    RegisterGlobalFunction("void Update()", @UpdatePostProcess)
+    RegisterGlobalFunction("void ProcessGamma(float gamma)", @ProcessGammaEffect)
+    RegisterGlobalFunction("void ProcessFXAA()", @ProcessFXAAEffect)
+
+    RegisterGlobalFunction("void SetQuadEffect(B3D::Effect@ effect)", @SetQuadEffect)
+    RegisterGlobalFunction("B3D::Sprite@ CreateFullscreenQuad(B3D::Entity@ parent=null)", @CreateFullscreenQuad)
+
+    RegisterGlobalFunction("void RenderQuad(B3D::Effect@ effect, B3D::Texture@ buffer, string technique, int blend=0)", @RenderEffectQuad)
+
+    SetDefaultNamespace(ns)
+End Function
+
 Function SetParticleSystemEmitter(template, owner, fixed = False)
     Return SetEmitter(owner, template, fixed)
 End Function
@@ -1442,6 +1472,7 @@ Function RegisterCB()
     RegisterIO()
     RegisterCBAudio()
     RegisterCBInput()
+    RegisterPostProcess()
     RegisterParticleSystem()
     ; Fucking ugly but the dependencies have a ton of cycles.
     RegisterTypeFromPtr("Waypoint", %WayPoints)
