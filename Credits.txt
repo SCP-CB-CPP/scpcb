@@ -3,6 +3,7 @@
 
 		Joonas Rikkonen ("Regalis")
 		Alexey Petrov ("Sooslick")
+		Chris A. ("krimbopple")
 		CommanderMark
 		Jesse Ludtke ("MonocleBios")
 		Juan Pablo Arce ("Juanjpro")
