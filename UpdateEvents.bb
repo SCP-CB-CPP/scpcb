@@ -8372,7 +8372,7 @@ Function UpdateEvents()
 				If PlayerRoom<>e\room
 					If e\room\Objects[0]<>0
 						For i = 1 To 15
-							HideEntity e\room\Objects[i]
+							If EntityExist(e\room\Objects[i]) Then HideEntity e\room\Objects[i]
 						Next
 					EndIf
 					If EntityY(Collider)>EntityY(e\room\obj)-0.5
@@ -8386,7 +8386,7 @@ Function UpdateEvents()
 					If e\SoundCHN2<>0 Then
 						StopChannel(e\SoundCHN2) : e\SoundCHN2 = 0
 					EndIf
-					HideEntity NTF_1499Sky
+					If EntityExist(NTF_1499Sky) Then HideEntity NTF_1499Sky
 					HideChunks()
 					For n.NPCs = Each NPCs
 						If n\NPCtype = NPCtype1499
