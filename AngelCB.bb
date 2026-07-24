@@ -288,7 +288,7 @@ Function RegisterPostProcess()
     RegisterGlobalFunction("void SetQuadEffect(B3D::Effect@ effect)", @SetQuadEffect)
     RegisterGlobalFunction("B3D::Sprite@ CreateFullscreenQuad(B3D::Entity@ parent=null)", @CreateFullscreenQuad)
 
-    RegisterGlobalFunction("void RenderQuad(B3D::Effect@ effect, B3D::Texture@ buffer, string technique, int blend=0)", @RenderEffectQuad)
+    RegisterGlobalFunction("void RenderQuad(B3D::Effect@ effect, B3D::Buffer@ buffer, string technique, int blend=0)", @RenderEffectQuad)
 
     SetDefaultNamespace(ns)
 End Function
