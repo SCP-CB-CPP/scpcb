@@ -72,7 +72,7 @@ Function UpdateEvents()
 						CameraFogRange(Camera, CameraFogNear, CameraFogFar)
 						CameraFogMode(Camera, 1)
 						If SelectedDifficulty\saveType = SAVEANYWHERE Then
-							Msg = Format(I_Loc\MessageSave_Anywhere, KeyName(KEY_SAVE))
+							Msg = Format(I_Loc\MessageSave_Anywhere, GetKeyName(KEY_SAVE))
 							MsgTimer = 70*4
 						ElseIf SelectedDifficulty\saveType = SAVEONSCREENS Then
 							Msg = I_Loc\MessageSave_Screens
@@ -236,7 +236,7 @@ Function UpdateEvents()
                                                 PositionEntity Curr173\Collider, 0,0,0
                                             EndIf
 											ResetEntity Curr173\Collider
-											Msg = Format(I_Loc\MessageHelp_Run, KeyName(KEY_SPRINT))
+											Msg = Format(I_Loc\MessageHelp_Run, GetKeyName(KEY_SPRINT))
 											MsgTimer = 70*8
 										EndIf
 									EndIf
@@ -438,7 +438,7 @@ Function UpdateEvents()
 								
 							ElseIf e\EventState3 < 40
 								If Inventory(0)<>Null Then
-									Msg = Format(I_Loc\MessageHelp_Inventory, KeyName(KEY_INV))
+									Msg = Format(I_Loc\MessageHelp_Inventory, GetKeyName(KEY_INV))
 									MsgTimer=70*7
 									e\EventState3 = 40
 									Exit
@@ -1014,7 +1014,7 @@ Function UpdateEvents()
 							If IntroSFX(17)<>0 Then
 								If EntityVisible(Curr173\Collider, Collider) Then
 									If EntityInView(Curr173\obj, Camera) Then
-										Msg = Format(I_Loc\MessageHelp_Blink, KeyName(KEY_BLINK))
+										Msg = Format(I_Loc\MessageHelp_Blink, GetKeyName(KEY_BLINK))
 										MsgTimer = 70*4
 										PlaySound_Strict IntroSFX(17)
 										IntroSFX(17)=0
@@ -1301,8 +1301,6 @@ Function UpdateEvents()
 										For r.Rooms = Each Rooms
 											If r\RoomTemplate\Name = "start" Then
 												DebugLog "tostart"
-												;Msg = "Press "+KeyName(KEY_SAVE)+" to save."
-												;MsgTimer = 70*8
 												
 												PlayerRoom = r
 												
@@ -4060,7 +4058,6 @@ Function UpdateEvents()
 							If itt\name = "drawing" Then
 								If itt\img<>0 Then FreeImage itt\img	
 								itt\img = LoadImage_Strict(imgPath)
-								MaskImage(itt\img, 255,0,255)
 								itt\imgpath = imgPath
 								
 								Exit
@@ -8380,7 +8377,7 @@ Function UpdateEvents()
 				If PlayerRoom<>e\room
 					If e\room\Objects[0]<>0
 						For i = 1 To 15
-							HideEntity e\room\Objects[i]
+							If EntityExist(e\room\Objects[i]) Then HideEntity e\room\Objects[i]
 						Next
 					EndIf
 					If EntityY(Collider)>EntityY(e\room\obj)-0.5
@@ -8394,7 +8391,7 @@ Function UpdateEvents()
 					If e\SoundCHN2<>0 Then
 						StopChannel(e\SoundCHN2) : e\SoundCHN2 = 0
 					EndIf
-					HideEntity NTF_1499Sky
+					If EntityExist(NTF_1499Sky) Then HideEntity NTF_1499Sky
 					HideChunks()
 					For n.NPCs = Each NPCs
 						If n\NPCtype = NPCtype1499
@@ -8743,8 +8740,11 @@ Function UpdateDimension1499()
 				ShowEntity e\room\obj
 				If QuickLoadPercent = 100 Or QuickLoadPercent = -1
 					UpdateChunks(e\room,15)
-					ShowEntity NTF_1499Sky
-					Update1499Sky()
+					; This is an attempt at a bandaid fix for very inconsistent 1499 crashes.
+					If EntityExist(NTF_1499Sky) Then
+						ShowEntity NTF_1499Sky
+						Update1499Sky()
+					EndIf
 					ShouldPlay = 18
 					If EntityY(Collider)<800.0
 						PositionEntity Collider,EntityX(Collider),800.5,EntityZ(Collider),True

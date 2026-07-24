@@ -21,7 +21,6 @@ Function RuntimeErrorExt%(Message$)
 End Function
 
 Include "StrictLoads.bb"
-Include "KeyName.bb"
 
 Global DataDir$ = InitDataDir()
 Global OptionFile$ = InitOptionsFile()
@@ -125,7 +124,7 @@ Global HasDubbedAudio%
 Global ModsEnabled% = GetOptionInt("general", "enable mods") And (Not HasCLIFlag("nomods"))
 If ModsEnabled Then ReloadMods()
 
-Global Font1%, Font2%, Font3%, Font4%, Font5%
+Global Font1%, Font2%, Font3%, Font4%, Font5%, Font6%
 Global ConsoleFont%
 
 Global MenuWhite%, MenuBlack%
@@ -159,11 +158,6 @@ If GraphicHeight <= 0 Then GraphicHeight = DesktopHeight()
 Global Depth% = 0
 Global Fullscreen% = GetOptionInt("graphics", "fullscreen")
 
-Global SelectedGFXDriver% = Min(Max(GetOptionInt("graphics", "gfx driver"), 1), CountGfxDrivers())
-
-Global fresize_image%, fresize_texture%, fresize_texture2%
-Global fresize_cam%
-
 Global ShowFPS = GetOptionInt("graphics", "show FPS")
 
 Global WireframeState
@@ -173,7 +167,10 @@ Global BirthdayHat = False
 
 Global BorderlessWindowed% = GetOptionInt("graphics", "borderless windowed")
 Global RealGraphicWidth%,RealGraphicHeight%
-Global AspectRatioRatio#
+
+; For borderless windowed
+Global ScaledGraphicWidth%,ScaledGraphicHeight%
+Global ScaledOffsetX%=0,ScaledOffsetY%=0
 
 ApplyWindowModeCLIOverrides()
 
@@ -202,10 +199,6 @@ End Select
 Global ConsoleOpening% = GetOptionInt("console", "auto opening")
 Global SFXVolume# = GetOptionFloat("audio", "sound volume")
 
-Global Bit16Mode = GetOptionInt("graphics", "16bit")
-
-Global HUDScaleFactor# = GetOptionFloat("graphics", "hud scale factor")
-
 Const StringsFile$ = "Data\strings.ini"
 Include "Localization.bb"
 
@@ -224,8 +217,7 @@ If (LauncherEnabled Lor HasCLIFlag("launcher")) And (Not IsRestart) And (Not Has
 	UpdateLauncher()
 EndIf
 
-SetGfxDriver(SelectedGFXDriver)
-Global GFXDriverName$ = GFXDriverName(SelectedGFXDriver)
+Global GFXDriverName$ = GFXDriverName(1)
 
 ;New "fake fullscreen" - ENDSHN Psst, it's called borderless windowed mode --Love Mark,
 If BorderlessWindowed
@@ -235,22 +227,93 @@ If BorderlessWindowed
 	RealGraphicWidth = DesktopWidth()
 	RealGraphicHeight = DesktopHeight()
 	
-	AspectRatioRatio = (Float(GraphicWidth)/Float(GraphicHeight))/(Float(RealGraphicWidth)/Float(RealGraphicHeight))
-	
+	Local scaleX# = Float(RealGraphicWidth) / GraphicWidth, scaleY# = Float(RealGraphicHeight) / GraphicHeight
+	Local scale# = Min(scaleX, scaleY)
+	ScaledGraphicWidth% = scale * GraphicWidth
+	ScaledGraphicHeight% = scale * GraphicHeight
+	If scaleX > scaleY Then
+		ScaledOffsetX = (RealGraphicWidth - ScaledGraphicWidth) / 2
+	Else
+		ScaledOffsetY = (RealGraphicHeight - ScaledGraphicHeight) / 2
+	EndIf
+
 	Fullscreen = False
 Else
-	AspectRatioRatio = 1.0
 	RealGraphicWidth = GraphicWidth
 	RealGraphicHeight = GraphicHeight
+	ScaledGraphicWidth = GraphicWidth
+	ScaledGraphicHeight = GraphicHeight
 	If Fullscreen Then
-		Graphics3DExt(GraphicWidth, GraphicHeight, (16*Bit16Mode), 1)
+		Graphics3DExt(GraphicWidth, GraphicHeight, 0, 1)
 	Else
 		Graphics3DExt(GraphicWidth, GraphicHeight, 0, 2)
 	End If
 EndIf
 
 Global MenuScale# = CalculateMenuScale()
-Global HUDScale# = Max(MenuScale * HUDScaleFactor, 1)
+Global HUDScaleScalar# = Max(1.0, MenuScale)
+Global MinHUDScaleFactor#
+Global MaxHUDScaleFactor#
+CalculateHUDScaleFactorLimits()
+Global HUDScaleFactor# = Max(MinHUDScaleFactor, Min(MaxHUDScaleFactor, GetOptionFloat("graphics", "hud scale factor")))
+Global HUDScale# = HUDScaleScalar * HUDScaleFactor
+
+Function CalculateHUDScaleFactorLimits()
+	Local minHUDScale# = 1.0
+	Local maxHUDScale# = Max(1.5, MenuScale * 2)
+	MinHUDScaleFactor = minHUDScale / HUDScaleScalar
+	MaxHUDScaleFactor = maxHUDScale / HUDScaleScalar
+End Function
+
+Type HUDScaledImage
+	Field Img%
+	Field BaseWidth%
+	Field BaseHeight%
+End Type
+Delete Each HUDScaledImage
+
+Function LoadImageHUDScaled(file$, fixedSizeX% = 0, fixedSizeY% = 0)
+	Local img%
+	Local h.HUDScaledImage = New HUDScaledImage
+	If fixedSizeX = 0 Then
+		img = LoadImage_Strict(file, HUDScale)
+		h\BaseWidth = ImageWidthUnscaled(img) * LoadImageScaleResult
+		h\BaseHeight = ImageHeightUnscaled(img) * LoadImageScaleResult
+	Else
+		If fixedSizeY = 0 Then fixedSizeY = fixedSizeX
+		img = LoadImage_Strict(file)
+		ResizeImage(img, fixedSizeX * HUDScale, fixedSizeY * HUDScale)
+		h\BaseWidth = fixedSizeX
+		h\BaseHeight = fixedSizeY
+	EndIf
+	h\Img = img
+	Return img
+End Function
+
+Function FreeImageHUDScaled(img%)
+	For h.HUDScaledImage = Each HUDScaledImage
+		If h\Img = img Then
+			Delete h
+			Exit
+		EndIf
+	Next
+	FreeImage(img)
+End Function
+
+Function UpdateHUDScaleFactor(newFactor#)
+	If newFactor = HUDScaleFactor Then Return
+
+	HUDScaleFactor = newFactor
+	HUDScale = HUDScaleScalar * HUDScaleFactor
+	For h.HUDScaledImage = Each HUDScaledImage
+		ResizeImage(h\Img, h\BaseWidth * HUDScale, h\BaseHeight * HUDScale)
+	Next
+
+	; Hardcoding because I'm LAME!
+	FreeFont Font3 : FreeFont Font4
+	Font3% = LoadFont_Strict("GFX\font\DS-DIGI\DS-Digital.ttf", Int(15 * HUDScale))
+	Font4% = LoadFont_Strict("GFX\font\DS-DIGI\DS-Digital.ttf", Int(42 * HUDScale))
+End Function
 
 Function CalculateMenuScale#()
 	Local short% = Min(GraphicWidth, GraphicHeight)
@@ -313,17 +376,18 @@ PlayStartupVideos()
 
 ;[Block]
 
-Global CursorIMG% = LoadImage_Strict("GFX\cursor.png")
+Global CursorIMG% = LoadImage_Strict("GFX\cursor.png", 1.0)
 
 Global SelectedLoadingScreen.LoadingScreens, LoadingScreenAmount% = 0, LoadingScreenText%
-Global LoadingBack% = LoadImage_Strict("Loadingscreens\loadingback.jpg")
+Global LoadingBack% = LoadImage_Strict("Loadingscreens\loadingback.jpg", MenuScale)
 InitLoadingScreens()
 
 Font1% = LoadFont_Strict("GFX\font\cour\Courier New.ttf", Int(19 * MenuScale))
 Font2% = LoadFont_Strict("GFX\font\cour\Courier New.ttf", Int(52 * MenuScale))
-Font3% = LoadFont_Strict("GFX\font\DS-DIGI\DS-Digital.ttf", Int(22 * MenuScale))
-Font4% = LoadFont_Strict("GFX\font\DS-DIGI\DS-Digital.ttf", Int(60 * MenuScale))
+Font3% = LoadFont_Strict("GFX\font\DS-DIGI\DS-Digital.ttf", Int(15 * HUDScale))
+Font4% = LoadFont_Strict("GFX\font\DS-DIGI\DS-Digital.ttf", Int(42 * HUDScale))
 Font5% = LoadFont_Strict("GFX\font\Journal\Journal.ttf", Int(58 * MenuScale))
+Font6% = LoadFont_Strict("GFX\font\DS-DIGI\DS-Digital.ttf", Int(25 * MenuScale))
 
 Global CreditsFont%,CreditsFont2%
 
@@ -334,15 +398,8 @@ LoadSubtitles()
 
 SetFont Font2
 
-Global BlinkMeterIMG% = LoadImage_Strict("GFX\blinkmeter.jpg")
-Global MenuMeterIMG%
-If HUDScale = MenuScale Then
-	MenuMeterIMG = BlinkMeterIMG
-Else
-	MenuMeterIMG = LoadImage_Strict("GFX\blinkmeter.jpg")
-	ScaleImage(MenuMeterIMG, MenuScale, MenuScale)
-EndIf
-ScaleImage(BlinkMeterIMG, HUDScale, HUDScale)
+Global BlinkMeterIMG% = LoadImageHUDScaled("GFX\blinkmeter.png")
+Global MenuMeterIMG% = LoadImage_Strict("GFX\blinkmeter.png", MenuScale)
 
 DrawLoading(0, True)
 
@@ -999,6 +1056,18 @@ Function UpdateConsole()
 						CreateConsoleMsg("Coordinates: "+EntityX(c)+", "+EntityY(c)+", "+EntityZ(c))
 						CreateConsoleMsg("******************************")							
 					EndIf
+					;[End Block]
+				Case "hudscalefactor"
+					;[Block]
+					StrTemp$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
+
+					UpdateHUDScaleFactor(Float(StrTemp))
+					;[End Block]
+				Case "hudoffset"
+					;[Block]
+					StrTemp$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
+					HUDOffsetScale = Float(StrTemp)
+					UpdateHUDOffsets()
 					;[End Block]
 				Case "viewbob"
 					;[Block]
@@ -1869,8 +1938,6 @@ Global StoredCameraFogFar# = CameraFogFar
 
 Global MouseSens# = GetOptionFloat("controls", "mouse sensitivity")
 
-Global EnableVRam% = GetOptionInt("graphics", "enable vram")
-
 Include "dreamfilter.bb"
 
 Dim LightSpriteTex(10)
@@ -2058,8 +2125,9 @@ Global NoTarget% = False
 
 Global GuaranteedOmni% = False
 
-Global NVGImages = LoadAnimImage("GFX\battery.png",64,64,0,2)
-MaskImage NVGImages,255,0,255
+Global NVGImages[2]
+NVGImages[0] = LoadImageHUDScaled("GFX\battery_green.png")
+NVGImages[1] = LoadImageHUDScaled("GFX\battery_blue.png")
 
 Global Wearing1499% = False
 Global AmbientLight%, AmbientLightNVG%
@@ -2101,12 +2169,12 @@ Global ParticleAmount% = GetOptionInt("graphics","particle amount")
 
 Dim NavImages(5)
 For i = 0 To 3
-	NavImages(i) = LoadImage_Strict("GFX\navigator\roomborder"+i+".png")
-	MaskImage NavImages(i),255,0,255
+	NavImages(i) = LoadImageHUDScaled("GFX\navigator\roomborder"+i+".png")
 Next
-NavImages(4) = LoadImage_Strict("GFX\navigator\batterymeter.png")
+Global NavSize% = ImageWidth(NavImages(0))
+NavImages(4) = LoadImageHUDScaled("GFX\navigator\batterymeter.png")
 
-Global NavBG = CreateImage(GraphicWidth,GraphicHeight)
+Global NavBG%
 
 Global LightConeModel
 
@@ -3050,6 +3118,13 @@ Collisions HIT_DEAD, HIT_MAP, 2, 2
 DrawLoading(90, True)
 
 ;----------------------------------- meshes and textures ----------------------------------------------------------------
+Include "Effects.bb"
+Global ResizeTexture%
+
+Function InitFastResize()
+	ResizeTexture = CreateTexture(SMALLEST_POWER_TWO, SMALLEST_POWER_TWO, 1 + 2 + 256 + 1024)
+	InitPostProcess()
+End Function
 
 Global FogTexture%, Fog%
 Global GasMaskTexture%, GasMaskOverlay%
@@ -3547,7 +3622,7 @@ While IsRunning
 			EndIf
 		Else If SelectedDifficulty\saveType = SAVEONSCREENS And (SelectedScreen<>Null Or SelectedMonitor<>Null)
 			If (Msg<>I_Loc\MessageSave_Saved And Msg<>I_Loc\MessageSave_DisabledLocation And Msg<>I_Loc\MessageSave_DisabledMoment) Or MsgTimer<=0 Then
-				Msg = Format(I_Loc\MessageSave_Anywhere, KeyName(KEY_SAVE))
+				Msg = Format(I_Loc\MessageSave_Anywhere, GetKeyName(KEY_SAVE))
 				MsgTimer = 70*4
 			EndIf
 			
@@ -3643,51 +3718,7 @@ While IsRunning
 		;UpdateSaveMSG()
 	End If
 	
-	If BorderlessWindowed Then
-		If (RealGraphicWidth<>GraphicWidth) Or (RealGraphicHeight<>GraphicHeight) Then
-			SetBuffer TextureBuffer(fresize_texture)
-			ClsColor 0,0,0 : Cls
-			CopyRect 0,0,GraphicWidth,GraphicHeight,1024-GraphicWidth/2,1024-GraphicHeight/2,BackBuffer(),TextureBuffer(fresize_texture)
-			SetBuffer BackBuffer()
-			ClsColor 0,0,0 : Cls
-			ScaleRender(0,0,2050.0 / Float(GraphicWidth) * AspectRatioRatio, 2050.0 / Float(GraphicWidth) * AspectRatioRatio)
-			;might want to replace Float(GraphicWidth) with Max(GraphicWidth,GraphicHeight) if portrait sizes cause issues
-			;everyone uses landscape so it's probably a non-issue
-		EndIf
-	EndIf
-
-	;not by any means a perfect solution
-	;Not even proper gamma correction but it's a nice looking alternative that works in windowed mode
-	If ScreenGamma>1.0 Then
-		CopyRect 0,0,RealGraphicWidth,RealGraphicHeight,1024-RealGraphicWidth/2,1024-RealGraphicHeight/2,BackBuffer(),TextureBuffer(fresize_texture)
-		EntityBlend fresize_image,1
-		ClsColor 0,0,0 : Cls
-		ScaleRender(-1.0/Float(RealGraphicWidth),1.0/Float(RealGraphicWidth),2048.0 / Float(RealGraphicWidth),2048.0 / Float(RealGraphicWidth))
-		EntityFX fresize_image,1+32
-		EntityBlend fresize_image,3
-		EntityAlpha fresize_image,ScreenGamma-1.0
-		ScaleRender(-1.0/Float(RealGraphicWidth),1.0/Float(RealGraphicWidth),2048.0 / Float(RealGraphicWidth),2048.0 / Float(RealGraphicWidth))
-	ElseIf ScreenGamma<1.0 Then ;todo: maybe optimize this if it's too slow, alternatively give players the option to disable gamma
-		CopyRect 0,0,RealGraphicWidth,RealGraphicHeight,1024-RealGraphicWidth/2,1024-RealGraphicHeight/2,BackBuffer(),TextureBuffer(fresize_texture)
-		EntityBlend fresize_image,1
-		ClsColor 0,0,0 : Cls
-		ScaleRender(-1.0/Float(RealGraphicWidth),1.0/Float(RealGraphicWidth),2048.0 / Float(RealGraphicWidth),2048.0 / Float(RealGraphicWidth))
-		EntityFX fresize_image,1+32
-		EntityBlend fresize_image,2
-		EntityAlpha fresize_image,1.0
-		SetBuffer TextureBuffer(fresize_texture2)
-		ClsColor 255*ScreenGamma,255*ScreenGamma,255*ScreenGamma
-		Cls
-		SetBuffer BackBuffer()
-		ScaleRender(-1.0/Float(RealGraphicWidth),1.0/Float(RealGraphicWidth),2048.0 / Float(RealGraphicWidth),2048.0 / Float(RealGraphicWidth))
-		SetBuffer(TextureBuffer(fresize_texture2))
-		ClsColor 0,0,0
-		Cls
-		SetBuffer(BackBuffer())
-	EndIf
-	EntityFX fresize_image,1
-	EntityBlend fresize_image,1
-	EntityAlpha fresize_image,1.0
+	ApplyBorderlessResizing()
 	
 	CatchErrors("Main loop / uncaught")
 
@@ -4020,7 +4051,7 @@ Function QuickLoadEvents()
 				ScaleSprite ForestNPC,0.75*(140.0/410.0),0.75
 				SpriteViewMode ForestNPC,4
 				EntityFX ForestNPC,1+8
-				ForestNPCTex = LoadAnimTexture("GFX\npcs\AgentIJ.AIJ",1+2,140,410,0,4)
+				ForestNPCTex = LoadAnimTexture_Strict("GFX\npcs\AgentIJ.AIJ",1+2,4,1,0,4)
 				ForestNPCData[0] = 0
 				EntityTexture ForestNPC,ForestNPCTex,ForestNPCData[0]
 				ForestNPCData[1]=0
@@ -4168,7 +4199,7 @@ Function DrawEnding()
 			SubBox\screenTop = GraphicHeight * 0.9
 			RecalculateSubtitleBoxTarget()
 
-			EndingScreen = LoadImage_Strict("GFX\endingscreen.pt")
+			EndingScreen = LoadImage_Strict("GFX\endingscreen.pt", MenuScale)
 			
 			ShouldPlay = 23
 			CurrMusicVolume = MusicVolume
@@ -4186,7 +4217,7 @@ Function DrawEnding()
 			;-200 -> -700
 			;Max(50 - (Abs(KillTimer)-200),0)    =    0->50
 			If Rand(1,150)<Min((Abs(EndingTimer)-200),155) Then
-				DrawImage EndingScreen, GraphicWidth/2-400, GraphicHeight/2-400
+				DrawImage EndingScreen, GraphicWidth/2-ImageWidth(EndingScreen)/2, GraphicHeight/2-ImageHeight(EndingScreen)/2
 			Else
 				Color 0,0,0
 				Rect 100,100,GraphicWidth-200,GraphicHeight-200
@@ -4204,7 +4235,7 @@ Function DrawEnding()
 			
 		Else
 			
-			DrawImage EndingScreen, GraphicWidth/2-400, GraphicHeight/2-400
+			DrawImage EndingScreen, GraphicWidth/2-ImageWidth(EndingScreen)/2, GraphicHeight/2-ImageHeight(EndingScreen)/2
 			
 			If EndingTimer < -1000 And EndingTimer > -2000
 				
@@ -4349,11 +4380,11 @@ Function InitCredits()
 	Local file% = OpenFile("Credits.txt")
 	Local l$
 	
-	CreditsFont% = LoadFont_Strict("GFX\font\cour\Courier New.ttf", Int(21 * (GraphicHeight / 1024.0)))
-	CreditsFont2% = LoadFont_Strict("GFX\font\cour\Courier New.ttf", Int(35 * (GraphicHeight / 1024.0)))
+	CreditsFont% = LoadFont_Strict("GFX\font\cour\Courier New.ttf", Int(21 * MenuScale))
+	CreditsFont2% = LoadFont_Strict("GFX\font\cour\Courier New.ttf", Int(35 * MenuScale))
 	
 	If CreditsScreen = 0
-		CreditsScreen = LoadImage_Strict("GFX\creditsscreen.pt")
+		CreditsScreen = LoadImage_Strict("GFX\creditsscreen.pt", MenuScale)
 	EndIf
 	
 	Repeat
@@ -4397,7 +4428,7 @@ Function DrawCredits()
     Cls
 	
 	If Rand(1,300)>1
-		DrawImage CreditsScreen, GraphicWidth/2-400, GraphicHeight/2-400
+		DrawImage CreditsScreen, GraphicWidth/2-ImageWidth(CreditsScreen)/2, GraphicHeight/2-ImageHeight(CreditsScreen)/2
 	EndIf
 	
 	id = 0
@@ -6274,9 +6305,7 @@ Function DrawGUI()
 					If SelectedItem\itemtemplate\img=0 Then
 						SelectedItem\state = Rand(0,5)
 						SelectedItem\itemtemplate\img=LoadImage_Strict("GFX\items\1025\1025_"+Int(SelectedItem\state)+".jpg")	
-						SelectedItem\itemtemplate\img = ResizeImage2(SelectedItem\itemtemplate\img, ImageWidth(SelectedItem\itemtemplate\img) * MenuScale, ImageHeight(SelectedItem\itemtemplate\img) * MenuScale)
-						
-						MaskImage(SelectedItem\itemtemplate\img, 255, 0, 255)
+						ScaleImage(SelectedItem\itemtemplate\img, MenuScale, MenuScale)
 					EndIf
 					
 					If (Not Wearing714) Then SCP1025state[SelectedItem\state]=Max(1,SCP1025state[SelectedItem\state])
@@ -6429,8 +6458,7 @@ Function DrawGUI()
 					If SelectedItem\state <= 100 Then SelectedItem\state = Max(0, SelectedItem\state - FPSfactor * 0.004)
 					
 					If SelectedItem\itemtemplate\img=0 Then
-						SelectedItem\itemtemplate\img=LoadImage_Strict(SelectedItem\itemtemplate\imgpath)	
-						MaskImage(SelectedItem\itemtemplate\img, 255, 0, 255)
+						SelectedItem\itemtemplate\img=LoadImageHUDScaled(SelectedItem\itemtemplate\imgpath)
 					EndIf
 					
 					;radiostate(5) = has the "use the number keys" -message been shown yet (true/false)
@@ -6679,19 +6707,19 @@ Function DrawGUI()
 									If ChannelPlaying(RadioCHN(5)) = False Then RadioCHN(5) = PlaySound_Strict(RadioStatic)
 							End Select 
 							
-							x=x+66
-							y=y+419
+							x=x+66*HUDScale
+							y=y+419*HUDScale
 							
 							Color (30,30,30)
 							
 							If SelectedItem\state <= 100 Then
 								For i = 0 To 4
-									Rect(x, y+8*i, 43 - i * 6, 4, Ceil(SelectedItem\state / 20.0) > 4 - i )
+									Rect(x, y+8*i*HUDScale, (43 - i * 6)*HUDScale, 4*HUDScale, Ceil(SelectedItem\state / 20.0) > 4 - i )
 								Next
 							EndIf	
 							
 							SetFont Font3
-							Text(x+60, y, I_Loc\HUD_RadioChannel)						
+							Text(x+60*HUDScale, y, I_Loc\HUD_RadioChannel)						
 							
 							If SelectedItem\itemtemplate\name = "veryfineradio" Then ;"KOODIKANAVA"
 								ResumeChannelWithSubtitles(RadioCHN(0))
@@ -6718,7 +6746,7 @@ Function DrawGUI()
 								Next
 								
 								SetFont Font4
-								Text(x+97, y+16, Rand(0,9),True,True)
+								Text(x+97*HUDScale, y+16*HUDScale, Rand(0,9),True,True)
 								
 							Else
 								If Not ConsoleOpen Then
@@ -6740,13 +6768,13 @@ Function DrawGUI()
 								EndIf
 								
 								SetFont Font4
-								Text(x+97, y+16, Int(SelectedItem\state2+1),True,True)
+								Text(x+97*HUDScale, y+16*HUDScale, Int(SelectedItem\state2+1),True,True)
 							EndIf
 							
 							SetFont Font3
 							If strtemp <> "" Then
 								strtemp = Right(Left(strtemp, (Int(MilliSecs()/300) Mod Len(strtemp))),10)
-								Text(x+32, y+33, strtemp)
+								Text(x+32*HUDScale, y+33*HUDScale, strtemp)
 							EndIf
 							
 							SetFont Font1
@@ -6928,20 +6956,19 @@ Function DrawGUI()
 					Color 255, 255, 255
 
 					If SelectedItem\itemtemplate\img=0 Then
-						SelectedItem\itemtemplate\img=LoadImage_Strict(SelectedItem\itemtemplate\imgpath)	
-						MaskImage(SelectedItem\itemtemplate\img, 255, 0, 255)
+						SelectedItem\itemtemplate\img=LoadImageHUDScaled(SelectedItem\itemtemplate\imgpath)
 					EndIf
 					
 					If SelectedItem\state <= 100 Then SelectedItem\state = Max(0, SelectedItem\state - FPSfactor * 0.005)
 					
-					x = HUDEndX - ImageWidth(SelectedItem\itemtemplate\img)*0.5+20
-					y = HUDEndY - ImageHeight(SelectedItem\itemtemplate\img)*0.4-85
-					width = 287
-					height = 256
+					x = HUDEndX - ImageWidth(SelectedItem\itemtemplate\img)*0.5+20*HUDScale
+					y = HUDEndY - ImageHeight(SelectedItem\itemtemplate\img)*0.4-85*HUDScale
+					width = 287*HUDScale
+					height = 256*HUDScale
 					
 					Local PlayerX,PlayerZ
 					
-					DrawImage(SelectedItem\itemtemplate\img, x - ImageWidth(SelectedItem\itemtemplate\img) / 2, y - ImageHeight(SelectedItem\itemtemplate\img) / 2 + 85)
+					DrawImage(SelectedItem\itemtemplate\img, x - ImageWidth(SelectedItem\itemtemplate\img) / 2, y - ImageHeight(SelectedItem\itemtemplate\img) / 2 + 85*HUDScale)
 					
 					SetFont Font3
 					
@@ -6962,8 +6989,8 @@ Function DrawGUI()
 					If (Not NavWorks) Then
 						If (MilliSecs() Mod 1000) > 300 Then
 							Color(200, 0, 0)
-							Text(x, y + height / 2 - 80, I_Loc\HUD_NavError, True)
-							Text(x, y + height / 2 - 60, I_Loc\HUD_NavErrorLocation, True)						
+							Text(x, y + height / 2 - 80 * HUDScale, I_Loc\HUD_NavError, True)
+							Text(x, y + height / 2 - 60 * HUDScale, I_Loc\HUD_NavErrorLocation, True)						
 						EndIf
 					Else
 						
@@ -6972,47 +6999,52 @@ Function DrawGUI()
 							PlayerX% = Floor((EntityX(PlayerRoom\obj)+8) / 8.0 + 0.5)
 							PlayerZ% = Floor((EntityZ(PlayerRoom\obj)+8) / 8.0 + 0.5)
 							
-							SetBuffer ImageBuffer(NavBG)
+							SetBuffer TextureBuffer(NavBG)
 							Local xx = x-ImageWidth(SelectedItem\itemtemplate\img)/2
-							Local yy = y-ImageHeight(SelectedItem\itemtemplate\img)/2+85
+							Local yy = y-ImageHeight(SelectedItem\itemtemplate\img)/2+85*HUDScale
 							DrawImage(SelectedItem\itemtemplate\img, xx, yy)
+							xx = xx + 80 * HUDScale
+							yy = yy + 70 * HUDScale
+							Local screenWidth% = 270*HUDScale
+
+							Local roomHalf% = NavSize / 2
 							
-							x = x - 12 + (((EntityX(Collider)-4.0)+8.0) Mod 8.0)*3
-							y = y + 12 - (((EntityZ(Collider)-4.0)+8.0) Mod 8.0)*3
+							x = x - roomHalf + (((EntityX(Collider)-4.0)+8.0) Mod 8.0)*3*HUDScale
+							y = y + roomHalf - (((EntityZ(Collider)-4.0)+8.0) Mod 8.0)*3*HUDScale
 							For x2 = Max(0, PlayerX - 6) To Min(MapWidth, PlayerX + 6)
 								For z2 = Max(0, PlayerZ - 6) To Min(MapHeight, PlayerZ + 6)
 									
 									If CoffinDistance > 16.0 Or Rnd(16.0)<CoffinDistance Then 
 										If MapTemp(x2, z2)>0 And (MapFound(x2, z2) > 0 Or SelectedItem\itemtemplate\name = "snav310" Or SelectedItem\itemtemplate\name = "snavulti") Then
-											Local drawx% = x + (PlayerX - 1 - x2) * 24 , drawy% = y - (PlayerZ - 1 - z2) * 24
+											Local drawx% = x + (PlayerX - 1 - x2) * NavSize , drawy% = y - (PlayerZ - 1 - z2) * NavSize
 											
 											If x2+1<=MapWidth Then
 												If MapTemp(x2+1,z2)=False
-													DrawImage NavImages(3),drawx-12,drawy-12
+													DrawImage NavImages(3),drawx-roomHalf,drawy-roomHalf
 												EndIf
 											Else
-												DrawImage NavImages(3),drawx-12,drawy-12
+												DrawImage NavImages(3),drawx-roomHalf,drawy-roomHalf
 											EndIf
 											If x2-1>=0 Then
 												If MapTemp(x2-1,z2)=False
-													DrawImage NavImages(1),drawx-12,drawy-12
+													DrawImage NavImages(1),drawx-roomHalf,drawy-roomHalf
 												EndIf
 											Else
-												DrawImage NavImages(1),drawx-12,drawy-12
+												DrawImage NavImages(1),drawx-roomHalf,drawy-roomHalf
 											EndIf
 											If z2-1>=0 Then
 												If MapTemp(x2,z2-1)=False
-													DrawImage NavImages(0),drawx-12,drawy-12
+													DrawImage NavImages(0),drawx-roomHalf,drawy-roomHalf
 												EndIf
 											Else
-												DrawImage NavImages(0),drawx-12,drawy-12
+												DrawImage NavImages(0),drawx-roomHalf,drawy-roomHalf
 											EndIf
 											If z2+1<=MapHeight Then
 												If MapTemp(x2,z2+1)=False
-													DrawImage NavImages(2),drawx-12,drawy-12
+													DrawImage NavImages(2),drawx-roomHalf,drawy-roomHalf
 												EndIf
 											Else
-												DrawImage NavImages(2),drawx-12,drawy-12
+												DrawImage NavImages(2),drawx-roomHalf,drawy-roomHalf
 											EndIf
 										EndIf
 									EndIf
@@ -7021,13 +7053,13 @@ Function DrawGUI()
 							Next
 							
 							SetBuffer BackBuffer()
-							DrawImageRect NavBG,xx+80,yy+70,xx+80,yy+70,270,230
+							DrawBufferRect TextureBuffer(NavBG),xx,yy,screenWidth,230*HUDScale,xx,yy,screenWidth,230*HUDScale
 							Color 30,30,30
 							If SelectedItem\itemtemplate\name = "snav" Then Color(100, 0, 0)
-							Rect xx+80,yy+70,270,230,False
+							Rect xx,yy,screenWidth,230*HUDScale,False
 							
-							x = HUDEndX - ImageWidth(SelectedItem\itemtemplate\img)*0.5+20
-							y = HUDEndY - ImageHeight(SelectedItem\itemtemplate\img)*0.4-85
+							x = HUDEndX - ImageWidth(SelectedItem\itemtemplate\img)*0.5+20*HUDScale
+							y = HUDEndY - ImageHeight(SelectedItem\itemtemplate\img)*0.4-85*HUDScale
 							
 							If SelectedItem\itemtemplate\name = "snav" Then 
 								Color(100, 0, 0)
@@ -7036,13 +7068,13 @@ Function DrawGUI()
 							EndIf
 							If (MilliSecs() Mod 1000) > 300 Then
 								If SelectedItem\itemtemplate\name <> "snav310" And SelectedItem\itemtemplate\name <> "snavulti" Then
-									Text(x - width/2 + 10, y - height/2 + 10, I_Loc\HUD_NavDatabase)
+									Text(x - width/2 + 10*HUDScale, y - height/2 + 10*HUDScale, I_Loc\HUD_NavDatabase)
 								EndIf
 								
 								yawvalue = EntityYaw(Collider)-90
-								x1 = x+Cos(yawvalue)*6 : y1 = y-Sin(yawvalue)*6
-								x2 = x+Cos(yawvalue-140)*5 : y2 = y-Sin(yawvalue-140)*5				
-								x3 = x+Cos(yawvalue+140)*5 : y3 = y-Sin(yawvalue+140)*5
+								x1 = x+Cos(yawvalue)*6*HUDScale : y1 = y-Sin(yawvalue)*6*HUDScale
+								x2 = x+Cos(yawvalue-140)*5*HUDScale : y2 = y-Sin(yawvalue-140)*5*HUDScale
+								x3 = x+Cos(yawvalue+140)*5*HUDScale : y3 = y-Sin(yawvalue+140)*5*HUDScale
 								
 								Line x1,y1,x2,y2
 								Line x1,y1,x3,y3
@@ -7056,8 +7088,8 @@ Function DrawGUI()
 									dist = Ceil(dist / 8.0) * 8.0
 									If dist < 8.0 * 4 Then
 										Color 100, 0, 0
-										Oval(x - dist * 3, y - 7 - dist * 3, dist * 3 * 2, dist * 3 * 2, False)
-										Text(x - width / 2 + 10, y - height / 2 + 30, I_Loc\NPC_173)
+										Oval(x - dist * 3 * HUDScale, y - 7 - dist * 3 * HUDScale, dist * 3 * 2 * HUDScale, dist * 3 * 2 * HUDScale, False)
+										Text(x - width / 2 + 10*HUDScale, y - height / 2 + 32*HUDScale, I_Loc\NPC_173)
 										SCPs_found% = SCPs_found% + 1
 									EndIf
 								EndIf
@@ -7065,8 +7097,8 @@ Function DrawGUI()
 									dist# = EntityDistance(Camera, Curr106\obj)
 									If dist < 8.0 * 4 Then
 										Color 100, 0, 0
-										Oval(x - dist * 1.5, y - 7 - dist * 1.5, dist * 3, dist * 3, False)
-										Text(x - width / 2 + 10, y - height / 2 + 30 + (20*SCPs_found), I_Loc\NPC_106)
+										Oval(x - dist * 1.5 * HUDScale, y - 7 - dist * 1.5 * HUDScale, dist * 3 * HUDScale, dist * 3 * HUDScale, False)
+										Text(x - width / 2 + 10*HUDScale, y - height / 2 + (32 + (20*SCPs_found))*HUDScale, I_Loc\NPC_106)
 										SCPs_found% = SCPs_found% + 1
 									EndIf
 								EndIf
@@ -7074,8 +7106,8 @@ Function DrawGUI()
 									dist# = EntityDistance(Camera, Curr096\obj)
 									If dist < 8.0 * 4 Then
 										Color 100, 0, 0
-										Oval(x - dist * 1.5, y - 7 - dist * 1.5, dist * 3, dist * 3, False)
-										Text(x - width / 2 + 10, y - height / 2 + 30 + (20*SCPs_found), I_Loc\NPC_096)
+										Oval(x - dist * 1.5 * HUDScale, y - 7 - dist * 1.5 * HUDScale, dist * 3 * HUDScale, dist * 3 * HUDScale, False)
+										Text(x - width / 2 + 10*HUDScale, y - height / 2 + (32 + (20*SCPs_found))*HUDScale, I_Loc\NPC_096)
 										SCPs_found% = SCPs_found% + 1
 									EndIf
 								EndIf
@@ -7085,8 +7117,8 @@ Function DrawGUI()
 										If dist < 8.0 * 4 Then
 											If (Not np\HideFromNVG) Then
 												Color 100, 0, 0
-												Oval(x - dist * 1.5, y - 7 - dist * 1.5, dist * 3, dist * 3, False)
-												Text(x - width / 2 + 10, y - height / 2 + 30 + (20*SCPs_found), I_Loc\NPC_049)
+												Oval(x - dist * 1.5 * HUDScale, y - 7 - dist * 1.5 * HUDScale, dist * 3 * HUDScale, dist * 3 * HUDScale, False)
+												Text(x - width / 2 + 10*HUDScale, y - height / 2 + (32 + (20*SCPs_found))*HUDScale, I_Loc\NPC_049)
 												SCPs_found% = SCPs_found% + 1
 											EndIf
 										EndIf
@@ -7097,8 +7129,8 @@ Function DrawGUI()
 									If CoffinDistance < 8.0 Then
 										dist = Rnd(4.0, 8.0)
 										Color 100, 0, 0
-										Oval(x - dist * 1.5, y - 7 - dist * 1.5, dist * 3, dist * 3, False)
-										Text(x - width / 2 + 10, y - height / 2 + 30 + (20*SCPs_found), I_Loc\NPC_895)
+										Oval(x - dist * 1.5 * HUDScale, y - 7 - dist * 1.5 * HUDScale, dist * 3 * HUDScale, dist * 3 * HUDScale, False)
+										Text(x - width / 2 + 10*HUDScale, y - height / 2 + (32 + (20*SCPs_found))*HUDScale, I_Loc\NPC_895)
 									EndIf
 								EndIf
 							End If
@@ -7121,12 +7153,12 @@ Function DrawGUI()
 								;Next
 								;SetFont Font3
 								
-								xtemp = x - width/2 + 196
-								ytemp = y - height/2 + 10
-								Rect xtemp,ytemp,80,20,False
+								xtemp = xx + screenWidth - 80*HUDScale
+								ytemp = yy - 20*HUDScale
+								Rect xtemp,ytemp,80*HUDScale,20*HUDScale,False
 								
 								For i = 1 To Ceil(SelectedItem\state / 10.0)
-									DrawImage NavImages(4),xtemp+i*8-6,ytemp+4
+									DrawImage NavImages(4),xtemp+(i*8-6)*HUDScale,ytemp+4*HUDScale
 								Next
 							EndIf
 						EndIf
@@ -7223,10 +7255,7 @@ Function DrawGUI()
 				Case "badge", "oldbadge"
 					;[Block]
 					If SelectedItem\itemtemplate\img=0 Then
-						SelectedItem\itemtemplate\img=LoadImage_Strict(SelectedItem\itemtemplate\imgpath)	
-						;SelectedItem\itemtemplate\img = ResizeImage2(SelectedItem\itemtemplate\img, ImageWidth(SelectedItem\itemtemplate\img) * MenuScale, ImageHeight(SelectedItem\itemtemplate\img) * MenuScale)
-						
-						MaskImage(SelectedItem\itemtemplate\img, 255, 0, 255)
+						SelectedItem\itemtemplate\img=LoadImage_Strict(SelectedItem\itemtemplate\imgpath, MenuScale)	
 					EndIf
 					
 					DrawImage(SelectedItem\itemtemplate\img, GraphicWidth / 2 - ImageWidth(SelectedItem\itemtemplate\img) / 2, GraphicHeight / 2 - ImageHeight(SelectedItem\itemtemplate\img) / 2)
@@ -7257,9 +7286,7 @@ Function DrawGUI()
 					;[Block]
 					If SelectedItem\itemtemplate\img = 0 Then
 						SelectedItem\itemtemplate\img = LoadImage_Strict(SelectedItem\itemtemplate\imgpath)	
-						SelectedItem\itemtemplate\img = ResizeImage2(SelectedItem\itemtemplate\img, ImageWidth(SelectedItem\itemtemplate\img) * MenuScale, ImageHeight(SelectedItem\itemtemplate\img) * MenuScale)
-						
-						MaskImage(SelectedItem\itemtemplate\img, 255, 0, 255)
+						ScaleImage(SelectedItem\itemtemplate\img, MenuScale, MenuScale)
 					EndIf
 					
 					DrawImage(SelectedItem\itemtemplate\img, GraphicWidth / 2 - ImageWidth(SelectedItem\itemtemplate\img) / 2, GraphicHeight / 2 - ImageHeight(SelectedItem\itemtemplate\img) / 2)
@@ -7325,46 +7352,37 @@ Function DrawGUI()
 					If SelectedItem\itemtemplate\group = "paper" Lor SelectedItem\itemtemplate\name = "ticket" Then
 						;[Block]
 						If SelectedItem\itemtemplate\img = 0 Then
+							SelectedItem\itemtemplate\img = LoadImage_Strict(SelectedItem\itemtemplate\imgpath, MenuScale)
+							Local buf%
 							Select SelectedItem\itemtemplate\name
 								Case "burntnote" 
-									SelectedItem\itemtemplate\img = LoadImage_Strict("GFX\items\bn.it")
-									SetBuffer ImageBuffer(SelectedItem\itemtemplate\img)
-									Color 0,0,0
+									SetBuffer(TextureBuffer(ResizeTexture))
+									DrawImage(SelectedItem\itemtemplate\img, 0, 0)
+									Color(0, 0, 0)
 									SetFont Font1
-									Text 277, 469, AccessCode, True, True
-									Color 255,255,255
+									Text 277 * MenuScale, 469 * MenuScale, AccessCode, True, True
 									SetBuffer BackBuffer()
+									buf = ImageBuffer(SelectedItem\itemtemplate\img)
+									CopyRectStretch(0, 0, ImageWidth(SelectedItem\itemtemplate\img), ImageHeight(SelectedItem\itemtemplate\img), 0, 0, BufferWidth(buf), BufferHeight(buf), TextureBuffer(ResizeTexture), buf)
 								Case "doc372"
-									SelectedItem\itemtemplate\img = LoadImage_Strict(SelectedItem\itemtemplate\imgpath)
-									SelectedItem\itemtemplate\img = ResizeImage2(SelectedItem\itemtemplate\img, ImageWidth(SelectedItem\itemtemplate\img) * MenuScale, ImageHeight(SelectedItem\itemtemplate\img) * MenuScale)
-									
-									SetBuffer ImageBuffer(SelectedItem\itemtemplate\img)
-									Color 37,45,137
+									SetBuffer(TextureBuffer(ResizeTexture))
+									DrawImage(SelectedItem\itemtemplate\img, 0, 0)
+									Color(37,45,137)
 									SetFont Font5
 									temp = ((Int(AccessCode)*3) Mod 10000)
 									If temp < 1000 Then temp = temp+1000
 									Text 383*MenuScale, 734*MenuScale, temp, True, True
-									Color 255,255,255
 									SetBuffer BackBuffer()
+									buf = ImageBuffer(SelectedItem\itemtemplate\img)
+									CopyRectStretch(0, 0, ImageWidth(SelectedItem\itemtemplate\img), ImageHeight(SelectedItem\itemtemplate\img), 0, 0, BufferWidth(buf), BufferHeight(buf), TextureBuffer(ResizeTexture), buf)
 								Case "ticket"
-									;don't resize because it messes up the masking
-									SelectedItem\itemtemplate\img=LoadImage_Strict(SelectedItem\itemtemplate\imgpath)
-									
 									If (SelectedItem\state = 0) Then
 										Msg = I_Loc\MessageItem_1162UseTicket
 										MsgTimer = 70*10
 										PlaySound_Strict LoadTempSound("SFX\SCP\1162\NostalgiaCancer"+Rand(1,5)+".ogg")
 										SelectedItem\state = 1
 									EndIf
-								Case "leaflet"
-									;don't resize because it messes up the masking
-									SelectedItem\itemtemplate\img=LoadImage_Strict(SelectedItem\itemtemplate\imgpath)
-								Default 
-									SelectedItem\itemtemplate\img=LoadImage_Strict(SelectedItem\itemtemplate\imgpath)
-									SelectedItem\itemtemplate\img = ResizeImage2(SelectedItem\itemtemplate\img, ImageWidth(SelectedItem\itemtemplate\img) * MenuScale, ImageHeight(SelectedItem\itemtemplate\img) * MenuScale)
 							End Select
-							
-							MaskImage(SelectedItem\itemtemplate\img, 255, 0, 255)
 						EndIf
 						
 						DrawImage(SelectedItem\itemtemplate\img, GraphicWidth / 2 - ImageWidth(SelectedItem\itemtemplate\img) / 2, GraphicHeight / 2 - ImageHeight(SelectedItem\itemtemplate\img) / 2)
@@ -7761,7 +7779,6 @@ Function DrawMenu()
 				MouseHit1 = False
 				SaveOptionsINI()
 				
-				AntiAlias Opt_AntiAlias
 				TextureLodBias TextureFloat#
 			EndIf
 			
@@ -7839,16 +7856,19 @@ Function DrawMenu()
 					If (MouseOn(x+270*MenuScale,y-6*MenuScale,100*MenuScale+14,20) And OnSliderID=0) Or OnSliderID=3
 						DrawOptionsTooltip(tx,ty,tw,th+100*MenuScale,"texquality")
 					EndIf
-					
-					y=y+50*MenuScale
-					Color 100,100,100
-					Text(x, y, I_Loc\OptionName_Vram)	
-					EnableVRam = DrawTick(x + 270 * MenuScale, y + MenuScale, EnableVRam, True)
-					If MouseOn(x + 270 * MenuScale, y + MenuScale, 20*MenuScale,20*MenuScale) And OnSliderID=0
-						DrawOptionsTooltip(tx,ty,tw,th,"vram")
-					EndIf
 
 					y=y+50*MenuScale
+
+					Local l# = Unlerp(MinHUDScaleFactor, MaxHUDScaleFactor, HUDScaleFactor)
+					l = SlideBar(x + 270*MenuScale, y+6*MenuScale,100*MenuScale, l#*100, 7)/100
+					Color 255,255,255
+					Text(x, y, I_Loc\Launcher_Hudscalefactor)
+					UpdateHUDScaleFactor(Lerp(MinHUDScaleFactor, MaxHUDScaleFactor, l))
+					If (MouseOn(x+270*MenuScale,y+6*MenuScale,100*MenuScale+14,20) And OnSliderID=0) Lor OnSliderID=7
+						DrawOptionsTooltip(tx,ty,tw,th,"hudscalefactor")
+					EndIf
+
+					y=y+30*MenuScale
 
 					HUDOffsetScale = SlideBar(x + 270*MenuScale, y+6*MenuScale,100*MenuScale, HUDOffsetScale*100, 5)/100
 					Color 255,255,255
@@ -8008,26 +8028,26 @@ Function DrawMenu()
 					y = y + 10*MenuScale
 					
 					Text(x, y + 20 * MenuScale, I_Loc\OptionName_BindMoveForward)
-					InputBox(x + 200 * MenuScale, y + 20 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_UP,210)),5,-1)
+					InputBox(x + 200 * MenuScale, y + 20 * MenuScale,100*MenuScale,20*MenuScale,GetKeyName(Min(KEY_UP,210)),5,-1)		
 					Text(x, y + 40 * MenuScale, I_Loc\OptionName_BindMoveLeft)
-					InputBox(x + 200 * MenuScale, y + 40 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_LEFT,210)),3,-1)
+					InputBox(x + 200 * MenuScale, y + 40 * MenuScale,100*MenuScale,20*MenuScale,GetKeyName(Min(KEY_LEFT,210)),3,-1)	
 					Text(x, y + 60 * MenuScale, I_Loc\OptionName_BindMoveBack)
-					InputBox(x + 200 * MenuScale, y + 60 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_DOWN,210)),6,-1)
+					InputBox(x + 200 * MenuScale, y + 60 * MenuScale,100*MenuScale,20*MenuScale,GetKeyName(Min(KEY_DOWN,210)),6,-1)				
 					Text(x, y + 80 * MenuScale, I_Loc\OptionName_BindMoveRight)
-					InputBox(x + 200 * MenuScale, y + 80 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_RIGHT,210)),4,-1)
+					InputBox(x + 200 * MenuScale, y + 80 * MenuScale,100*MenuScale,20*MenuScale,GetKeyName(Min(KEY_RIGHT,210)),4,-1)
 					
 					Text(x, y + 100 * MenuScale, I_Loc\OptionName_BindBlink)
-					InputBox(x + 200 * MenuScale, y + 100 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_BLINK,210)),7,-1)
+					InputBox(x + 200 * MenuScale, y + 100 * MenuScale,100*MenuScale,20*MenuScale,GetKeyName(Min(KEY_BLINK,210)),7,-1)				
 					Text(x, y + 120 * MenuScale, I_Loc\OptionName_BindSprint)
-					InputBox(x + 200 * MenuScale, y + 120 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_SPRINT,210)),8,-1)
+					InputBox(x + 200 * MenuScale, y + 120 * MenuScale,100*MenuScale,20*MenuScale,GetKeyName(Min(KEY_SPRINT,210)),8,-1)
 					Text(x, y + 140 * MenuScale, I_Loc\OptionName_BindInv)
-					InputBox(x + 200 * MenuScale, y + 140 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_INV,210)),9,-1)
+					InputBox(x + 200 * MenuScale, y + 140 * MenuScale,100*MenuScale,20*MenuScale,GetKeyName(Min(KEY_INV,210)),9,-1)
 					Text(x, y + 160 * MenuScale, I_Loc\OptionName_BindCrouch)
-					InputBox(x + 200 * MenuScale, y + 160 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_CROUCH,210)),10,-1)
+					InputBox(x + 200 * MenuScale, y + 160 * MenuScale,100*MenuScale,20*MenuScale,GetKeyName(Min(KEY_CROUCH,210)),10,-1)
 					Text(x, y + 180 * MenuScale, I_Loc\OptionName_BindSave)
-					InputBox(x + 200 * MenuScale, y + 180 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_SAVE,210)),11,-1)
+					InputBox(x + 200 * MenuScale, y + 180 * MenuScale,100*MenuScale,20*MenuScale,GetKeyName(Min(KEY_SAVE,210)),11,-1)	
 					Text(x, y + 200 * MenuScale, I_Loc\OptionName_BindConsole)
-					InputBox(x + 200 * MenuScale, y + 200 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_CONSOLE,210)),12,-1)
+					InputBox(x + 200 * MenuScale, y + 200 * MenuScale,100*MenuScale,20*MenuScale,GetKeyName(Min(KEY_CONSOLE,210)),12,-1)
 
 					If MouseOn(x,y,300*MenuScale,220*MenuScale) And OnSliderID=0
 						DrawOptionsTooltip(tx,ty,tw,th,"controls")
@@ -8437,42 +8457,17 @@ Function LoadEntities()
 		TempSounds[i]=0
 	Next
 	
-	If PauseMenuIMG% = 0 Then
-		PauseMenuIMG% = LoadImage_Strict("GFX\menu\pausemenu.jpg")
-		MaskImage PauseMenuIMG, 255,255,0
-		ScaleImage PauseMenuIMG,MenuScale,MenuScale
-	EndIf
+	If PauseMenuIMG = 0 Then PauseMenuIMG% = LoadImage_Strict("GFX\menu\pausemenu.jpg", MenuScale)
 	
-	If SprintIcon = 0 Then
-		SprintIcon% = LoadImage_Strict("GFX\sprinticon.png")
-		ScaleImage(SprintIcon, HUDScale, HUDScale)
-	EndIf
-	If BlinkIcon = 0 Then
-		BlinkIcon% = LoadImage_Strict("GFX\blinkicon.png")
-		ScaleImage(BlinkIcon, HUDScale, HUDScale)
-	EndIf
-	If CrouchIcon = 0 Then
-		CrouchIcon% = LoadImage_Strict("GFX\sneakicon.png")
-		ScaleImage(CrouchIcon, HUDScale, HUDScale)
-	EndIf
-	If HandIcon = 0 Then
-		HandIcon% = LoadImage_Strict("GFX\handsymbol.png")
-		ScaleImage(HandIcon, HUDScale, HUDScale)
-	EndIf
-	If HandIcon2 = 0 Then
-		HandIcon2% = LoadImage_Strict("GFX\handsymbol2.png")
-		ScaleImage(HandIcon2, HUDScale, HUDScale)
-	EndIf
+	If SprintIcon = 0 Then SprintIcon% = LoadImageHUDScaled("GFX\sprinticon.png")
+	If BlinkIcon = 0 Then BlinkIcon% = LoadImageHUDScaled("GFX\blinkicon.png")
+	If CrouchIcon = 0 Then CrouchIcon% = LoadImageHUDScaled("GFX\sneakicon.png")
+	If HandIcon = 0 Then HandIcon% = LoadImageHUDScaled("GFX\handsymbol.png")
+	If HandIcon2 = 0 Then HandIcon2% = LoadImageHUDScaled("GFX\handsymbol2.png")
 
-	If StaminaMeterIMG = 0 Then
-		StaminaMeterIMG% = LoadImage_Strict("GFX\staminameter.jpg")
-		ScaleImage(StaminaMeterIMG, HUDScale, HUDScale)
-	EndIf
+	If StaminaMeterIMG = 0 Then StaminaMeterIMG% = LoadImageHUDScaled("GFX\staminameter.png")
 
-	If Panel294 = 0 Then
-		Panel294 = LoadImage_Strict("GFX\294panel.jpg")
-		ScaleImage(Panel294, HUDScale, HUDScale)
-	EndIf
+	If Panel294 = 0 Then Panel294 = LoadImageHUDScaled("GFX\294panel.jpg")
 
 	Load294()
 
@@ -8484,7 +8479,7 @@ Function LoadEntities()
 	
 	;TextureLodBias
 	
-	AmbientLightRoomTex% = CreateTexture(2,2,257)
+	AmbientLightRoomTex% = CreateTexture(2,2,1+256+1024)
 	AmbientLight = GetModdedINIInt(MapOptions, "facility", "ambient light")
 	AmbientLightNVG = GetModdedINIInt(MapOptions, "facility", "ambient light nvg")
 
@@ -8504,8 +8499,9 @@ Function LoadEntities()
 	CameraFogRange (Camera, CameraFogNear, CameraFogFar)
 	AmbientLight Brightness, Brightness, Brightness
 	
-	ScreenTexs[0] = CreateTexture(512, 512, 1+256)
-	ScreenTexs[1] = CreateTexture(512, 512, 1+256)
+	ScreenTexs[0] = CreateTexture(512, 512, 1+256+1024)
+	ScreenTexs[1] = CreateTexture(512, 512, 1+256+1024)
+	ScreenTexs[2] = CreateTexture(512, 512, 8192)
 	
 	CreateBlurImage()
 	CameraProjMode ark_blur_cam,0
@@ -8518,7 +8514,7 @@ Function LoadEntities()
 	EntityTexture(Fog, FogTexture)
 	EntityBlend (Fog, 2)
 	EntityOrder Fog, -1000
-	MoveEntity(Fog, 0, 0, 1.0)
+	MoveEntity(Fog, -PixelWidth, PixelHeight, 1.0)
 	
 	GasMaskTexture = LoadTexture_Strict("GFX\GasmaskOverlay.jpg", 1)
 	GasMaskOverlay = CreateSprite(ark_blur_cam)
@@ -8527,7 +8523,7 @@ Function LoadEntities()
 	EntityBlend (GasMaskOverlay, 2)
 	EntityFX(GasMaskOverlay, 1)
 	EntityOrder GasMaskOverlay, -1003
-	MoveEntity(GasMaskOverlay, 0, 0, 1.0)
+	MoveEntity(GasMaskOverlay, -PixelWidth, PixelHeight, 1.0)
 	HideEntity(GasMaskOverlay)
 	
 	InfectTexture = LoadTexture_Strict("GFX\InfectOverlay.jpg", 1)
@@ -8537,7 +8533,7 @@ Function LoadEntities()
 	EntityBlend (InfectOverlay, 3)
 	EntityFX(InfectOverlay, 1)
 	EntityOrder InfectOverlay, -1003
-	MoveEntity(InfectOverlay, 0, 0, 1.0)
+	MoveEntity(InfectOverlay, -PixelWidth, PixelHeight, 1.0)
 	;EntityAlpha (InfectOverlay, 255.0)
 	HideEntity(InfectOverlay)
 	
@@ -8548,14 +8544,14 @@ Function LoadEntities()
 	EntityBlend (NVOverlay, 2)
 	EntityFX(NVOverlay, 1)
 	EntityOrder NVOverlay, -1003
-	MoveEntity(NVOverlay, 0, 0, 1.0)
+	MoveEntity(NVOverlay, -PixelWidth, PixelHeight, 1.0)
 	HideEntity(NVOverlay)
 	NVBlink = CreateSprite(ark_blur_cam)
 	ScaleSprite(NVBlink, 1.0, Max(Float(GraphicHeight) / Float(GraphicWidth), 0.8))
 	EntityColor(NVBlink,0,0,0)
 	EntityFX(NVBlink, 1)
 	EntityOrder NVBlink, -1005
-	MoveEntity(NVBlink, 0, 0, 1.0)
+	MoveEntity(NVBlink, -PixelWidth, PixelHeight, 1.0)
 	HideEntity(NVBlink)
 	
 	FogNVTexture = LoadTexture_Strict("GFX\fogNV.jpg", 1)
@@ -8564,7 +8560,7 @@ Function LoadEntities()
 	
 	DrawLoading(5)
 	
-	DarkTexture = CreateTexture(1024, 1024, 1 + 2)
+	DarkTexture = CreateTexture(1, 1, 1 + 2)
 	SetBuffer TextureBuffer(DarkTexture)
 	Cls
 	SetBuffer BackBuffer()
@@ -8574,10 +8570,10 @@ Function LoadEntities()
 	EntityTexture(Dark, DarkTexture)
 	EntityBlend (Dark, 1)
 	EntityOrder Dark, -1002
-	MoveEntity(Dark, 0, 0, 1.0)
+	MoveEntity(Dark, -PixelWidth, PixelHeight, 1.0)
 	EntityAlpha Dark, 0.0
 	
-	LightTexture = CreateTexture(1024, 1024, 1 + 2+256)
+	LightTexture = CreateTexture(1, 1, 1 + 2+256)
 	SetBuffer TextureBuffer(LightTexture)
 	ClsColor 255, 255, 255
 	Cls
@@ -8591,7 +8587,7 @@ Function LoadEntities()
 	EntityTexture(Light, LightTexture)
 	EntityBlend (Light, 1)
 	EntityOrder Light, -1002
-	MoveEntity(Light, 0, 0, 1.0)
+	MoveEntity(Light, -PixelWidth, PixelHeight, 1.0)
 	HideEntity Light
 	
 	Collider = CreatePivot()
@@ -8753,7 +8749,7 @@ Function LoadEntities()
 	For i = 0 To 6
 		DecalTextures(i) = LoadTexture_Strict("GFX\decal" + (i + 1) + ".png", 1 + 2)
 	Next
-	DecalTextures(7) = LoadTexture_Strict("GFX\items\INVpaperstrips.jpg", 1 + 2)
+	DecalTextures(7) = LoadTexture_Strict("GFX\items\INVpaperstrips.png", 1 + 2)
 	For i = 8 To 12
 		DecalTextures(i) = LoadTexture_Strict("GFX\decalpd"+(i-7)+".jpg", 1 + 2)	
 	Next
@@ -8861,7 +8857,7 @@ Function LoadEntities()
 
 	ParticleTextures(0) = LoadTexture_Strict("GFX\smoke.png", 1 + 2)
 	ParticleTextures(1) = LoadTexture_Strict("GFX\flash.jpg", 1 + 2)
-	ParticleTextures(2) = LoadTexture_Strict("GFX\dust.jpg", 1 + 2)
+	ParticleTextures(2) = LoadTexture_Strict("GFX\dust.png", 1 + 2)
 	ParticleTextures(3) = LoadTexture_Strict("GFX\npcs\hg.pt", 1 + 2)
 	ParticleTextures(4) = LoadTexture_Strict("GFX\map\sun.jpg", 1 + 2)
 	ParticleTextures(5) = LoadTexture_Strict("GFX\bloodsprite.png", 1 + 2)
@@ -8871,6 +8867,8 @@ Function LoadEntities()
 	
 	SetChunkDataValues()
 	
+	NavBG = CreateTexture(GraphicWidth,GraphicHeight, 1 + 1024)
+
 	;NPCtypeD - different models with different textures (loaded using "CopyEntity") - ENDSHN
 	;[Block]
 	For i=1 To MaxDTextures-1
@@ -8915,7 +8913,7 @@ Function LoadEntities()
 	InitMaterials()
 
 	If IsBirthday Then
-		tex = LoadModdedTextureNonStrict("GFX\map\miscsigns3.ae", 1)
+		tex = LoadTexture("GFX\map\miscsigns3.ae", 1)
 		TextureBlend(tex, 5)
 		AddTextureToCache(tex, "GFX\map\miscsigns3.jpg")
 	EndIf
@@ -8988,7 +8986,7 @@ Function LoadEntities()
 	SetTemplateEmitterLifeTime(ParticleEffect[2], 0)
 	SetTemplateParticlesPerInterval(ParticleEffect[2], 80)
 	SetTemplateParticleLifeTime(ParticleEffect[2], 90, 100)
-	SetTemplateTexture(ParticleEffect[2], "GFX\dust.jpg", 2, 1)
+	SetTemplateTexture(ParticleEffect[2], "GFX\dust.png", 2, 1)
 	SetTemplateOffset(ParticleEffect[2], -0.2, 0.2, 0.0, 1.2, -0.2, 0.2)
 	SetTemplateVelocity(ParticleEffect[2], -0.005, 0.005, -0.0017, 0.0017, -0.005, 0.005)
 	SetTemplateSizeVel(ParticleEffect[2], -0.000005, 1)
@@ -9460,8 +9458,9 @@ Function NullGame(playbuttonsfx%=True)
 	Delete Each Items
 
 	For itt.ItemTemplates = Each ItemTemplates
-		FreeImage(itt\invimg)
-		If itt\invimg2 <> 0 Then FreeImage(itt\invimg2)
+		FreeImageHUDScaled(itt\invimg)
+		If itt\invimg2 <> 0 Then FreeImageHUDScaled(itt\invimg2)
+		If itt\img <> 0 Then FreeImageHUDScaled(itt\img)
 		Delete itt
 	Next
 
@@ -9541,9 +9540,10 @@ Function NullGame(playbuttonsfx%=True)
 	;DeInitExt
 	
 	CatchErrors("Clear World")
-	ClearWorld
+	; Don't clear shaders
+	ClearWorld(1, 1, 1, 0)
 	CatchErrors("Uncaught (Clear World)")
-	
+
 	Camera = 0
 	ark_blur_cam = 0
 	Collider = 0
@@ -11350,6 +11350,14 @@ Function angleDist#(a0#,a1#)
 	Return bb
 End Function
 
+Function Lerp#(a#, b#, f#)
+    Return a * (1.0 - f) + (b * f)
+End Function
+
+Function Unlerp#(a#, b#, f#)
+	Return (f - a) / (b - a)
+End Function
+
 ;--------------------------------------- decals -------------------------------------------------------
 
 Type Decals
@@ -11758,8 +11766,8 @@ Function SaveOptionsINI()
 	PutINIValue(OptionFile, "console", "auto opening", ConsoleOpening%)
 	PutINIValue(OptionFile, "general", "speed run mode", SpeedRunMode%)
 	PutINIValue(OptionFile, "general", "numeric seeds", UseNumericSeeds%)
-	PutINIValue(OptionFile, "graphics", "enable vram", EnableVRam)
 	PutINIValue(OptionFile, "controls", "mouse smoothing", MouseSmooth)
+	PutINIValue(OptionFile, "graphics", "hud scale factor", HUDScaleFactor)
 	PutINIValue(OptionFile, "graphics", "hud offset", HUDOffsetScale)
 	PutINIValue(OptionFile, "graphics", "view bob", ViewBobScale)
 	PutINIValue(OptionFile, "graphics", "fov", FOV)
@@ -11856,37 +11864,25 @@ Function EntityScaleZ#(entity%, globl% = False)
 	Return Sqr(TFormedX() * TFormedX() + TFormedY() * TFormedY() + TFormedZ() * TFormedZ())
 End Function 
 
+Global SMALLEST_POWER_TWO#
+
 Function Graphics3DExt%(width%,height%,depth%=32,mode%=2)
-	;If FE_InitExtFlag = 1 Then DeInitExt() ;prevent FastExt from breaking itself
 	Graphics3D width,height,depth,mode
+	SMALLEST_POWER_TWO = 512.0
+	While SMALLEST_POWER_TWO < Width Lor SMALLEST_POWER_TWO < Height
+		SMALLEST_POWER_TWO = SMALLEST_POWER_TWO * 2.0
+	Wend
 	InitFastResize()
-	;InitExt()
-	AntiAlias GetOptionInt("graphics","antialias")
 	;TextureAnisotropy% (GetOptionInt("graphics","anisotropy"),-1)
 End Function
 
-Function ResizeImage2(image%, width%, height%)
-    Local img%
-    #ifdef _B3XD
-        img = CreateImage(width, height)
-        Local oldWidth% = ImageWidth(image)
-        Local oldHeight% = ImageHeight(image)
-        CopyRectStretch 0, 0, oldWidth, oldHeight, 0, 0, width, height, ImageBuffer(image), ImageBuffer(img)
-        FreeImage image
-        Return img
-    #else_
-        img = CreateImage(width, height)
-        oldWidth = ImageWidth(image)
-        oldHeight = ImageHeight(image)
-        CopyRect 0, 0, oldWidth, oldHeight, 1024 - oldWidth / 2, 1024 - oldHeight / 2, ImageBuffer(image), TextureBuffer(fresize_texture)
-        SetBuffer BackBuffer()
-        ScaleRender(0, 0, 2048.0 / Float(RealGraphicWidth) * Float(width) / Float(oldWidth), 2048.0 / Float(RealGraphicWidth) * Float(height) / Float(oldHeight))
-        ; might want to replace Float(GraphicWidth) with Max(GraphicWidth,GraphicHeight) if portrait sizes cause issues
-        ; everyone uses landscape so it's probably a non-issue
-        CopyRect RealGraphicWidth / 2 - width / 2, RealGraphicHeight / 2 - height / 2, width, height, 0, 0, BackBuffer(), ImageBuffer(img)
-        FreeImage image
-        Return img
-    #endif_
+Function ApplyBorderlessResizing()
+	If BorderlessWindowed And (RealGraphicWidth<>GraphicWidth Lor RealGraphicHeight<>GraphicHeight) Then
+		CopyRectStretch(0, 0, GraphicWidth, GraphicHeight, 0, 0, ScaledGraphicWidth, ScaledGraphicHeight, BackBuffer(), TextureBuffer(ResizeTexture))
+		; We need to move the picture into the center of the screen, need to clear the rest.
+		If ScaledOffsetX<>0 Lor ScaledOffsetY<>0 Then Cls
+		CopyRect(0, 0, ScaledGraphicWidth, ScaledGraphicHeight, ScaledOffsetX, ScaledOffsetY, TextureBuffer(ResizeTexture), BackBuffer())
+	EndIf
 End Function
 
 Function RenderWorld2()
@@ -11940,6 +11936,8 @@ Function RenderWorld2()
 	
 	CurrTrisAmount = TrisRendered()
 
+	UpdatePostProcess()
+
 	If hasBattery=0 And WearingNightVision<>3
 		IsNVGBlinking% = True
 		ShowEntity NVBlink%
@@ -11958,8 +11956,8 @@ Function RenderWorld2()
 				IsNVGBlinking% = True
 				ShowEntity NVBlink%
 				If NVTimer<=-10
-				NVTimer = 600.0
-			EndIf
+					NVTimer = 600.0
+				EndIf
 			EndIf
 			
 			Color 255,255,255
@@ -11969,10 +11967,10 @@ Function RenderWorld2()
 			Local plusY% = 0
 			If hasBattery=1 Then plusY% = 40
 			
-			Text GraphicWidth/2,HUDStartY+(20+plusY)*MenuScale,I_Loc\HUD_NvgRefresh,True,False
+			Text GraphicWidth/2,HUDStartY+(20+plusY)*HUDScale,I_Loc\HUD_NvgRefresh,True,False
 			
-			Text GraphicWidth/2,HUDStartY+(60+plusY)*MenuScale,Max(f2s(NVTimer/60.0,1),0.0),True,False
-			Text GraphicWidth/2,HUDStartY+(100+plusY)*MenuScale,I_Loc\HUD_NvgRefreshSeconds,True,False
+			Text GraphicWidth/2,HUDStartY+(60+plusY)*HUDScale,Max(f2s(NVTimer/60.0,1),0.0),True,False
+			Text GraphicWidth/2,HUDStartY+(100+plusY)*HUDScale,I_Loc\HUD_NvgRefreshSeconds,True,False
 			
 			temp% = CreatePivot() : temp2% = CreatePivot()
 			PositionEntity temp, EntityX(Collider), EntityY(Collider), EntityZ(Collider)
@@ -12006,7 +12004,7 @@ Function RenderWorld2()
 						
 						If (Not IsNVGBlinking%)
 						Text GraphicWidth / 2 + xvalue * (GraphicWidth / 2),GraphicHeight / 2 - yvalue * (GraphicHeight / 2),np\NVName,True,True
-						Text GraphicWidth / 2 + xvalue * (GraphicWidth / 2),GraphicHeight / 2 - yvalue * (GraphicHeight / 2) + 30.0 * MenuScale,Format(I_Loc\HUD_NvgMeters, f2s(dist,1)),True,True
+						Text GraphicWidth / 2 + xvalue * (GraphicWidth / 2),GraphicHeight / 2 - yvalue * (GraphicHeight / 2) + 30.0 * HUDScale,Format(I_Loc\HUD_NvgMeters, f2s(dist,1)),True,True
 					EndIf
 				EndIf
 				EndIf
@@ -12018,25 +12016,25 @@ Function RenderWorld2()
 			
 			Color 0,0,55
 			For k=0 To 10
-				Rect HUDStartX+45,GraphicHeight*0.5-(k*20),54,10,True
+				Rect HUDStartX+45*HUDScale,GraphicHeight*0.5-(k*20)*HUDScale,54*HUDScale,10*HUDScale,True
 			Next
 			Color 0,0,255
 			For l=0 To Floor((power%+50)*0.01)
-				Rect HUDStartX+45,GraphicHeight*0.5-(l*20),54,10,True
+				Rect HUDStartX+45*HUDScale,GraphicHeight*0.5-(l*20)*HUDScale,54*HUDScale,10*HUDScale,True
 			Next
-			DrawImage NVGImages,HUDStartX+40,GraphicHeight*0.5+30,1
+			DrawImage NVGImages[1],HUDStartX+40*HUDScale,GraphicHeight*0.5+30*HUDScale
 			
 			Color 255,255,255
 		ElseIf WearingNightVision=1 And hasBattery<>0
 			Color 0,55,0
 			For k=0 To 10
-				Rect HUDStartX+45,GraphicHeight*0.5-(k*20),54,10,True
+				Rect HUDStartX+45*HUDScale,GraphicHeight*0.5-(k*20)*HUDScale,54*HUDScale,10*HUDScale,True
 			Next
 			Color 0,255,0
 			For l=0 To Floor((power%+50)*0.01)
-				Rect HUDStartX+45,GraphicHeight*0.5-(l*20),54,10,True
+				Rect HUDStartX+45*HUDScale,GraphicHeight*0.5-(l*20)*HUDScale,54*HUDScale,10*HUDScale,True
 			Next
-			DrawImage NVGImages,HUDStartX+40,GraphicHeight*0.5+30,0
+			DrawImage NVGImages[0],HUDStartX+40*HUDScale,GraphicHeight*0.5+30*HUDScale
 		EndIf
 	EndIf
 	
@@ -12045,13 +12043,13 @@ Function RenderWorld2()
 	CameraProjMode Camera,0
 	RenderWorld()
 	CameraProjMode ark_blur_cam,0
-
+	
 	If BlinkTimer < - 16 Or BlinkTimer > - 6
 		If (WearingNightVision=1 Or WearingNightVision=2) And (hasBattery=1) And ((MilliSecs() Mod 800) < 400) Then
 			Color 255,0,0
 			SetFont Font3
 			
-			Text GraphicWidth/2,20*MenuScale,I_Loc\HUD_NvgBatlow,True,False
+			Text GraphicWidth/2,20*HUDScale,I_Loc\HUD_NvgBatlow,True,False
 			Color 255,255,255
 			SetFont Font1
 		EndIf
@@ -12060,65 +12058,6 @@ Function RenderWorld2()
 	CatchErrors("RenderWorld2")
 End Function
 
-
-Function ScaleRender(x#,y#,hscale#=1.0,vscale#=1.0)
-	If Camera<>0 Then HideEntity Camera
-	WireFrame 0
-	ShowEntity fresize_image
-	ScaleEntity fresize_image,hscale,vscale,1.0
-	PositionEntity fresize_image, x, y, 1.0001
-	ShowEntity fresize_cam
-	RenderWorld()
-	HideEntity fresize_cam
-	HideEntity fresize_image
-	WireFrame WireframeState
-	If Camera<>0 Then ShowEntity Camera
-End Function
-
-Function InitFastResize()
-    ;Create Camera
-	Local cam% = CreateCamera()
-	CameraProjMode cam, 2
-	CameraZoom cam, 0.1
-	CameraClsMode cam, 0, 0
-	CameraRange cam, 0.1, 1.5
-	MoveEntity cam, 0, 0, -10000
-	
-	fresize_cam = cam
-	
-    ;ark_sw = GraphicsWidth()
-    ;ark_sh = GraphicsHeight()
-	
-    ;Create sprite
-	Local spr% = CreateMesh(cam)
-	Local sf% = CreateSurface(spr)
-	AddVertex sf, -1, 1, 0, 0, 0
-	AddVertex sf, 1, 1, 0, 1, 0
-	AddVertex sf, -1, -1, 0, 0, 1
-	AddVertex sf, 1, -1, 0, 1, 1
-	AddTriangle sf, 0, 1, 2
-	AddTriangle sf, 3, 2, 1
-	EntityFX spr, 17
-	ScaleEntity spr, 2048.0 / Float(RealGraphicWidth), 2048.0 / Float(RealGraphicHeight), 1
-	PositionEntity spr, 0, 0, 1.0001
-	EntityOrder spr, -100001
-	EntityBlend spr, 1
-	fresize_image = spr
-	
-    ;Create texture
-	fresize_texture = CreateTexture(2048, 2048, 1+256)
-	fresize_texture2 = CreateTexture(2048, 2048, 1+256)
-	TextureBlend fresize_texture2,3
-	SetBuffer(TextureBuffer(fresize_texture2))
-	ClsColor 0,0,0
-	Cls
-	SetBuffer(BackBuffer())
-	;TextureAnisotropy(fresize_texture)
-	EntityTexture spr, fresize_texture,0,0
-	EntityTexture spr, fresize_texture2,0,1
-	
-	HideEntity fresize_cam
-End Function
 
 ;--------------------------------------- Some new 1.3 -functions -------------------------------------------------------
 
@@ -12278,11 +12217,11 @@ Function CheckTriggers$(r.Rooms, x#, y#, z#)
 End Function
 
 Function ScaledMouseX%()
-	Return Float(MouseX()-(RealGraphicWidth*0.5*(1.0-AspectRatioRatio)))*Float(GraphicWidth)/Float(RealGraphicWidth*AspectRatioRatio)
+	Return Float(MouseX()-ScaledOffsetX)/ScaledGraphicWidth*GraphicWidth
 End Function
 
 Function ScaledMouseY%()
-	Return Float(MouseY())*Float(GraphicHeight)/Float(RealGraphicHeight)
+	Return Float(MouseY()-ScaledOffsetY)/ScaledGraphicHeight*GraphicHeight
 End Function
 
 Function PlayAnnouncement(file$) ;This function streams the announcement currently playing
@@ -12382,7 +12321,7 @@ Function PlayMovie(moviefile$)
 		DebugLog "Scaled: "+ScaledGraphicHeight
 	EndIf
 
-	Local SplashScreenVideo = OpenMovie(moviefile$+".avi")
+	Local SplashScreenVideo = OpenMovie(moviefile$+".webm")
 	If SplashScreenVideo = 0 Then Return
 
 	DebugLog(RealGraphicHeight)

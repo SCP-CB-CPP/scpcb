@@ -12,10 +12,13 @@ Global ImageExtensions$[ImageExtensionCount]
 ImageExtensions[0] = "png"
 ImageExtensions[1] = "jpg"
 
-Const ModelExtensionCount = 2
+Const ModelExtensionCount = 5
 Global ModelExtensions$[ModelExtensionCount]
 ModelExtensions[0] = "b3d"
 ModelExtensions[1] = "x"
+ModelExtensions[2] = "fbx"
+ModelExtensions[3] = "glb"
+ModelExtensions[4] = "obj"
 
 Const SoundExtensionCount = 3
 Global SoundExtensions$[SoundExtensionCount]
@@ -23,11 +26,15 @@ SoundExtensions[0] = "ogg"
 SoundExtensions[1] = "wav"
 SoundExtensions[2] = "mp3"
 
+Global LoadImageScaleResult#
+
 ;basic wrapper functions that check to make sure that the file exists before attempting to load it, raises an RTE if it doesn't
 ;more informative alternative to MAVs outside of debug mode, makes it immiediately obvious whether or not someone is loading resources
 ;likely to cause more crashes than 'clean' CB, as this prevents anyone from loading any assets that don't exist, regardless if they are ever used
 ;added zero checks since blitz load functions return zero sometimes even if the filetype exists
-Function LoadImage_Strict%(file$)
+Function LoadImage_Strict%(file$, scale#=0, flags%=0)
+	LoadImageScaleResult = 1.0
+
 	Local ext$ = File_GetExtension(file)
 	Local fileNoExt$ = Left(file, Len(file) - Len(ext))
 	Local tmp%
@@ -42,8 +49,9 @@ Function LoadImage_Strict%(file$)
 			EndIf
 			Local modPath$ = m\Path + fileNoExt + usedExtension
 			If FileType(modPath) = 1 Then
-				tmp = LoadImage(modPath)
+				tmp = LoadImage(modPath, flags)
 				If tmp <> 0 Then
+					If scale <> 0 Then ScaleImageFromFile(tmp, m\Path + fileNoExt, scale)
 					Return tmp
 				Else
 					RuntimeErrorExt("Failed to load image " + Chr(34) + modPath + Chr(34) + ".")
@@ -53,18 +61,36 @@ Function LoadImage_Strict%(file$)
 	Next
 
 	If FileType(file$) = 1 Then
-		Return LoadImage(file$)
+		tmp = LoadImage(file$, flags)
+		If scale <> 0 Then ScaleImageFromFile(tmp, fileNoExt, scale)
+		Return tmp
 	Else
 		For i = 0 To ImageExtensionCount-1
 			usedExtension$ = ImageExtensions[i]
 			Local path$ = fileNoExt + usedExtension
 			If FileType(path) = 1 Then
-				Return LoadImage(path)
+				tmp = LoadImage(path, flags)
+				If scale <> 0 Then ScaleImageFromFile(tmp, fileNoExt, scale)
+				Return tmp
 			EndIf
 		Next
 	EndIf
 
 	RuntimeErrorExt "Image " + Chr(34) + file$ + Chr(34) + " missing."
+End Function
+
+Function ScaleImageFromFile(img%, path$, scale#)
+	path = path + "SCALE"
+	If FileType(path) = 1 Then
+		Local f% = OpenFile(path)
+		Local val# = Float(ReadLine(f))
+		CloseFile f
+		scale = scale * val
+		LoadImageScaleResult = val
+	EndIf
+	If scale <> 1.0 Then
+		ScaleImage img, scale, scale
+	EndIf
 End Function
 
 
@@ -377,12 +403,40 @@ End Function
 
 ;don't use in LoadRMesh, as Reg does this manually there. If you wanna fuck around with the logic in that function, be my guest 
 Function LoadTexture_Strict(File$,flags=1)
-	Local tmp% = LoadModdedTextureNonStrict(File, flags)
+	Local tmp% = LoadTexture(File, flags)
 	If tmp <> 0 Then Return tmp
 
 	Local err$
 	If FileType(File$) <> 1 Then err = "Texture " + File$ + " not found." Else err = "Failed to load Texture: " + File$ + "."
 	RuntimeErrorExt(err)
+End Function
+
+Function LoadAnimTexture_Strict(File$,flags%,columns%,rows%,start%,count%)
+	Local ext$ = File_GetExtension(File)
+	Local fileNoExt$ = Left(File, Len(File) - Len(ext))
+	Local tmp%
+
+	For m.ActiveMods = Each ActiveMods
+		For i = 0 To ImageExtensionCount
+			Local usedExtension$
+			If i = ImageExtensionCount Then
+				usedExtension = ext
+			Else
+				usedExtension = ImageExtensions[i]
+			EndIf
+			Local modPath$ = m\Path + fileNoExt + usedExtension
+			If FileType(modPath) = 1 Then
+				tmp = LoadAnimTextureGrid(modPath, flags, columns, rows, start, count)
+				If tmp <> 0 Then
+					Return tmp
+				Else If DebugResourcePacks Then
+					RuntimeErrorExt("Failed to load animated texture " + Chr(34) + modPath + Chr(34) + ".")
+				EndIf
+			EndIf
+		Next
+	Next
+
+	Return LoadAnimTextureGrid(file, flags, columns, rows, start, count)
 End Function
 
 Function LoadBrush_Strict(file$,flags,u#=1.0,v#=1.0)
@@ -401,7 +455,13 @@ Function LoadFont_Strict(file$, height, bold%=False, italic%=False)
 	Return tmp
 End Function
 
-
+Function LoadEffect_Strict%(file$)
+	file = DetermineModdedPath(file)
+	If FileType(file$)<>1 Then RuntimeErrorExt "Shader " + file$ + " not found."
+	tmp = LoadEffect(file)
+	If tmp = 0 Then RuntimeErrorExt "Failed to load Shader: " + file$ + ". Error: " + GetEffectError() + Chr(10)
+	Return tmp
+End Function
 
 
 

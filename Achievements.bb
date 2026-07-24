@@ -21,8 +21,8 @@ Function CreateAchievement.Achievements(name$, isSCP% = False)
 	a\IsSCP = isSCP
 	a\LocalName = GetModdedINIString(StringsFile, "Achievement", name)
 	a\Description = GetModdedINIString(StringsFile, "Achievement Desc", name)
-	a\Img = LoadImage_Strict("GFX\menu\achievements\Achv"+name+".jpg")
-	a\Img = ResizeImage2(a\Img,ImageWidth(a\Img)*GraphicHeight/768.0,ImageHeight(a\Img)*GraphicHeight/768.0)
+	a\Img = LoadImage_Strict("GFX\menu\achievements\Achv"+name+".png")
+	ResizeImage(a\Img, 64*GraphicHeight/768.0, 64*GraphicHeight/768.0)
 	a\Unlocked = False
 	Return a
 End Function
@@ -73,8 +73,8 @@ Global UsedConsole
 Global AchievementsMenu%
 Global AchvMSGenabled% = GetOptionInt("general", "achievement popup enabled")
 
-Global AchvLocked = LoadImage_Strict("GFX\menu\achievements\achvlocked.jpg")
-AchvLocked = ResizeImage2(AchvLocked,ImageWidth(AchvLocked)*GraphicHeight/768.0,ImageHeight(AchvLocked)*GraphicHeight/768.0)
+Global AchvLocked = LoadImage_Strict("GFX\menu\achievements\achvlocked.png")
+ResizeImage(AchvLocked, 64*GraphicHeight/768.0, 64*GraphicHeight/768.0)
 
 Function GiveAchievement(achv.Achievements, showMessage%=True)
 	If Not achv\Unlocked Then
@@ -90,7 +90,7 @@ Function GiveAchievement(achv.Achievements, showMessage%=True)
 End Function
 
 Function AchievementTooltip(achv.Achievements)
-    SetFont Font3
+    SetFont Font6
     Local width = StringWidth(achv\LocalName)
     SetFont Font1
     If (StringWidth(achv\Description)>width) Then
@@ -104,7 +104,7 @@ Function AchievementTooltip(achv.Achievements)
     Rect(ScaledMouseX()+(20*MenuScale),ScaledMouseY()+(20*MenuScale),width,height,True)
     Color 150,150,150
     Rect(ScaledMouseX()+(20*MenuScale),ScaledMouseY()+(20*MenuScale),width,height,False)
-    SetFont Font3
+    SetFont Font6
     Text(ScaledMouseX()+(20*MenuScale)+(width/2),ScaledMouseY()+(35*MenuScale), achv\LocalName, True, True)
     SetFont Font1
     Text(ScaledMouseX()+(20*MenuScale)+(width/2),ScaledMouseY()+(55*MenuScale), achv\Description, True, True)
