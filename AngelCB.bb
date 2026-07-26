@@ -306,6 +306,8 @@ Function FromInternalTemplate%(template.Template)
     Return Handle(template)
 End Function
 
+Global ParticleSpark%, ParticleVentSmoke%, ParticleBigDoorSmashDust%, ParticleConfettiGreen%, ParticleConfettiRed%, ParticleConfettiPurple%, ParticleConfettiYellow%, ParticleConfettiBlue%
+
 Function RegisterParticleSystem()
     ; Technically they are meshes, but I don't think they should be treated as such.
     RegisterB3DEntitySubtype("ParticleEmitter", False)
@@ -349,6 +351,25 @@ Function RegisterParticleSystem()
     ;RegisterObjectMethod("ParticleTemplate", "void AddSubTemplate(ParticleTemplate@ template)", @SetTemplateSubTemplate)
 
     RegisterObjectMethod("ParticleTemplate", "ParticleEmitter@ Emit(B3D::Entity@ owner, bool fixed=false)", @SetParticleSystemEmitter)
+
+    ; Currently, there is no support for taking pointers into fixed-size arrays.
+    ParticleSpark = ParticleEffect[0]
+    ParticleVentSmoke = ParticleEffect[1]
+    ParticleBigDoorSmashDust = ParticleEffect[2]
+    ParticleConfettiGreen = ParticleEffect[3]
+    ParticleConfettiRed = ParticleEffect[4]
+    ParticleConfettiPurple = ParticleEffect[5]
+    ParticleConfettiYellow = ParticleEffect[6]
+    ParticleConfettiBlue = ParticleEffect[7]
+    RegisterGlobalProperty("carray<ParticleTemplate@> Templates", &ParticleEffect)
+    RegisterGlobalProperty("ParticleTemplate@ Spark", &ParticleSpark)
+    RegisterGlobalProperty("ParticleTemplate@ VentSmoke", &ParticleVentSmoke)
+    RegisterGlobalProperty("ParticleTemplate@ BigDoorSmashDust", &ParticleBigDoorSmashDust)
+    RegisterGlobalProperty("ParticleTemplate@ ConfettiGreen", &ParticleConfettiGreen)
+    RegisterGlobalProperty("ParticleTemplate@ ConfettiRed", &ParticleConfettiRed)
+    RegisterGlobalProperty("ParticleTemplate@ ConfettiPurple", &ParticleConfettiPurple)
+    RegisterGlobalProperty("ParticleTemplate@ ConfettiYellow", &ParticleConfettiYellow)
+    RegisterGlobalProperty("ParticleTemplate@ ConfettiBlue", &ParticleConfettiBlue)
 
     Local ns$ = GetDefaultNamespace()
     If ns <> "" Then SetDefaultNamespace(ns + "::Particles") Else SetDefaultNamespace("Particles")
