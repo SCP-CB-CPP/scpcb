@@ -29,9 +29,9 @@ Function SaveGame(file$)
 	
 	WriteString f, Str(AccessCode)
 	
-	WriteFloat f, user_camera_pitch
+	WriteFloat f, EntityPitch(Collider)
 	WriteFloat f, EntityYaw(Collider)
-
+	
 	;WriteString f, VersionNumber
 	WriteString f, CompatibleNumber
 	
@@ -514,11 +514,8 @@ Function LoadGame(file$)
 	AccessCode = Int(ReadString(f))
 	
 	user_camera_pitch = ReadFloat(f)
-	y = ReadFloat(f)
-	RotateEntity(Collider, 0, y, 0)
-	RotateEntity(Camera, user_camera_pitch, y, 0)
-	mouse_y_speed_1 = 0.0
-	mouse_x_speed_1 = 0.0
+	user_camera_yaw = ReadFloat(f)
+	RotateEntity(Collider, user_camera_pitch, user_camera_yaw, 0, 0)
 	
 	strtemp = ReadString(f)
 	version = strtemp
@@ -1352,12 +1349,9 @@ Function LoadGameQuick(file$)
 	AccessCode = Int(ReadString(f))
 	
 	user_camera_pitch = ReadFloat(f)
-	y = ReadFloat(f)
-	RotateEntity(Collider, 0, y, 0)
-	RotateEntity(Camera, user_camera_pitch, y, 0)
-	mouse_y_speed_1 = 0.0
-	mouse_x_speed_1 = 0.0
-
+	user_camera_yaw = ReadFloat(f)
+	RotateEntity(Collider, user_camera_pitch, user_camera_yaw, 0, 0)
+	
 	strtemp = ReadString(f)
 	version = strtemp
 	

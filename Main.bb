@@ -8930,10 +8930,6 @@ Function NullGame(playbuttonsfx%=True)
 	Shake = 0
 	LightFlash = 0
 	
-	user_camera_pitch = 0.0
-	mouse_y_speed_1 = 0.0
-	mouse_x_speed_1 = 0.0
-
 	GodMode = 0
 	NoClip = 0
 	WireframeState = 0
