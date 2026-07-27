@@ -32,6 +32,8 @@ Global MainMenuTab%
 
 Global IntroEnabled% = GetOptionInt("general", "intro enabled")
 
+Global BeatableCheck% = GetOptionInt("general", "beatable check")
+
 Global SelectedInputBox%
 
 Global SavePath$ = "Saves\"
@@ -192,6 +194,7 @@ Function UpdateMainMenu()
 			Select MainMenuTab
 				Case 1
 					PutINIValue(OptionFile, "general", "intro enabled", IntroEnabled%)
+					PutINIValue(OptionFile, "general", "beatable check", BeatableCheck%)
 					MainMenuTab = 0
 				Case 2
 					CurrLoadGamePage = 0
@@ -288,6 +291,9 @@ Function UpdateMainMenu()
 				
 				Text(x + 20 * MenuScale, y + 110 * MenuScale, "Enable intro sequence:")
 				IntroEnabled = DrawTick(x + 280 * MenuScale, y + 110 * MenuScale, IntroEnabled)	
+
+				Text(x + 355 * MenuScale, y + 110 * MenuScale, "Beatable check:")
+				BeatableCheck = DrawTick(x + 535 * MenuScale, y + 110 * MenuScale, BeatableCheck)
 				
 				;Local modeName$, modeDescription$, selectedDescription$
 				Text (x + 20 * MenuScale, y + 150 * MenuScale, "Difficulty:")				
@@ -383,6 +389,7 @@ Function UpdateMainMenu()
 					FlushMouse()
 					
 					PutINIValue(OptionFile, "general", "intro enabled", IntroEnabled%)
+					PutINIValue(OptionFile, "general", "beatable check", BeatableCheck%)
 					
 				EndIf
 				
