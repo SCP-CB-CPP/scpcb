@@ -257,7 +257,7 @@ Function RegisterB3DCamera()
 
     RegisterObjectMethod("Camera", "void SetOrder(int order)", @EntityOrder)
 
-    RegisterObjectMethod("Camera", "int InView(Entity@ camera)", @EntityInView, True)
+    RegisterObjectMethod("Camera", "int InView(Entity@ entity)", @EntityInView, True)
 
     Local ns$ = GetDefaultNamespace()
     If ns <> "" Then SetDefaultNamespace(ns + "::Camera") Else SetDefaultNamespace("Camera")
