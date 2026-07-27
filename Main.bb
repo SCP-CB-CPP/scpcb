@@ -5110,6 +5110,8 @@ Function DrawGUI()
 		EndIf
 		MenuOpen = (Not MenuOpen)
 		
+		SeedRevealed = False
+		
 		AchievementsMenu = 0
 		OptionsMenu = 0
 		QuitMSG = 0
@@ -7405,6 +7407,8 @@ Function FormatDuration$(totalMillis%, highPrecision%=True)
 	EndIf
 End Function
 
+Global SeedRevealed% = False
+
 Function DrawMenu()
 	CatchErrors("Uncaught (DrawMenu)")
 	
@@ -7491,10 +7495,35 @@ Function DrawMenu()
 			SetFont Font1
 			Text x, y, "Difficulty: "+SelectedDifficulty\name
 			Text x, y+20*MenuScale, "Save: "+CurrSave
-			Text x, y+40*MenuScale, GetSeedString()
+			Local seedTxt$
+			If HasNumericSeed Then
+				seedTxt = "Map seed (numeric): "
+			Else
+				seedTxt = "Map seed: "
+			EndIf
+			Text x, y+40*MenuScale, seedTxt
+			Local seedTxtStart% = StringWidth(seedTxt) - 5*MenuScale
+			Local seedTxtWidth%
+			If HasNumericSeed Then
+				seedTxt = Str(RandomSeedNumeric)
+				seedTxtWidth% = 135*MenuScale
+			Else
+				seedTxt = RandomSeed
+				seedTxtWidth% = 185*MenuScale
+			EndIf
+			If SeedRevealed Then
+				Text(x + seedTxtStart + seedTxtWidth / 2.0, y+40*MenuScale, seedTxt, True)
+				Rect(x + seedTxtStart, y+35*MenuScale, seedTxtWidth, 20*MenuScale, False)
+			ElseIf DrawButton(x + seedTxtStart, y+35*MenuScale, seedTxtWidth, 20*MenuScale, "Reveal", False)
+				SeedRevealed = True
+			Endif
+			If DrawButton(x + seedTxtStart + seedTxtWidth + 20*MenuScale, y+35*MenuScale, 60*MenuScale, 20*MenuScale, "Copy", False)
+				SetClipboardContents(seedTxt)
+			EndIf
 			If DeathTime >= 0 Then Text x, y+60*MenuScale, "Time played: " +FormatDuration(DeathTime, SpeedRunMode)
 		ElseIf AchievementsMenu <= 0 And OptionsMenu > 0 And QuitMSG <= 0 And KillTimer >= 0
 			If DrawButton(x + 101 * MenuScale, y + 390 * MenuScale, 230 * MenuScale, 60 * MenuScale, "Back") Then
+				SeedRevealed = False
 				AchievementsMenu = 0
 				OptionsMenu = 0
 				QuitMSG = 0
@@ -7856,6 +7885,7 @@ Function DrawMenu()
 			EndIf
 			
 			If DrawButton(x+101*MenuScale, y + 344*MenuScale, 230*MenuScale, 60*MenuScale, "Back") Then
+				SeedRevealed = False
 				AchievementsMenu = 0
 				OptionsMenu = 0
 				QuitMSG = 0
@@ -7863,6 +7893,7 @@ Function DrawMenu()
 			EndIf
 		Else
 			If DrawButton(x+101*MenuScale, y + 344*MenuScale, 230*MenuScale, 60*MenuScale, "Back") Then
+				SeedRevealed = False
 				AchievementsMenu = 0
 				OptionsMenu = 0
 				QuitMSG = 0

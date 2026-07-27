@@ -195,6 +195,7 @@ Function UpdateMainMenu()
 				Case 1
 					PutINIValue(OptionFile, "general", "intro enabled", IntroEnabled%)
 					PutINIValue(OptionFile, "general", "beatable check", BeatableCheck%)
+					PutINIValue(OptionFile, "general", "numeric seeds", UseNumericSeeds%)
 					MainMenuTab = 0
 				Case 2
 					CurrLoadGamePage = 0
@@ -357,6 +358,8 @@ Function UpdateMainMenu()
 				
 				If DrawButton(x + 420 * MenuScale, y + height + 20 * MenuScale, 160 * MenuScale, 70 * MenuScale, "START", False) Then
 					TimerStopped = True
+					
+					HasNumericSeed = UseNumericSeeds
 
 					If CurrSave = "" Then CurrSave = "untitled"
 					Local SaveName$ = CurrSave
@@ -390,6 +393,7 @@ Function UpdateMainMenu()
 					
 					PutINIValue(OptionFile, "general", "intro enabled", IntroEnabled%)
 					PutINIValue(OptionFile, "general", "beatable check", BeatableCheck%)
+					PutINIValue(OptionFile, "general", "numeric seeds", UseNumericSeeds%)
 					
 				EndIf
 				
