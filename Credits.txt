@@ -136,21 +136,21 @@
 by "far2"
 
 		SCP-008 is based on "SCP-008 - Zombie Plague"
-by "Lee Byron"
+author unknown
 
-		SCP-012 is based on "SCP-012 - A Bad Composition",
+		SCP-012 is based on "SCP-012 - A Bad Composition"
 by "ITIFAMCO"
 
-		SCP-035 is based on "SCP-035 - Possessive Mask",
+		SCP-035 is based on "SCP-035 - Possessive Mask"
 by "Kain Pathos Crow"
 
-		SCP-049 is based on "SCP-049 - Plague Doctor",
+		SCP-049 is based on "SCP-049 - Plague Doctor"
 by "Gabriel Jade"
 
-		SCP-066 is based on "SCP-066 - Eric's Toy",
+		SCP-066 is based on "SCP-066 - Eric's Toy"
 by "Scantron"
 
-		SCP-079 is based on "SCP-079 - Old AI",
+		SCP-079 is based on "SCP-079 - Old AI"
 author unknown
 
 		SCP-096 is based on "SCP-096 - The 'Shy Guy'"
@@ -159,16 +159,16 @@ by "Dr Dan"
 		SCP-106 is based on "SCP-106 - The Old Man"
 by "Dr Gears"
 
-		SCP-148 is based on "SCP-148 - The "Telekill" Alloy",
+		SCP-148 is based on "SCP-148 - The "Telekill" Alloy"
 by "Lt Masipag"
 
-		SCP-173 is based on "SCP-173 - The Sculpture",
+		SCP-173 is based on "SCP-173 - The Sculpture"
 by "Moto42"
 
-		SCP-205 is based on "SCP-205 - Shadow Lamps",
+		SCP-205 is based on "SCP-205 - Shadow Lamps"
 by "Sorts"
 
-		SCP-294 is based on "SCP-294 - The Coffee Machine",
+		SCP-294 is based on "SCP-294 - The Coffee Machine"
 by "far2"
 
 		SCP-372 is based on "SCP-372 - Peripheral Jumper"
@@ -186,11 +186,11 @@ by "far2"
 		SCP-513-1 is based on "SCP-513 - A Cowbell"
 by "beefwit"
 
-		SCP-714 is based on "SCP-714 - The Jaded Ring"
-by "Arcalane"
-
 		SCP-682 is based on "SCP-682 - Hard-to-Destroy Reptile"
 by "Dr. Gears"
+
+		SCP-714 is based on "SCP-714 - The Jaded Ring"
+by "Arcalane"
 
 		SCP-789-J is based on "SCP-789-J - the butt ghost!!"
 by "Salman Corbette"

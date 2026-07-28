@@ -46,6 +46,7 @@ Dim SaveGameTime$(SaveGameAmount + 1)
 Dim SaveGameDate$(SaveGameAmount + 1)
 Dim SaveGameVersion$(SaveGameAmount + 1)
 Dim SaveGamePlayTime$(SaveGameAmount + 1)
+Global KeepDuplicateSaveCount% = GetOptionInt("general", "keep duplicate saves")
 
 Global SavedMapsAmount% = 0
 Dim SavedMaps$(SavedMapsAmount+1)
@@ -435,6 +436,7 @@ Function UpdateMainMenu()
 
 					LoadSaveGames()
 					For i% = 1 To SaveGameAmount
+						If KeepDuplicateSaveCount > 0 And KeepDuplicateSaveCount <= SameFound Then Exit
 						If SaveGames(i - 1) = CurrSave Then
 							SameFound = SameFound + 1
 							i = 0
