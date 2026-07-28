@@ -358,6 +358,7 @@ bool PutINIValue(string section, string key, string value);
 
 namespace CB {
 B3D::Image@ LoadImage(string file, float scale = 0, int flags = 0);
+B3D::Image@ LoadImageHUDScaled(string file, int fixedSizeX = 0, int fixedSizeY = 0);
 B3D::Mesh@ LoadMesh(string file, B3D::Entity@ parent);
 B3D::Mesh@ LoadAnimMesh(string file, B3D::Entity@ parent);
 B3D::Texture@ LoadTexture(string file, int flags = 1);
@@ -378,19 +379,37 @@ CB::Music RegisterCustom(string file);
 }
 
 namespace CB::Effect {
+void RenderQuad(B3D::Effect@ effect, B3D::Buffer@ buffer, string technique, int blend = 0);
+}
+
+namespace CB::Effect::Internal {
 void Initialize();
 void Update();
 void ProcessGamma(float gamma);
 void ProcessFXAA();
 void SetQuadEffect(B3D::Effect@ effect);
 B3D::Sprite@ CreateFullscreenQuad(B3D::Entity@ parent = null);
-void RenderQuad(B3D::Effect@ effect, B3D::Texture@ buffer, string technique, int blend = 0);
 }
 
 namespace CB::Particles {
 void Initialize(B3D::Camera@ camera);
 void Update();
 void FreeAll();
+}
+
+namespace CB::Particles::Internal::Template {
+CB::Particles::Internal::Template@ get_First() property;
+CB::Particles::Internal::Template@ get_Last() property;
+}
+
+namespace CB::Particles::Internal::Emitter {
+CB::Particles::Internal::Emitter@ get_First() property;
+CB::Particles::Internal::Emitter@ get_Last() property;
+}
+
+namespace CB::Particles::Internal::Particle {
+CB::Particles::Internal::Particle@ get_First() property;
+CB::Particles::Internal::Particle@ get_Last() property;
 }
 
 namespace CB::Waypoint {
@@ -701,7 +720,7 @@ cstr@ PullString();
 int GetSenderIDUpper();
 int GetSenderIDLower();
 int LoadPacket();
-bool SendPacketToUser(int upperID, int lowerID);
+bool SendPacketToUser(int upperID, int lowerID, bool reliable = false);
 bool CloseConnection(int upperID, int lowerID);
 bool CreateLobby(int lobbyType, int maxMembers);
 bool JoinLobby(int lobbyIDUpper, int lobbyIDLower);
@@ -1442,7 +1461,7 @@ class Camera {
     B3D::Entity@ Pick(float viewportX, float viewportY);
     void Render(B3D::Model@ entity, float tween = 1, int settings = -1);
     void SetOrder(int order);
-    int InView(B3D::Entity@ camera);
+    int InView(B3D::Entity@ entity);
 }
 
 class Light {
@@ -2153,7 +2172,112 @@ class ParticleTemplate {
     void SetFloor(float y, float bounce = 0.5);
     void SetFixAngles(int pitch, int yaw);
     CB::ParticleEmitter@ Emit(B3D::Entity@ owner, bool fixed = false);
+    CB::Particles::Internal::Template@ ToInternal();
 }
+}
+
+namespace CB::Particles::Internal {
+
+class Template {
+    carray<CB::Particles::Internal::Template@> SubTemplate;
+    int EmitterBlend;
+    int Interval;
+    int ParticlesPerInterval;
+    int MaxParticles;
+    int EmitterMaxTime;
+    int MinTime;
+    int MaxTime;
+    B3D::Texture@ Texture;
+    bool AnimatedTexture;
+    float TextureFrame;
+    int MaxTextureFrames;
+    float TextureSpeed;
+    float MinOffsetX;
+    float MaxOffsetX;
+    float MinOffsetY;
+    float MaxOffsetY;
+    float MinOffsetZ;
+    float MaxOffsetZ;
+    float MinVelocityX;
+    float MaxVelocityX;
+    float MinVelocityY;
+    float MaxVelocityY;
+    float MinVelocityZ;
+    float MaxVelocityZ;
+    float MinRotationVelocity;
+    float MaxRotationVelocity;
+    bool AlignToFall;
+    int AlignToFallOffset;
+    float Gravity;
+    float Alpha;
+    bool AlphaVelocity;
+    float SizeX;
+    float SizeY;
+    float MinSizeMultiplier;
+    float MaxSizeMultiplier;
+    float SizeAdd;
+    float SizeMultiplier;
+    int ColorR1;
+    int ColorG1;
+    int ColorB1;
+    int ColorR2;
+    int ColorG2;
+    int ColorB2;
+    int Brightness;
+    float FloorY;
+    float FloorBounce;
+    int PitchFix;
+    int YawFix;
+    float Yaw;
+    void Delete();
+    CB::Particles::Internal::Template@ get_Next() const property;
+    CB::Particles::Internal::Template@ get_Previous() const property;
+    void InsertAfter(CB::Particles::Internal::Template@);
+    void InsertBefore(CB::Particles::Internal::Template@);
+    CB::ParticleTemplate@ FromInternal();
+}
+
+class Emitter {
+    bool Fixed;
+    float LoopCount;
+    float Age;
+    float MaxTime;
+    CB::Particles::Internal::Template@ Template;
+    B3D::Entity@ Owner;
+    CB::ParticleEmitter@ Entity;
+    B3D::Surface@ Surface;
+    bool Deleted;
+    bool Frozen;
+    void Delete();
+    CB::Particles::Internal::Emitter@ get_Next() const property;
+    CB::Particles::Internal::Emitter@ get_Previous() const property;
+    void InsertAfter(CB::Particles::Internal::Emitter@);
+    void InsertBefore(CB::Particles::Internal::Emitter@);
+}
+
+class Particle {
+    CB::Particles::Internal::Emitter@ Emitter;
+    int Age;
+    int MaxTime;
+    float X;
+    float Y;
+    float Z;
+    float VelocityX;
+    float VelocityY;
+    float VelocityZ;
+    float Rotation;
+    float RotationVelocity;
+    float SizeX;
+    float SizeY;
+    void Delete();
+    CB::Particles::Internal::Particle@ get_Next() const property;
+    CB::Particles::Internal::Particle@ get_Previous() const property;
+    void InsertAfter(CB::Particles::Internal::Particle@);
+    void InsertBefore(CB::Particles::Internal::Particle@);
+}
+}
+
+namespace CB {
 
 class Waypoint {
     B3D::Pivot@ Object;
@@ -2938,11 +3062,18 @@ int PlayTime;
 
 namespace CB::Menu {
 float Scale;
-float HUDScale;
 bool IsMainMenuOpen;
 int MainMenuTab;
 int CurrentOpen;
 float StopHidingTimer;
+}
+
+namespace CB::HUD {
+float Scale;
+float StartX;
+float StartY;
+float EndX;
+float EndY;
 }
 
 namespace CB::LoadingScreen {
@@ -3003,6 +3134,7 @@ bool ConsoleEnabled;
 bool ConsoleAutoOpen;
 bool SpeedRunMode;
 bool NumericSeeds;
+bool KeepDuplicateSaveCount;
 bool DebugMapGen;
 bool DebugForestGen;
 int ParticleAmount;
@@ -3029,12 +3161,32 @@ bool MouseUp1;
 namespace CB::Effect {
 B3D::Effect@ Gamma;
 B3D::Effect@ FXAA;
+}
+
+namespace CB::Effect::Internal {
 B3D::Camera@ Camera;
 B3D::Sprite@ Quad;
 B3D::Effect@ Active;
 B3D::Texture@ ScreenTexture;
 int PixelWidth;
 int PixelHeight;
+}
+
+namespace CB {
+carray<CB::ParticleTemplate@> Templates;
+CB::ParticleTemplate@ Spark;
+CB::ParticleTemplate@ VentSmoke;
+CB::ParticleTemplate@ BigDoorSmashDust;
+CB::ParticleTemplate@ ConfettiGreen;
+CB::ParticleTemplate@ ConfettiRed;
+CB::ParticleTemplate@ ConfettiPurple;
+CB::ParticleTemplate@ ConfettiYellow;
+CB::ParticleTemplate@ ConfettiBlue;
+}
+
+namespace CB::Particles::Internal {
+B3D::Camera@ Camera;
+B3D::Pivot@ Pivot;
 }
 
 namespace CB::NPC {
