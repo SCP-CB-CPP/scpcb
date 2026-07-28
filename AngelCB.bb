@@ -18,7 +18,6 @@ Function RegisterMenu()
     If ns <> "" Then SetDefaultNamespace(ns + "::Menu") Else SetDefaultNamespace("Menu")
 
     RegisterGlobalProperty("const float Scale", &MenuScale)
-    RegisterGlobalProperty("const float HUDScale", &HUDScale)
 
     RegisterGlobalProperty("const bool IsMainMenuOpen", &MainMenuOpen)
     RegisterGlobalProperty("int MainMenuTab", &MainMenuTab)
@@ -36,6 +35,14 @@ Function RegisterMenu()
     RegisterGlobalFunction("bool IsAnyOpen()", @IsAnyMenuOpen)
 
     RegisterGlobalFunction("void StartNewGame()", @StartNewGame)
+
+    If ns <> "" Then SetDefaultNamespace(ns + "::HUD") Else SetDefaultNamespace("HUD")
+
+    RegisterGlobalProperty("const float Scale", &HUDScale)
+    RegisterGlobalProperty("const float StartX", &HUDStartX)
+    RegisterGlobalProperty("const float StartY", &HUDStartY)
+    RegisterGlobalProperty("const float EndX", &HUDEndX)
+    RegisterGlobalProperty("const float EndY", &HUDEndY)
 
     SetDefaultNamespace(ns)
 End Function
@@ -157,6 +164,7 @@ Function RegisterIO()
     ; TODO: Sanitize paths (also in audio).
     ; TODO: Consider "hijacking" the standard B3D functions.
     RegisterGlobalFunction("B3D::Image@ LoadImage(string file, float scale=0, int flags=0)", @LoadImage_Strict)
+    RegisterGlobalFunction("B3D::Image@ LoadImageHUDScaled(string file, int fixedSizeX=0, int fixedSizeY=0)", @LoadImageHUDScaled)
     RegisterGlobalFunction("B3D::Mesh@ LoadMesh(string file, B3D::Entity@ parent)", @LoadMesh_Strict)
     RegisterGlobalFunction("B3D::Mesh@ LoadAnimMesh(string file, B3D::Entity@ parent)", @LoadAnimMesh_Strict)
     RegisterGlobalFunction("B3D::Texture@ LoadTexture(string file, int flags=1)", @LoadTexture_Strict)
