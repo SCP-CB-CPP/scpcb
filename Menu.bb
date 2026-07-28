@@ -926,7 +926,7 @@ Function UpdateMainMenu()
 					Text(x + 20 * MenuScale, y, "Keep duplicate saves:")
 					KeepDuplicateSaveCount% = Int(InputBox(x + 310 * MenuScale, y + MenuScale, 30 * MenuScale, 20 * MenuScale, Str(KeepDuplicateSaveCount), 123)) Mod 10
 					If MouseOn(x+310*MenuScale,y+MenuScale,15*MenuScale,20*MenuScale) And OnSliderID=0
-						DrawOptionsTooltip(tx,ty,tw,th,"KeepDuplicateSaveCount")
+						DrawOptionsTooltip(tx,ty,tw,th,"keepduplicatesaves")
 					EndIf
 
 					y = y + 50*MenuScale
@@ -2099,6 +2099,8 @@ Function DrawOptionsTooltip(x%,y%,width%,height%,option$,value#=0,ingame%=False)
 		Case "numericseeds"
 			txt = "Allows seeds to be entered as integers, which will be used to directly seed the game's internal random number generator."
 			txt = txt + " When no seed is entered, the elapsed millseconds since the computer started is used."
+		Case "keepduplicatesaves"
+			txt = "Allows configuring the number of saves of the same name that are kept at one time. If this number is exceeded, the last save will be overwritten upon creating a new save with the same name."
 		Case "achpopup"
 			txt = "Displays a pop-up notification when an achievement is unlocked."
 		Case "launcher"

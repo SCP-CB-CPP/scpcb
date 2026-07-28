@@ -7823,7 +7823,7 @@ Function DrawMenu()
 					Text(x, y, "Keep duplicate saves:")
 					KeepDuplicateSaveCount% = Int(InputBox(x + 270 * MenuScale, y + MenuScale, 25 * MenuScale, 20 * MenuScale, Str(KeepDuplicateSaveCount), 123)) Mod 10
 					If MouseOn(x+270*MenuScale,y+MenuScale,15*MenuScale,20*MenuScale) And OnSliderID=0
-						DrawOptionsTooltip(tx,ty,tw,th,"KeepDuplicateSaveCount")
+						DrawOptionsTooltip(tx,ty,tw,th,"keepduplicatesaves")
 					EndIf
 					
 					y = y + 50*MenuScale
