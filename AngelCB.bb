@@ -143,6 +143,7 @@ Function RegisterOptions()
 
     RegisterGlobalProperty("bool SpeedRunMode", &SpeedRunMode)
     RegisterGlobalProperty("bool NumericSeeds", &UseNumericSeeds)
+    RegisterGlobalProperty("bool KeepDuplicateSaveCount", &KeepDuplicateSaveCount)
 
     RegisterGlobalProperty("bool DebugMapGen", &DebugMapGen)
     RegisterGlobalProperty("bool DebugForestGen", &DebugForestGen)
