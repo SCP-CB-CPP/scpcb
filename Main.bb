@@ -7816,6 +7816,15 @@ Function DrawMenu()
 					If MouseOn(x+270*MenuScale,y+MenuScale,20*MenuScale,20*MenuScale) And OnSliderID=0
 						DrawOptionsTooltip(tx,ty,tw,th,"speedrunmode")
 					EndIf
+
+					y = y + 30*MenuScale
+
+					Color 255,255,255
+					Text(x, y, "Keep duplicate saves:")
+					KeepDuplicateSaveCount% = Int(InputBox(x + 270 * MenuScale, y + MenuScale, 25 * MenuScale, 20 * MenuScale, Str(KeepDuplicateSaveCount), 123)) Mod 10
+					If MouseOn(x+270*MenuScale,y+MenuScale,15*MenuScale,20*MenuScale) And OnSliderID=0
+						DrawOptionsTooltip(tx,ty,tw,th,"KeepDuplicateSaveCount")
+					EndIf
 					
 					y = y + 50*MenuScale
 					
@@ -11276,6 +11285,7 @@ Function SaveOptionsINI()
 	PutINIValue(OptionFile, "console", "enabled", CanOpenConsole%)
 	PutINIValue(OptionFile, "general", "speed run mode", SpeedRunMode%)
 	PutINIValue(OptionFile, "general", "numeric seeds", UseNumericSeeds%)
+	PutINIValue(OptionFile, "general", "keep duplicate saves", KeepDuplicateSaveCount%)
 	PutINIValue(OptionFile, "controls", "mouse smoothing", MouseSmooth)
 	
 	PutINIValue(OptionFile, "audio", "music volume", MusicVolume)

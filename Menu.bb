@@ -920,6 +920,15 @@ Function UpdateMainMenu()
 						DrawOptionsTooltip(tx,ty,tw,th,"speedrunmode")
 					EndIf
 
+					y = y + 30*MenuScale
+
+					Color 255,255,255
+					Text(x + 20 * MenuScale, y, "Keep duplicate saves:")
+					KeepDuplicateSaveCount% = Int(InputBox(x + 310 * MenuScale, y + MenuScale, 30 * MenuScale, 20 * MenuScale, Str(KeepDuplicateSaveCount), 123)) Mod 10
+					If MouseOn(x+310*MenuScale,y+MenuScale,15*MenuScale,20*MenuScale) And OnSliderID=0
+						DrawOptionsTooltip(tx,ty,tw,th,"KeepDuplicateSaveCount")
+					EndIf
+
 					y = y + 50*MenuScale
 					
 					Color 255,255,255
