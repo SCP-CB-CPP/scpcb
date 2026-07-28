@@ -1,5 +1,4 @@
 Function UpdateEvents()
-	CatchErrors("Uncaught (UpdateEvents)")
 	Local dist#, i%, temp%, pvt%, strtemp$, j%, k%
 	
 	Local p.Particles, n.NPCs, r.Rooms, e.Events, e2.Events, it.Items, it2.Items, em.Emitters, sc.SecurityCams, sc2.SecurityCams
@@ -15,6 +14,12 @@ Function UpdateEvents()
 	UpdateRooms()
 	
 	For e.Events = Each Events
+		If e<>Null Then
+			CatchErrors(Chr(34)+e\EventName+Chr(34)+" event")
+		Else
+			CatchErrors("Deleted event")
+		EndIf
+		
 		If UpdateEvent\Subscribers > 0 Then
 			PrepareFunction(1)
 			SetArgObj(0, &e)
@@ -8378,7 +8383,7 @@ Function UpdateEvents()
 				If PlayerRoom<>e\room
 					If e\room\Objects[0]<>0
 						For i = 1 To 15
-							HideEntity e\room\Objects[i]
+							If EntityExist(e\room\Objects[i]) Then HideEntity e\room\Objects[i]
 						Next
 					EndIf
 					If EntityY(Collider)>EntityY(e\room\obj)-0.5
@@ -8392,7 +8397,7 @@ Function UpdateEvents()
 					If e\SoundCHN2<>0 Then
 						StopChannel(e\SoundCHN2) : e\SoundCHN2 = 0
 					EndIf
-					HideEntity NTF_1499Sky
+					If EntityExist(NTF_1499Sky) Then HideEntity NTF_1499Sky
 					HideChunks()
 					For n.NPCs = Each NPCs
 						If n\NPCtype = NPCtype1499
@@ -8500,12 +8505,6 @@ Function UpdateEvents()
 				EndIf
 				;[End Block]
 		End Select
-		
-		If e<>Null Then
-			CatchErrors(Chr(34)+e\EventName+Chr(34)+" event")
-		Else
-			CatchErrors("Deleted event")
-		EndIf
 	Next
 	
 	;This here is necessary because the 294 drinks with explosion effect didn't worked anymore - ENDSHN

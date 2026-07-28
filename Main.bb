@@ -184,8 +184,8 @@ Dim ArrowIMG(4)
 
 ;[Block]
 
-Global LauncherWidth%= Min(GetOptionInt("launcher", "launcher width"), 1024)
-Global LauncherHeight% = Min(GetOptionInt("launcher", "launcher height"), 768)
+Const LauncherWidth% = 640
+Const LauncherHeight% = 480
 Global LauncherEnabled% = GetOptionInt("launcher", "launcher enabled")
 
 Global GraphicWidth% = GetCLIInt("width", GetCLIInt("w", GetOptionInt("graphics", "width")))
@@ -11048,9 +11048,10 @@ Function Use294()
 
 					strtemp$ = GetINIString2(iniStr, loc, "dispensesound")
 					If strtemp="" Then
-						PlayerRoom\SoundCHN = PlaySound_Strict (LoadTempSound("SFX\SCP\294\dispense1.ogg"))
-					Else
 						PlayerRoom\SoundCHN = PlaySound_Strict (LoadTempSound(strtemp))
+					EndIf
+					If PlayerRoom\SoundCHN=0 Then
+						PlayerRoom\SoundCHN = PlaySound_Strict (LoadTempSound("SFX\SCP\294\dispense1.ogg"))
 					EndIf
 					
 					If GetINIInt2(iniStr, loc, "explosion")=True Then 
@@ -12061,20 +12062,6 @@ Function GetMeshExtents(Mesh%)
 	
 End Function
 
-Function EntityScaleX#(entity%, globl% = False)
-	If globl Then TFormVector 1, 0, 0, entity, 0 Else TFormVector 1, 0, 0, entity, GetParent(entity)
-	Return Sqr(TFormedX() * TFormedX() + TFormedY() * TFormedY() + TFormedZ() * TFormedZ())
-End Function 
-
-Function EntityScaleY#(entity%, globl% = False)
-	If globl Then TFormVector 0, 1, 0, entity, 0 Else TFormVector 0, 1, 0, entity, GetParent(entity)
-	Return Sqr(TFormedX() * TFormedX() + TFormedY() * TFormedY() + TFormedZ() * TFormedZ())
-End Function 
-
-Function EntityScaleZ#(entity%, globl% = False)
-	If globl Then TFormVector 0, 0, 1, entity, 0 Else TFormVector 0, 0, 1, entity, GetParent(entity)
-	Return Sqr(TFormedX() * TFormedX() + TFormedY() * TFormedY() + TFormedZ() * TFormedZ())
-End Function 
 
 Global SMALLEST_POWER_TWO#
 
