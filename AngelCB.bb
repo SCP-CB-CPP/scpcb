@@ -39,10 +39,10 @@ Function RegisterMenu()
     If ns <> "" Then SetDefaultNamespace(ns + "::HUD") Else SetDefaultNamespace("HUD")
 
     RegisterGlobalProperty("const float Scale", &HUDScale)
-    RegisterGlobalProperty("const float StartX", &HUDStartX)
-    RegisterGlobalProperty("const float StartY", &HUDStartY)
-    RegisterGlobalProperty("const float EndX", &HUDEndX)
-    RegisterGlobalProperty("const float EndY", &HUDEndY)
+    RegisterGlobalProperty("const int StartX", &HUDStartX)
+    RegisterGlobalProperty("const int StartY", &HUDStartY)
+    RegisterGlobalProperty("const int EndX", &HUDEndX)
+    RegisterGlobalProperty("const int EndY", &HUDEndY)
 
     SetDefaultNamespace(ns)
 End Function

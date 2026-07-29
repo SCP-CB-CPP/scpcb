@@ -3070,10 +3070,10 @@ float StopHidingTimer;
 
 namespace CB::HUD {
 float Scale;
-float StartX;
-float StartY;
-float EndX;
-float EndY;
+int StartX;
+int StartY;
+int EndX;
+int EndY;
 }
 
 namespace CB::LoadingScreen {
