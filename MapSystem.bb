@@ -8163,10 +8163,10 @@ Function HideChunks()
 	For ch = Each Chunk
 		If (Not ch\IsSpawnChunk)
 			For i = 0 To ch\Amount
-				FreeEntity ch\obj[i]
+				If EntityExist(ch\obj[i]) Then FreeEntity ch\obj[i]
 			Next
-			FreeEntity ch\PlatForm
-			FreeEntity ch\ChunkPivot
+			If EntityExist(ch\PlatForm) Then FreeEntity ch\PlatForm
+			If EntityExist(ch\ChunkPivot) Then FreeEntity ch\ChunkPivot
 			Delete ch
 		EndIf
 	Next
