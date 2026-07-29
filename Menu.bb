@@ -32,7 +32,7 @@ Global MainMenuTab%
 
 Global IntroEnabled% = GetOptionInt("general", "intro enabled")
 
-Global BeatableCheck% = GetOptionInt("general", "beatable check")
+Global CompletableCheck% = GetOptionInt("general", "beatable check")
 
 Global SelectedInputBox%
 
@@ -195,7 +195,7 @@ Function UpdateMainMenu()
 			Select MainMenuTab
 				Case 1
 					PutINIValue(OptionFile, "general", "intro enabled", IntroEnabled%)
-					PutINIValue(OptionFile, "general", "beatable check", BeatableCheck%)
+					PutINIValue(OptionFile, "general", "beatable check", CompletableCheck%)
 					PutINIValue(OptionFile, "general", "numeric seeds", UseNumericSeeds%)
 					MainMenuTab = 0
 				Case 2
@@ -294,8 +294,8 @@ Function UpdateMainMenu()
 				Text(x + 20 * MenuScale, y + 110 * MenuScale, "Enable intro sequence:")
 				IntroEnabled = DrawTick(x + 280 * MenuScale, y + 110 * MenuScale, IntroEnabled)	
 
-				Text(x + 355 * MenuScale, y + 110 * MenuScale, "Beatable check:")
-				BeatableCheck = DrawTick(x + 535 * MenuScale, y + 110 * MenuScale, BeatableCheck)
+				Text(x + 345 * MenuScale, y + 110 * MenuScale, "Check 100%-able:")
+				CompletableCheck = DrawTick(x + 535 * MenuScale, y + 110 * MenuScale, CompletableCheck)
 				
 				;Local modeName$, modeDescription$, selectedDescription$
 				Text (x + 20 * MenuScale, y + 150 * MenuScale, "Difficulty:")				
@@ -394,7 +394,7 @@ Function UpdateMainMenu()
 					FlushMouse()
 					
 					PutINIValue(OptionFile, "general", "intro enabled", IntroEnabled%)
-					PutINIValue(OptionFile, "general", "beatable check", BeatableCheck%)
+					PutINIValue(OptionFile, "general", "beatable check", CompletableCheck%)
 					PutINIValue(OptionFile, "general", "numeric seeds", UseNumericSeeds%)
 					
 				EndIf

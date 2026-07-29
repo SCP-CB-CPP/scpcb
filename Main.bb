@@ -3481,35 +3481,26 @@ Repeat
 			EndIf
 			
 			Local messageOpacity% = Min(MsgTimer / 2, 255)
+			Local textY%
+
 			If (Not temp%)
-				Color 0,0,0
-				Text((GraphicWidth / 2)+1, (GraphicHeight / 2) + 201, Msg, True, False)
-				Color messageOpacity, messageOpacity, messageOpacity
-				If Left(Msg,14)="Blitz3D Error!" Then
-					Color 255,0,0
-				Else If Msg="This seed is 100%-completable."
-					Color 0,192,0
-				Else If Msg="This seed is beatable."
-					Color 0,128,0
-				Else If Msg="This seed is not beatable."
-					Color 128,0,0
-				EndIf
-				Text((GraphicWidth / 2), (GraphicHeight / 2) + 200, Msg, True, False)
+				textY = (GraphicHeight / 2) + 200
 			Else
-				Color 0,0,0
-				Text((GraphicWidth / 2)+1, (GraphicHeight * 0.94) + 1, Msg, True, False)
-				Color messageOpacity, messageOpacity, messageOpacity
-				If Left(Msg,14)="Blitz3D Error!" Then
-					Color 255,0,0
-				Else If Msg="This seed is 100%-completable."
-					Color 0,192,0
-				Else If Msg="This seed is beatable."
-					Color 0,128,0
-				Else If Msg="This seed is not beatable."
-					Color 128,0,0
-				EndIf
-				Text((GraphicWidth / 2), (GraphicHeight * 0.94), Msg, True, False)
+				textY = (GraphicHeight * 0.94)
 			EndIf
+
+			Color 0,0,0
+			Text((GraphicWidth / 2)+1, textY + 1, Msg, True, False)
+			Color messageOpacity, messageOpacity, messageOpacity
+			If Left(Msg,14)="Blitz3D Error!" Then
+				Color 255,0,0
+			Else If Msg="This seed is 100%-completable." Lor Msg="This seed is beatable."
+				Color 0,192,0
+			Else If Msg="This seed is not 100%-completable." Lor Msg="This seed is not beatable."
+				Color 192,0,0
+			EndIf
+			Text((GraphicWidth / 2), textY, Msg, True, False)
+
 			MsgTimer=MsgTimer-FPSfactor2 
 		End If
 		

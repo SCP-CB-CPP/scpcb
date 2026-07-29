@@ -67,44 +67,40 @@ Function UpdateEvents()
 						CameraFogRange(Camera, CameraFogNear, CameraFogFar)
 						CameraFogMode(Camera, 1)
 
-						If BeatableCheck Then
-							Local isBeatable% = False
-							Local hadToilets% = False
-							Local requiredRoomCount% = 22
-							For r.Rooms = Each Rooms
-								Select r\RoomTemplate\Name
-									Case "room2ccont" isBeatable = True : requiredRoomCount = requiredRoomCount - 1
-									Case "room2toilets"
-										; There may exist multiple instances of this room.
-										If Not hadToilets Then
-											hadToilets = True
-											requiredRoomCount = requiredRoomCount - 1
-										EndIf
-									Case "008", "room012", "room035", "room2sl", "room079", "room205" requiredRoomCount = requiredRoomCount - 1
-									Case "room2cafeteria", "roompj", "room2sroom", "room513", "room2scps", "coffin" requiredRoomCount = requiredRoomCount - 1
-									Case "914", "room3storage", "room966", "room2storage", "room1123", "room2poffices" requiredRoomCount = requiredRoomCount - 1
-									Case "room1162", "room2scps2" requiredRoomCount = requiredRoomCount - 1
-								End Select
-								If requiredRoomCount = 0 Then Exit
-							Next
+						Local isBeatable% = False
+						Local hadToilets% = False
+						Local requiredRoomCount% = 22
+						For r.Rooms = Each Rooms
+							Select r\RoomTemplate\Name
+								Case "room2ccont" isBeatable = True : requiredRoomCount = requiredRoomCount - 1
+								Case "room2toilets"
+									; There may exist multiple instances of this room.
+									If Not hadToilets Then
+										hadToilets = True
+										requiredRoomCount = requiredRoomCount - 1
+									EndIf
+								Case "008", "room012", "room035", "room2sl", "room079", "room205" requiredRoomCount = requiredRoomCount - 1
+								Case "room2cafeteria", "roompj", "room2sroom", "room513", "room2scps", "coffin" requiredRoomCount = requiredRoomCount - 1
+								Case "914", "room3storage", "room966", "room2storage", "room1123", "room2poffices" requiredRoomCount = requiredRoomCount - 1
+								Case "room1162", "room2scps2" requiredRoomCount = requiredRoomCount - 1
+							End Select
+							If requiredRoomCount = 0 Then Exit
+						Next
 
+						If CompletableCheck Then
 							If requiredRoomCount = 0 Then
 								Msg = "This seed is 100%-completable."
-							ElseIf isBeatable Then
+							Else
+								Msg = "This seed is not 100%-completable."
+							EndIf
+						Else
+							If isBeatable Then
 								Msg = "This seed is beatable."
 							Else
 								Msg = "This seed is not beatable."
 							EndIf
-							MsgTimer = 70 * 8
-						Else
-							If SelectedDifficulty\saveType = SAVEANYWHERE Then
-								Msg = "Press "+GetKeyName(KEY_SAVE)+" to save."
-								MsgTimer = 70*4
-							ElseIf SelectedDifficulty\saveType = SAVEONSCREENS Then
-								Msg = "Saving is only permitted on clickable monitors scattered throughout the facility."
-								MsgTimer = 70 * 8
-							EndIf
 						EndIf
+						MsgTimer = 70 * 8
 						
 						Curr173\Idle=False
 						
