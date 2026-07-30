@@ -403,7 +403,20 @@ End Function
 
 ;don't use in LoadRMesh, as Reg does this manually there. If you wanna fuck around with the logic in that function, be my guest 
 Function LoadTexture_Strict(File$,flags=1)
-	Local tmp% = LoadTexture(File, flags)
+	Local ext$ = File_GetExtension(File)
+	Local fileNoExt$ = Left(File, Len(File) - Len(ext))
+	Local tmp%
+
+	For m.ActiveMods = Each ActiveMods
+		Local modPath$ = m\Path + File
+		If FileType(modPath) = 1 Then
+			tmp = LoadTexture(modPath, flags)
+			If tmp <> 0 Then Return tmp
+			RuntimeErrorExt("Failed to load Texture " + Chr(34) + modPath + Chr(34) + ".")
+		EndIf
+	Next
+
+	tmp = LoadTexture(File, flags)
 	If tmp <> 0 Then Return tmp
 
 	Local err$
