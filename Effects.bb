@@ -5,10 +5,8 @@ Global PostEffectQuad%, QuadCamera%, PostEffect%
 Global ScreenTexture%
 
 Global PixelWidth# = 0, PixelHeight# = 0
-If GetGraphicsLevel() < 100
-	PixelWidth# = 0.5 / GraphicWidth
-	PixelHeight# = 0.5 / GraphicHeight
-EndIf
+PixelWidth# = 0.5 / GraphicWidth
+PixelHeight# = 0.5 / GraphicHeight
 
 Function InitPostProcess()
 	ScreenTexture = CreateTexture(GraphicWidth, GraphicHeight, 1 + 1024)
@@ -36,7 +34,7 @@ Function UpdatePostProcess()
 End Function
 
 Function ProcessGammaEffect(gamma#)
-	EffectFloat(GammaEffect, "Gamma", Lerp(gamma, 1.0, 0.3)) ; Limit gamma
+	SetEffectFloat(GammaEffect, "Gamma", Lerp(gamma, 1.0, 0.3)) ; Limit gamma
 	RenderEffectQuad(GammaEffect, BackBuffer(), "Main")
 End Function
 
@@ -51,9 +49,9 @@ Function RenderEffectQuad(effect%, buffer%, technique$, blend% = 0)
 	ShowEntity(PostEffectQuad)
 	EntityBlend(PostEffectQuad, blend)
 	SetBuffer(buffer)
-	EffectTechnique(effect, technique)
+	;EffectTechnique(effect, technique)
 	CameraViewport(QuadCamera, 0, 0, GraphicWidth, GraphicHeight)
-	RenderEntity(QuadCamera, PostEffectQuad)
+	;RenderEntity(QuadCamera, PostEffectQuad)
 	HideEntity(PostEffectQuad)
 End Function
 
@@ -67,6 +65,6 @@ End Function
 
 Function SetQuadEffect(effect%)
 	if PostEffect = effect Then Return
-	EntityEffect PostEffectQuad, effect
+	SetEntityEffect PostEffectQuad, effect
 	PostEffect = effect
 End Function
