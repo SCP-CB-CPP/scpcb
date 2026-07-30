@@ -6573,7 +6573,7 @@ Function UpdateSecurityCams()
 						If BlinkTimer > - 5 And EntityInView(sc\ScrObj, Camera)Then
 							If EntityVisible(Camera,sc\ScrObj) Then
 								;sc\InSight = True
-								SetBuffer(TextureBuffer(ScreenTexs[sc\ScrTexture]), TextureBuffer(ScreenTexs[2]))
+								SetBufferDepth(TextureBuffer(ScreenTexs[sc\ScrTexture]), TextureBuffer(ScreenTexs[2]))
 								If CoffinCam = Null Or Rand(5)=5 Or sc\CoffinEffect <> 3 Then
 									HideEntity(Camera)
 									ShowEntity(sc\Cam)
