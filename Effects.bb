@@ -51,7 +51,7 @@ Function RenderEffectQuad(effect%, buffer%, technique$, blend% = 0)
 	SetBuffer(buffer)
 	;EffectTechnique(effect, technique)
 	CameraViewport(QuadCamera, 0, 0, GraphicWidth, GraphicHeight)
-	RenderEntity(QuadCamera, PostEffectQuad)
+	RenderEntity(PostEffectQuad, QuadCamera)
 	HideEntity(PostEffectQuad)
 End Function
 
