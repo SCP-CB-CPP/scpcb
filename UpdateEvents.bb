@@ -4638,11 +4638,9 @@ Function UpdateEvents()
 									e\room\NPC[1]=Null
 								EndIf
 							Case 60
-								If (Not HalloweenTex) Then
-									Local tex970 = LoadTexture_Strict("GFX\npcs\173h.pt", 1)
-									EntityTexture Curr173\obj, tex970, 0, 0
-									FreeTexture tex970
-								EndIf
+								Local tex970 = LoadTexture_Strict("GFX\npcs\173h.pt", 1)
+								EntityTexture Curr173\obj, tex970, 0, 0
+								FreeTexture tex970
 						End Select
 						
 						If Rand(10)=1 Then
