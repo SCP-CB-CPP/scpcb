@@ -36,6 +36,8 @@ Global SelectedInputBox%
 
 Global SavePath$ = "Saves\"
 Global SaveMSG$
+Global WarnLoadSave$
+Global WarnLoadSaveIndex%
 
 ;nykyisen tallennuksen nimi ja samalla missä kansiossa tallennustiedosto sijaitsee saves-kansiossa
 Global PrevSave$, CurrSave$
@@ -46,7 +48,12 @@ Dim SaveGameTime$(SaveGameAmount + 1)
 Dim SaveGameDate$(SaveGameAmount + 1)
 Dim SaveGameVersion$(SaveGameAmount + 1)
 Dim SaveGamePlayTime$(SaveGameAmount + 1)
+Dim SaveGameHasModData%(SaveGameAmount + 1)
+Dim SaveGameModCount%(SaveGameAmount + 1)
+Dim SaveGameModIDs$(SaveGameAmount + 1)
+Dim SaveGameModNames$(SaveGameAmount + 1)
 Global KeepDuplicateSaveCount% = GetOptionInt("general", "keep duplicate saves")
+Global AlwaysShowModWarning% = GetOptionInt("general", "always show mod warning")
 
 Global SavedMapsAmount% = 0
 Dim SavedMaps$(SavedMapsAmount+1)
@@ -262,6 +269,8 @@ Function UpdateMainMenu()
 					MainMenuTab = 0
 				Case 2
 					CurrLoadGamePage = 0
+					SaveMSG = ""
+					WarnLoadSave = ""
 					MainMenuTab = 0
 				Case 3,5,6,7 ;save the options
 					SaveOptionsINI()
@@ -496,7 +505,7 @@ Function UpdateMainMenu()
 				
 				SetFont Font2
 				
-				If CurrLoadGamePage < Ceil(Float(SaveGameAmount)/EntriesPerPage)-1 And SaveMSG = "" Then 
+				If CurrLoadGamePage < Ceil(Float(SaveGameAmount)/EntriesPerPage)-1 And SaveMSG = "" And WarnLoadSave = "" Then 
 					If DrawButton(x+530*MenuScale, y + PagingFrameHeight, 50*MenuScale, 55*MenuScale, ">") Then
 						CurrLoadGamePage = CurrLoadGamePage+1
 					EndIf
@@ -505,7 +514,7 @@ Function UpdateMainMenu()
 					Color(100, 100, 100)
 					Text(x+555*MenuScale, y + PagingFrameHeight + 27.5*MenuScale, ">", True, True)
 				EndIf
-				If CurrLoadGamePage > 0 And SaveMSG = "" Then
+				If CurrLoadGamePage > 0 And SaveMSG = "" And WarnLoadSave = "" Then
 					If DrawButton(x, y + PagingFrameHeight, 50*MenuScale, 55*MenuScale, "<") Then
 						CurrLoadGamePage = CurrLoadGamePage-1
 					EndIf
@@ -545,21 +554,30 @@ Function UpdateMainMenu()
 							Text(x + 20 * MenuScale, y + (10+18) * MenuScale, SaveGameTime(i - 1) + RSet(SaveGameDate(i - 1), 21 - Len(SaveGameTime(i - 1))))
 							Text(x + 20 * MenuScale, y + (10+36) * MenuScale, SaveGameVersion(i - 1) + RSet(FormatDuration(SaveGamePlayTime(i - 1), False), 21 - Len(SaveGameVersion(i - 1))))
 							
-							If SaveMSG = "" Then
+							If SaveMSG = "" And WarnLoadSave = "" Then
 								If SaveGameVersion(i - 1) <> CompatibleNumber Then
 									DrawFrame(x + 300 * MenuScale, y + 20 * MenuScale, 100 * MenuScale, 30 * MenuScale)
 									Color(255, 0, 0)
 									Text(x + 350 * MenuScale, y + 35 * MenuScale, I_Loc\LoadGame_Load, True, True)
 								Else
 									If DrawButton(x + 300 * MenuScale, y + 20 * MenuScale, 100 * MenuScale, 30 * MenuScale, I_Loc\LoadGame_Load, False) Then
-										LoadEntities()
-										LoadAllSounds()
-										InitRoomTemplates()
-										LoadGame(SaveGames(i - 1))
-										CurrSave = SaveGames(i - 1)
-										InitLoadGame()
-										MainMenuOpen = False
-										Return
+										If AlwaysShowModWarning Then
+											ComputeWarnModLists(i - 1)
+											WarnLoadSave = SaveGames(i - 1)
+											WarnLoadSaveIndex = i - 1
+										ElseIf CheckSaveModMatch(i - 1) Then
+											LoadEntities()
+											LoadAllSounds()
+											InitRoomTemplates()
+											LoadGame(SaveGames(i - 1))
+											CurrSave = SaveGames(i - 1)
+											InitLoadGame()
+											MainMenuOpen = False
+											Return
+										Else
+											WarnLoadSave = SaveGames(i - 1)
+											WarnLoadSaveIndex = i - 1
+										EndIf
 									EndIf
 								EndIf
 								
@@ -602,6 +620,79 @@ Function UpdateMainMenu()
 						EndIf
 						If DrawButton(x + 250 * MenuScale, y, 100 * MenuScale, 30 * MenuScale, I_Loc\Menu_No, False) Then
 							SaveMSG = ""
+						EndIf
+					EndIf
+
+					If WarnLoadSave <> ""
+						x = 640 * MenuScale
+						y = 260 * MenuScale
+						width = 660 * MenuScale
+						height = 340 * MenuScale
+						DrawFrame(x, y, width, height)
+
+						Local modWordSing$ = I_Loc\LoadGame_ModWordSingular
+						If modWordSing = "" Then modWordSing = "mod"
+						Local modWordPlur$ = I_Loc\LoadGame_ModWordPlural
+						If modWordPlur = "" Then modWordPlur = "mods"
+
+						Local savedCount% = 0
+						If SaveGameHasModData(WarnLoadSaveIndex) Then savedCount = SaveGameModCount(WarnLoadSaveIndex)
+						Local savedWord$ = modWordPlur
+						If savedCount = 1 Then savedWord = modWordSing
+
+						Local savedList$ = WarnModSavedNames
+						If savedList = "" Then savedList = I_Loc\Mods_Nomods
+
+						Local warnText$ = ""
+						Local missingList$ = WarnModMissingNames
+						Local extraList$ = WarnModExtraNames
+						Local currentList$ = WarnModCurrentNames
+
+						If AlwaysShowModWarning Then
+							warnText = Format(I_Loc\LoadGame_ModWarning, modWordPlur, savedList)
+							If currentList <> "" Then
+								warnText = warnText + Chr(10) + Format(I_Loc\LoadGame_ModWarningExtraHeader, modWordPlur, currentList)
+							Else
+								warnText = warnText + Chr(10) + Format(I_Loc\LoadGame_ModWarningExtraNone, modWordPlur)
+							EndIf
+						Else
+							Local showMissing% = (missingList <> "")
+							Local showExtra% = (extraList <> "")
+							Local mismatch% = showMissing Or showExtra
+							If mismatch Then
+								warnText = Format(I_Loc\LoadGame_ModWarning, savedWord, savedList)
+								If showMissing Then
+									warnText = warnText + Chr(10) + Format(I_Loc\LoadGame_ModWarningMissingHeader, modWordPlur, missingList)
+								Else
+									warnText = warnText + Chr(10) + Format(I_Loc\LoadGame_ModWarningMissingNone, modWordPlur)
+								EndIf
+								If showExtra Then
+									warnText = warnText + Chr(10) + Format(I_Loc\LoadGame_ModWarningExtraHeader, modWordPlur, extraList)
+								Else
+									warnText = warnText + Chr(10) + Format(I_Loc\LoadGame_ModWarningExtraNone, modWordPlur)
+								EndIf
+							Else
+								warnText = Format(I_Loc\LoadGame_ModWarningNoextra, savedWord, savedList)
+							EndIf
+						EndIf
+
+						RowText(warnText, x + 20 * MenuScale, y + 15 * MenuScale, width - 40 * MenuScale, height - 70 * MenuScale)
+
+						y = y + height - (30 + 15) * MenuScale
+						If DrawButton(x + 30 * MenuScale, y, 180 * MenuScale, 30 * MenuScale, I_Loc\LoadGame_GoBack, False) Then
+							WarnLoadSave = ""
+						EndIf
+						If DrawButton(x + width - (180 + 30) * MenuScale, y, 180 * MenuScale, 30 * MenuScale, I_Loc\LoadGame_LoadAnyway, False) Then
+							Local saveToLoad$ = WarnLoadSave
+							WarnLoadSave = ""
+							LoadEntities()
+							LoadAllSounds()
+							InitRoomTemplates()
+							LoadGame(saveToLoad)
+							CurrSave = saveToLoad
+							InitLoadGame()
+							MainMenuOpen = False
+							Return
 						EndIf
 					EndIf
 				EndIf
@@ -977,20 +1068,20 @@ Function UpdateMainMenu()
 					;[End Block]
 				ElseIf MainMenuTab = 7 ;Advanced
 					;[Block]
-					height = (325 + (CurrFrameLimit > 0.0) * 30) * MenuScale
-					DrawFrame(x, y, width, height)	
-					
+					height = (355 + (CurrFrameLimit > 0.0) * 30) * MenuScale
+					DrawFrame(x, y, width, height)
+
 					y = y + 20*MenuScale
-					
-					Color 255,255,255				
-					Text(x + 20 * MenuScale, y, I_Loc\OptionName_Showhud)	
+
+					Color 255,255,255
+					Text(x + 20 * MenuScale, y, I_Loc\OptionName_Showhud)
 					HUDenabled = DrawTick(x + 310 * MenuScale, y + MenuScale, HUDenabled)
 					If MouseOn(x+310*MenuScale,y+MenuScale,20*MenuScale,20*MenuScale) And OnSliderID=0
 						DrawOptionsTooltip(tx,ty,tw,th,"hud")
 					EndIf
-					
+
 					y=y+30*MenuScale
-					
+
 					Color 255,255,255
 					Text(x + 20 * MenuScale, y, I_Loc\OptionName_Console)
 					CanOpenConsole = DrawTick(x + 310 * MenuScale, y + MenuScale, CanOpenConsole)
@@ -1015,7 +1106,16 @@ Function UpdateMainMenu()
 					If MouseOn(x+310*MenuScale,y+MenuScale,20*MenuScale,20*MenuScale) And OnSliderID=0
 						DrawOptionsTooltip(tx,ty,tw,th,"numericseeds")
 					EndIf
-					
+
+					y = y + 30*MenuScale
+
+					Color 255,255,255
+					Text(x + 20 * MenuScale, y, I_Loc\OptionName_AlwaysShowModWarning)
+					AlwaysShowModWarning% = DrawTick(x + 310 * MenuScale, y + MenuScale, AlwaysShowModWarning%)
+					If MouseOn(x+310*MenuScale,y+MenuScale,20*MenuScale,20*MenuScale) And OnSliderID=0
+						DrawOptionsTooltip(tx,ty,tw,th,"alwaysshowmodwarning")
+					EndIf
+
 					y = y + 50*MenuScale
 					
 					Color 255,255,255

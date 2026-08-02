@@ -1,4 +1,6 @@
 
+Const SAVE_MOD_MAGIC = -777
+
 Function SaveGame(file$)
 	CatchErrors("Uncaught (SaveGame)")
 	
@@ -34,6 +36,19 @@ Function SaveGame(file$)
 
 	;WriteString f, VersionNumber
 	WriteString f, CompatibleNumber
+	
+	WriteInt f, SAVE_MOD_MAGIC
+	Local activeModCount% = 0
+	For m.Mods = Each Mods
+		If m\IsActive Then activeModCount = activeModCount + 1
+	Next
+	WriteInt f, activeModCount
+	For m.Mods = Each Mods
+		If m\IsActive Then
+			WriteString f, m\Id
+			WriteString f, m\Name
+		EndIf
+	Next
 	
 	WriteFloat f, BlinkTimer
 	WriteFloat f, BlinkEffect
@@ -524,6 +539,19 @@ Function LoadGame(file$)
 	
 	strtemp = ReadString(f)
 	version = strtemp
+	
+	If Not Eof(f) Then
+		Local magic% = ReadInt(f)
+		If magic = SAVE_MOD_MAGIC Then
+			Local savedModCount% = ReadInt(f)
+			For k = 1 To savedModCount
+				ReadString(f)
+				ReadString(f)
+			Next
+		Else
+			SeekFile(f, FilePos(f) - 4)
+		EndIf
+	EndIf
 	
 	BlinkTimer = ReadFloat(f)
 	BlinkEffect = ReadFloat(f)	
@@ -1377,6 +1405,19 @@ Function LoadGameQuick(file$)
 	strtemp = ReadString(f)
 	version = strtemp
 	
+	If Not Eof(f) Then
+		magic% = ReadInt(f)
+		If magic = SAVE_MOD_MAGIC Then
+			savedModCount% = ReadInt(f)
+			For k = 1 To savedModCount
+				ReadString(f)
+				ReadString(f)
+			Next
+		Else
+			SeekFile(f, FilePos(f) - 4)
+		EndIf
+	EndIf
+	
 	BlinkTimer = ReadFloat(f)
 	BlinkEffect = ReadFloat(f)	
 	BlinkEffectTimer = ReadFloat(f)	
@@ -2062,6 +2103,10 @@ Function LoadSaveGames()
 	Dim SaveGameDate$(SaveGameAmount + 1)
 	Dim SaveGameVersion$(SaveGameAmount + 1)
 	Dim SaveGamePlayTime$(SaveGameAmount + 1)
+	Dim SaveGameHasModData%(SaveGameAmount + 1)
+	Dim SaveGameModCount%(SaveGameAmount + 1)
+	Dim SaveGameModIDs$(SaveGameAmount + 1)
+	Dim SaveGameModNames$(SaveGameAmount + 1)
 	For i = 1 To SaveGameAmount
 		DebugLog (SavePath + SaveGames(i - 1))
 		Local f% = ReadFile(SavePath + SaveGames(i - 1) + ".cbsav")
@@ -2078,11 +2123,137 @@ Function LoadSaveGames()
 		;End Skip
 		SaveGameVersion(i - 1) = ReadString(f)
 		
+		SaveGameHasModData(i - 1) = False
+		SaveGameModCount(i - 1) = 0
+		SaveGameModIDs$(i - 1) = ""
+		SaveGameModNames$(i - 1) = ""
+		If Not Eof(f) Then
+			magic% = ReadInt(f)
+			If magic = SAVE_MOD_MAGIC Then
+				SaveGameHasModData(i - 1) = True
+				SaveGameModCount(i - 1) = ReadInt(f)
+				For k = 1 To SaveGameModCount(i - 1)
+					Local smId$ = ReadString(f)
+					Local smName$ = ReadString(f)
+					SaveGameModIDs$(i - 1) = SaveGameModIDs$(i - 1) + smId + ";"
+					If SaveGameModNames$(i - 1) <> "" Then SaveGameModNames$(i - 1) = SaveGameModNames$(i - 1) + ", "
+					SaveGameModNames$(i - 1) = SaveGameModNames$(i - 1) + smName
+				Next
+			Else
+				SeekFile(f, FilePos(f) - 4)
+			EndIf
+		EndIf
+		
 		CloseFile f
 	Next
 	
 	CatchErrors("LoadSaveGames")
 End Function
+
+Global WarnModMissingNames$
+Global WarnModExtraNames$
+Global WarnModSavedNames$
+Global WarnModCurrentNames$
+
+Function ComputeWarnModLists(saveIndex%)
+	WarnModMissingNames$ = ""
+	WarnModExtraNames$ = ""
+	WarnModSavedNames$ = ""
+	WarnModCurrentNames$ = ""
+	
+	If saveIndex < 0 Or saveIndex >= SaveGameAmount Then Return
+	
+	If SaveGameHasModData(saveIndex) Then WarnModSavedNames$ = SaveGameModNames$(saveIndex)
+	
+	Local firstCurrent% = True
+	Local firstSavedMissing% = True
+	
+	For m.Mods = Each Mods
+		If m\IsActive Then
+			Local idKey$ = m\Id + ";"
+			Local mName$ = m\Name
+			If mName = "" Then mName = m\Id
+			
+			If Not firstCurrent Then WarnModCurrentNames$ = WarnModCurrentNames$ + ", "
+			WarnModCurrentNames$ = WarnModCurrentNames$ + mName
+			firstCurrent = False
+			
+			If SaveGameHasModData(saveIndex) Then
+				If Instr(SaveGameModIDs$(saveIndex), idKey) = 0 Then
+					If Not firstSavedMissing Then WarnModExtraNames$ = WarnModExtraNames$ + ", "
+					WarnModExtraNames$ = WarnModExtraNames$ + mName
+					firstSavedMissing = False
+				EndIf
+			EndIf
+		EndIf
+	Next
+	
+	If SaveGameHasModData(saveIndex) Then
+		Local position% = 1
+		Local idList$ = SaveGameModIDs$(saveIndex)
+		Local namesList$ = SaveGameModNames$(saveIndex)
+		Local count% = SaveGameModCount(saveIndex)
+		Local nameIdx% = 1
+		Local firstMissing% = True
+		
+		For k = 1 To count
+			Local semi% = Instr(idList, ";", position)
+			If semi = 0 Then Exit
+			Local id$ = Mid(idList, position, semi - position)
+			position = semi + 1
+			
+			Local commaPos% = Instr(namesList, ", ", nameIdx)
+			Local name$
+			If commaPos = 0 Then
+				name = Mid(namesList, nameIdx, Len(namesList) - nameIdx + 1)
+			Else
+				name = Mid(namesList, nameIdx, commaPos - nameIdx)
+				nameIdx = commaPos + 2
+			EndIf
+			
+			Local stillActive% = False
+			For m.Mods = Each Mods
+				If m\IsActive And m\Id = id Then stillActive = True : Exit
+			Next
+			If Not stillActive Then
+				If Not firstMissing Then WarnModMissingNames$ = WarnModMissingNames$ + ", "
+				WarnModMissingNames$ = WarnModMissingNames$ + name
+				firstMissing = False
+			EndIf
+		Next
+	EndIf
+End Function
+
+Function CheckSaveModMatch%(saveIndex%)
+	If saveIndex < 0 Or saveIndex >= SaveGameAmount Then Return True
+	If Not SaveGameHasModData(saveIndex) Then
+		ComputeWarnModLists(saveIndex)
+		Return True
+	EndIf
+	
+	Local currentActiveCount% = 0
+	For m.Mods = Each Mods
+		If m\IsActive Then currentActiveCount = currentActiveCount + 1
+	Next
+	
+	If currentActiveCount <> SaveGameModCount(saveIndex) Then
+		ComputeWarnModLists(saveIndex)
+		Return False
+	EndIf
+	
+	For m.Mods = Each Mods
+		If m\IsActive Then
+			If Instr(SaveGameModIDs$(saveIndex), m\Id + ";") = 0 Then
+				ComputeWarnModLists(saveIndex)
+				Return False
+			EndIf
+		EndIf
+	Next
+	
+	ComputeWarnModLists(saveIndex)
+	Return True
+End Function
+
 
 
 Function CountSavedMapsFrom%(folder$)

@@ -111,6 +111,8 @@ Type LocalizationTable
     Field OptionName_Showfps$
     Field OptionName_Framelimit$
     Field OptionName_FramelimitFps$
+    Field OptionName_AlwaysShowModWarning$
+    Field OptionTooltip_AlwaysShowModWarning$
     Field OptionTooltip_Vsync$
     Field OptionTooltip_Antialias$
     Field OptionTooltip_Gamma$
@@ -161,6 +163,16 @@ Type LocalizationTable
     Field LoadGame_Delete$
     Field LoadGame_DeleteConfirm$
     Field LoadGame_Nosaved$
+    Field LoadGame_ModWarning$
+    Field LoadGame_ModWarningNoextra$
+    Field LoadGame_ModWarningMissingHeader$
+    Field LoadGame_ModWarningMissingNone$
+    Field LoadGame_ModWarningExtraHeader$
+    Field LoadGame_ModWarningExtraNone$
+    Field LoadGame_ModWordSingular$
+    Field LoadGame_ModWordPlural$
+    Field LoadGame_LoadAnyway$
+    Field LoadGame_GoBack$
     Field NewGame_Name$
     Field NewGame_Enableintro$
     Field NewGame_Start$
@@ -592,6 +604,7 @@ Function LoadLocalization(loc.LocalizationTable, file$)
                             Case "showfps" If loc\OptionName_Showfps = "" Then loc\OptionName_Showfps = value
                             Case "framelimit" If loc\OptionName_Framelimit = "" Then loc\OptionName_Framelimit = value
                             Case "framelimit.fps" If loc\OptionName_FramelimitFps = "" Then loc\OptionName_FramelimitFps = value
+                            Case "alwaysshowmodwarning" If loc\OptionName_AlwaysShowModWarning = "" Then loc\OptionName_AlwaysShowModWarning = value
                         End Select
                     Case "Option Tooltip"
                         Select key
@@ -626,6 +639,7 @@ Function LoadLocalization(loc.LocalizationTable, file$)
                             Case "showfps" If loc\OptionTooltip_Showfps = "" Then loc\OptionTooltip_Showfps = value
                             Case "framelimit" If loc\OptionTooltip_Framelimit = "" Then loc\OptionTooltip_Framelimit = value
                             Case "framelimit.note" If loc\OptionTooltip_FramelimitNote = "" Then loc\OptionTooltip_FramelimitNote = value
+                            Case "alwaysshowmodwarning" If loc\OptionTooltip_AlwaysShowModWarning = "" Then loc\OptionTooltip_AlwaysShowModWarning = value
                         End Select
                     Case "Mods"
                         Select key
@@ -659,6 +673,16 @@ Function LoadLocalization(loc.LocalizationTable, file$)
                             Case "delete" If loc\LoadGame_Delete = "" Then loc\LoadGame_Delete = value
                             Case "delete.confirm" If loc\LoadGame_DeleteConfirm = "" Then loc\LoadGame_DeleteConfirm = value
                             Case "nosaved" If loc\LoadGame_Nosaved = "" Then loc\LoadGame_Nosaved = value
+                            Case "modwarning" If loc\LoadGame_ModWarning = "" Then loc\LoadGame_ModWarning = value
+                            Case "modwarning.noextra" If loc\LoadGame_ModWarningNoextra = "" Then loc\LoadGame_ModWarningNoextra = value
+                            Case "modwarning.missing.header" If loc\LoadGame_ModWarningMissingHeader = "" Then loc\LoadGame_ModWarningMissingHeader = value
+                            Case "modwarning.missing.none" If loc\LoadGame_ModWarningMissingNone = "" Then loc\LoadGame_ModWarningMissingNone = value
+                            Case "modwarning.extra.header" If loc\LoadGame_ModWarningExtraHeader = "" Then loc\LoadGame_ModWarningExtraHeader = value
+                            Case "modwarning.extra.none" If loc\LoadGame_ModWarningExtraNone = "" Then loc\LoadGame_ModWarningExtraNone = value
+                            Case "modword.singular" If loc\LoadGame_ModWordSingular = "" Then loc\LoadGame_ModWordSingular = value
+                            Case "modword.plural" If loc\LoadGame_ModWordPlural = "" Then loc\LoadGame_ModWordPlural = value
+                            Case "loadanyways" If loc\LoadGame_LoadAnyway = "" Then loc\LoadGame_LoadAnyway = value
+                            Case "goback" If loc\LoadGame_GoBack = "" Then loc\LoadGame_GoBack = value
                         End Select
                     Case "New Game"
                         Select key
