@@ -8103,10 +8103,10 @@ Function DrawMenu()
 					y = y + 30*MenuScale
 
 					Color 255,255,255
-					Text(x, y, I_Loc\OptionName_AlwaysShowModWarning)
-					AlwaysShowModWarning% = DrawTick(x + 270 * MenuScale, y + MenuScale, AlwaysShowModWarning%)
+					Text(x, y, I_Loc\OptionName_DisableModWarning)
+					DisableModWarning% = DrawTick(x + 270 * MenuScale, y + MenuScale, DisableModWarning%)
 					If MouseOn(x+270*MenuScale,y+MenuScale,20*MenuScale,20*MenuScale) And OnSliderID=0
-						DrawOptionsTooltip(tx,ty,tw,th,"alwaysshowmodwarning")
+						DrawOptionsTooltip(tx,ty,tw,th,"disablemodwarning")
 					EndIf
 
 					y = y + 50*MenuScale
@@ -11761,7 +11761,7 @@ Function SaveOptionsINI()
 	PutINIValue(OptionFile, "graphics", "show FPS", ShowFPS)
 	PutINIValue(OptionFile, "graphics", "framelimit", Framelimit%)
 	PutINIValue(OptionFile, "general", "achievement popup enabled", AchvMSGenabled%)
-	PutINIValue(OptionFile, "general", "always show mod warning", AlwaysShowModWarning%)
+	PutINIValue(OptionFile, "general", "disable mod warning", DisableModWarning%)
 	PutINIValue(OptionFile, "launcher", "launcher enabled", LauncherEnabled%)
 	PutINIValue(OptionFile, "graphics", "texture details", TextureDetails%)
 	PutINIValue(OptionFile, "console", "enabled", CanOpenConsole%)

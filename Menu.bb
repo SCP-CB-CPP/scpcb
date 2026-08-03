@@ -53,7 +53,7 @@ Dim SaveGameModCount%(SaveGameAmount + 1)
 Dim SaveGameModIDs$(SaveGameAmount + 1)
 Dim SaveGameModNames$(SaveGameAmount + 1)
 Global KeepDuplicateSaveCount% = GetOptionInt("general", "keep duplicate saves")
-Global AlwaysShowModWarning% = GetOptionInt("general", "always show mod warning")
+Global DisableModWarning% = GetOptionInt("general", "disable mod warning")
 
 Global SavedMapsAmount% = 0
 Dim SavedMaps$(SavedMapsAmount+1)
@@ -561,20 +561,14 @@ Function UpdateMainMenu()
 									Text(x + 350 * MenuScale, y + 35 * MenuScale, I_Loc\LoadGame_Load, True, True)
 								Else
 									If DrawButton(x + 300 * MenuScale, y + 20 * MenuScale, 100 * MenuScale, 30 * MenuScale, I_Loc\LoadGame_Load, False) Then
-										If AlwaysShowModWarning Then
-											ComputeWarnModLists(i - 1)
-											WarnLoadSave = SaveGames(i - 1)
-											WarnLoadSaveIndex = i - 1
+										If DisableModWarning Then
+											InitSaveGameLoad(SaveGames(i - 1))
+											Return
 										ElseIf CheckSaveModMatch(i - 1) Then
-											LoadEntities()
-											LoadAllSounds()
-											InitRoomTemplates()
-											LoadGame(SaveGames(i - 1))
-											CurrSave = SaveGames(i - 1)
-											InitLoadGame()
-											MainMenuOpen = False
+											InitSaveGameLoad(SaveGames(i - 1))
 											Return
 										Else
+											ComputeWarnModLists(i - 1)
 											WarnLoadSave = SaveGames(i - 1)
 											WarnLoadSaveIndex = i - 1
 										EndIf
@@ -630,69 +624,37 @@ Function UpdateMainMenu()
 						height = 340 * MenuScale
 						DrawFrame(x, y, width, height)
 
-						Local modWordSing$ = I_Loc\LoadGame_ModWordSingular
-						If modWordSing = "" Then modWordSing = "mod"
-						Local modWordPlur$ = I_Loc\LoadGame_ModWordPlural
-						If modWordPlur = "" Then modWordPlur = "mods"
-
-						Local savedCount% = 0
-						If SaveGameHasModData(WarnLoadSaveIndex) Then savedCount = SaveGameModCount(WarnLoadSaveIndex)
-						Local savedWord$ = modWordPlur
-						If savedCount = 1 Then savedWord = modWordSing
-
-						Local savedList$ = WarnModSavedNames
-						If savedList = "" Then savedList = I_Loc\Mods_Nomods
-
-						Local warnText$ = ""
-						Local missingList$ = WarnModMissingNames
-						Local extraList$ = WarnModExtraNames
-						Local currentList$ = WarnModCurrentNames
-
-						If AlwaysShowModWarning Then
-							warnText = Format(I_Loc\LoadGame_ModWarning, modWordPlur, savedList)
-							If currentList <> "" Then
-								warnText = warnText + Chr(10) + Format(I_Loc\LoadGame_ModWarningExtraHeader, modWordPlur, currentList)
-							Else
-								warnText = warnText + Chr(10) + Format(I_Loc\LoadGame_ModWarningExtraNone, modWordPlur)
-							EndIf
+						Local warnText$
+						If WarnModSavedNames <> "" Then
+							warnText = Format(I_Loc\LoadGame_ModWarning, WarnModSavedNames)
 						Else
-							Local showMissing% = (missingList <> "")
-							Local showExtra% = (extraList <> "")
-							Local mismatch% = showMissing Or showExtra
-							If mismatch Then
-								warnText = Format(I_Loc\LoadGame_ModWarning, savedWord, savedList)
-								If showMissing Then
-									warnText = warnText + Chr(10) + Format(I_Loc\LoadGame_ModWarningMissingHeader, modWordPlur, missingList)
-								Else
-									warnText = warnText + Chr(10) + Format(I_Loc\LoadGame_ModWarningMissingNone, modWordPlur)
-								EndIf
-								If showExtra Then
-									warnText = warnText + Chr(10) + Format(I_Loc\LoadGame_ModWarningExtraHeader, modWordPlur, extraList)
-								Else
-									warnText = warnText + Chr(10) + Format(I_Loc\LoadGame_ModWarningExtraNone, modWordPlur)
-								EndIf
-							Else
-								warnText = Format(I_Loc\LoadGame_ModWarningNoextra, savedWord, savedList)
-							EndIf
+							warnText = Format(I_Loc\LoadGame_ModWarning, I_Loc\Mods_Nomods)
+						EndIf
+						If WarnModMissingNames <> "" Then
+							warnText = warnText + Chr(10) + Format(I_Loc\LoadGame_ModWarningMissingHeader, WarnModMissingNames)
+						Else
+							warnText = warnText + Chr(10) + I_Loc\LoadGame_ModWarningMissingNone
+						EndIf
+						If WarnModExtraNames <> "" Then
+							warnText = warnText + Chr(10) + Format(I_Loc\LoadGame_ModWarningExtraHeader, WarnModExtraNames)
+						Else
+							warnText = warnText + Chr(10) + I_Loc\LoadGame_ModWarningExtraNone
+						EndIf
+						If I_Loc\LoadGame_ModWarningPrompt <> "" Then
+							warnText = warnText + Chr(10) + Chr(10) + I_Loc\LoadGame_ModWarningPrompt
 						EndIf
 
 						RowText(warnText, x + 20 * MenuScale, y + 15 * MenuScale, width - 40 * MenuScale, height - 70 * MenuScale)
 
 						y = y + height - (30 + 15) * MenuScale
-						If DrawButton(x + 30 * MenuScale, y, 180 * MenuScale, 30 * MenuScale, I_Loc\LoadGame_GoBack, False) Then
-							WarnLoadSave = ""
-						EndIf
-						If DrawButton(x + width - (180 + 30) * MenuScale, y, 180 * MenuScale, 30 * MenuScale, I_Loc\LoadGame_LoadAnyway, False) Then
+						If DrawButton(x + 50 * MenuScale, y, 100 * MenuScale, 30 * MenuScale, I_Loc\Menu_Yes, False) Then
 							Local saveToLoad$ = WarnLoadSave
 							WarnLoadSave = ""
-							LoadEntities()
-							LoadAllSounds()
-							InitRoomTemplates()
-							LoadGame(saveToLoad)
-							CurrSave = saveToLoad
-							InitLoadGame()
-							MainMenuOpen = False
+							InitSaveGameLoad(saveToLoad)
 							Return
+						EndIf
+						If DrawButton(x + 250 * MenuScale, y, 100 * MenuScale, 30 * MenuScale, I_Loc\Menu_No, False) Then
+							WarnLoadSave = ""
 						EndIf
 					EndIf
 				EndIf
@@ -1110,10 +1072,10 @@ Function UpdateMainMenu()
 					y = y + 30*MenuScale
 
 					Color 255,255,255
-					Text(x + 20 * MenuScale, y, I_Loc\OptionName_AlwaysShowModWarning)
-					AlwaysShowModWarning% = DrawTick(x + 310 * MenuScale, y + MenuScale, AlwaysShowModWarning%)
+					Text(x + 20 * MenuScale, y, I_Loc\OptionName_DisableModWarning)
+					DisableModWarning% = DrawTick(x + 310 * MenuScale, y + MenuScale, DisableModWarning%)
 					If MouseOn(x+310*MenuScale,y+MenuScale,20*MenuScale,20*MenuScale) And OnSliderID=0
-						DrawOptionsTooltip(tx,ty,tw,th,"alwaysshowmodwarning")
+						DrawOptionsTooltip(tx,ty,tw,th,"disablemodwarning")
 					EndIf
 
 					y = y + 50*MenuScale
@@ -3157,6 +3119,16 @@ Function Button%(x,y,width,height,txt$, disabled%=False)
 	Color 0,0,0
 	
 	If Pushed And MouseHit1 Then PlaySound_Strict ButtonSFX : Return True
+End Function
+
+Function InitSaveGameLoad(saveName$)
+	LoadEntities()
+	LoadAllSounds()
+	InitRoomTemplates()
+	LoadGame(saveName)
+	CurrSave = saveName
+	InitLoadGame()
+	MainMenuOpen = False
 End Function
 
 

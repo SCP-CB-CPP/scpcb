@@ -544,6 +544,7 @@ Function LoadGame(file$)
 		Local magic% = ReadInt(f)
 		If magic = SAVE_MOD_MAGIC Then
 			Local savedModCount% = ReadInt(f)
+			Local k%
 			For k = 1 To savedModCount
 				ReadString(f)
 				ReadString(f)
@@ -1406,9 +1407,10 @@ Function LoadGameQuick(file$)
 	version = strtemp
 	
 	If Not Eof(f) Then
-		magic% = ReadInt(f)
+		Local magic% = ReadInt(f)
 		If magic = SAVE_MOD_MAGIC Then
-			savedModCount% = ReadInt(f)
+			Local savedModCount% = ReadInt(f)
+			Local k%
 			For k = 1 To savedModCount
 				ReadString(f)
 				ReadString(f)
@@ -2128,15 +2130,16 @@ Function LoadSaveGames()
 		SaveGameModIDs$(i - 1) = ""
 		SaveGameModNames$(i - 1) = ""
 		If Not Eof(f) Then
-			magic% = ReadInt(f)
+			Local magic% = ReadInt(f)
 			If magic = SAVE_MOD_MAGIC Then
 				SaveGameHasModData(i - 1) = True
 				SaveGameModCount(i - 1) = ReadInt(f)
+				Local k%
 				For k = 1 To SaveGameModCount(i - 1)
 					Local smId$ = ReadString(f)
 					Local smName$ = ReadString(f)
 					SaveGameModIDs$(i - 1) = SaveGameModIDs$(i - 1) + smId + ";"
-					If SaveGameModNames$(i - 1) <> "" Then SaveGameModNames$(i - 1) = SaveGameModNames$(i - 1) + ", "
+					If k <> 1 Then SaveGameModNames$(i - 1) = SaveGameModNames$(i - 1) + ", "
 					SaveGameModNames$(i - 1) = SaveGameModNames$(i - 1) + smName
 				Next
 			Else
@@ -2179,7 +2182,7 @@ Function ComputeWarnModLists(saveIndex%)
 			firstCurrent = False
 			
 			If SaveGameHasModData(saveIndex) Then
-				If Instr(SaveGameModIDs$(saveIndex), idKey) = 0 Then
+				If Instr(";" + SaveGameModIDs$(saveIndex), ";" + idKey) = 0 Then
 					If Not firstSavedMissing Then WarnModExtraNames$ = WarnModExtraNames$ + ", "
 					WarnModExtraNames$ = WarnModExtraNames$ + mName
 					firstSavedMissing = False
@@ -2243,7 +2246,7 @@ Function CheckSaveModMatch%(saveIndex%)
 	
 	For m.Mods = Each Mods
 		If m\IsActive Then
-			If Instr(SaveGameModIDs$(saveIndex), m\Id + ";") = 0 Then
+			If Instr(";" + SaveGameModIDs$(saveIndex), ";" + m\Id + ";") = 0 Then
 				ComputeWarnModLists(saveIndex)
 				Return False
 			EndIf
