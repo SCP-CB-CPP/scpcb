@@ -11847,7 +11847,6 @@ Function Graphics3DExt%(width%,height%,depth%=32,mode%=2)
 	InitFastResize()
 	;InitExt()
 	AntiAlias GetOptionInt("graphics","antialias")
-	;TextureAnisotropy% (GetOptionInt("graphics","anisotropy"),-1)
 End Function
 
 Function ResizeImage2(image%, width%, height%)
@@ -12098,7 +12097,6 @@ Function InitFastResize()
 	ClsColor 0,0,0
 	Cls
 	SetBuffer(BackBuffer())
-	;TextureAnisotropy(fresize_texture)
 	EntityTexture spr, fresize_texture,0,0
 	EntityTexture spr, fresize_texture2,0,1
 	
