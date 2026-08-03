@@ -4252,8 +4252,16 @@ Function DrawEnding()
 							If a\IsSCP Then scpsEncountered = scpsEncountered + 1
 						EndIf
 					Next
+
+					Local tempB%=0
+					Select Lower(SelectedEnding)
+						Case "b1", "b2", "b3"
+							tempB = 1
+						Default
+							tempB = 0
+					End Select
 					
-					Text x, y, I_Loc\Menu_EndEnding+" " + Upper(SelectedEnding)
+					Text x, y, I_Loc\Menu_EndEnding+" " + Upper(Left(SelectedEnding, 1)) + (Int(Right(SelectedEnding, 1)) - tempB)
 					Text x, y+20*MenuScale, I_Loc\Menu_EndTime+" " + FormatDuration(PlayTime, SpeedRunMode)
 					Text x, y+40*MenuScale, GetSeedString()
 					Text x, y+60*MenuScale, I_Loc\Menu_EndScps+" " + scpsEncountered
