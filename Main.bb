@@ -11842,12 +11842,9 @@ Function GetMeshExtents(Mesh%)
 End Function
 
 Function Graphics3DExt%(width%,height%,depth%=32,mode%=2)
-	;If FE_InitExtFlag = 1 Then DeInitExt() ;prevent FastExt from breaking itself
 	Graphics3D width,height,depth,mode
 	InitFastResize()
-	;InitExt()
 	AntiAlias GetOptionInt("graphics","antialias")
-	;TextureAnisotropy% (GetOptionInt("graphics","anisotropy"),-1)
 End Function
 
 Function ResizeImage2(image%, width%, height%)
@@ -12098,7 +12095,6 @@ Function InitFastResize()
 	ClsColor 0,0,0
 	Cls
 	SetBuffer(BackBuffer())
-	;TextureAnisotropy(fresize_texture)
 	EntityTexture spr, fresize_texture,0,0
 	EntityTexture spr, fresize_texture2,0,1
 	
