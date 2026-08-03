@@ -9143,7 +9143,7 @@ Function UpdateEndings()
 										
 										If temp = 1 Then ;remote detonation on -> explode
 											ExplosionTimer = Max(ExplosionTimer, 0.1)
-											SelectedEnding = "B2"
+											SelectedEnding = "B1"
 										Else
 											;LoadEventSound(e,"SFX\Ending\GateB\AlphaWarheadsFail.ogg")
 											;e\SoundCHN = PlaySound_Strict(e\Sound)
@@ -9170,12 +9170,12 @@ Function UpdateEndings()
 											
 											e\EventState = 85.0*70
 											
-											SelectedEnding = "B3"
+											SelectedEnding = "B2"
 										EndIf
 										
 										;EndIf										
 									Else
-										If SelectedEnding = "B3" Then
+										If SelectedEnding = "B2" Then
 											e\room\NPC[0]\EnemyX = EntityX(e\room\Objects[11],True)+Sin(MilliSecs()/25.0)*3
 											e\room\NPC[0]\EnemyY = EntityY(e\room\Objects[11],True)+Cos(MilliSecs()/85.0)+9.0
 											e\room\NPC[0]\EnemyZ = EntityZ(e\room\Objects[11],True)+Cos(MilliSecs()/25.0)*3
