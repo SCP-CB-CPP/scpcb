@@ -1,3 +1,5 @@
+Include "StrictLoads.bb"
+
 Global MenuBack% = LoadImage_Strict("GFX\menu\back.jpg")
 Global MenuText% = LoadImage_Strict("GFX\menu\scptext.jpg")
 Global Menu173% = LoadImage_Strict("GFX\menu\173back.png")
@@ -862,12 +864,14 @@ Function UpdateMainMenu()
 								file$=NextFile(Dir)
 								If file$="" Then Exit
 								If FileType("SFX\Radio\UserTracks\"+file$) = 1 Then
-									test = LoadSound("SFX\Radio\UserTracks\"+file$)
-									If test<>0
-										UserTrackCheck = UserTrackCheck + 1
-										UserTrackCheck2 = UserTrackCheck2 + 1
-									EndIf
-									FreeSound test
+									For i=0 To SoundExtensionCount-1
+										If Lower(Right(file, 4)) = "." + SoundExtensions[i] Then
+											UserTrackCheck = UserTrackCheck + 1
+											test = LoadSound("SFX\Radio\UserTracks\"+file$)
+											If test<>0 Then UserTrackCheck2 = UserTrackCheck2 + 1
+											FreeSound test
+										EndIf
+									Next
 								EndIf
 							Forever
 							CloseDir Dir
