@@ -865,7 +865,7 @@ Function UpdateMainMenu()
 								If file$="" Then Exit
 								If FileType("SFX\Radio\UserTracks\"+file$) = 1 Then
 									For i=0 To SoundExtensionCount-1
-										If Lower(Right(file, 4)) = "." + SoundExtensions[i] Then
+										If Lower(Right(file, 3)) = SoundExtensions[i] Then
 											UserTrackCheck = UserTrackCheck + 1
 											test = LoadSound("SFX\Radio\UserTracks\"+file$)
 											If test<>0 Then UserTrackCheck2 = UserTrackCheck2 + 1
