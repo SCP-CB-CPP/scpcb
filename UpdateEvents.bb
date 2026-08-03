@@ -1,5 +1,4 @@
 Function UpdateEvents()
-	CatchErrors("Uncaught (UpdateEvents)")
 	Local dist#, i%, temp%, pvt%, strtemp$, j%, k%
 	
 	Local p.Particles, n.NPCs, r.Rooms, e.Events, e2.Events, it.Items, it2.Items, em.Emitters, sc.SecurityCams, sc2.SecurityCams
@@ -15,6 +14,12 @@ Function UpdateEvents()
 	UpdateRooms()
 	
 	For e.Events = Each Events
+		If e<>Null Then
+			CatchErrors(Chr(34)+e\EventName+Chr(34)+" event")
+		Else
+			CatchErrors("Deleted event")
+		EndIf
+
 		Select e\EventName
 			Case "exit1"
 				;[Block]
@@ -7787,8 +7792,6 @@ Function UpdateEvents()
 							EndIf
 							StopChannel e\SoundCHN
 							e\SoundCHN = 0
-							If e\Sound <> 0 Then FreeSound_Strict(e\Sound) : e\Sound = 0
-							e\Sound = LoadSound_Strict("SFX\Door\Airlock.ogg")
 							e\room\RoomDoors[0]\locked = False
 							e\room\RoomDoors[1]\locked = False
 							UseDoor(e\room\RoomDoors[0])
@@ -7855,7 +7858,11 @@ Function UpdateEvents()
 								Next
 								
 								FreeEntity pvt
-								If e\SoundCHN = 0 Then e\SoundCHN = PlaySound2(e\Sound,Camera,e\room\Objects[0],5)
+								If e\SoundCHN = 0 Then
+									If e\Sound <> 0 Then FreeSound_Strict(e\Sound) : e\Sound = 0
+									e\Sound = LoadSound_Strict("SFX\Door\Airlock.ogg")
+									e\SoundCHN = PlaySound2(e\Sound,Camera,e\room\Objects[0],5)
+								EndIf
 							EndIf
 						Else
 							e\EventState = 0.0
@@ -8497,12 +8504,6 @@ Function UpdateEvents()
 				EndIf
 				;[End Block]
 		End Select
-		
-		If e<>Null Then
-			CatchErrors(Chr(34)+e\EventName+Chr(34)+" event")
-		Else
-			CatchErrors("Deleted event")
-		EndIf
 	Next
 	
 	;This here is necessary because the 294 drinks with explosion effect didn't worked anymore - ENDSHN

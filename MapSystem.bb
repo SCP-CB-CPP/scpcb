@@ -7899,7 +7899,7 @@ Function load_terrain(hmap,yscale#=0.7,t1%,t2%,mask%)
 	If mask = 0 Then RuntimeErrorExt "load_terrain error: invalid texture mask"
 	
 	; fuck
-	Local maskZoom# = 1.4
+	Local maskZoom# = 2.0
 	
 	; offset to keep centered
 	Local maskW = TextureWidth(mask)
@@ -8516,10 +8516,10 @@ Function HideChunks()
 	For ch = Each Chunk
 		If (Not ch\IsSpawnChunk)
 			For i = 0 To ch\Amount
-				FreeEntity ch\obj[i]
+				If EntityExist(ch\obj[i]) Then FreeEntity ch\obj[i]
 			Next
-			FreeEntity ch\PlatForm
-			FreeEntity ch\ChunkPivot
+			If EntityExist(ch\PlatForm) Then FreeEntity ch\PlatForm
+			If EntityExist(ch\ChunkPivot) Then FreeEntity ch\ChunkPivot
 			Delete ch
 		EndIf
 	Next

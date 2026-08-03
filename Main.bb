@@ -147,8 +147,8 @@ Dim ArrowIMG(4)
 
 ;[Block]
 
-Global LauncherWidth%= Min(GetOptionInt("launcher", "launcher width"), 1024)
-Global LauncherHeight% = Min(GetOptionInt("launcher", "launcher height"), 768)
+Const LauncherWidth% = 640
+Const LauncherHeight% = 480
 Global LauncherEnabled% = GetOptionInt("launcher", "launcher enabled")
 
 Global GraphicWidth% = GetCLIInt("width", GetCLIInt("w", GetOptionInt("graphics", "width")))
@@ -261,7 +261,7 @@ End Function
 
 SetBuffer(BackBuffer())
 
-Global CurTime%, PrevTime%, LoopDelay%, FPSfactor#, FPSfactor2#, PrevFPSFactor#
+Global CurTime%, PrevTime%, LoopDelay%, AccumulatedLoopDelay#, FPSfactor#, FPSfactor2#, PrevFPSFactor#
 Local CheckFPS%, ElapsedLoops%, FPS%
 
 Global Framelimit% = GetOptionInt("graphics", "framelimit")
@@ -296,7 +296,7 @@ Function UpdateHUDOffsets()
 	EndIf
 End Function
 
-Const HIT_MAP% = 1, HIT_PLAYER% = 2, HIT_ITEM% = 3, HIT_APACHE% = 4, HIT_178% = 5, HIT_DEAD% = 6
+Const HIT_MAP% = 1, HIT_PLAYER% = 2, HIT_ITEM% = 3, HIT_APACHE% = 4, HIT_DEAD% = 6
 SeedRnd MilliSecs()
 
 ;[End block]
@@ -1900,7 +1900,6 @@ Music(10) = "106"
 Music(11) = "Menu"
 Music(12) = "8601Cancer"
 Music(13) = "Intro"
-Music(14) = "178"
 Music(15) = "PDTrench"
 Music(16) = "205"
 Music(17) = "GateA"
@@ -3043,8 +3042,6 @@ Collisions HIT_PLAYER, HIT_MAP, 2, 2
 Collisions HIT_PLAYER, HIT_PLAYER, 1, 3
 Collisions HIT_ITEM, HIT_MAP, 2, 2
 Collisions HIT_APACHE, HIT_APACHE, 1, 2
-Collisions HIT_178, HIT_MAP, 2, 2
-Collisions HIT_178, HIT_178, 1, 3
 Collisions HIT_DEAD, HIT_MAP, 2, 2
 
 DrawLoading(90, True)
@@ -3103,6 +3100,7 @@ FlushMouse()
 DrawLoading(100, True)
 
 LoopDelay = MilliSecs()
+AccumulatedLoopDelay = 0.0
 
 Global UpdateParticles_Time# = 0.0
 
@@ -3143,12 +3141,17 @@ While IsRunning
 	
 	CurTime = MilliSecs()
 	If Framelimit > 0 Then
-	    ;Framelimit
-		Local WaitingTime% = (1000.0 / Framelimit) - (MilliSecs() - LoopDelay)
-		Delay WaitingTime% - 1
-		
-		LoopDelay = MilliSecs()
-		CurTime = LoopDelay
+	    ; Capped to prevent lag spikes as a result of invalid values.
+		AccumulatedLoopDelay = Min(50, AccumulatedLoopDelay + 1000.0 / Framelimit - (CurTime - LoopDelay))
+		If AccumulatedLoopDelay > 0 Then
+			Delay AccumulatedLoopDelay
+			LoopDelay = MilliSecs()
+			AccumulatedLoopDelay = AccumulatedLoopDelay - (LoopDelay - CurTime)
+			CurTime = LoopDelay
+		Else
+			AccumulatedLoopDelay = 0
+			LoopDelay = CurTime
+		EndIf
 	EndIf
 
 	Local ElapsedTime% = CurTime - PrevTime
@@ -5625,10 +5628,6 @@ Function DrawGUI()
 						;BoH items
 					;Case "ring"
 					;	If Wearing714=2 Then Rect(x - 3, y - 3, width + 6, height + 6)
-					;Case "scp178"
-					;	If Wearing178=1 Then Rect(x - 3, y - 3, width + 6, height + 6)
-					;Case "glasses"
-					;	If Wearing178=2 Then Rect(x - 3, y - 3, width + 6, height + 6)
 					Case "nvgoggles"
 						If WearingNightVision=1 Then Rect(x - 3, y - 3, width + 6, height + 6)
 					Case "supernv"
@@ -9578,8 +9577,8 @@ Function PlaySound2%(SoundHandle%, cam%, entity%, range# = 10, volume# = 1.0, us
 		s\Range = range
 		s\Volume = volume
 		s\UseSFXVolume = useSFXVolume
-		UpdateFireAndForgetSounds(s)
 		soundchn = s\Chn
+		UpdateFireAndForgetSounds(s)
 	EndIf
 	
 	Return soundchn
@@ -10842,9 +10841,10 @@ Function Use294()
 
 					strtemp$ = GetINIString2(iniStr, loc, "dispensesound")
 					If strtemp="" Then
-						PlayerRoom\SoundCHN = PlaySound_Strict (LoadTempSound("SFX\SCP\294\dispense1.ogg"))
-					Else
 						PlayerRoom\SoundCHN = PlaySound_Strict (LoadTempSound(strtemp))
+					EndIf
+					If PlayerRoom\SoundCHN=0 Then
+						PlayerRoom\SoundCHN = PlaySound_Strict (LoadTempSound("SFX\SCP\294\dispense1.ogg"))
 					EndIf
 					
 					If GetINIInt2(iniStr, loc, "explosion")=True Then 
@@ -11840,21 +11840,6 @@ Function GetMeshExtents(Mesh%)
 	Mesh_MagZ = maxz-minz
 	
 End Function
-
-Function EntityScaleX#(entity%, globl% = False)
-	If globl Then TFormVector 1, 0, 0, entity, 0 Else TFormVector 1, 0, 0, entity, GetParent(entity)
-	Return Sqr(TFormedX() * TFormedX() + TFormedY() * TFormedY() + TFormedZ() * TFormedZ())
-End Function 
-
-Function EntityScaleY#(entity%, globl% = False)
-	If globl Then TFormVector 0, 1, 0, entity, 0 Else TFormVector 0, 1, 0, entity, GetParent(entity)
-	Return Sqr(TFormedX() * TFormedX() + TFormedY() * TFormedY() + TFormedZ() * TFormedZ())
-End Function 
-
-Function EntityScaleZ#(entity%, globl% = False)
-	If globl Then TFormVector 0, 0, 1, entity, 0 Else TFormVector 0, 0, 1, entity, GetParent(entity)
-	Return Sqr(TFormedX() * TFormedX() + TFormedY() * TFormedY() + TFormedZ() * TFormedZ())
-End Function 
 
 Function Graphics3DExt%(width%,height%,depth%=32,mode%=2)
 	;If FE_InitExtFlag = 1 Then DeInitExt() ;prevent FastExt from breaking itself
