@@ -4249,8 +4249,8 @@ Function DrawEnding()
 					Next
 
 					Local tempB%=0
-					Select Lower(SelectedEnding)
-						Case "b1", "b2", "b3"
+					Select Lower(Left(SelectedEnding, 1))
+						Case "b"
 							tempB = 1
 						Default
 							tempB = 0
