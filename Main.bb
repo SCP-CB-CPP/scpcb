@@ -4197,12 +4197,7 @@ Function DrawEnding()
 			EndIf
 			
 			If EndingTimer+FPSfactor2 > -450 And EndingTimer <= -450 Then
-				Select Lower(SelectedEnding)
-					Case "a1", "a2"
-						PlaySound_Strict LoadTempSound("SFX\Ending\GateA\Ending"+SelectedEnding+".ogg")
-					Case "b1", "b2", "b3"
-						PlaySound_Strict LoadTempSound("SFX\Ending\GateB\Ending"+SelectedEnding+".ogg")
-				End Select
+				PlaySound_Strict LoadTempSound("SFX\Ending\Gate"+Upper(Left(SelectedEnding, 1))+"\Ending"+Upper(SelectedEnding)+".ogg")
 			EndIf			
 			
 		Else
