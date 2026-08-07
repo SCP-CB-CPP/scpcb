@@ -5625,9 +5625,7 @@ Function DrawGUI()
 						If WearingVest=2 Then Rect(x - 3, y - 3, width + 6, height + 6)
 					Case "scp714"
 						If Wearing714=1 Then Rect(x - 3, y - 3, width + 6, height + 6)
-						;BoH items
-					;Case "ring"
-					;	If Wearing714=2 Then Rect(x - 3, y - 3, width + 6, height + 6)
+				;BoH items
 					Case "nvgoggles"
 						If WearingNightVision=1 Then Rect(x - 3, y - 3, width + 6, height + 6)
 					Case "supernv"
