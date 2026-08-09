@@ -5296,8 +5296,8 @@ Function FillRoom(r.Rooms)
 			Local scale# = RoomScale * 4.5 * 0.4
 			Local screen%
 			
-			r\Textures[0] = LoadAnimTexture_Strict("GFX\SL_monitors_checkpoint.jpg",1,4,1,0,4)
-			r\Textures[1] = LoadAnimTexture_Strict("GFX\Sl_monitors.jpg",1,8,1,0,8)
+			r\Textures[0] = LoadAnimTexture("GFX\SL_monitors_checkpoint.jpg",1,512,512,0,4)
+			r\Textures[1] = LoadAnimTexture("GFX\Sl_monitors.jpg",1,256,256,0,8)
 			
 			;Monitor Objects
 			For i = 0 To 14
