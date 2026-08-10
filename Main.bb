@@ -7000,7 +7000,7 @@ Function DrawGUI()
 							PlayerX% = Floor((EntityX(PlayerRoom\obj)+8) / 8.0 + 0.5)
 							PlayerZ% = Floor((EntityZ(PlayerRoom\obj)+8) / 8.0 + 0.5)
 							
-							SetBuffer ImageBuffer(NavBG)
+							SetBuffer TextureBuffer(NavBG)
 							Local xx = x-ImageWidth(SelectedItem\itemtemplate\img)/2
 							Local yy = y-ImageHeight(SelectedItem\itemtemplate\img)/2+85*HUDScale
 							DrawImage(SelectedItem\itemtemplate\img, xx, yy)
@@ -7054,7 +7054,7 @@ Function DrawGUI()
 							Next
 							
 							SetBuffer BackBuffer()
-							DrawImageRectStretch NavBG,xx,yy,screenWidth,230*HUDScale,xx,yy,screenWidth,230*HUDScale
+							DrawBufferRect TextureBuffer(NavBG),xx,yy,screenWidth,230*HUDScale,xx,yy,screenWidth,230*HUDScale
 							Color 30,30,30
 							If SelectedItem\itemtemplate\name = "snav" Then Color(100, 0, 0)
 							Rect xx,yy,screenWidth,230*HUDScale,False
@@ -8868,7 +8868,7 @@ Function LoadEntities()
 	
 	SetChunkDataValues()
 	
-	NavBG = CreateImageFlag(GraphicWidth,GraphicHeight, 1, 65537)
+	NavBG = CreateTexture(GraphicWidth,GraphicHeight, 1 + 1024)
 
 	;NPCtypeD - different models with different textures (loaded using "CopyEntity") - ENDSHN
 	;[Block]
