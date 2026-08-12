@@ -33,6 +33,7 @@ Global MainMenuTab%
 Global IntroEnabled% = GetOptionInt("general", "intro enabled")
 
 Global CompletableCheck% = GetOptionInt("general", "beatable check")
+Global PerfectRNG% = GetOptionInt("general", "perfect rng")
 
 Global SelectedInputBox%
 
@@ -152,11 +153,8 @@ Function UpdateMainMenu()
 
 		If DrawButton(x, y, width, height, "NEW GAME") Then
 			HasNumericSeed = UseNumericSeeds
-			If HasNumericSeed Then
-				RandomSeedNumeric = 0
-			Else
-				RandomSeed = ""
-			EndIf
+			RandomSeedNumeric = 0
+			RandomSeed = ""
 			
 			MainMenuTab = 1
 		EndIf
@@ -196,6 +194,7 @@ Function UpdateMainMenu()
 				Case 1
 					PutINIValue(OptionFile, "general", "intro enabled", IntroEnabled%)
 					PutINIValue(OptionFile, "general", "beatable check", CompletableCheck%)
+					PutINIValue(OptionFile, "general", "perfect rng", PerfectRNG%)
 					PutINIValue(OptionFile, "general", "numeric seeds", UseNumericSeeds%)
 					MainMenuTab = 0
 				Case 2
@@ -234,7 +233,7 @@ Function UpdateMainMenu()
 				x = 160 * MenuScale
 				y = y + height + 20 * MenuScale
 				width = 580 * MenuScale
-				height = 330 * MenuScale
+				height = 360 * MenuScale
 				
 				DrawFrame(x, y, width, height)				
 				
@@ -271,7 +270,11 @@ Function UpdateMainMenu()
 					EndIf
 					Local toggleButtonText$
 					If UseNumericSeeds Then toggleButtonText = "Numeric" Else toggleButtonText = "Textual"
-					If DrawButton(x+360*MenuScale, y+55*MenuScale, 100*MenuScale, 30*MenuScale, toggleButtonText, False) Then UseNumericSeeds = Not UseNumericSeeds
+					If DrawButton(x+360*MenuScale, y+55*MenuScale, 100*MenuScale, 30*MenuScale, toggleButtonText, False) Then
+						UseNumericSeeds = Not UseNumericSeeds
+						RandomSeed = ""
+						RandomSeedNumeric = 0
+					EndIf
 				Else
 					Text (x + 20 * MenuScale, y + 60 * MenuScale, "Selected map:")
 					Color (255, 255, 255)
@@ -291,12 +294,28 @@ Function UpdateMainMenu()
 					EndIf
 				EndIf	
 				
+				Local tx# = x+width
+				Local ty# = y
+				Local tw# = 400*MenuScale
+				Local th# = 300*MenuScale
+
 				Text(x + 20 * MenuScale, y + 110 * MenuScale, "Enable intro sequence:")
 				IntroEnabled = DrawTick(x + 280 * MenuScale, y + 110 * MenuScale, IntroEnabled)	
 
 				Text(x + 345 * MenuScale, y + 110 * MenuScale, "Check 100%-able:")
 				CompletableCheck = DrawTick(x + 535 * MenuScale, y + 110 * MenuScale, CompletableCheck)
+				If MouseOn(x+535*MenuScale,y+110*MenuScale,20*MenuScale,20*MenuScale) And OnSliderID=0
+					DrawOptionsTooltip(tx,ty,tw,th,"100able")
+				EndIf
+
+				Text(x + 345 * MenuScale, y + 140 * MenuScale, "Perfect RNG:")
+				PerfectRNG = DrawTick(x + 535 * MenuScale, y + 140 * MenuScale, PerfectRNG)
+				If MouseOn(x+535*MenuScale,y+140*MenuScale,20*MenuScale,20*MenuScale) And OnSliderID=0
+					DrawOptionsTooltip(tx,ty,tw,th,"perfectrng")
+				EndIf
 				
+				y = y + 30 * MenuScale
+
 				;Local modeName$, modeDescription$, selectedDescription$
 				Text (x + 20 * MenuScale, y + 150 * MenuScale, "Difficulty:")				
 				For i = SAFE To CUSTOM
@@ -395,6 +414,7 @@ Function UpdateMainMenu()
 					
 					PutINIValue(OptionFile, "general", "intro enabled", IntroEnabled%)
 					PutINIValue(OptionFile, "general", "beatable check", CompletableCheck%)
+					PutINIValue(OptionFile, "general", "perfect rng", PerfectRNG%)
 					PutINIValue(OptionFile, "general", "numeric seeds", UseNumericSeeds%)
 					
 				EndIf
@@ -583,10 +603,10 @@ Function UpdateMainMenu()
 					UserTrackCheck2% = 0
 				EndIf
 				
-				Local tx# = x+width
-				Local ty# = y
-				Local tw# = 400*MenuScale
-				Local th# = 150*MenuScale
+				tx# = x+width
+				ty# = y
+				tw# = 400*MenuScale
+				th# = 150*MenuScale
 				
 				;DrawOptionsTooltip(tx,ty,tw,th,"")
 				
@@ -2101,6 +2121,14 @@ Function DrawOptionsTooltip(x%,y%,width%,height%,option$,value#=0,ingame%=False)
 			txt = txt + " When no seed is entered, the elapsed millseconds since the computer started is used."
 		Case "keepduplicatesaves"
 			txt = "Allows configuring the number of saves of the same name that are kept at one time. If this number is exceeded, the last save will be overwritten upon creating a new save with the same name."
+		Case "100able"
+			txt = Chr(34) + "Check 100%-able" + Chr(34) + " is used to change the pre-game check that determines whether a specific seed is beatable to instead check whether every achievement can be attained on that seed. "
+			txt = txt + "This includes checking for the existence of all rooms that are tied to achievements."
+		Case "perfectrng"
+			txt = Chr(34) + "Perfect RNG" + Chr(34) + " is used to force perfect results from specific speedrunning-relevant events that otherwise rely on random chance. "
+			txt = txt + "Guarantees receiving a Key Card Omni from SCP-914 when refining any key card on Very Fine, "
+			txt = txt + "being transported to SCP-106's pocket dimension when using the Strange Bottle, "
+			txt = txt + "and directly exiting the pocket dimension via the tunnel room."
 		Case "achpopup"
 			txt = "Displays a pop-up notification when an achievement is unlocked."
 		Case "launcher"

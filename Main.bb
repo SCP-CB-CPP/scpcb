@@ -5858,7 +5858,9 @@ Function DrawGUI()
 				Case "veryfinefirstaid"
 					;[Block]
 					If CanUseItem(False, False, True)
-						Select Rand(5)
+						Local picked% = Rand(5)
+						If PerfectRNG Then picked = 5
+						Select picked
 							Case 1
 								Injuries = 3.5
 								Msg = "You started bleeding heavily."
@@ -7357,13 +7359,17 @@ Function DrawTimer()
 	Local y% = 24
 	Color 0, 0, 0
 	Text(x + 3 * MenuScale, y + 3 * MenuScale, durText)
+	Local blueComponent% = 255
 	If UsedConsole Then
-		Color 150, 150, 150
+		blueComponent = 150
 	Else If PreMadeSaveLoaded Then
-		Color 175, 175, 175
-	Else
-		Color 255, 255, 255
+		blueComponent = 175
 	EndIf
+	Local otherComponents% = blueComponent
+	If PerfectRNG Then
+		otherComponents = otherComponents / 3
+	EndIf
+	Color otherComponents, otherComponents, blueComponent
 	Text(x, y, durText)
 	SetFont(Font1)
 End Function
@@ -9907,19 +9913,19 @@ Function Use914(item.Items, setting$, x#, y#, z#)
 							
 							Select SelectedDifficulty\otherFactors
 								Case EASY
-									If GuaranteedOmni Lor Rand(0,((MAXACHIEVEMENTS-1)*3)-((CurrAchvAmount-1)*3))=0
+									If GuaranteedOmni Lor PerfectRNG Lor Rand(0,((MAXACHIEVEMENTS-1)*3)-((CurrAchvAmount-1)*3))=0
 										it2 = CreateItem("Key Card Omni", "key6", x, y, z)
 									Else
 										it2 = CreateItem("Mastercard", "misc", x, y, z)
 									EndIf
 								Case NORMAL
-									If GuaranteedOmni Lor Rand(0,((MAXACHIEVEMENTS-1)*4)-((CurrAchvAmount-1)*3))=0
+									If GuaranteedOmni Lor PerfectRNG Lor Rand(0,((MAXACHIEVEMENTS-1)*4)-((CurrAchvAmount-1)*3))=0
 										it2 = CreateItem("Key Card Omni", "key6", x, y, z)
 									Else
 										it2 = CreateItem("Mastercard", "misc", x, y, z)
 									EndIf
 								Case HARD
-									If GuaranteedOmni Lor Rand(0,((MAXACHIEVEMENTS-1)*5)-((CurrAchvAmount-1)*3))=0
+									If GuaranteedOmni Lor PerfectRNG Lor Rand(0,((MAXACHIEVEMENTS-1)*5)-((CurrAchvAmount-1)*3))=0
 										it2 = CreateItem("Key Card Omni", "key6", x, y, z)
 									Else
 										it2 = CreateItem("Mastercard", "misc", x, y, z)
@@ -9938,19 +9944,19 @@ Function Use914(item.Items, setting$, x#, y#, z#)
 					
 					Select SelectedDifficulty\otherFactors
 						Case EASY
-							If GuaranteedOmni Lor Rand(0,((MAXACHIEVEMENTS-1)*3)-((CurrAchvAmount-1)*3))=0
+							If GuaranteedOmni Lor PerfectRNG Lor Rand(0,((MAXACHIEVEMENTS-1)*3)-((CurrAchvAmount-1)*3))=0
 								it2 = CreateItem("Key Card Omni", "key6", x, y, z)
 							Else
 								it2 = CreateItem("Mastercard", "misc", x, y, z)
 							EndIf
 						Case NORMAL
-							If GuaranteedOmni Lor Rand(0,((MAXACHIEVEMENTS-1)*4)-((CurrAchvAmount-1)*3))=0
+							If GuaranteedOmni Lor PerfectRNG Lor Rand(0,((MAXACHIEVEMENTS-1)*4)-((CurrAchvAmount-1)*3))=0
 								it2 = CreateItem("Key Card Omni", "key6", x, y, z)
 							Else
 								it2 = CreateItem("Mastercard", "misc", x, y, z)
 							EndIf
 						Case HARD
-							If GuaranteedOmni Lor Rand(0,((MAXACHIEVEMENTS-1)*5)-((CurrAchvAmount-1)*3))=0
+							If GuaranteedOmni Lor PerfectRNG Lor Rand(0,((MAXACHIEVEMENTS-1)*5)-((CurrAchvAmount-1)*3))=0
 								it2 = CreateItem("Key Card Omni", "key6", x, y, z)
 							Else
 								it2 = CreateItem("Mastercard", "misc", x, y, z)

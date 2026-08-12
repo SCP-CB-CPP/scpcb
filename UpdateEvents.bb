@@ -2380,7 +2380,9 @@ Function UpdateEvents()
 						If dist > 1700*RoomScale Then
 							BlinkTimer = -10
 							
-							Select Rand(25)
+							Local picked% = Rand(25)
+							If PerfectRNG Then picked = 16
+							Select picked
 								Case 1,2,3,4
 									PlaySound_Strict(OldManSFX(3))
 									
