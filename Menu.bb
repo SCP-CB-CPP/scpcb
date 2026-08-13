@@ -268,9 +268,8 @@ Function UpdateMainMenu()
 				Case 3,5,6,7 ;save the options
 					SaveOptionsINI()
 					
-					UserTrackCheck% = 0
+					UserTrackCheck% = -1
 					UserTrackCheck2% = 0
-					UserTrackCheckDone% = False
 					
 					AntiAlias Opt_AntiAlias
 					UpdateHUDOffsets()
@@ -651,9 +650,8 @@ Function UpdateMainMenu()
 				y = y + 70 * MenuScale
 				
 				If MainMenuTab <> 5
-					UserTrackCheck% = 0
+					UserTrackCheck% = -1
 					UserTrackCheck2% = 0
-					UserTrackCheckDone% = False
 				EndIf
 				
 				Local tx# = x+width
@@ -764,7 +762,7 @@ Function UpdateMainMenu()
 					height = 225 * MenuScale
 					If HasDubbedAudio Then height = height + 50*MenuScale
 					If EnableUserTracks Then height = height + 65*MenuScale
-					If UserTrackCheckDone% Then height = height + 25*MenuScale
+					If UserTrackCheck >= 0 Then height = height + 25*MenuScale
 					DrawFrame(x, y, width, height)
 					
 					y = y + 20*MenuScale
@@ -876,19 +874,17 @@ Function UpdateMainMenu()
 							Forever
 							CloseDir Dir
 
-							UserTrackCheckDone% = True
 							DebugLog "User Tracks Check Ended"
 						EndIf
 						If MouseOn(x+20*MenuScale,y+30*MenuScale,190*MenuScale,25*MenuScale) And OnSliderID=0
 							DrawOptionsTooltip(tx,ty,tw,th,"usertrackscan")
 						EndIf
-						If UserTrackCheckDone%
+						If UserTrackCheck >= 0
 							Text x + 20 * MenuScale, y + 70 * MenuScale, Format(I_Loc\OptionName_UsertrackscanFound, UserTrackCheck2, UserTrackCheck)
 						EndIf
 					Else
-						UserTrackCheck% = 0
+						UserTrackCheck% = -1
 						UserTrackCheck2% = 0
-						UserTrackCheckDone% = False
 					EndIf
 					;[End Block]
 				ElseIf MainMenuTab = 6 ;Controls
