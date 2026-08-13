@@ -3925,7 +3925,7 @@ Function DrawEnding()
 	Local itt.ItemTemplates, r.Rooms
 	
 	Select Lower(SelectedEnding)
-		Case "b2", "a1"
+		Case "b1", "a1"
 			ClsColor Max(255+(EndingTimer)*2.8,0), Max(255+(EndingTimer)*2.8,0), Max(255+(EndingTimer)*2.8,0)
 		Default
 			ClsColor 0,0,0
@@ -3975,8 +3975,10 @@ Function DrawEnding()
 				Select Lower(SelectedEnding)
 					Case "a1", "a2"
 						PlaySound_Strict LoadTempSound("SFX\Ending\GateA\Ending"+SelectedEnding+".ogg")
-					Case "b1", "b2", "b3"
-						PlaySound_Strict LoadTempSound("SFX\Ending\GateB\Ending"+SelectedEnding+".ogg")
+					Case "b1", "b2"
+						PlaySound_Strict LoadTempSound("SFX\Ending\GateB\EndingB"+Str(Int(Right(SelectedEnding,1))+1)+".ogg")
+					Case "b3"
+						PlaySound_Strict LoadTempSound("SFX\Ending\GateB\EndingB1.ogg")
 				End Select
 			EndIf			
 			
