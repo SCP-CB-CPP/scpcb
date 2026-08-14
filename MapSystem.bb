@@ -114,14 +114,6 @@ Function AddTextureToCache(texture%)
 	If tc\Diff=0 Then tc\Diff=texture
 End Function
 
-Function ClearTextureCache()
-	For tc.Materials=Each Materials
-		If tc\Diff<>0 Then FreeTexture tc\Diff
-		If tc\Bump<>0 Then FreeTexture tc\Bump
-		Delete tc
-	Next
-End Function
-
 Function FreeTextureCache()
 	For tc.Materials=Each Materials
 		If tc\Diff<>0 Then FreeTexture tc\Diff

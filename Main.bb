@@ -8902,8 +8902,6 @@ Function NullGame(playbuttonsfx%=True)
 	
 	FreeParticles()
 	
-	ClearTextureCache
-	
 	If Not SpeedRunMode Then PlayTime = 0
 
 	DebugHUD = False
