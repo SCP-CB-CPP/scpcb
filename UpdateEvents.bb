@@ -72,36 +72,38 @@ Function UpdateEvents()
 						CameraFogRange(Camera, CameraFogNear, CameraFogFar)
 						CameraFogMode(Camera, 1)
 
+						Local isBeatable% = True
 						Local hadEC% = False
 						Local had079% = False
+						Local hadExit% = False
 						Local hadToilets% = False
-						Local requiredRoomCount% = 22
+						Local requiredRoomCount% = 21
 						For r.Rooms = Each Rooms
 							Select r\RoomTemplate\Name
+								Case "exit1", "gateaentrance" hadExit = True
 								Case "room2ccont" hadEC = True : requiredRoomCount = requiredRoomCount - 1
+								Case "008"
+									; 008 may spawn in the EZ, making the game unbeatable.
+									If r\zone = 3 Then isBeatable = False
+									requiredRoomCount = requiredRoomCount - 1
 								Case "room079" had079 = True : requiredRoomCount = requiredRoomCount - 1
-								Case "room2toilets"
-									; There may exist multiple instances of this room.
-									If Not hadToilets Then
-										hadToilets = True
-										requiredRoomCount = requiredRoomCount - 1
-									EndIf
-								Case "008", "room012", "room035", "room2sl", "room205" requiredRoomCount = requiredRoomCount - 1
+								Case "room2toilets" hadToilets = True
+								Case "room012", "room035", "room2sl", "room205" requiredRoomCount = requiredRoomCount - 1
 								Case "room2cafeteria", "roompj", "room2sroom", "room513", "room2scps", "coffin" requiredRoomCount = requiredRoomCount - 1
 								Case "914", "room3storage", "room966", "room2storage", "room1123", "room2poffices" requiredRoomCount = requiredRoomCount - 1
 								Case "room1162", "room2scps2" requiredRoomCount = requiredRoomCount - 1
 							End Select
-							If requiredRoomCount = 0 Then Exit
 						Next
 
+						isBeatable = isBeatable And hadExit And hadEC And had079
 						If CompletableCheck Then
-							If requiredRoomCount = 0 Then
+							If isBeatable And hadToilets And requiredRoomCount = 0 Then
 								Msg = "This seed is 100%-completable."
 							Else
 								Msg = "This seed is not 100%-completable."
 							EndIf
 						Else
-							If hadEC And had079 Then
+							If isBeatable Then
 								Msg = "This seed is beatable."
 							Else
 								Msg = "This seed is not beatable."
