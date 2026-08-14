@@ -72,19 +72,21 @@ Function UpdateEvents()
 						CameraFogRange(Camera, CameraFogNear, CameraFogFar)
 						CameraFogMode(Camera, 1)
 
-						Local isBeatable% = False
+						Local hadEC% = False
+						Local had079% = False
 						Local hadToilets% = False
 						Local requiredRoomCount% = 22
 						For r.Rooms = Each Rooms
 							Select r\RoomTemplate\Name
-								Case "room2ccont" isBeatable = True : requiredRoomCount = requiredRoomCount - 1
+								Case "room2ccont" hadEC = True : requiredRoomCount = requiredRoomCount - 1
+								Case "room079" had079 = True : requiredRoomCount = requiredRoomCount - 1
 								Case "room2toilets"
 									; There may exist multiple instances of this room.
 									If Not hadToilets Then
 										hadToilets = True
 										requiredRoomCount = requiredRoomCount - 1
 									EndIf
-								Case "008", "room012", "room035", "room2sl", "room079", "room205" requiredRoomCount = requiredRoomCount - 1
+								Case "008", "room012", "room035", "room2sl", "room205" requiredRoomCount = requiredRoomCount - 1
 								Case "room2cafeteria", "roompj", "room2sroom", "room513", "room2scps", "coffin" requiredRoomCount = requiredRoomCount - 1
 								Case "914", "room3storage", "room966", "room2storage", "room1123", "room2poffices" requiredRoomCount = requiredRoomCount - 1
 								Case "room1162", "room2scps2" requiredRoomCount = requiredRoomCount - 1
@@ -99,7 +101,7 @@ Function UpdateEvents()
 								Msg = "This seed is not 100%-completable."
 							EndIf
 						Else
-							If isBeatable Then
+							If hadEC And had079 Then
 								Msg = "This seed is beatable."
 							Else
 								Msg = "This seed is not beatable."
