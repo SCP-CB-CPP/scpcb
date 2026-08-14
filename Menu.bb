@@ -264,7 +264,7 @@ Function UpdateMainMenu()
 				Case 3,5,6,7 ;save the options
 					SaveOptionsINI()
 					
-					UserTrackCheck% = 0
+					UserTrackCheck% = -1
 					UserTrackCheck2% = 0
 					
 					UpdateHUDOffsets()
@@ -425,6 +425,7 @@ Function UpdateMainMenu()
 				
 				If DrawButton(x + 420 * MenuScale, y + height + 10 * MenuScale, 160 * MenuScale, 70 * MenuScale, I_Loc\NewGame_Start, False) Then
 					StartNewGame()
+					Return
 				EndIf
 				
 				;[End Block]
@@ -609,7 +610,7 @@ Function UpdateMainMenu()
 				y = y + 70 * MenuScale
 				
 				If MainMenuTab <> 5
-					UserTrackCheck% = 0
+					UserTrackCheck% = -1
 					UserTrackCheck2% = 0
 				EndIf
 				
@@ -724,7 +725,7 @@ Function UpdateMainMenu()
 					height = 225 * MenuScale
 					If HasDubbedAudio Then height = height + 50*MenuScale
 					If EnableUserTracks Then height = height + 65*MenuScale
-					If UserTrackCheck>0 Then height = height + 25*MenuScale
+					If UserTrackCheck >= 0 Then height = height + 25*MenuScale
 					DrawFrame(x, y, width, height)
 					
 					y = y + 20*MenuScale
@@ -824,12 +825,15 @@ Function UpdateMainMenu()
 								file$=NextFile(Dir)
 								If file$="" Then Exit
 								If FileType("SFX\Radio\UserTracks\"+file$) = 1 Then
-									UserTrackCheck = UserTrackCheck + 1
-									test = LoadSound("SFX\Radio\UserTracks\"+file$)
-									If test<>0
-										UserTrackCheck2 = UserTrackCheck2 + 1
-									EndIf
-									FreeSound test
+									Local ext$ = File_GetExtension(file$)
+									For i=1 To SoundExtensionCount
+										If ext = SoundExtensions[i-1] Then
+											UserTrackCheck = UserTrackCheck + 1
+											test = LoadSound("SFX\Radio\UserTracks\"+file$)
+											If test<>0 Then UserTrackCheck2 = UserTrackCheck2 + 1
+											FreeSound test
+										EndIf
+									Next
 								EndIf
 							Forever
 							CloseDir Dir
@@ -839,11 +843,11 @@ Function UpdateMainMenu()
 						If MouseOn(x+20*MenuScale,y+30*MenuScale,190*MenuScale,25*MenuScale) And OnSliderID=0
 							DrawOptionsTooltip(tx,ty,tw,th,"usertrackscan")
 						EndIf
-						If UserTrackCheck%>0
+						If UserTrackCheck >= 0
 							Text x + 20 * MenuScale, y + 70 * MenuScale, Format(I_Loc\OptionName_UsertrackscanFound, UserTrackCheck2, UserTrackCheck)
 						EndIf
 					Else
-						UserTrackCheck%=0
+						UserTrackCheck% = -1
 					EndIf
 					;[End Block]
 				ElseIf MainMenuTab = 6 ;Controls

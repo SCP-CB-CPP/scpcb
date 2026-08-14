@@ -6661,8 +6661,8 @@ Function UpdateSecurityCams()
 										VomitTimer = 1
 									EndIf
 								ElseIf Sanity < - 500
-									If Rand(7) = 1 Then EntityTexture(sc\ScrOverlay, MonitorTexture)
-									If Rand(50) = 1 Then
+									If Rand(7/FPSfactor) = 1 Then EntityTexture(sc\ScrOverlay, MonitorTexture)
+									If Rand(50/FPSfactor) = 1 Then
 										EntityTexture(sc\ScrOverlay, GorePics(Rand(0, 5)))
 										If sc\PlayerState = 0 Then PlaySound_Strict(HorrorSFX(0))
 										sc\PlayerState = Max(sc\PlayerState, 1)
@@ -6686,7 +6686,7 @@ Function UpdateSecurityCams()
 							sc\PlayerState = Rand(60000, 65000)
 						EndIf
 						
-						If Rand(500) = 1 Then
+						If Rand(500/FPSfactor) = 1 Then
 							EntityTexture(sc\ScrOverlay, OldAiPics(0))
 						End If
 						
@@ -8149,7 +8149,7 @@ Function UpdateRoomLights(cam%)
 							If r\LightCone[i]<>0 Then
 								ScaleEntity r\LightCone[i],0.005+Max(((-0.4+random#)*0.025),0),0.005+Max(((-0.4+random#)*0.025),0),0.005+Max(((-0.4+random#)*0.025),0)
 								If r\LightFlicker%[i]>4 Then
-									If Rand(400)=1 Then
+									If Rand(400/FPSfactor)=1 Then
 										SetEmitter(r\LightSpritesPivot[i],ParticleEffect[0])
 										PlaySound2(IntroSFX(Rand(10,12)),cam,r\LightSpritesPivot[i])
 										ShowEntity r\LightConeSpark[i]
@@ -8578,10 +8578,10 @@ Function HideChunks()
 	For ch = Each Chunk
 		If (Not ch\IsSpawnChunk)
 			For i = 0 To ch\Amount
-				FreeEntity ch\obj[i]
+				If EntityExist(ch\obj[i]) Then FreeEntity ch\obj[i]
 			Next
-			FreeEntity ch\PlatForm
-			FreeEntity ch\ChunkPivot
+			If EntityExist(ch\PlatForm) Then FreeEntity ch\PlatForm
+			If EntityExist(ch\ChunkPivot) Then FreeEntity ch\ChunkPivot
 			Delete ch
 		EndIf
 	Next

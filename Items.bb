@@ -773,10 +773,10 @@ Function Update294()
 		
 ;		If (MilliSecs() Mod 1000) < Rand(1200) Then 
 		
-		If Rand(50) = 50 And (MilliSecs() Mod 4000) < 200 Then PlaySound_Strict(CoughSFX(Rand(0,2)))
+		If Rand(50/FPSfactor) = 1 And (MilliSecs() Mod 4000) < 200 Then PlaySound_Strict(CoughSFX(Rand(0,2)))
 		
 		;Regurgitate when timer is below 10 seconds. (ew)
-		If VomitTimer < 10 And Rnd(0, 500 * VomitTimer) < 2 Then
+		If VomitTimer < 10 And Rnd(0, 500 * VomitTimer / FPSfactor) < 2 Then
 			If (Not ChannelPlaying(VomitCHN)) And (Not Regurgitate) Then
 				VomitCHN = PlaySound_Strict(LoadTempSound("SFX\SCP\294\Retch" + Rand(1, 2) + ".ogg"))
 				Regurgitate = MilliSecs() + 50

@@ -144,7 +144,7 @@ Function UpdateEmitters()
 		EndIf
 		
 		If KillTimer => 0 Then 
-			If Rand(150) = 1 Then
+			If Rand(150/FPSfactor) = 1 Then
 				If CoughCHN = 0 Then
 					CoughCHN = PlaySound_Strict(CoughSFX(Rand(0, 2)))
 				Else
@@ -259,7 +259,7 @@ Function UpdateDevilEmitters()
 		EndIf
 		
 		If KillTimer => 0 Then 
-			If Rand(150) = 1 Then
+			If Rand(150/FPSfactor) = 1 Then
 				If CoughCHN = 0 Then
 					CoughCHN = PlaySound_Strict(CoughSFX(Rand(0, 2)))
 				Else
