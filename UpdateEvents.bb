@@ -291,7 +291,7 @@ Function UpdateEvents()
 						RotateEntity e\room\Objects[1], -Max(e\EventState-2040,0)/135, 0, -Max(e\EventState-2040,0)/43, True
 						
 						If EntityDistance(e\room\Objects[0],Collider)<2.5 Then
-							If Rand(300)=2 Then PlaySound2(DecaySFX(Rand(1,3)),Camera,e\room\Objects[0], 3.0)
+							If Rand(300/FPSfactor)=1 Then PlaySound2(DecaySFX(Rand(1,3)),Camera,e\room\Objects[0], 3.0)
 						EndIf
 					EndIf
 					
@@ -1711,8 +1711,8 @@ Function UpdateEvents()
 									VomitTimer = 1
 								EndIf
 							ElseIf Sanity < - 500 Then
-								If Rand(7) = 1 Then EntityTexture(NVOverlay, NVTexture)
-								If Rand(50) = 1 Then
+								If Rand(7/FPSfactor) = 1 Then EntityTexture(NVOverlay, NVTexture)
+								If Rand(50/FPSfactor) = 1 Then
 									EntityTexture(NVOverlay, GorePics(Rand(0, 5)))
 									For i% = 0 To MaxItemAmount - 1
 										If (Inventory(i) <> Null) Then
@@ -2013,7 +2013,7 @@ Function UpdateEvents()
 							RotateEntity Curr106\obj, 0, EntityYaw(Curr106\Collider), 0
 							
 							If e\EventState > 65*70 Then
-								If Rand(800)=1 Then	
+								If Rand(800/FPSfactor)=1 Then	
 									PlaySound_Strict HorrorSFX(8)
 									Curr106\State = -0.1
 									Curr106\Idle = False
@@ -2429,7 +2429,7 @@ Function UpdateEvents()
 						CameraClsColor Camera, 38*0.5, 55*0.5, 47*0.5
 						
 						If ParticleAmount > 0
-							If Rand(800)=1 Then 
+							If Rand(800/FPSfactor)=1 Then 
 								angle = EntityYaw(Camera,True)+Rnd(150,210)
 								p.Particles = CreateParticle(EntityX(Collider)+Cos(angle)*7.5, 0.0, EntityZ(Collider)+Sin(angle)*7.5, 3, 4.0, 0.0, 2500)
 								EntityBlend(p\obj, 2)
@@ -2458,7 +2458,7 @@ Function UpdateEvents()
 							PositionEntity(Curr106\obj, EntityX(Curr106\Collider), EntityY(Curr106\Collider) - 0.15, EntityZ(Curr106\Collider))
 							RotateEntity Curr106\obj, 0, EntityYaw(Curr106\Collider), 0
 							
-							If Rand(750)=1 And e\EventState2 > 12 Then
+							If Rand(750/FPSfactor)=1 And e\EventState2 > 12 Then
 								BlinkTimer = -10
 								e\EventState2 = e\EventState2-1
 								PlaySound_Strict HorrorSFX(8)
@@ -2698,7 +2698,7 @@ Function UpdateEvents()
 					EndIf
 				Else
 					If e\EventState = 1 Then
-						If e\room\dist<5.0 Or Rand(700)=1 Then 
+						If e\room\dist<5.0 Or Rand(700/FPSfactor)=1 Then 
 							e\EventState = 2
 							
 							e\room\NPC[0]\State = 5
@@ -3028,7 +3028,7 @@ Function UpdateEvents()
 					ElseIf e\EventStr <> "" And e\EventStr <> "step1" And e\EventStr <> "done"
 						If Float(e\EventStr) < 70*10 Then
 							If ParticleAmount > 0 Then
-								If Rand(20-(10*(ParticleAmount-1)))=1 Then
+								If Rand((20-(10*(ParticleAmount-1)))/FPSfactor)=1 Then
 									;p.Particles = CreateParticle(EntityX(e\room\NPC[0]\Collider),EntityY(e\room\NPC[0]\obj)+0.05,EntityZ(e\room\NPC[0]\Collider),6,0.05,0,60)
 									p.Particles = CreateParticle(EntityX(e\room\NPC[0]\Collider),EntityY(e\room\NPC[0]\obj)+0.05,EntityZ(e\room\NPC[0]\Collider),0,0.05,0,60)
 									p\speed = 0.002
@@ -4031,7 +4031,7 @@ Function UpdateEvents()
 					Else
 						If EntityInView(e\room\Objects[2],Camera)=False Then
 							e\EventState = e\EventState + FPSfactor
-							If Rand(200)=1 And e\EventState > 300 Then
+							If Rand(200/FPSfactor)=1 And e\EventState > 300 Then
 								e\EventState = 0
 								e\SoundCHN = PlaySound2(e\Sound, Camera, e\room\Objects[2],6.0)
 							EndIf
@@ -4188,9 +4188,9 @@ Function UpdateEvents()
 						e\EventState=1
 					EndIf
 				ElseIf e\EventState < 70*45
-					If	Rand(200)<5 And PlayerRoom = e\room Then 
+					If	Rand(200/FPSfactor)<5 And PlayerRoom = e\room Then 
 						LightBlink = Rnd(1.0,2.0)
-						If Rand(5)=1 Then PlaySound2(IntroSFX(Rand(10,12)), Camera, e\room\obj, 8.0, Rnd(0.1,0.3))
+						If Rand(5/FPSfactor)=1 Then PlaySound2(IntroSFX(Rand(10,12)), Camera, e\room\obj, 8.0, Rnd(0.1,0.3))
 					EndIf
 					
 					e\EventState=Min(e\EventState+FPSfactor,70*43)
@@ -4403,7 +4403,7 @@ Function UpdateEvents()
 							If e\SoundCHN<>0 Then
 								If	ChannelPlaying(e\SoundCHN) Then 
 									LightBlink = Rnd(0.5,6.0)
-									If Rand(50)=1 Then PlaySound2(IntroSFX(Rand(10,12)), Camera, e\room\obj, 8.0, Rnd(0.1,0.3))
+									If Rand(50/FPSfactor)=1 Then PlaySound2(IntroSFX(Rand(10,12)), Camera, e\room\obj, 8.0, Rnd(0.1,0.3))
 								EndIf
 							EndIf						
 							
@@ -4450,7 +4450,7 @@ Function UpdateEvents()
 						e\room\RoomDoors[0]\locked = False
 						e\room\RoomDoors[1]\locked = False
 					Else
-						If	Rand(200)<5 Then LightBlink = Rnd(0.5,1.0)
+						If	Rand(200/FPSfactor)<5 Then LightBlink = Rnd(0.5,1.0)
 						
 						If e\room\RoomDoors[0]\open Then 
 							e\room\RoomDoors[0]\locked = False
@@ -4642,7 +4642,7 @@ Function UpdateEvents()
 								EndIf
 						End Select
 						
-						If Rand(10)=1 Then
+						If Rand(10/FPSfactor)=1 Then
 							temp = Rand(0,2)
 							PlaySound_Strict(AmbientSFX(temp, Rand(0,AmbientSFXAmount(temp)-1)))
 						EndIf
@@ -4766,12 +4766,12 @@ Function UpdateEvents()
 						EndIf
 						If e\EventState2 = 0 Then 
 							e\EventState = CurveValue(0, e\EventState, 15.0)
-							If Rand(800)=1 Then e\EventState2 = 1
+							If Rand(800/FPSfactor)=1 Then e\EventState2 = 1
 						Else
 							e\EventState = e\EventState+(FPSfactor*0.5)
 							If e\EventState > 360 Then e\EventState = 0	
 							
-							If Rand(1200)=1 Then e\EventState2 = 0
+							If Rand(1200/FPSfactor)=1 Then e\EventState2 = 0
 						EndIf
 						
 						PositionEntity e\room\Objects[3], EntityX(e\room\Objects[3],True), (-608.0*RoomScale)+0.05+Sin(e\EventState+270)*0.05, EntityZ(e\room\Objects[3],True), True
@@ -5227,7 +5227,7 @@ Function UpdateEvents()
 										PointEntity e\room\NPC[0]\obj, Collider
 										RotateEntity e\room\NPC[0]\Collider, 0, CurveAngle(EntityYaw(e\room\NPC[0]\obj), EntityYaw(e\room\NPC[0]\Collider), 15.0), 0
 										
-										If Rand(500)=1 Then
+										If Rand(500/FPSfactor)=1 Then
 											If EntityDistance(e\room\NPC[0]\Collider, e\room\Objects[4])>2 Then
 												e\room\NPC[0]\State2 = 1
 											Else
@@ -5953,7 +5953,7 @@ Function UpdateEvents()
 					EndIf
 					
 					If e\EventState = 0 Then 
-						If SoundTransmission And Rand(100)=1 Then
+						If SoundTransmission And Rand(100/FPSfactor)=1 Then
 							If e\SoundCHN2 = 0 Then
 								LoadEventSound(e,"SFX\Character\LureSubject\Idle"+Rand(1,6)+".ogg",1)
 								e\SoundCHN2 = PlaySound_Strict(e\Sound2)								
@@ -6134,7 +6134,7 @@ Function UpdateEvents()
 							EndIf
 							
 							If e\EventState>7 Then
-								If (Rand(0,300)=1) Then
+								If (Rand(301/FPSfactor)=1) Then
 									e\room\RoomDoors[0]\open = Not e\room\RoomDoors[0]\open
 								EndIf
 							EndIf 
@@ -6249,7 +6249,7 @@ Function UpdateEvents()
 									EndIf
 								EndIf
 							Case 67
-								If (Rand(150)=1) Then
+								If (Rand(150/FPSfactor)=1) Then
 									DeathMSG = I_Loc\DeathMessage_205
 									
 									Injuries=Injuries+Rnd(0.4,0.8)
@@ -6342,7 +6342,7 @@ Function UpdateEvents()
 								e\EventState3 = e\EventState3 + (1+CurrSpeed)* FPSfactor
 								If (e\EventState3 Mod 500) < 10.0 And ((e\EventState3-(1+CurrSpeed)*FPSfactor) Mod 500) > 490.0 Then
 									;If e\EventState3 > 3500 And Rnd(10000)<e\EventState3 Then
-									If e\EventState3 > 3000-(500*SelectedDifficulty\aggressiveNPCs) And Rnd(10000+(500*SelectedDifficulty\aggressiveNPCs)) < e\EventState3
+									If e\EventState3 > 3000-(500*SelectedDifficulty\aggressiveNPCs) And Rnd(10000+(500*SelectedDifficulty\aggressiveNPCs))/FPSfactor < e\EventState3
 										e\room\NPC[0]\State=2
 										PositionEntity e\room\NPC[0]\Collider, 0,-110,0
 										;e\EventState3=e\EventState3-Rnd(2000,3000)
@@ -6857,7 +6857,7 @@ Function UpdateEvents()
 					EndIf
 				ElseIf e\EventState = 1
 					
-					If e\room\dist < 3.0 Or Rand(7000)=1 Then
+					If e\room\dist < 3.0 Or Rand(7000/FPSfactor)=1 Then
 						e\EventState = 2
 						d.Decals = CreateDecal(0, EntityX(e\room\obj), 445.0*RoomScale, EntityZ(e\room\obj), -90, Rand(360), 0)
 						d\Size = Rnd(0.5, 0.7) : EntityAlpha(d\obj, 0.7) : d\ID = 1 : ScaleSprite(d\obj, d\Size, d\Size)
@@ -7789,8 +7789,6 @@ Function UpdateEvents()
 							EndIf
 							StopChannel e\SoundCHN
 							e\SoundCHN = 0
-							If e\Sound <> 0 Then FreeSound_Strict(e\Sound) : e\Sound = 0
-							e\Sound = LoadSound_Strict("SFX\Door\Airlock.ogg")
 							e\room\RoomDoors[0]\locked = False
 							e\room\RoomDoors[1]\locked = False
 							UseDoor(e\room\RoomDoors[0])
@@ -7857,7 +7855,11 @@ Function UpdateEvents()
 								Next
 								
 								FreeEntity pvt
-								If e\SoundCHN = 0 Then e\SoundCHN = PlaySound2(e\Sound,Camera,e\room\Objects[0],5)
+								If e\SoundCHN = 0 Then
+									If e\Sound <> 0 Then FreeSound_Strict(e\Sound) : e\Sound = 0
+									e\Sound = LoadSound_Strict("SFX\Door\Airlock.ogg")
+									e\SoundCHN = PlaySound2(e\Sound,Camera,e\room\Objects[0],5)
+								EndIf
 							EndIf
 						Else
 							e\EventState = 0.0
@@ -9141,7 +9143,7 @@ Function UpdateEndings()
 										
 										If temp = 1 Then ;remote detonation on -> explode
 											ExplosionTimer = Max(ExplosionTimer, 0.1)
-											SelectedEnding = "B2"
+											SelectedEnding = "B1"
 										Else
 											;LoadEventSound(e,"SFX\Ending\GateB\AlphaWarheadsFail.ogg")
 											;e\SoundCHN = PlaySound_Strict(e\Sound)
@@ -9168,12 +9170,12 @@ Function UpdateEndings()
 											
 											e\EventState = 85.0*70
 											
-											SelectedEnding = "B3"
+											SelectedEnding = "B2"
 										EndIf
 										
 										;EndIf										
 									Else
-										If SelectedEnding = "B3" Then
+										If SelectedEnding = "B2" Then
 											e\room\NPC[0]\EnemyX = EntityX(e\room\Objects[11],True)+Sin(MilliSecs()/25.0)*3
 											e\room\NPC[0]\EnemyY = EntityY(e\room\Objects[11],True)+Cos(MilliSecs()/85.0)+9.0
 											e\room\NPC[0]\EnemyZ = EntityZ(e\room\Objects[11],True)+Cos(MilliSecs()/25.0)*3
@@ -9352,7 +9354,7 @@ Function UpdateEndings()
 						AmbientLight (140, 140, 140)
 						
 						If ParticleAmount > 0
-							If Rand(3) = 1 Then
+							If Rand(Max(1, 3/FPSfactor)) = 1 Then
 								p.Particles = CreateParticle(EntityX(Camera)+Rnd(-2.0,2.0), EntityY(Camera)+Rnd(0.9,2.0), EntityZ(Camera)+Rnd(-2.0,2.0), 2, 0.006, 0, 300)
 								p\speed = Rnd(0.002,0.003)
 								RotateEntity(p\pvt, Rnd(-20, 20), e\room\angle-90+Rnd(-15,15),0, 0)
