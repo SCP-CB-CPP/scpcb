@@ -1,5 +1,3 @@
-Include "StrictLoads.bb"
-
 Global MenuBack% = LoadImage_Strict("GFX\menu\back.jpg")
 Global MenuText% = LoadImage_Strict("GFX\menu\scptext.jpg")
 Global Menu173% = LoadImage_Strict("GFX\menu\173back.png")
@@ -874,7 +872,7 @@ Function UpdateMainMenu()
 								EndIf
 							Forever
 							CloseDir Dir
-
+							
 							DebugLog "User Tracks Check Ended"
 						EndIf
 						If MouseOn(x+20*MenuScale,y+30*MenuScale,190*MenuScale,25*MenuScale) And OnSliderID=0
@@ -885,7 +883,6 @@ Function UpdateMainMenu()
 						EndIf
 					Else
 						UserTrackCheck% = -1
-						UserTrackCheck2% = 0
 					EndIf
 					;[End Block]
 				ElseIf MainMenuTab = 6 ;Controls
