@@ -78,6 +78,6 @@ Function ProcessFXAAEffect()
 End Function
 
 Function UpdatePostProcess()
-    ProcessGammaEffect(ScreenGamma)
-    If Opt_AntiAlias Then ProcessFXAAEffect()
+	If ScreenGamma <> 1.0 Then ProcessGammaEffect(ScreenGamma)
+	If Opt_AntiAlias Then ProcessFXAAEffect()
 End Function

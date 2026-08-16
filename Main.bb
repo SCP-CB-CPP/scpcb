@@ -12029,7 +12029,7 @@ Function RenderWorld2()
 	;render sprites
 	CameraProjMode ark_blur_cam,2
 	CameraProjMode Camera,0
-	RenderWorld()
+	RenderEntity(ark_blur_cam, ark_blur_cam)
 	CameraProjMode ark_blur_cam,0
 	
 	If BlinkTimer < - 16 Or BlinkTimer > - 6
