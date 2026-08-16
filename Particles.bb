@@ -24,7 +24,7 @@ Function CreateParticle.Particles(x#, y#, z#, image%, size#, gravity# = 1.0, lif
 	RotateEntity(p\obj, 0, 0, Rnd(360))
 	EntityFX(p\obj, 1 + 8)
 	
-	SpriteViewMode (p\obj, 3)
+	SpriteViewMode (p\obj, 1)
 	
 	Select image
 		Case 0,2,5,6
