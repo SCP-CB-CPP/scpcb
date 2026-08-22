@@ -283,7 +283,7 @@ Function LoadImageHUDScaled(file$, fixedSizeX% = 0, fixedSizeY% = 0)
 	Else
 		If fixedSizeY = 0 Then fixedSizeY = fixedSizeX
 		img = LoadImage_Strict(file)
-		ResizeImage(img, fixedSizeX * HUDScale, fixedSizeY * HUDScale)
+		ResizeImageFast(img, fixedSizeX * HUDScale, fixedSizeY * HUDScale)
 		h\BaseWidth = fixedSizeX
 		h\BaseHeight = fixedSizeY
 	EndIf
@@ -307,7 +307,7 @@ Function UpdateHUDScaleFactor(newFactor#)
 	HUDScaleFactor = newFactor
 	HUDScale = HUDScaleScalar * HUDScaleFactor
 	For h.HUDScaledImage = Each HUDScaledImage
-		ResizeImage(h\Img, h\BaseWidth * HUDScale, h\BaseHeight * HUDScale)
+		ResizeImageFast(h\Img, h\BaseWidth * HUDScale, h\BaseHeight * HUDScale)
 	Next
 
 	; Hardcoding because I'm LAME!
