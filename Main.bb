@@ -119,6 +119,8 @@ Global IsRestart% = False
 Global IsRunning% = True
 Global ShouldRestart% = False
 
+SetDarkMode(True)
+
 Include "ModManager.bb"
 Global HasDubbedAudio%
 Global ModsEnabled% = GetOptionInt("general", "enable mods") And (Not HasCLIFlag("nomods"))
