@@ -8517,7 +8517,6 @@ Function LoadEntities()
 	EntityTexture(Fog, FogTexture)
 	EntityBlend (Fog, 2)
 	EntityOrder Fog, -1000
-	MoveEntity(Fog, -PixelWidth, PixelHeight, 1.0)
 	
 	GasMaskTexture = LoadTexture_Strict("GFX\GasmaskOverlay.jpg", 1)
 	GasMaskOverlay = CreateSprite(ark_blur_cam)
@@ -8526,7 +8525,6 @@ Function LoadEntities()
 	EntityBlend (GasMaskOverlay, 2)
 	EntityFX(GasMaskOverlay, 1)
 	EntityOrder GasMaskOverlay, -1003
-	MoveEntity(GasMaskOverlay, -PixelWidth, PixelHeight, 1.0)
 	HideEntity(GasMaskOverlay)
 	
 	InfectTexture = LoadTexture_Strict("GFX\InfectOverlay.jpg", 1)
@@ -8536,7 +8534,6 @@ Function LoadEntities()
 	EntityBlend (InfectOverlay, 3)
 	EntityFX(InfectOverlay, 1)
 	EntityOrder InfectOverlay, -1003
-	MoveEntity(InfectOverlay, -PixelWidth, PixelHeight, 1.0)
 	;EntityAlpha (InfectOverlay, 255.0)
 	HideEntity(InfectOverlay)
 	
@@ -8547,14 +8544,12 @@ Function LoadEntities()
 	EntityBlend (NVOverlay, 2)
 	EntityFX(NVOverlay, 1)
 	EntityOrder NVOverlay, -1003
-	MoveEntity(NVOverlay, -PixelWidth, PixelHeight, 1.0)
 	HideEntity(NVOverlay)
 	NVBlink = CreateSprite(ark_blur_cam)
 	ScaleSprite(NVBlink, 1.0, Max(Float(GraphicHeight) / Float(GraphicWidth), 0.8))
 	EntityColor(NVBlink,0,0,0)
 	EntityFX(NVBlink, 1)
 	EntityOrder NVBlink, -1005
-	MoveEntity(NVBlink, -PixelWidth, PixelHeight, 1.0)
 	HideEntity(NVBlink)
 	
 	FogNVTexture = LoadTexture_Strict("GFX\fogNV.jpg", 1)
@@ -8573,7 +8568,6 @@ Function LoadEntities()
 	EntityTexture(Dark, DarkTexture)
 	EntityBlend (Dark, 1)
 	EntityOrder Dark, -1002
-	MoveEntity(Dark, -PixelWidth, PixelHeight, 1.0)
 	EntityAlpha Dark, 0.0
 	
 	LightTexture = CreateTexture(1, 1, 1 + 2+256)
@@ -8590,7 +8584,6 @@ Function LoadEntities()
 	EntityTexture(Light, LightTexture)
 	EntityBlend (Light, 1)
 	EntityOrder Light, -1002
-	MoveEntity(Light, -PixelWidth, PixelHeight, 1.0)
 	HideEntity Light
 	
 	Collider = CreatePivot()
