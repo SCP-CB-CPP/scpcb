@@ -24,9 +24,13 @@ Function InitPostProcess()
     HideEntity(QuadCamera)
 
     Local aspect# = Float(GraphicWidth) / Float(GraphicHeight)
-    Local scale# = SMALLEST_POWER_TWO / Float(GraphicWidth)
-    ScaleEntity(PostEffectQuad, scale, scale / aspect, 1.0)
+    Local scaleX# = 1.0
+    Local scaleY# = 1.0 / aspect
+
+    ScaleEntity(PostEffectQuad, scaleX, scaleY, 1.0)
     PositionEntity(PostEffectQuad, 0, 0, 1.0001)
+
+    CameraViewport(QuadCamera, 0, 0, GraphicWidth, GraphicHeight)
 
     PostEffect = 0
 End Function
@@ -34,13 +38,14 @@ End Function
 Function CreateFullscreenQuad%(Parent% = 0)
     Local Quad% = CreateMesh(Parent)
     Local SF% = CreateSurface(Quad)
-    AddVertex(SF, -1.0,  1.0, 0.0, 0.0, 0.0)
-    AddVertex(SF,  1.0,  1.0, 0.0, 1.0, 0.0)
-    AddVertex(SF,  1.0, -1.0, 0.0, 1.0, 1.0)
+    AddVertex(SF, -1.0, 1.0, 0.0, 0.0, 0.0)
+    AddVertex(SF, 1.0, 1.0, 0.0, 1.0, 0.0)
     AddVertex(SF, -1.0, -1.0, 0.0, 0.0, 1.0)
+    AddVertex(SF, 1.0, -1.0, 0.0, 1.0, 1.0)
+
     AddTriangle(SF, 0, 1, 2)
-    AddTriangle(SF, 0, 2, 3)
-    UpdateNormals(Quad)
+    AddTriangle(SF, 3, 2, 1)
+
     EntityFX(Quad, 1 + 32)
     Return Quad
 End Function
