@@ -442,7 +442,7 @@ End Function
 Function LoadBrush_Strict(file$,flags,u#=1.0,v#=1.0)
 	File = DetermineModdedPath(File)
 	If FileType(file$)<>1 Then RuntimeErrorExt "Brush Texture " + file$ + "not found."
-	tmp = LoadBrush(file$, flags, u, v)
+	Local tmp = LoadBrush(file$, flags, u, v)
 	If tmp = 0 Then RuntimeErrorExt "Failed to load Brush: " + file$ 
 	Return tmp 
 End Function 
@@ -450,7 +450,7 @@ End Function
 Function LoadFont_Strict(file$, height, bold%=False, italic%=False)
 	File = DetermineModdedPath(File)
 	If FileType(file$)<>1 Then RuntimeErrorExt "Font " + file$ + " not found."
-	tmp = LoadFont(file, height, bold, italic)
+	Local tmp = LoadFont(file, height, bold, italic)
 	If tmp = 0 Then RuntimeErrorExt "Failed to load Font: " + file$ 
 	Return tmp
 End Function
@@ -458,11 +458,10 @@ End Function
 Function LoadEffect_Strict%(file$)
 	file = DetermineModdedPath(file)
 	If FileType(file$)<>1 Then RuntimeErrorExt "Shader " + file$ + " not found."
-	tmp = LoadEffect(file)
+	Local tmp = LoadEffect(file)
 	If tmp = 0 Then RuntimeErrorExt "Failed to load Shader: " + file$ + ". Error: " + GetEffectError() + Chr(10)
 	Return tmp
 End Function
-
 
 
 

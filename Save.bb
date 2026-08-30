@@ -672,7 +672,7 @@ Function LoadGame(file$)
 		
 		n\texture = ReadString(f)
 		If n\texture <> "" Then
-			tex = LoadTexture_Strict (n\texture)
+			Local tex = LoadTexture_Strict (n\texture)
 			EntityTexture n\obj, tex
 		EndIf
 		
@@ -752,11 +752,11 @@ Function LoadGame(file$)
 		y = ReadFloat(f)
 		z = ReadFloat(f)
 		
-		found = ReadByte(f)
+		Local found = ReadByte(f)
 		
-		level = ReadInt(f)
+		Local level = ReadInt(f)
 		
-		temp2 = ReadByte(f)		
+		Local temp2 = ReadByte(f)		
 		
 ;		If angle >= 360
 ;            angle = angle-360
@@ -841,9 +841,9 @@ Function LoadGame(file$)
 				Next
 				DebugLog sssss
 			Next
-			lx# = ReadFloat(f)
-			ly# = ReadFloat(f)
-			lz# = ReadFloat(f)
+			Local lx# = ReadFloat(f)
+			Local ly# = ReadFloat(f)
+			Local lz# = ReadFloat(f)
 			If hasForest=1 Then
 				PlaceForest(r\fr,lx,ly,lz,r)
 			Else
@@ -1022,10 +1022,10 @@ Function LoadGame(file$)
 		If ittName = "cup" Then
 			Local drinkName$ = ReadString(f)
 
-			red = ReadByte(f)
-			green = ReadByte(f)
-			blue = ReadByte(f)
-			a# = ReadFloat(f)
+			Local red = ReadByte(f)
+			Local green = ReadByte(f)
+			Local blue = ReadByte(f)
+			Local a# = ReadFloat(f)
 
 			it = CreateCup(drinkName, x, y, z, red, green, blue, a)
 		Else
@@ -1040,7 +1040,7 @@ Function LoadGame(file$)
 		it\Picked = ReadByte(f)
 		If it\Picked Then HideEntity(it\collider)
 		
-		nt = ReadByte(f)
+		Local nt = ReadByte(f)
 		If nt = True Then SelectedItem = it
 		
 		nt = ReadByte(f)
@@ -1095,10 +1095,10 @@ Function LoadGame(file$)
 	
 	For do.Doors = Each Doors
 		If do\room <> Null Then
-			dist# = 20.0
+			Local dist# = 20.0
 			Local closestroom.Rooms
 			For r.Rooms = Each Rooms
-				dist2# = EntityDistance(r\obj, do\obj)
+				Local dist2# = EntityDistance(r\obj, do\obj)
 				If dist2 < dist Then
 					dist = dist2
 					closestroom = r.Rooms
@@ -1212,7 +1212,7 @@ Function LoadGameQuick(file$)
 	
 	DebugHUD = False
 	For r.Rooms = Each Rooms
-		tb.Triggerboxes = r\FirstTriggerbox
+		Local tb.Triggerboxes = r\FirstTriggerbox
 		While tb <> Null
 			HideEntity(tb\Obj)
 			tb = tb\Successor
@@ -1439,7 +1439,7 @@ Function LoadGameQuick(file$)
 		
 		n\texture = ReadString(f)
 		If n\texture <> "" Then
-			tex = LoadTexture_Strict (n\texture)
+			Local tex = LoadTexture_Strict (n\texture)
 			EntityTexture n\obj, tex
 		EndIf
 		
@@ -1516,11 +1516,11 @@ Function LoadGameQuick(file$)
 		y = ReadFloat(f)
 		z = ReadFloat(f)
 		
-		found = ReadByte(f)
+		Local found = ReadByte(f)
 		
-		level = ReadInt(f)
+		Local level = ReadInt(f)
 		
-		temp2 = ReadByte(f)	
+		Local temp2 = ReadByte(f)	
 		
 		If angle >= 360
             angle = angle-360
@@ -1589,9 +1589,9 @@ Function LoadGameQuick(file$)
 					ReadByte(f)
 				Next
 			Next
-			lx# = ReadFloat(f)
-			ly# = ReadFloat(f)
-			lz# = ReadFloat(f)
+			Local lx# = ReadFloat(f)
+			Local ly# = ReadFloat(f)
+			Local lz# = ReadFloat(f)
 		ElseIf r\fr<>Null Then ;remove the old forest
 			DestroyForest(r\fr)
 			Delete r\fr
@@ -1749,10 +1749,10 @@ Function LoadGameQuick(file$)
 		If ittName = "cup" Then
 			Local drinkName$ = ReadString(f)
 
-			red = ReadByte(f)
-			green = ReadByte(f)
-			blue = ReadByte(f)
-			a# = ReadFloat(f)
+			Local red = ReadByte(f)
+			Local green = ReadByte(f)
+			Local blue = ReadByte(f)
+			Local a# = ReadFloat(f)
 
 			it = CreateCup(drinkName, x, y, z, red, green, blue, a)
 		Else
@@ -1767,7 +1767,7 @@ Function LoadGameQuick(file$)
 		it\Picked = ReadByte(f)
 		If it\Picked Then HideEntity(it\collider)
 		
-		nt = ReadByte(f)
+		Local nt = ReadByte(f)
 		If nt = True Then SelectedItem = it
 		
 		nt = ReadByte(f)
@@ -1820,10 +1820,10 @@ Function LoadGameQuick(file$)
 	
 	For do.Doors = Each Doors
 		If do\room <> Null Then
-			dist# = 20.0
+			Local dist# = 20.0
 			Local closestroom.Rooms
 			For r.Rooms = Each Rooms
-				dist2# = EntityDistance(r\obj, do\obj)
+				Local dist2# = EntityDistance(r\obj, do\obj)
 				If dist2 < dist Then
 					dist = dist2
 					closestroom = r.Rooms
@@ -1949,9 +1949,9 @@ Function LoadSaveGames()
 	SaveGameAmount = 0
 	If FileType(SavePath)=1 Then RuntimeErrorExt "Can't create dir "+Chr(34)+SavePath+Chr(34)
 	If FileType(SavePath)=0 Then CreateDir(SavePath)
-	myDir=ReadDir(SavePath) 
+	Local myDir=ReadDir(SavePath) 
 	Repeat 
-		file$=NextFile$(myDir) 
+		Local file$=NextFile$(myDir) 
 		If file$="" Then Exit 
 		If FileType(SavePath+"\"+file$) = 1 And Instr(file, ".cbsav") = Len(file) - 5 Then 
 			SaveGameAmount=SaveGameAmount+1
@@ -1962,7 +1962,7 @@ Function LoadSaveGames()
 	Dim SaveGames$(SaveGameAmount+1) 
 	
 	myDir=ReadDir(SavePath) 
-	i = 0
+	Local i = 0
 	Repeat 
 		file$=NextFile$(myDir) 
 		If file$="" Then Exit 
@@ -2019,7 +2019,7 @@ End Function
 Function LoadSavedMapsFrom%(folder$, i%)
 	Local dir%=ReadDir(folder) 
 	Repeat
-		file$=NextFile$(dir)
+		Local file$=NextFile$(dir)
 		
 		DebugLog file
 		

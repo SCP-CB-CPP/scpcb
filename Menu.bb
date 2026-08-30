@@ -203,7 +203,7 @@ Function UpdateMainMenu()
 							RandomSeed = "whatpumpkin"
 					End Select
 				Else
-					n = Rand(4,8)
+					Local n = Rand(4,8)
 					For i = 1 To n
 						If Rand(3)=1 Then
 							RandomSeed = RandomSeed + Rand(0,9)
@@ -820,16 +820,16 @@ Function UpdateMainMenu()
 							UserTrackCheck% = 0
 							UserTrackCheck2% = 0
 							
-							Dir=ReadDir("SFX\Radio\UserTracks\")
+							Local Dir=ReadDir("SFX\Radio\UserTracks\")
 							Repeat
-								file$=NextFile(Dir)
+								Local file$=NextFile(Dir)
 								If file$="" Then Exit
 								If FileType("SFX\Radio\UserTracks\"+file$) = 1 Then
 									Local ext$ = File_GetExtension(file$)
 									For i=1 To SoundExtensionCount
 										If ext = SoundExtensions[i-1] Then
 											UserTrackCheck = UserTrackCheck + 1
-											test = LoadSound("SFX\Radio\UserTracks\"+file$)
+											Local test = LoadSound("SFX\Radio\UserTracks\"+file$)
 											If test<>0 Then UserTrackCheck2 = UserTrackCheck2 + 1
 											FreeSound test
 										EndIf
@@ -914,6 +914,7 @@ Function UpdateMainMenu()
 						DrawOptionsTooltip(tx,ty,tw,th,"controls")
 					EndIf
 					
+					Local key
 					For i = 0 To 227
 						If KeyHit(i) Then key = i : Exit
 					Next
@@ -1178,12 +1179,10 @@ Function UpdateMainMenu()
 				If ModCount = 0 Then
 					Text (x + 20 * MenuScale, y + 20 * MenuScale, I_Loc\Mods_Nomods)
 				Else
-					x = x + 10 * MenuScale
+					x = x + 35 * MenuScale
 					y = y + (20 + (EntriesPerPage-1) * 80) * MenuScale
 					
 					UpdateUpdatingMod()
-
-					Local xStart = x
 
 					Local milis% = MilliSecs()
 					i% = ModCount
@@ -1191,18 +1190,40 @@ Function UpdateMainMenu()
 					Local drawn% = 0
 					Local m.Mods = Last Mods
 					Repeat
+						Local nextM.Mods = Before m
 						If i <= (EntriesPerPage+(EntriesPerPage*CurrLoadGamePage)) Then
 							If i <= ModCount Then
-								x = xStart
+								If KeyDown(29) Then
+									If DrawButton(x + 500 * MenuScale, y + 10 * MenuScale, 30 * MenuScale, 20 * MenuScale, "◄", False, False, i = 1) Then
+										If m\IsActive And m\RequiresReload Then ModsDirty = True
+										Insert m Before First Mods
+									EndIf
+									
+									If DrawButton(x + 500 * MenuScale, y + (70 - 30) * MenuScale, 30 * MenuScale, 20 * MenuScale, "►", False, False, i = ModCount) Then
+										If m\IsActive And m\RequiresReload Then ModsDirty = True
+										Insert m After Last Mods
+									EndIf
+								Else
+									If DrawButton(x + 500 * MenuScale, y + 10 * MenuScale, 30 * MenuScale, 20 * MenuScale, "▲", False, False, i = 1) Then
+										If m\IsActive And m\RequiresReload Then ModsDirty = True
+										Insert m Before Before m
+										nextM = m
+										m = After m
+									EndIf
+									
+									If DrawButton(x + 500 * MenuScale, y + (70 - 30) * MenuScale, 30 * MenuScale, 20 * MenuScale, "▼", False, False, i = ModCount) Then
+										If m\IsActive And m\RequiresReload Then ModsDirty = True
+										Insert m After After m
+									EndIf
+								EndIf
 
-								Local mActive = DrawTick(x, y + 25 * MenuScale, m\IsActive)
+
+								Local mActive = DrawTick(x - 25 * MenuScale, y + 25 * MenuScale, m\IsActive)
 								If mActive <> m\IsActive Then
 									m\IsActive = mActive
 									m\IsNew = False
 									If m\RequiresReload Then ModsDirty = True
 								EndIf
-
-								x = x + 25 * MenuScale
 
 								DrawFrame(x,y,490* MenuScale, 70 * MenuScale)
 								If m\Icon = 0 And m\Iconpath <> "" Then
@@ -1229,18 +1250,6 @@ Function UpdateMainMenu()
 								Text(x + 85 * MenuScale, y + 10 * MenuScale, EllipsisLeft(m\Name, 24))
 								Text(x + 85 * MenuScale, y + (10+18) * MenuScale, EllipsisLeft(m\Description, 24))
 								Text(x + 85 * MenuScale, y + (10+18*2) * MenuScale, EllipsisLeft(m\Author, 24))
-
-								If DrawButton(x + 500 * MenuScale, y + 10 * MenuScale, 30 * MenuScale, 20 * MenuScale, "▲", False, False, i = 1) Then
-									Insert m Before Before m
-									m = After m
-									If m\IsActive And m\RequiresReload Then ModsDirty = True
-								EndIf
-								
-								If DrawButton(x + 500 * MenuScale, y + (70 - 30) * MenuScale, 30 * MenuScale, 20 * MenuScale, "▼", False, False, i = ModCount) Then
-									Insert m After After m
-									m = Before m
-									If m\IsActive And m\RequiresReload Then ModsDirty = True
-								EndIf
 
 								If UpdatingMod = m Then
 									Local strr$ = ""
@@ -1299,7 +1308,7 @@ Function UpdateMainMenu()
 							y = y - 80 * MenuScale
 							drawn = drawn + 1
 						EndIf
-						If i <= ModCount Then m = Before m
+						If i <= ModCount Then m = nextM
 						i = i - 1
 					Until i <= 0 Lor drawn => EntriesPerPage
 
@@ -1578,7 +1587,7 @@ Dim GfxModeWidthsByAspectRatio%(0, 0), GfxModeHeightsByAspectRatio%(0, 0)
 
 Function UpdateLauncher()
 	MenuScale = 1
-	
+
 	Graphics3DExt(LauncherWidth, LauncherHeight, 0, 2)
 
 	;InitExt
@@ -1599,7 +1608,7 @@ Function UpdateLauncher()
 	Local SelectedGfxMode% = -1, AspectRatioCount%
 	Local SelectedAspectRatio% = -1
 	Local nativeGdc% = GreatestCommonDivisor(DesktopWidth(), DesktopHeight())
-	Local NativeAspectRatioWidth = DesktopWidth() / nativeGdc : NativeAspectRatioHeight = DesktopHeight() / nativeGdc
+	Local NativeAspectRatioWidth = DesktopWidth() / nativeGdc, NativeAspectRatioHeight = DesktopHeight() / nativeGdc
 	Local nativeAspectRatio%, nativeGfxMode
 
 	Dim AspectRatioWidths%(TotalGfxModes), AspectRatioHeights%(TotalGfxModes)
@@ -1945,7 +1954,7 @@ Function DrawLoading(percent%, shortloading=False)
 	If percent = 0 Then
 		LoadingScreenStartTime = MilliSecs()
 		
-		temp = Rand(1,LoadingScreenAmount)
+		Local temp = Rand(1,LoadingScreenAmount)
 		For ls.loadingscreens = Each LoadingScreens
 			If ls\id = temp Then
 				If ls\img=0 Then
@@ -1958,7 +1967,7 @@ Function DrawLoading(percent%, shortloading=False)
 		Next
 	EndIf	
 	
-	firstloop = True
+	Local firstloop = True
 	Repeat 
 		
 		;Color 0,0,0
@@ -2029,7 +2038,7 @@ Function DrawLoading(percent%, shortloading=False)
 			EndIf
 			
 			SetFont Font2
-			strtemp$ = ""
+			Local strtemp$ = ""
 			temp = Rand(2,9)
 			For i = 0 To temp
 				strtemp$ = STRTEMP + RandomDefaultWidthChar(48,122,"?")
@@ -2102,7 +2111,7 @@ Function DrawLoading(percent%, shortloading=False)
 		EndIf
 		
 		Color 0,0,0
-		Text(GraphicWidth / 2 + Max(1, enuScale), GraphicHeight / 2 - 100 * MenuScale + Max(1, MenuScale), Format(I_Loc\Menu_Loading, percent), True, True)
+		Text(GraphicWidth / 2 + Max(1, MenuScale), GraphicHeight / 2 - 100 * MenuScale + Max(1, MenuScale), Format(I_Loc\Menu_Loading, percent), True, True)
 		Color 255,255,255
 		Text(GraphicWidth / 2, GraphicHeight / 2 - 100 * MenuScale, Format(I_Loc\Menu_Loading, percent), True, True)
 		

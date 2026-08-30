@@ -398,7 +398,7 @@ Function CreateNPC.NPCs(NPCtype%, x#, y#, z#)
 			
 			EntityFX(n\obj, 1)
 			
-			tex = LoadTexture_Strict("GFX\npcs\860_eyes.png",1+2)
+			Local tex = LoadTexture_Strict("GFX\npcs\860_eyes.png",1+2)
 			
 			n\obj2 = CreateSprite()
 			ScaleSprite(n\obj2, 0.1, 0.1)
@@ -833,7 +833,7 @@ Function UpdateNPCs()
 														If Abs(EntityX(n\Collider) - EntityX(d\buttons[i])) < 0.5 Then
 															If Abs(EntityZ(n\Collider) - EntityZ(d\buttons[i])) < 0.5 Then
 																If (d\openstate >= 180 Or d\openstate <= 0) Then
-																	pvt = CreatePivot()
+																	Local pvt = CreatePivot()
 																	PositionEntity pvt, EntityX(n\Collider), EntityY(n\Collider) + 0.5, EntityZ(n\Collider)
 																	PointEntity pvt, d\buttons[i]
 																	MoveEntity pvt, 0, 0, n\Speed * 0.6
@@ -1208,7 +1208,7 @@ Function UpdateNPCs()
                                 If dist > 10 And PlayerRoom\RoomTemplate\Name <> "pocketdimension" And PlayerRoom\RoomTemplate\Name <> "gatea" And n\State <-5 Then ;timer idea by Juanjpro
                                     If (Not EntityInView(n\obj,Camera))
                                         TurnEntity Collider,0,180,0
-                                        pick = EntityPick(Collider,5)
+                                        Local pick = EntityPick(Collider,5)
                                         TurnEntity Collider,0,180,0
                                         If pick<>0
 											TeleportEntity(n\Collider,PickedX(),PickedY(),PickedZ(),n\CollRadius)
@@ -2433,7 +2433,7 @@ Function UpdateNPCs()
 						;Animate2(n\obj, AnimTime(n\obj), 1539, 1553, 0.35, False)
 						If n\Reload = 0 ;And n\Frame > 1545 Then 
 							PlaySound2(GunshotSFX, Camera, n\Collider, 20)
-							p.Particles = CreateParticle(EntityX(n\obj, True), EntityY(n\obj, True), EntityZ(n\obj, True), 1, 0.2, 0.0, 5)
+							Local p.Particles = CreateParticle(EntityX(n\obj, True), EntityY(n\obj, True), EntityZ(n\obj, True), 1, 0.2, 0.0, 5)
 							PositionEntity(p\pvt, EntityX(n\obj), EntityY(n\obj), EntityZ(n\obj))
 							RotateEntity(p\pvt, EntityPitch(n\Collider), EntityYaw(n\Collider), 0, True)
 							MoveEntity (p\pvt,0.8*0.079, 10.75*0.079, 6.9*0.079)
@@ -5740,6 +5740,7 @@ Function UpdateMTFUnit(n.NPCs)
                 If MeNPCSeesPlayer(n) = True Then
 					
 					;if close enough, start shooting at the player
+					Local playerDist# = EntityDistance(n\Collider,Collider)
 					If playerDist < 4.0 Then
 						
 						Local angle# = VectorYaw(EntityX(Collider)-EntityX(n\Collider),0,EntityZ(Collider)-EntityZ(n\Collider))
@@ -5751,7 +5752,7 @@ Function UpdateMTFUnit(n.NPCs)
 							If EntityVisible(n\Collider, Camera) Then
 								angle# = WrapAngle(angle - EntityYaw(n\Collider))
 								If angle < 5 Or angle > 355 Then 
-									prev% = KillTimer
+									Local prev% = KillTimer
 									
 									PlaySound2(GunshotSFX, Camera, n\Collider, 15)
 									
@@ -6944,7 +6945,7 @@ Function Shoot(x#, y#, z#, hitProb# = 1.0, particles% = True, instaKill% = False
 			;Kill()
 			PlaySound_Strict BullethitSFX
 		ElseIf particles And ParticleAmount>0
-			pvt = CreatePivot()
+			Local pvt = CreatePivot()
 			PositionEntity pvt, EntityX(Collider),(EntityY(Collider)+EntityY(Camera))/2,EntityZ(Collider)
 			PointEntity pvt, p\obj
 			TurnEntity pvt, 0, 180, 0
@@ -7666,7 +7667,7 @@ Function ChangeNPCTextureID(n.NPCs,textureid%)
 	FreeEntity n\obj
 	n\obj = CopyEntity(DTextures[textureid%+1])
 	
-	temp# = 0.5 / MeshWidth(n\obj)
+	Local temp# = 0.5 / MeshWidth(n\obj)
 	ScaleEntity n\obj, temp, temp, temp
 	MeshCullBox (n\obj, -MeshWidth(ClassDObj), -MeshHeight(ClassDObj), -MeshDepth(ClassDObj)*4, MeshWidth(ClassDObj)*2, MeshHeight(ClassDObj)*2, MeshDepth(ClassDObj)*8)
 	

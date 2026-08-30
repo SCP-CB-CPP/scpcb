@@ -23,7 +23,7 @@ Global ActiveModCount% = 0
 Const STEAM_ITEM_ID_FILENAME$ = "steam_itemid.txt"
 
 Function InstantiateMod.Mods(id$, path$)
-    m.Mods = new Mods
+    Local m.Mods = new Mods
     m\IsNew = True
     m\Id = id
     m\Path = path
@@ -65,13 +65,13 @@ End Function
 
 Function ReloadMods()
     For m.Mods = Each Mods
-        If Icon <> 0 Then FreeImage(Icon)
+        If m\Icon <> 0 Then FreeImage(m\Icon)
     Next
     Delete Each Mods
     ModCount = 0
-    d% = ReadDir("Mods")
+    Local d% = ReadDir("Mods")
     Repeat
-        f$=NextFile(d)
+        Local f$=NextFile(d)
         If f$="" Then Exit
         If f$<>"." And f$<>".." And FileType("Mods\"+f) = 2 Then
             m.Mods = InstantiateMod("local " + f, "Mods\"+f+"\")
@@ -102,14 +102,14 @@ Function ReloadMods()
 
     If FileType(ModsFile) = 1 Then
         Local mods% = OpenFile(ModsFile)
-        Local firstSorted.Mods = First Mods
+        Local firstSorted.Mods = Last Mods
         While Not Eof(mods)
-            l$ = Trim(ReadLine(mods))
+            Local l$ = Trim(ReadLine(mods))
             If l <> "" And Instr(l, "#") <> 1 And Instr(l, ";") <> 1 Then
-                splitterPos = Instr(l, "=")
+                Local splitterPos = Instr(l, "=")
                 If splitterPos = 0 Then Continue
-                key$ = Trim(Left(l, splitterPos - 1))
-                value$ = Trim(Right(l, Len(l) - splitterPos))
+                Local key$ = Trim(Left(l, splitterPos - 1))
+                Local value$ = Trim(Right(l, Len(l) - splitterPos))
                 For m.Mods = Each Mods
                     If key = m\Id Then
                         Insert m After firstSorted
@@ -240,7 +240,7 @@ End Function
 
 Function DetermineModdedPath$(f$)
     For m.ActiveMods = Each ActiveMods
-        modPath$ = m\Path + f
+        Local modPath$ = m\Path + f
         If FileType(modPath) = 1 Then Return modPath
     Next
     Return f
