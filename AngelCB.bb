@@ -9,6 +9,7 @@ Function RegisterCommon()
 
     RegisterGlobalProperty("int TimerStopped", &TimerStopped)
     RegisterGlobalProperty("int PlayTime", &PlayTime)
+    RegisterGlobalProperty("int DeathTime", &DeathTime)
 
     RegisterGlobalFunction("string FormatDuration(int ms, bool highPrecision=true)", @FormatDuration)
 End Function
