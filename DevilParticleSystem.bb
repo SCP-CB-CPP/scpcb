@@ -65,8 +65,8 @@ If ParticlePiv Then FreeEntity ParticlePiv
 End Function
 
 Function CreateTemplate()
-tmp.Template = New Template
-template = Handle(tmp)
+Local tmp.Template = New Template
+Local template = Handle(tmp)
 SetTemplateEmitterBlend(template, 3)
 SetTemplateInterval(template, 1)
 SetTemplateParticlesPerInterval(template, 1)
@@ -84,7 +84,7 @@ Return Handle(tmp)
 End Function
 
 Function FreeTemplate(template)
-tmp.Template = Object.Template(template)
+Local tmp.Template = Object.Template(template)
 If tmp\tex Then FreeTexture tmp\tex
 For i = 0 To 7
 	If tmp\sub_template[i] <> Null Then FreeTemplate(Handle(tmp\sub_template[i]))
@@ -93,44 +93,44 @@ Delete tmp
 End Function
 
 Function SetTemplateEmitterBlend(template, emitter_blend)
-tmp.Template = Object.Template(template)
+Local tmp.Template = Object.Template(template)
 tmp\emitter_blend = emitter_blend
 End Function
 
 Function SetTemplateInterval(template, interval)
-tmp.Template = Object.Template(template)
+Local tmp.Template = Object.Template(template)
 tmp\interval = interval
 End Function
 
 Function SetTemplateParticlesPerInterval(template, particles_per_interval)
-tmp.Template = Object.Template(template)
+Local tmp.Template = Object.Template(template)
 tmp\particles_per_interval = particles_per_interval
 End Function
 
 Function SetTemplateMaxParticles(template, max_particles)
-tmp.Template = Object.Template(template)
+Local tmp.Template = Object.Template(template)
 tmp\max_particles = max_particles
 End Function
 
 Function SetTemplateParticleLifeTime(template, min_time, max_time)
-tmp.Template = Object.Template(template)
+Local tmp.Template = Object.Template(template)
 tmp\min_time = min_time
 tmp\max_time = max_time
 End Function
 
 Function SetTemplateEmitterLifeTime(template, emitter_max_time)
-tmp.Template = Object.Template(template)
+Local tmp.Template = Object.Template(template)
 tmp\emitter_max_time = emitter_max_time
 End Function
 
 Function SetTemplateTexture(template, path$, mode = 0, blend = 1)
-tmp.Template = Object.Template(template)
+Local tmp.Template = Object.Template(template)
 tmp\tex = LoadTexture_Strict(path$, mode)
 TextureBlend tmp\tex, blend
 End Function
 
 Function SetTemplateAnimTexture(template, path$, mode, blend, w, h, maxframes, speed# = 1)
-tmp.Template = Object.Template(template)
+Local tmp.Template = Object.Template(template)
 tmp\animtex = True
 tmp\maxtexframes = maxframes
 tmp\texspeed# = speed#
@@ -139,7 +139,7 @@ TextureBlend tmp\tex, blend
 End Function
 
 Function SetTemplateOffset(template, min_ox#, max_ox#, min_oy#, max_oy#, min_oz#, max_oz#)
-tmp.Template = Object.Template(template)
+Local tmp.Template = Object.Template(template)
 tmp\min_ox# = min_ox#
 tmp\max_ox# = max_ox#
 tmp\min_oy# = min_oy#
@@ -149,7 +149,7 @@ tmp\max_oz# = max_oz#
 End Function
 
 Function SetTemplateVelocity(template, min_xv#, max_xv#, min_yv#, max_yv#, min_zv#, max_zv#)
-tmp.Template = Object.Template(template)
+Local tmp.Template = Object.Template(template)
 tmp\min_xv# = min_xv#
 tmp\max_xv# = max_xv#
 tmp\min_yv# = min_yv#
@@ -159,24 +159,24 @@ tmp\max_zv# = max_zv#
 End Function
 
 Function SetTemplateRotation(template, rot_vel1#, rot_vel2#)
-tmp.Template = Object.Template(template)
+Local tmp.Template = Object.Template(template)
 tmp\rot_vel1# = rot_vel1#
 tmp\rot_vel2# = rot_vel2#
 End Function
 
 Function SetTemplateAlignToFall(template, align_to_fall, align_to_fall_offset = 0)
-tmp.Template = Object.Template(template)
+Local tmp.Template = Object.Template(template)
 tmp\align_to_fall = align_to_fall
 tmp\align_to_fall_offset = align_to_fall_offset
 End Function
 
 Function SetTemplateGravity(template, gravity#)
-tmp.Template = Object.Template(template)
+Local tmp.Template = Object.Template(template)
 tmp\gravity# = gravity#
 End Function
 
 Function SetTemplateSize(template, sx#, sy#, size_multiplicator1# = 1, size_multiplicator2# = 1)
-tmp.Template = Object.Template(template)
+Local tmp.Template = Object.Template(template)
 tmp\sx# = sx#
 tmp\sy# = sy#
 tmp\size_multiplicator1# = size_multiplicator1#
@@ -184,23 +184,23 @@ tmp\size_multiplicator2# = size_multiplicator2#
 End Function
 
 Function SetTemplateSizeVel(template, size_add#, size_mult#)
-tmp.Template = Object.Template(template)
+Local tmp.Template = Object.Template(template)
 tmp\size_add# = size_add#
 tmp\size_mult# = size_mult#
 End Function
 
 Function SetTemplateAlpha(template, alpha#)
-tmp.Template = Object.Template(template)
+Local tmp.Template = Object.Template(template)
 tmp\alpha# = alpha#
 End Function
 
 Function SetTemplateAlphaVel(template, alpha_vel)
-tmp.Template = Object.Template(template)
+Local tmp.Template = Object.Template(template)
 tmp\alpha_vel = alpha_vel
 End Function
 
 Function SetTemplateColors(template, col1, col2)
-tmp.Template = Object.Template(template)
+Local tmp.Template = Object.Template(template)
 tmp\r1 = (col1 And $FF0000) / $10000
 tmp\g1 = (col1 And $FF00) / $100
 tmp\b1 = col1 And $FF
@@ -210,24 +210,24 @@ tmp\b2 = col2 And $FF
 End Function
 
 Function SetTemplateBrightness(template, brightness)
-tmp.Template = Object.Template(template)
+Local tmp.Template = Object.Template(template)
 tmp\brightness = brightness
 End Function
 
 Function SetTemplateFloor(template, floor_y#, floor_bounce# = .5)
-tmp.Template = Object.Template(template)
+Local tmp.Template = Object.Template(template)
 tmp\floor_y# = floor_y#
 tmp\floor_bounce# = floor_bounce#
 End Function
 
 Function SetTemplateFixAngles(template, pitch_fix, yaw_fix)
-tmp.Template = Object.Template(template)
+Local tmp.Template = Object.Template(template)
 tmp\pitch_fix = pitch_fix
 tmp\yaw_fix = yaw_fix
 End Function
 
 Function SetTemplateSubTemplate(template, sub_template, for_each_particle = False)
-tmp.Template = Object.Template(template)
+Local tmp.Template = Object.Template(template)
 For i = 0 To 7
 	If tmp\sub_template[i] = Null Then
 		tmp\sub_template[i] = Object.Template(sub_template)
@@ -237,7 +237,7 @@ Next
 End Function
 
 Function SetEmitter(owner, template, fixed = False)
-e.Emitter = New Emitter
+Local e.Emitter = New Emitter
 If fixed Then
 	e\owner = CreatePivot()
 	PositionEntity e\owner, EntityX(owner), EntityY(owner), EntityZ(owner)
@@ -290,16 +290,14 @@ Next
 End Function
 
 Function SetTemplateYaw(template,yaw#)
-	tmp.template = Object.Template(template)
+	Local tmp.template = Object.Template(template)
 	tmp\yaw = yaw#
 End Function
 
 Function UpdateParticles_Devil()
-	Local e.Emitter,p.Particle
-	
 For e.Emitter = Each Emitter
+	Local cnt_particles = 0
 	If e\tmp\max_particles > -1 Then
-		cnt_particles = 0
 		For p.Particle = Each Particle
 			If p\emitter = e Then cnt_particles = cnt_particles + 1
 		Next
@@ -323,7 +321,7 @@ For e.Emitter = Each Emitter
 					p\yv# = Rnd(e\tmp\min_yv#, e\tmp\max_yv#)
 					p\zv# = Rnd(e\tmp\min_zv#, e\tmp\max_zv#)
 					p\rot_vel# = Rnd(e\tmp\rot_vel1#, e\tmp\rot_vel2#)
-					sm# = Rnd(e\tmp\size_multiplicator1#, e\tmp\size_multiplicator2#)
+					Local sm# = Rnd(e\tmp\size_multiplicator1#, e\tmp\size_multiplicator2#)
 					p\sx# = p\emitter\tmp\sx# * sm#
 					p\sy# = p\emitter\tmp\sy# * sm#
 				EndIf
@@ -335,9 +333,8 @@ For e.Emitter = Each Emitter
 		If e\tmp\texframe# > e\tmp\maxtexframes - 1 Then e\tmp\texframe# = 0
 		EntityTexture e\ent, e\tmp\tex, e\tmp\texframe#
 	EndIf
-	frame = frame + texspeed#
 	If e\del Then
-		del = True
+		Local del = True
 		For p.Particle = Each Particle
 			If p\emitter = e Then del = False
 		Next
@@ -370,34 +367,35 @@ For p.Particle = Each Particle
 		RotateEntity ParticlePiv, cam_pitch#, cam_yaw#, cam_roll# + (p\rot# + p\emitter\tmp\align_to_fall_offset)
 		If p\emitter\tmp\pitch_fix > -1 Then RotateEntity ParticlePiv, p\emitter\tmp\pitch_fix, EntityYaw(ParticlePiv), EntityRoll(ParticlePiv)
 		If p\emitter\tmp\yaw_fix > -1 Then RotateEntity ParticlePiv, EntityPitch(ParticlePiv), p\emitter\tmp\yaw_fix, EntityRoll(ParticlePiv)
-		x# = EntityX(p\emitter\ent) + p\x#
-		y# = EntityY(p\emitter\ent) + p\y#
-		z# = EntityZ(p\emitter\ent) + p\z#
-		sx# = p\sx#
-		sy# = p\sy#
+		Local lx# = EntityX(p\emitter\ent) + p\x#
+		Local ly# = EntityY(p\emitter\ent) + p\y#
+		Local lz# = EntityZ(p\emitter\ent) + p\z#
+		Local sx# = p\sx#
+		Local sy# = p\sy#
 		TFormVector sx#, -sy#, 0, ParticlePiv, 0
-		v1x# = TFormedX() + x#
-		v1y# = TFormedY() + y#
-		v1z# = TFormedZ() + z#
+		Local v1x# = TFormedX() + lx#
+		Local v1y# = TFormedY() + ly#
+		Local v1z# = TFormedZ() + lz#
 		TFormVector -sx#, -sy#, 0, ParticlePiv, 0
-		v2x# = TFormedX() + x#
-		v2y# = TFormedY() + y#
-		v2z# = TFormedZ() + z#
+		Local v2x# = TFormedX() + lx#
+		Local v2y# = TFormedY() + ly#
+		Local v2z# = TFormedZ() + lz#
 		TFormVector sx#, sy#, 0, ParticlePiv, 0
-		v3x# = TFormedX() + x#
-		v3y# = TFormedY() + y#
-		v3z# = TFormedZ() + z#
+		Local v3x# = TFormedX() + lx#
+		Local v3y# = TFormedY() + ly#
+		Local v3z# = TFormedZ() + lz#
 		TFormVector -sx#, sy#, 0, ParticlePiv, 0
-		v4x# = TFormedX() + x#
-		v4y# = TFormedY() + y#
-		v4z# = TFormedZ() + z#
-		v1 = AddVertex(p\emitter\surf, v1x#, v1y#, v1z#, 0, 0)
-		v2 = AddVertex(p\emitter\surf, v2x#, v2y#, v2z#, 1, 0)
-		v3 = AddVertex(p\emitter\surf, v3x#, v3y#, v3z#, 0, 1)
-		v4 = AddVertex(p\emitter\surf, v4x#, v4y#, v4z#, 1, 1)
-		r = p\emitter\tmp\r1 + (p\emitter\tmp\r2 - p\emitter\tmp\r1) * Float(p\age) / Float(p\max_time)
-		g = p\emitter\tmp\g1 + (p\emitter\tmp\g2 - p\emitter\tmp\g1) * Float(p\age) / Float(p\max_time)
-		b = p\emitter\tmp\b1 + (p\emitter\tmp\b2 - p\emitter\tmp\b1) * Float(p\age) / Float(p\max_time)
+		Local v4x# = TFormedX() + lx#
+		Local v4y# = TFormedY() + ly#
+		Local v4z# = TFormedZ() + lz#
+		Local v1 = AddVertex(p\emitter\surf, v1x#, v1y#, v1z#, 0, 0)
+		Local v2 = AddVertex(p\emitter\surf, v2x#, v2y#, v2z#, 1, 0)
+		Local v3 = AddVertex(p\emitter\surf, v3x#, v3y#, v3z#, 0, 1)
+		Local v4 = AddVertex(p\emitter\surf, v4x#, v4y#, v4z#, 1, 1)
+		Local r = p\emitter\tmp\r1 + (p\emitter\tmp\r2 - p\emitter\tmp\r1) * Float(p\age) / Float(p\max_time)
+		Local g = p\emitter\tmp\g1 + (p\emitter\tmp\g2 - p\emitter\tmp\g1) * Float(p\age) / Float(p\max_time)
+		Local b = p\emitter\tmp\b1 + (p\emitter\tmp\b2 - p\emitter\tmp\b1) * Float(p\age) / Float(p\max_time)
+		Local a#
 		If p\emitter\tmp\alpha_vel Then a# = (1 - Float(p\age) / Float(p\max_time)) * p\emitter\tmp\alpha# Else a# = p\emitter\tmp\alpha#
 		VertexColor p\emitter\surf, v1, r, g, b, a#
 		VertexColor p\emitter\surf, v2, r, g, b, a#

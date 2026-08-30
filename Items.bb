@@ -479,7 +479,7 @@ Function UpdateItems()
 							ytemp# = (EntityY(i2\collider,True)-EntityY(i\collider,True))
 							ztemp# = (EntityZ(i2\collider,True)-EntityZ(i\collider,True))
 							
-							ed# = (xtemp*xtemp+ztemp*ztemp)
+							Local ed# = (xtemp*xtemp+ztemp*ztemp)
 							If ed<0.07 And Abs(ytemp)<0.25 Then
 								;items are too close together, push away
 								If PlayerRoom\RoomTemplate\Name	<> "room2storage" Then
@@ -776,11 +776,11 @@ Function Update294()
 			Bloodloss = Bloodloss + 70
 			EyeIrritation = 9 * 70
 			
-			pvt = CreatePivot()
+			Local pvt = CreatePivot()
 			PositionEntity(pvt, EntityX(Camera), EntityY(Collider) - 0.05, EntityZ(Camera))
 			TurnEntity(pvt, 90, 0, 0)
 			EntityPick(pvt, 0.3)
-			de.decals = CreateDecal(5, PickedX(), PickedY() + 0.005, PickedZ(), 90, 180, 0)
+			Local de.decals = CreateDecal(5, PickedX(), PickedY() + 0.005, PickedZ(), 90, 180, 0)
 			de\Size = 0.001 : de\SizeChange = 0.001 : de\MaxSize = 0.6 : EntityAlpha(de\obj, 1.0) : EntityColor(de\obj, 0.0, Rnd(200, 255), 0.0) : ScaleSprite de\obj, de\size, de\size
 			FreeEntity pvt
 			Vomit = True

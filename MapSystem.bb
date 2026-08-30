@@ -178,7 +178,7 @@ Function LoadRMesh(file$,rt.RoomTemplates)
 	
 	;read the file
 	Local f%=ReadFile(file)
-	Local i%,j%,k%,x#,y#,z#,yaw#
+	Local i%,j%,k%,x#,y#,z#
 	Local vertex%
 	Local temp1i%,temp2i%,temp3i%
 	Local temp1#,temp2#,temp3#
@@ -294,6 +294,9 @@ Function LoadRMesh(file$,rt.RoomTemplates)
 	
 	Local lastItem.TempItems
 	Local lastDoor.TempDoors
+	Local range#, lcolor$, intensity#
+	Local r%, g%, b%
+	Local angles$, pitch#, yaw#, roll#
 
 	count=ReadInt(f) ;point entities
 	For i%=1 To count
@@ -407,9 +410,9 @@ Function LoadRMesh(file$,rt.RoomTemplates)
 				pitch#=Piece(angles,1," ")
 				yaw#=Piece(angles,2," ")
 				roll#=Piece(angles,3," ")
-				If cam Then
-					PositionEntity cam,temp1,temp2,temp3
-					RotateEntity cam,pitch,yaw,roll
+				If Camera Then
+					PositionEntity Camera,temp1,temp2,temp3
+					RotateEntity Camera,pitch,yaw,roll
 				EndIf
 			Case "model"
 				file = ReadString(f)
@@ -436,7 +439,7 @@ Function LoadRMesh(file$,rt.RoomTemplates)
 					;Stop
 				EndIf
 			Case "item"
-				it.TempItems = New TempItems
+				Local it.TempItems = New TempItems
 				
 				it\X = ReadFloat(f) * RoomScale
 				it\Y = ReadFloat(f) * RoomScale
@@ -445,7 +448,7 @@ Function LoadRMesh(file$,rt.RoomTemplates)
 				it\Name = ReadString(f)
 				If version < 0 Then
 					Local tempName$ = ReadString(f)
-					itt.ItemTemplates = FindItemTemplate(it\Name)
+					Local itt.ItemTemplates = FindItemTemplate(it\Name)
 					If itt = Null Then itt = FindItemTemplate(tempName)
 					If itt = Null Then
 						RuntimeErrorExt("Item template for "+Chr(34)+it\Name+Chr(34)+" not found.")
@@ -472,7 +475,7 @@ Function LoadRMesh(file$,rt.RoomTemplates)
 				lastItem = it
 
 			Case "door"
-				d.TempDoors = New TempDoors
+				Local d.TempDoors = New TempDoors
 
 				d\X = ReadFloat(f) * RoomScale
 				d\Y = ReadFloat(f) * RoomScale
@@ -554,6 +557,8 @@ Function LoadRMesh(file$,rt.RoomTemplates)
 End Function
 
 Function ReadMesh%(file$, f%, blankTexture%, Alpha%, Opaque%, coll% = True)
+	Local temp1i, temp2i, temp3i
+	
 	Local childMesh=CreateMesh()
 	
 	Local surf=CreateSurface(childMesh)
@@ -562,10 +567,10 @@ Function ReadMesh%(file$, f%, blankTexture%, Alpha%, Opaque%, coll% = True)
 	
 	Local tex%[2]
 	tex[0]=0 : tex[1]=0
-	
+
 	Local isAlpha=0
 	For j=0 To 1
-		Local temp1i=ReadByte(f)
+		temp1i=ReadByte(f)
 		If temp1i<>0 Then
 			Local temp1s$=ReadString(f)
 			tex[j]=GetTextureFromCache(temp1s)
@@ -604,7 +609,7 @@ Function ReadMesh%(file$, f%, blankTexture%, Alpha%, Opaque%, coll% = True)
 		EndIf
 	Else
 		If tex[0]<>0 And tex[1]<>0 Then
-			bumptex% = GetBumpFromCache(StripPath(TextureName(tex[1])))
+			Local bumptex% = GetBumpFromCache(StripPath(TextureName(tex[1])))
 			;If bumptex<>0 Then
 			;	DebugLog StripPath(TextureName(bumptex))
 			;	Stop
@@ -638,12 +643,12 @@ Function ReadMesh%(file$, f%, blankTexture%, Alpha%, Opaque%, coll% = True)
 	
 	For j%=1 To count2
 		;world coords
-		x#=ReadFloat(f) : y#=ReadFloat(f) : z#=ReadFloat(f)
-		vertex=AddVertex(surf,x,y,z)
+		Local x#=ReadFloat(f), y#=ReadFloat(f), z#=ReadFloat(f)
+		Local vertex=AddVertex(surf,x#,y#,z#)
 		
 		;texture coords
 		For k%=0 To 1
-			u#=ReadFloat(f) : v#=ReadFloat(f)
+			Local u#=ReadFloat(f), v#=ReadFloat(f)
 			VertexTexCoords surf,vertex,u,v,0.0,k
 		Next
 		
@@ -702,7 +707,7 @@ Function StripPath$(file$)
 	If Len(file$)>0 
 		For i=Len(file$) To 1 Step -1 
 			
-			mi$=Mid$(file$,i,1) 
+			Local mi$=Mid$(file$,i,1) 
 			If mi$="\" Or mi$="/" Then Return name$
 			
 			name$=mi$+name$ 
@@ -714,6 +719,7 @@ Function StripPath$(file$)
 End Function
 
 Function Piece$(s$,entry,char$=" ")
+	Local p
 	While Instr(s,char+char)
 		s=Replace(s,char+char,char)
 	Wend
@@ -723,34 +729,13 @@ Function Piece$(s$,entry,char$=" ")
 		s=Right(s,Len(s)-p)
 	Next
 	p=Instr(s,char)
+	Local a$
 	If p<1
-		a$=s
+		a=s
 	Else
 		a=Left(s,p-1)
 	EndIf
 	Return a
-End Function
-
-Function KeyValue$(entity,key$,defaultvalue$="")
-	properties$=EntityName(entity)
-	properties$=Replace(properties$,Chr(13),"")
-	key$=Lower(key)
-	Repeat
-		p=Instr(properties,Chr(10))
-		If p Then test$=(Left(properties,p-1)) Else test=properties
-		testkey$=Piece(test,1,"=")
-		testkey=Trim(testkey)
-		testkey=Replace(testkey,Chr(34),"")
-		testkey=Lower(testkey)
-		If testkey=key Then
-			value$=Piece(test,2,"=")
-			value$=Trim(value$)
-			value$=Replace(value$,Chr(34),"")
-			Return value
-		EndIf
-		If Not p Then Return defaultvalue$
-		properties=Right(properties,Len(properties)-p)
-	Forever 
 End Function
 
 
@@ -908,8 +893,8 @@ Function GenForestGrid(fr.Forest)
 			;determine if on left or on right
 			branch_pos=2*Rand(0,1)
 			;get leftmost or rightmost path in this row
-			leftmost=gridsize-1
-			rightmost=0
+			Local leftmost=gridsize-1
+			Local rightmost=0
 			For i=0 To gridsize-1
 				If fr\grid[((gridsize-1-new_y)*gridsize)+i]=1 Then
 					If i<leftmost Then leftmost=i
@@ -1018,7 +1003,7 @@ Function PlaceForest(fr.Forest,x#,y#,z#,r.Rooms)
 	Local tile_type%
 	Local tile_entity%,detail_entity%
 	
-	Local tempf1#,tempf2#,tempf3#
+	Local tempf1#,tempf2#,tempf3#,tempf4#
 	Local i%
 	
 	DestroyForest(fr,False)
@@ -1141,7 +1126,7 @@ Function PlaceForest(fr.Forest,x#,y#,z#,r.Rooms)
 					;place trees and other details
 					;only placed on spots where the value of the heightmap is above 100
 					SetBuffer TextureBuffer(hmap[tile_type])
-					width = TextureWidth(hmap[tile_type])
+					Local width = TextureWidth(hmap[tile_type])
 					tempf4# = (tempf3/Float(width))
 					For lx = 3 To width-2
 						For ly = 3 To width-2
@@ -1155,7 +1140,7 @@ Function PlaceForest(fr.Forest,x#,y#,z#,r.Rooms)
 										tempf2=Rnd(0.25,0.4)
 										
 										For i = 0 To 3
-											d=CopyEntity(fr\DetailMesh[2])
+											Local d=CopyEntity(fr\DetailMesh[2])
 											;ScaleEntity d,tempf2*1.1,tempf2,tempf2*1.1,True
 											RotateEntity d, 0, 90*i+Rnd(-20,20), 0
 											EntityParent(d,detail_entity)
@@ -1250,7 +1235,7 @@ Function PlaceForest(fr.Forest,x#,y#,z#,r.Rooms)
 				EntityParent fr\Door[i],fr\DetailEntities[i]
 				;SetAnimTime fr\Door[i], 0
 				
-				frame = CopyEntity(r\Objects[2],fr\Door[i])
+				Local frame = CopyEntity(r\Objects[2],fr\Door[i])
 				PositionEntity frame,0,32.0*RoomScale,0,True
 				ScaleEntity frame,45*RoomScale,44*RoomScale,80*RoomScale,True
 				EntityParent frame,fr\DetailEntities[i]
@@ -1288,7 +1273,7 @@ Function PlaceForest_MapCreator(fr.Forest,x#,y#,z#,r.Rooms)
 	Local tile_type%
 	Local tile_entity%,detail_entity%
 	
-	Local tempf1#,tempf2#,tempf3#
+	Local tempf1#,tempf2#,tempf3#,tempf4#
 	Local i%
 	
 	DestroyForest(fr,False)
@@ -1363,7 +1348,7 @@ Function PlaceForest_MapCreator(fr.Forest,x#,y#,z#,r.Rooms)
 					;place trees and other details
 					;only placed on spots where the value of the heightmap is above 100
 					SetBuffer TextureBuffer(hmap[tile_type])
-					width = TextureWidth(hmap[tile_type])
+					Local width = TextureWidth(hmap[tile_type])
 					tempf4# = (tempf3/Float(width))
 					For lx = 3 To width-2
 						For ly = 3 To width-2
@@ -1378,7 +1363,7 @@ Function PlaceForest_MapCreator(fr.Forest,x#,y#,z#,r.Rooms)
 										tempf2=Rnd(0.25,0.4)
 										
 										For i = 0 To 3
-											d=CopyEntity(fr\DetailMesh[2])
+											Local d=CopyEntity(fr\DetailMesh[2])
 											;ScaleEntity d,tempf2*1.1,tempf2,tempf2*1.1,True
 											RotateEntity d, 0, 90*i+Rnd(-20,20), 0
 											EntityParent(d,detail_entity)
@@ -1945,9 +1930,10 @@ Function PlaceGrid_MapCreator(r.Rooms)
 				End Select
 				
 				r\grid\Entities[x+(y*gridsz)]=tile_entity
-				wayp.WayPoints = CreateWaypoint(r\x+(x*2.0),MT_HEIGHT+0.2,r\z+(y*2.0),Null,r)
+				Local wayp.WayPoints = CreateWaypoint(r\x+(x*2.0),MT_HEIGHT+0.2,r\z+(y*2.0),Null,r)
 				r\grid\waypoints[x+(y*gridsz)]=wayp
 				
+				Local dist
 				If y<gridsz-1 Then
 					If r\grid\waypoints[x+((y+1)*gridsz)]<>Null Then
 						dist=EntityDistance(r\grid\waypoints[x+(y*gridsz)]\obj,r\grid\waypoints[x+((y+1)*gridsz)]\obj)
@@ -2180,7 +2166,9 @@ End Function
 Function FillRoom(r.Rooms)
 	CatchErrors("Uncaught (FillRoom)")
 	Local d.Doors, d2.Doors, sc.SecurityCams, de.Decals, r2.Rooms, sc2.SecurityCams
+	Local w.WayPoints, w2.WayPoints
 	Local it.Items, i%
+	Local x#, y#, z#
 	Local xtemp%, ytemp%, ztemp%
 	
 	Local t1;, Bump	
@@ -3113,7 +3101,7 @@ Function FillRoom(r.Rooms)
 			PositionEntity(r\RoomDoors[2]\buttons[0], r\x - 224.0 * RoomScale, 0.7, r\z - 480.0 * RoomScale, True)
 			PositionEntity(r\RoomDoors[2]\buttons[1], r\x - 304.0 * RoomScale, 0.7, r\z - 832.0 * RoomScale, True)
 ;			
-			temp = ((Int(AccessCode)*3) Mod 10000)
+			Local temp = ((Int(AccessCode)*3) Mod 10000)
 			If temp < 1000 Then temp = temp+1000
 			d.Doors = CreateDoor(0, r\x,r\y,r\z,0, r, False, True, False, temp)
 			PositionEntity(d\buttons[0], r\x + 224.0 * RoomScale, r\y + 0.7, r\z - 384.0 * RoomScale, True)
@@ -3689,7 +3677,7 @@ Function FillRoom(r.Rooms)
 			HideEntity r\Objects[3]
 			
 			r\Objects[4] = LoadMesh_Strict("GFX\map\room012_3.b3d")
-			tex=LoadTexture_Strict("GFX\map\scp-012_0.jpg")
+			Local tex=LoadTexture_Strict("GFX\map\scp-012_0.jpg")
 			EntityTexture r\Objects[4],tex, 0,1
 			ScaleEntity r\Objects[4], RoomScale, RoomScale, RoomScale
 			PositionEntity(r\Objects[4], r\x - 360 * RoomScale, - 130 * RoomScale, r\z + 456.0 * RoomScale, 0)
@@ -3879,7 +3867,7 @@ Function FillRoom(r.Rooms)
 			sc.SecurityCams = CreateSecurityCam(r\x + 744.0 * RoomScale, r\y - 856.0 * RoomScale, r\z + 236.0 * RoomScale, r)
 			sc\FollowPlayer = True
 			
-			CreateDoor(0, r\x + 720.0 * RoomScale, 0, r\z, 0, r, False, 2, -1)
+			r\RoomDoors[0] = CreateDoor(0, r\x + 720.0 * RoomScale, 0, r\z, 0, r, False, 2, -1)
 			
 			CreateDoor(0, r\x - 624.0 * RoomScale, -1280.0 * RoomScale, r\z, 90, r, True)			
 			
@@ -4170,7 +4158,7 @@ Function FillRoom(r.Rooms)
 			it = CreateItem("doc427", r\x - 608.0 * RoomScale, r\y + 66.0 * RoomScale, r\z + 636.0 * RoomScale)
 			EntityParent(it\collider, r\obj)
 			
-			Local dx#,dy#
+			Local dx#,dz#
 			For i = 0 To 14
 				Select i
 					Case 0
@@ -4765,8 +4753,8 @@ Function FillRoom(r.Rooms)
 				For ytemp = 0 To 2
 					For ztemp = 0 To 2
 						
-						tempstr$ = "bat"
-						chance% = Rand(-10,100)
+						Local tempstr$ = "bat"
+						Local chance% = Rand(-10,100)
 						Select True
 							Case (chance<0)
 								Exit
@@ -4789,8 +4777,7 @@ Function FillRoom(r.Rooms)
 										tempstr=tempstr+"966"
 								End Select
 							Case (chance>=40) And (chance<45) ;5% chance for a key card
-								temp3%=Rand(1,2)
-								tempstr="key"+Str(temp3)
+								tempstr="key"+Str(Rand(1,2))
 							Case (chance>=45) And (chance<50) ;5% chance for a medkit
 								tempstr="firstaid"
 							Case (chance>=50) And (chance<60) ;10% chance for a battery
@@ -4802,8 +4789,7 @@ Function FillRoom(r.Rooms)
 							Case (chance>=85) And (chance<95) ;10% chance for a clipboard
 								tempstr="clipboard"
 							Case (chance>=95) And (chance=<100) ;5% chance for misc
-								temp3%=Rand(1,3)
-								Select temp3
+								Select Rand(1,3)
 									Case 1 ;playing card
 										tempstr="playingcard"
 									Case 2 ;Mastercard
@@ -4926,7 +4912,7 @@ Function FillRoom(r.Rooms)
 			r\Objects[11]=LoadMesh_Strict("GFX\map\pocketdimension5.b3d") ;the pillar room
 			
 			
-			terrain = LoadMesh_Strict("GFX\map\pocketdimensionterrain.b3d")
+			Local terrain = LoadMesh_Strict("GFX\map\pocketdimensionterrain.b3d")
 			ScaleEntity terrain,RoomScale,RoomScale,RoomScale,True
 			;RotateEntity terrain,0,e\room\angle,0,True
 			PositionEntity terrain, 0, 2944, 0, True
@@ -4937,9 +4923,10 @@ Function FillRoom(r.Rooms)
 			
 			For n = 0 To -1;4
 				
+				Local entity
 				Select n
 					Case 0
-						entity = hallway 					
+						entity = hallway
 					Case 1
 						entity = r\Objects[8]						
 					Case 2
@@ -5011,7 +4998,7 @@ Function FillRoom(r.Rooms)
 			For i = 1 To 8
 				r\Objects[i-1] = CopyEntity(hallway) ;CopyMesh
 				ScaleEntity (r\Objects[i-1],RoomScale,RoomScale,RoomScale)
-				angle# = (i-1) * (360.0/8.0)
+				Local angle# = (i-1) * (360.0/8.0)
 				
 				EntityType r\Objects[i-1], HIT_MAP
 				;EntityPickMode r\Objects[i-1], 3
@@ -5068,7 +5055,6 @@ Function FillRoom(r.Rooms)
 			EntityFX(r\Objects[20], 1 + 8)
 			SpriteViewMode(r\Objects[20], 2)
 			
-			FreeTexture t
 			FreeEntity hallway
 			;[End Block]
 		Case "room3z3"
@@ -5569,7 +5555,7 @@ Function FillRoom(r.Rooms)
 	
 	For lt.lighttemplates = Each LightTemplates
 		If lt\roomtemplate = r\RoomTemplate Then
-			newlt = AddLight(r, r\x+lt\x, r\y+lt\y, r\z+lt\z, lt\ltype, lt\range, lt\r, lt\g, lt\b)
+			Local newlt = AddLight(r, r\x+lt\x, r\y+lt\y, r\z+lt\z, lt\ltype, lt\range, lt\r, lt\g, lt\b)
 			If newlt <> 0 Then 
 				If lt\ltype = 3 Then
 					LightConeAngles(newlt, lt\innerconeangle, lt\outerconeangle)
@@ -5893,7 +5879,7 @@ Type LightTemplates
 End Type 
 
 Function AddTempLight.LightTemplates(rt.RoomTemplates, x#, y#, z#, ltype%, range#, r%, g%, b%)
-	lt.lighttemplates = New LightTemplates
+	Local lt.lighttemplates = New LightTemplates
 	lt\roomtemplate = rt
 	lt\x = x
 	lt\y = y
@@ -5931,7 +5917,7 @@ End Type
 
 Function CreateWaypoint.WayPoints(x#,y#,z#,door.Doors, room.Rooms)
 	
-	w.waypoints = New WayPoints
+	Local w.waypoints = New WayPoints
 	
 	If 1 Then
 		w\obj = CreatePivot()
@@ -5958,7 +5944,7 @@ Function InitWayPoints(loadingstart,loadingcount#)
 	
 	Local x#, y#, z#
 	
-	temper = MilliSecs()
+	Local temper = MilliSecs()
 	
 	Local dist#, dist2#
 	
@@ -5990,7 +5976,7 @@ Function InitWayPoints(loadingstart,loadingcount#)
 		If (Not d\DisableWaypoint) Then CreateWaypoint(EntityX(d\frameobj, True), EntityY(d\frameobj, True)+0.18, EntityZ(d\frameobj, True), d, ClosestRoom)
 	Next
 	
-	amount# = 0
+	Local amount# = 0
 	For w.WayPoints = Each WayPoints
 		EntityPickMode w\obj, 1, True
 		EntityRadius w\obj, 0.2
@@ -6000,8 +5986,8 @@ Function InitWayPoints(loadingstart,loadingcount#)
 	
 	;pvt = CreatePivot()
 	
-	number = 0
-	iter = 0
+	Local number = 0
+	Local iter = 0
 	For w.WayPoints = Each WayPoints
 		
 		number = number + 1
@@ -6070,7 +6056,7 @@ Function InitWayPoints(loadingstart,loadingcount#)
 		
 		For i = 0 To 4
 			If w\connected[i]<>Null Then 
-				tline = CreateLine(EntityX(w\obj,True),EntityY(w\obj,True),EntityZ(w\obj,True),EntityX(w\connected[i]\obj,True),EntityY(w\connected[i]\obj,True),EntityZ(w\connected[i]\obj,True))
+				Local tline = CreateLine(EntityX(w\obj,True),EntityY(w\obj,True),EntityZ(w\obj,True),EntityX(w\connected[i]\obj,True),EntityY(w\connected[i]\obj,True),EntityZ(w\connected[i]\obj,True))
 				EntityColor(tline, 255,0,0)
 				EntityParent tline, w\obj
 			EndIf
@@ -6191,7 +6177,7 @@ Function FindPath(n.NPCs, x#, y#, z#)
 	Repeat
 		
 		temp% = False
-		smallest.WayPoints = Null
+		Local smallest.WayPoints = Null
 		dist# = 10000.0
 		For w.WayPoints = Each WayPoints
 			If w\state = 1 Then
@@ -6212,6 +6198,7 @@ Function FindPath(n.NPCs, x#, y#, z#)
                 If w\connected[i]<>Null Then
 					If w\connected[i]\state < 2 Then
 						
+						Local gtemp#
 						If w\connected[i]\state=1 Then ;open list
 							gtemp# = w\Gcost+w\dist[i]
 							If n\NPCtype = NPCtypeMTF Then
@@ -6283,6 +6270,8 @@ Function FindPath(n.NPCs, x#, y#, z#)
 End Function
 Function CreateLine(x1#,y1#,z1#, x2#,y2#,z2#, mesh=0)
 	
+	Local verts
+	Local surf
 	If mesh = 0 Then 
 		mesh=CreateMesh()
 		EntityFX(mesh,16)
@@ -6324,7 +6313,7 @@ Type TempScreens
 End Type
 
 Function CreateScreen.Screens(x#,y#,z#,imgpath$,r.Rooms)
-	s.screens = New Screens
+	Local s.screens = New Screens
 	s\obj = CreatePivot()
 	EntityPickMode(s\obj, 1)	
 	EntityRadius s\obj, 0.1
@@ -6765,7 +6754,7 @@ Function UpdateLever(obj, locked=False)
 					If MouseHit1 Then GrabbedEntity = obj
 				End If
 				
-				prevpitch# = EntityPitch(obj)
+				Local prevpitch# = EntityPitch(obj)
 				
 				If (MouseDown1 Or MouseHit1) Then
 					If GrabbedEntity <> 0 Then
@@ -7132,6 +7121,7 @@ Function CreateMapLayout()
 		
 		If GetZone(y-height)<>GetZone(y-height+1) Then height=height-1
 		
+		Local temp
 		For i = 1 To yhallways
 			
 			Local x2% = Max(Min(Rand(x, x + width-1),MapWidth-2),2)
@@ -7140,6 +7130,7 @@ Function CreateMapLayout()
 			Wend
 			
 			If x2<x+width Then
+				Local tempheight
 				If i = 1 Then
 					tempheight = height 
 					If Rand(2)=1 Then x2 = x Else x2 = x+width
@@ -7204,7 +7195,7 @@ Function ForceRooms()
 
 	;force more room1s (if needed)
 	For i = 0 To 2
-		temp = -RoomAmounts(ROOM1, i)+forceRoom1
+		Local temp = -RoomAmounts(ROOM1, i)+forceRoom1
 		
 		If temp > 0 Then
 			
@@ -7220,6 +7211,7 @@ Function ForceRooms()
 						If (Min(MapTemp(x + 1, y),1) + Min(MapTemp(x - 1, y),1) + Min(MapTemp(x, y + 1),1) + Min(MapTemp(x, y - 1),1)) = 1 Then
 							;If Rand(4)=1 Then
 							
+							Local x2, y2
 							If MapTemp(x + 1, y) Then
 								x2 = x+1 : y2 = y
 							ElseIf MapTemp(x - 1, y)
@@ -7230,7 +7222,7 @@ Function ForceRooms()
 								x2 = x : y2 = y-1
 							EndIf
 							
-							placed = False
+							Local placed = False
 							If MapTemp(x2,y2)>1 And MapTemp(x2,y2)<4 And (y<y_max Or y2<y Or i=0) Then
 								Select MapTemp(x2,y2)
 									Case 2
@@ -7446,7 +7438,7 @@ Function SetRooms()
 	For rt.RoomTemplates = Each RoomTemplates
 		If rt\SetRoom >= 0 Then
 			For i% = 0 To ZONEAMOUNT-1
-				zone% = rt\zone[i]
+				Local zone% = rt\zone[i]
 				If zone <> 0 Then
 					zone = zone - 1
 					Local start% = MinPositions(rt\Shape, zone)
@@ -7467,6 +7459,7 @@ Function CreateRooms(loadingstart,loadingcount#)
 		
 		;zone% = GetZone(y)
 		
+		Local zone
 		If y < MapHeight/3+1 Then
 			zone=3
 		ElseIf y < MapHeight*(2.0/3.0);-1
@@ -7610,7 +7603,7 @@ Function DrawDebugMap()
 				Local mirroredX% = MapWidth - x
 				If MapTemp(x, y) = 0 Then
 					
-					zone=GetZone(y)
+					Local zone=GetZone(y)
 					
 					Color 25+50*zone, 25+50*zone, 25+50*zone
 					Rect(xStart + mirroredX * tileSize, yStart + y * tileSize, tileSize - 2, tileSize - 2)
@@ -7664,6 +7657,7 @@ Function CreateDoors()
 	Local shouldSpawnDoor%
 	For y = MapHeight To 0 Step -1
 		
+		Local zone
 		If y<I_Zone\Transition[1]-1 Then
 			zone=3
 		ElseIf y>=I_Zone\Transition[1]-1 And y<I_Zone\Transition[0]-1 Then
@@ -7674,6 +7668,7 @@ Function CreateDoors()
 		
 		For x = MapWidth To 0 Step -1
 			If MapTemp(x,y) > 0 Then
+				Local temp
 				If zone = 2 Then temp=2 Else temp=0
                 
                 For r.Rooms = Each Rooms
@@ -7944,8 +7939,8 @@ Function load_terrain(hmap,yscale#=0.7,t1%,t2%,mask%)
 	EntityFX mesh2, 1+2+32
 	
 	; alter vertice height to match the heightmap red channel
-	HeightMapBuffer = TextureBuffer(hmap)
-	MaskBuffer = TextureBuffer(mask)
+	Local HeightMapBuffer = TextureBuffer(hmap)
+	Local MaskBuffer = TextureBuffer(mask)
 	LockBuffer HeightMapBuffer
 	LockBuffer MaskBuffer
 	;SetBuffer 
@@ -7956,8 +7951,8 @@ Function load_terrain(hmap,yscale#=0.7,t1%,t2%,mask%)
 			maskX = Min(maskX, maskW-1)
 			maskY = Min(maskY, maskH-1)
 			
-			RGB1 = ReadPixelFast(Min(lx, x-1), y - Min(ly, y-1), HeightMapBuffer)
-			r = (RGB1 And $FF0000) Shr 16
+			Local RGB1 = ReadPixelFast(Min(lx, x-1), y - Min(ly, y-1), HeightMapBuffer)
+			Local r = (RGB1 And $FF0000) Shr 16
 			
 			Local alpha# = ((ReadPixelFast(Clamp(maskX-5,0,maskW-1), Clamp(maskY-5,0,maskH-1), MaskBuffer) And $FF000000) Shr 24) / 255.0
 			alpha = alpha + ((ReadPixelFast(Clamp(maskX+5,0,maskW-1), Clamp(maskY+5,0,maskH-1), MaskBuffer) And $FF000000) Shr 24) / 255.0
@@ -8180,7 +8175,7 @@ Function UpdateCheckpointMonitors(numb%)
 		If b<>0 Then
 			t1 = GetBrushTexture(b,0)
 			If t1<>0 Then
-				name$ = StripPath(TextureName(t1))
+				Local name$ = StripPath(TextureName(t1))
 				If Lower(name) <> "monitortexture.jpg"
 					If numb% = 0
 						If MonitorTimer# < 50
@@ -8225,7 +8220,7 @@ Function TurnCheckpointMonitorsOff(numb%)
 		If b<>0 Then
 			t1 = GetBrushTexture(b,0)
 			If t1<>0 Then
-				name$ = StripPath(TextureName(t1))
+				Local name$ = StripPath(TextureName(t1))
 				If Lower(name) <> "monitortexture.jpg"
 					BrushTexture b, MonitorTextureOff, 0, 0
 					PaintSurface sf,b
