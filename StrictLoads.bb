@@ -458,7 +458,7 @@ End Function
 Function LoadEffect_Strict%(file$)
 	file = DetermineModdedPath(file)
 	If FileType(file$)<>1 Then RuntimeErrorExt "Shader " + file$ + " not found."
-	tmp = LoadEffect(file)
+	Local tmp = LoadEffect(file)
 	If tmp = 0 Then RuntimeErrorExt "Failed to load Shader: " + file$ + ". Error: " + GetEffectError() + Chr(10)
 	Return tmp
 End Function
