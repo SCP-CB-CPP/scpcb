@@ -12136,6 +12136,8 @@ Function UpdateLeave1499()
 				NTF_1499Z# = EntityZ(Collider)
 				PositionEntity (Collider, NTF_1499PrevX#, NTF_1499PrevY#+0.05, NTF_1499PrevZ#)
 				ResetEntity(Collider)
+				DropSpeed = 0.0
+				PlayerFallingPickDistance = 10.0
 				PlayerRoom = r
 				UpdateDoors()
 				UpdateRooms()
