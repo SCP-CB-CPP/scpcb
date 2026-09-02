@@ -6351,7 +6351,7 @@ Function DrawGUI()
 						Injuries = Max(Injuries + GetINIInt2(iniStr, loc, "damage") + GetINIInt2(iniStr, loc, "injuries"), 0);*temp
 						Bloodloss = Max(Bloodloss + GetINIInt2(iniStr, loc, "blood loss"), 0);*temp
 						
-						If GetINIInt2(iniStr, loc, "stomachache") Then SCP1025state[3]=Max(1, SCP1025state[3])
+						If GetINIInt2(iniStr, loc, "stomachache") Lor GetINIInt2(iniStr, loc, "stomach ache") Then SCP1025state[3]=Max(1, SCP1025state[3])
 						
 						;the state of refined drinks is more than 1.0 (fine setting increases it by 1, very fine doubles it)
 						strtemp = GetINIString2(iniStr, loc, "blink effect")
