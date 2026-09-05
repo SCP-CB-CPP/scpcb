@@ -325,7 +325,7 @@ Function UpdateEvents()
 						If i = 0 Then PlaySound_Strict(LoadTempSound("SFX\Room\Intro\PA\scripted\scripted6.ogg"))
 						
 						If (i>0 And i<26) Then
-							If Not CommotionState(i) Then ;Prevents the same commotion file from playing more then once.
+							If Not CommotionState(i) Then ;Prevents the same commotion file from playing more than once.
 								PlaySound_Strict(LoadTempSound("SFX\Room\Intro\Commotion\Commotion"+i+".ogg"))
 								CommotionState(i) = True
 							EndIf
@@ -4824,13 +4824,7 @@ Function UpdateEvents()
 							EndIf
 							
 							If e\room\RoomDoors[4]\open = False
-								If UpdateLever(e\room\Levers[0])
-									e\room\RoomDoors[4]\open = True
-									If e\Sound2 <> 0 Then FreeSound_Strict e\Sound2 : e\Sound2=0
-									e\Sound2 = LoadSound_Strict("SFX\Door\Door2Open1_dist.ogg")
-									e\SoundCHN2 = PlaySound2(e\Sound2,Camera,e\room\RoomDoors[4]\obj,400)
-								EndIf
-								If UpdateLever(e\room\Levers[1])
+								If UpdateLever(e\room\Levers[0]) Or UpdateLever(e\room\Levers[1])
 									e\room\RoomDoors[4]\open = True
 									If e\Sound2 <> 0 Then FreeSound_Strict e\Sound2 : e\Sound2=0
 									e\Sound2 = LoadSound_Strict("SFX\Door\Door2Open1_dist.ogg")
