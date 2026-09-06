@@ -4172,6 +4172,8 @@ Function DrawEnding()
 		;EndIf
 		
 		If EndingScreen = 0 Then
+			KillSounds()
+
 			SubBox\screenTop = GraphicHeight * 0.9
 			RecalculateSubtitleBoxTarget()
 
