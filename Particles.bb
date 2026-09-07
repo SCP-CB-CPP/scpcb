@@ -27,9 +27,9 @@ Function CreateParticle.Particles(x#, y#, z#, image%, size#, gravity# = 1.0, lif
 	SpriteViewMode (p\obj, 3)
 	
 	Select image
-		Case 0,5,6
+		Case 0,2,5,6
 			EntityBlend(p\obj, 1)
-		Case 1,2,3,4,7
+		Case 1,3,4,7
 			EntityBlend(p\obj, 3)
 	End Select
 	

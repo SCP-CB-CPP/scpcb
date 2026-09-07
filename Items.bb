@@ -78,17 +78,13 @@ Function CreateItemTemplate.ItemTemplates(name$, group$, displayname$, objpath$,
 		EndIf
 	Next
 	If it\invimg=0 Then
-		it\invimg = LoadImage_Strict(invimgpath)
+		it\invimg = LoadImageHUDScaled(invimgpath, 64)
 		it\invimgpath = invimgpath
-		MaskImage(it\invimg, 255, 0, 255)
-		ScaleImage(it\invimg, HUDScale, HUDScale)
 	EndIf
 	
 	If (invimgpath2 <> "") Then
 		If it\invimg2=0 Then
-			it\invimg2 = LoadImage_Strict(invimgpath2)
-			MaskImage(it\invimg2,255,0,255)
-			ScaleImage(it\invimg2, HUDScale, HUDScale)
+			it\invimg2 = LoadImageHUDScaled(invimgpath2, 64)
 		EndIf
 	Else
 		it\invimg2 = 0
@@ -101,7 +97,7 @@ Function CreateItemTemplate.ItemTemplates(name$, group$, displayname$, objpath$,
 	;	
 	;	;DebugLog imgpath
 	;	
-	;	If it\img<>0 Then ResizeImage(it\img, ImageWidth(it\img) * MenuScale, ImageHeight(it\img) * MenuScale)
+	;	If it\img<>0 Then ScaleImage(it\img, MenuScale, MenuScale)
 	;EndIf
 	
 	it\group = group
@@ -401,7 +397,7 @@ Function RemoveItem(i.Items, inGame%=True)
 		End Select
 	EndIf
 	If i\itemtemplate\img <> 0
-		FreeImage i\itemtemplate\img
+		FreeImageHUDScaled i\itemtemplate\img
 		i\itemtemplate\img = 0
 	EndIf
 	If i\Inventory <> Null Then Delete i\Inventory

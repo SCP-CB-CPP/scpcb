@@ -577,9 +577,9 @@ Function ReadMesh%(file$, f%, blankTexture%, Alpha%, Opaque%, coll% = True)
 			If tex[j]=0 Then ;texture is not in cache
 				Select True
 					Case temp1i<3
-						tex[j]=LoadModdedTextureNonStrict(file+temp1s,1)
+						tex[j]=LoadTexture(file+temp1s,1)
 					Default
-						tex[j]=LoadModdedTextureNonStrict(file+temp1s,3)
+						tex[j]=LoadTexture(file+temp1s,3)
 				End Select
 				
 				If tex[j]<>0 Then
@@ -1017,20 +1017,22 @@ Function PlaceForest(fr.Forest,x#,y#,z#,r.Rooms)
 	Local GroundTexture = LoadTexture_Strict("GFX\map\forest\forestfloor.jpg")
 	Local PathTexture = LoadTexture_Strict("GFX\map\forest\forestpath.jpg")
 	
-	hmap[ROOM1]=LoadImage_Strict("GFX\map\forest\forest1h.png")
-	mask[ROOM1]=LoadTexture_Strict("GFX\map\forest\forest1h_mask.png",1+2+256)
+	hmapFlags% = 1+16+32+256+512+16384
+	maskFlags% = hmapFlags+2
+	hmap[ROOM1]=LoadTexture_Strict("GFX\map\forest\forest1h.png",hmapFlags)
+	mask[ROOM1]=LoadTexture_Strict("GFX\map\forest\forest1h_mask.png",maskFlags)
 	
-	hmap[ROOM2]=LoadImage_Strict("GFX\map\forest\forest2h.png")
-	mask[ROOM2]=LoadTexture_Strict("GFX\map\forest\forest2h_mask.png",1+2+256)
+	hmap[ROOM2]=LoadTexture_Strict("GFX\map\forest\forest2h.png",hmapFlags)
+	mask[ROOM2]=LoadTexture_Strict("GFX\map\forest\forest2h_mask.png",maskFlags)
 	
-	hmap[ROOM2C]=LoadImage_Strict("GFX\map\forest\forest2Ch.png")
-	mask[ROOM2C]=LoadTexture_Strict("GFX\map\forest\forest2Ch_mask.png",1+2+256)
+	hmap[ROOM2C]=LoadTexture_Strict("GFX\map\forest\forest2Ch.png",hmapFlags)
+	mask[ROOM2C]=LoadTexture_Strict("GFX\map\forest\forest2Ch_mask.png",maskFlags)
 	
-	hmap[ROOM3]=LoadImage_Strict("GFX\map\forest\forest3h.png")
-	mask[ROOM3]=LoadTexture_Strict("GFX\map\forest\forest3h_mask.png",1+2+256)
+	hmap[ROOM3]=LoadTexture_Strict("GFX\map\forest\forest3h.png",hmapFlags)
+	mask[ROOM3]=LoadTexture_Strict("GFX\map\forest\forest3h_mask.png",maskFlags)
 	
-	hmap[ROOM4]=LoadImage_Strict("GFX\map\forest\forest4h.png")
-	mask[ROOM4]=LoadTexture_Strict("GFX\map\forest\forest4h_mask.png",1+2+256)
+	hmap[ROOM4]=LoadTexture_Strict("GFX\map\forest\forest4h.png",hmapFlags)
+	mask[ROOM4]=LoadTexture_Strict("GFX\map\forest\forest4h_mask.png",maskFlags)
 	
 	For i = ROOM1 To ROOM4
 		fr\TileMesh[i]=load_terrain(hmap[i],0.03,GroundTexture,PathTexture,mask[i])
@@ -1123,14 +1125,15 @@ Function PlaceForest(fr.Forest,x#,y#,z#,r.Rooms)
 					
 					;place trees and other details
 					;only placed on spots where the value of the heightmap is above 100
-					SetBuffer ImageBuffer(hmap[tile_type])
-					Local width = ImageWidth(hmap[tile_type])
+					Local width = TextureWidth(hmap[tile_type])
+					Local buf% = TextureBuffer(hmap[tile_type])
+					LockBuffer(buf)
 					tempf4# = (tempf3/Float(width))
 					For lx = 3 To width-2
 						For ly = 3 To width-2
-							GetColor lx,width-ly
+							Local red% = (ReadPixelFast(lx,width-ly,buf) And $FF0000) Shr 16
 							
-							If ColorRed()>Rand(100,260) Then
+							If red>Rand(100,260) Then
 								Select Rand(0,7)
 									Case 0,1,2,3,4,5,6 ;create a tree
 										detail_entity=CopyEntity(fr\DetailMesh[0])
@@ -1147,7 +1150,7 @@ Function PlaceForest(fr.Forest,x#,y#,z#,r.Rooms)
 										Next
 										
 										ScaleEntity detail_entity,tempf2*1.1,tempf2,tempf2*1.1,True
-										PositionEntity detail_entity,lx*tempf4-(tempf3/2.0),ColorRed()*0.03-Rnd(3.0,3.2),ly*tempf4-(tempf3/2.0),True
+										PositionEntity detail_entity,lx*tempf4-(tempf3/2.0),red*0.03-Rnd(3.0,3.2),ly*tempf4-(tempf3/2.0),True
 										
 										RotateEntity detail_entity,Rnd(-5,5),Rnd(360.0),0.0,True
 										
@@ -1158,7 +1161,7 @@ Function PlaceForest(fr.Forest,x#,y#,z#,r.Rooms)
 										tempf2=Rnd(0.01,0.012)
 										;ScaleEntity detail_entity,tempf2,tempf2*Rnd(1.0,2.0),tempf2,True
 										
-										PositionEntity detail_entity,lx*tempf4-(tempf3/2.0),ColorRed()*0.03-1.3,ly*tempf4-(tempf3/2.0),True
+										PositionEntity detail_entity,lx*tempf4-(tempf3/2.0),red*0.03-1.3,ly*tempf4-(tempf3/2.0),True
 										
 										EntityFX detail_entity, 1
 										
@@ -1169,16 +1172,16 @@ Function PlaceForest(fr.Forest,x#,y#,z#,r.Rooms)
 										tempf2=Rnd(0.1,0.12)
 										ScaleEntity detail_entity,tempf2,tempf2,tempf2,True
 										
-										PositionEntity detail_entity,lx*tempf4-(tempf3/2.0),ColorRed()*0.03-1.3,ly*tempf4-(tempf3/2.0),True
+										PositionEntity detail_entity,lx*tempf4-(tempf3/2.0),red*0.03-1.3,ly*tempf4-(tempf3/2.0),True
 								End Select
 								
 								EntityFX detail_entity, 1
-								;PositionEntity detail_entity,Rnd(0.0,tempf3)-(tempf3/2.0),ColorRed()*0.03-0.05,Rnd(0.0,tempf3)-(tempf3/2.0),True
+								;PositionEntity detail_entity,Rnd(0.0,tempf3)-(tempf3/2.0),red*0.03-0.05,Rnd(0.0,tempf3)-(tempf3/2.0),True
 								EntityParent detail_entity,tile_entity
 							EndIf
 						Next
 					Next
-					SetBuffer BackBuffer()
+					UnlockBuffer(buf)
 					
 					ScaleEntity tile_entity,tempf1,tempf1,tempf1
 					
@@ -1254,7 +1257,7 @@ Function PlaceForest(fr.Forest,x#,y#,z#,r.Rooms)
 	FreeTexture GroundTexture
 	FreeTexture PathTexture
 	For i = ROOM1 To ROOM4
-		FreeImage(hmap[i])
+		FreeTexture(hmap[i])
 		FreeTexture(mask[i])
 	Next
 
@@ -1285,20 +1288,22 @@ Function PlaceForest_MapCreator(fr.Forest,x#,y#,z#,r.Rooms)
 	Local GroundTexture = LoadTexture_Strict("GFX\map\forest\forestfloor.jpg")
 	Local PathTexture = LoadTexture_Strict("GFX\map\forest\forestpath.jpg")
 	
-	hmap[ROOM1]=LoadImage_Strict("GFX\map\forest\forest1h.png")
-	mask[ROOM1]=LoadTexture_Strict("GFX\map\forest\forest1h_mask.png",1+2+256)
+	hmapFlags% = 1+16+32+256+512+16384
+	maskFlags% = hmapFlags+2
+	hmap[ROOM1]=LoadTexture_Strict("GFX\map\forest\forest1h.png",hmapFlags)
+	mask[ROOM1]=LoadTexture_Strict("GFX\map\forest\forest1h_mask.png",maskFlags)
 	
-	hmap[ROOM2]=LoadImage_Strict("GFX\map\forest\forest2h.png")
-	mask[ROOM2]=LoadTexture_Strict("GFX\map\forest\forest2h_mask.png",1+2+256)
+	hmap[ROOM2]=LoadTexture_Strict("GFX\map\forest\forest2h.png",hmapFlags)
+	mask[ROOM2]=LoadTexture_Strict("GFX\map\forest\forest2h_mask.png",maskFlags)
 	
-	hmap[ROOM2C]=LoadImage_Strict("GFX\map\forest\forest2Ch.png")
-	mask[ROOM2C]=LoadTexture_Strict("GFX\map\forest\forest2Ch_mask.png",1+2+256)
+	hmap[ROOM2C]=LoadTexture_Strict("GFX\map\forest\forest2Ch.png",hmapFlags)
+	mask[ROOM2C]=LoadTexture_Strict("GFX\map\forest\forest2Ch_mask.png",maskFlags)
 	
-	hmap[ROOM3]=LoadImage_Strict("GFX\map\forest\forest3h.png")
-	mask[ROOM3]=LoadTexture_Strict("GFX\map\forest\forest3h_mask.png",1+2+256)
+	hmap[ROOM3]=LoadTexture_Strict("GFX\map\forest\forest3h.png",hmapFlags)
+	mask[ROOM3]=LoadTexture_Strict("GFX\map\forest\forest3h_mask.png",maskFlags)
 	
-	hmap[ROOM4]=LoadImage_Strict("GFX\map\forest\forest4h.png")
-	mask[ROOM4]=LoadTexture_Strict("GFX\map\forest\forest4h_mask.png",1+2+256)
+	hmap[ROOM4]=LoadTexture_Strict("GFX\map\forest\forest4h.png",hmapFlags)
+	mask[ROOM4]=LoadTexture_Strict("GFX\map\forest\forest4h_mask.png",maskFlags)
 	
 	For i = ROOM1 To ROOM4
 		fr\TileMesh[i]=load_terrain(hmap[i],0.03,GroundTexture,PathTexture,mask[i])
@@ -1343,14 +1348,15 @@ Function PlaceForest_MapCreator(fr.Forest,x#,y#,z#,r.Rooms)
 					
 					;place trees and other details
 					;only placed on spots where the value of the heightmap is above 100
-					SetBuffer ImageBuffer(hmap[tile_type])
-					Local width = ImageWidth(hmap[tile_type])
+					Local width = TextureWidth(hmap[tile_type])
+					Local buf% = TextureBuffer(hmap[tile_type])
+					LockBuffer(buf)
 					tempf4# = (tempf3/Float(width))
 					For lx = 3 To width-2
 						For ly = 3 To width-2
 							GetColor lx,width-ly
 							
-							If ColorRed()>Rand(100,260) Then
+							If red>Rand(100,260) Then
 								detail_entity = 0
 								Select Rand(0,7)
 									Case 0,1,2,3,4,5,6 ;create a tree
@@ -1368,7 +1374,7 @@ Function PlaceForest_MapCreator(fr.Forest,x#,y#,z#,r.Rooms)
 										Next
 										
 										ScaleEntity detail_entity,tempf2*1.1,tempf2,tempf2*1.1,True
-										PositionEntity detail_entity,lx*tempf4-(tempf3/2.0),ColorRed()*0.03-Rnd(3.0,3.2),ly*tempf4-(tempf3/2.0),True
+										PositionEntity detail_entity,lx*tempf4-(tempf3/2.0),red*0.03-Rnd(3.0,3.2),ly*tempf4-(tempf3/2.0),True
 										
 										RotateEntity detail_entity,Rnd(-5,5),Rnd(360.0),0.0,True
 										
@@ -1379,7 +1385,7 @@ Function PlaceForest_MapCreator(fr.Forest,x#,y#,z#,r.Rooms)
 										tempf2=Rnd(0.01,0.012)
 										;ScaleEntity detail_entity,tempf2,tempf2*Rnd(1.0,2.0),tempf2,True
 										
-										PositionEntity detail_entity,lx*tempf4-(tempf3/2.0),ColorRed()*0.03-1.3,ly*tempf4-(tempf3/2.0),True
+										PositionEntity detail_entity,lx*tempf4-(tempf3/2.0),red*0.03-1.3,ly*tempf4-(tempf3/2.0),True
 										
 										EntityFX detail_entity, 1
 										
@@ -1390,18 +1396,18 @@ Function PlaceForest_MapCreator(fr.Forest,x#,y#,z#,r.Rooms)
 										tempf2=Rnd(0.1,0.12)
 										ScaleEntity detail_entity,tempf2,tempf2,tempf2,True
 										
-										PositionEntity detail_entity,lx*tempf4-(tempf3/2.0),ColorRed()*0.03-1.3,ly*tempf4-(tempf3/2.0),True
+										PositionEntity detail_entity,lx*tempf4-(tempf3/2.0),red*0.03-1.3,ly*tempf4-(tempf3/2.0),True
 								End Select
 								
 								If detail_entity <> 0 Then
 									EntityFX detail_entity, 1
-									;PositionEntity detail_entity,Rnd(0.0,tempf3)-(tempf3/2.0),ColorRed()*0.03-0.05,Rnd(0.0,tempf3)-(tempf3/2.0),True
+									;PositionEntity detail_entity,Rnd(0.0,tempf3)-(tempf3/2.0),red*0.03-0.05,Rnd(0.0,tempf3)-(tempf3/2.0),True
 									EntityParent detail_entity,tile_entity
 								EndIf
 							EndIf
 						Next
 					Next
-					SetBuffer BackBuffer()
+					UnlockBuffer(buf)
 					
 					ScaleEntity tile_entity,tempf1,tempf1,tempf1
 					
@@ -1476,7 +1482,7 @@ Function PlaceForest_MapCreator(fr.Forest,x#,y#,z#,r.Rooms)
 	FreeTexture GroundTexture
 	FreeTexture PathTexture
 	For i = ROOM1 To ROOM4
-		FreeImage(hmap[i])
+		FreeTexture(hmap[i])
 		FreeTexture(mask[i])
 	Next
 
@@ -5282,8 +5288,8 @@ Function FillRoom(r.Rooms)
 			Local scale# = RoomScale * 4.5 * 0.4
 			Local screen%
 			
-			r\Textures[0] = LoadAnimTexture("GFX\SL_monitors_checkpoint.jpg",1,512,512,0,4)
-			r\Textures[1] = LoadAnimTexture("GFX\Sl_monitors.jpg",1,256,256,0,8)
+			r\Textures[0] = LoadAnimTexture_Strict("GFX\SL_monitors_checkpoint.jpg",1,4,1,0,4)
+			r\Textures[1] = LoadAnimTexture_Strict("GFX\Sl_monitors.jpg",1,8,1,0,8)
 			
 			;Monitor Objects
 			For i = 0 To 14
@@ -6335,9 +6341,7 @@ Function UpdateScreens()
 					If MouseUp1 Then 
 						SelectedScreen=s
 						SelectedItem = Null
-						s\img = LoadImage_Strict("GFX\screens\"+s\imgpath)
-						s\img = ResizeImage2(s\img, ImageWidth(s\img) * MenuScale, ImageHeight(s\img) * MenuScale)
-						MaskImage s\img, 255,0,255
+						s\img = LoadImage_Strict("GFX\screens\"+s\imgpath, MenuScale)
 						PlaySound_Strict ButtonSFX
 						MouseUp1=False
 					EndIf
@@ -6388,7 +6392,7 @@ Type SecurityCams
 	Field MinAngle#, MaxAngle#, dir%
 End Type
 
-Global ScreenTexs%[2]
+Global ScreenTexs%[3]
 
 Global CurrRoom2slRenderCam%
 Global Room2slCam%
@@ -6560,6 +6564,7 @@ Function UpdateSecurityCams()
 						If BlinkTimer > - 5 And EntityInView(sc\ScrObj, Camera)Then
 							If EntityVisible(Camera,sc\ScrObj) Then
 								;sc\InSight = True
+								SetBuffer(TextureBuffer(ScreenTexs[sc\ScrTexture]), TextureBuffer(ScreenTexs[2]))
 								If CoffinCam = Null Or Rand(5)=5 Or sc\CoffinEffect <> 3 Then
 									HideEntity(Camera)
 									ShowEntity(sc\Cam)
@@ -6567,9 +6572,7 @@ Function UpdateSecurityCams()
 									
 									UpdateRoomLights(sc\Cam)
 									
-									SetBuffer BackBuffer()
 									RenderWorld
-									CopyRect 0,0,512,512,0,0,BackBuffer(),TextureBuffer(ScreenTexs[sc\ScrTexture])
 									
 									HideEntity(sc\Cam)
 									ShowEntity(Camera)										
@@ -6582,14 +6585,13 @@ Function UpdateSecurityCams()
 									
 									UpdateRoomLights(CoffinCam\Cam)
 									
-									SetBuffer BackBuffer()
 									RenderWorld
-									CopyRect 0,0,512,512,0,0,BackBuffer(),TextureBuffer(ScreenTexs[sc\ScrTexture])
 									
 									HideEntity (CoffinCam\room\obj)
 									HideEntity(CoffinCam\Cam)
 									ShowEntity(Camera)										
 								EndIf
+								SetBuffer BackBuffer()
 							EndIf
 						EndIf
 						sc\State = 0
@@ -7885,7 +7887,7 @@ Function load_terrain(hmap,yscale#=0.7,t1%,t2%,mask%)
 	If hmap = 0 Then RuntimeErrorExt "Heightmap image "+hmap+" does not exist."
 	
 	; store heightmap dimensions
-	Local x = ImageWidth(hmap)-1, y = ImageHeight(hmap)-1
+	Local x = TextureWidth(hmap)-1, y = TextureHeight(hmap)-1
 	Local lx,ly,index
 	
 	; load texture and lightmaps
@@ -7939,15 +7941,15 @@ Function load_terrain(hmap,yscale#=0.7,t1%,t2%,mask%)
 	EntityFX mesh2, 1+2+32
 	
 	; alter vertice height to match the heightmap red channel
-	Local HeightMapBuffer = ImageBuffer(hmap)
+	Local HeightMapBuffer = TextureBuffer(hmap)
 	Local MaskBuffer = TextureBuffer(mask)
 	LockBuffer HeightMapBuffer
 	LockBuffer MaskBuffer
 	;SetBuffer 
 	For lx = 0 To x
 		For ly = 0 To y
-			Local maskX# = lx * Float(maskW) / Float(ImageWidth(hmap)) * maskZoom + offsetX
-			Local maskY# = (ImageHeight(hmap) - ly) * Float(maskH) / Float(ImageHeight(hmap)) * maskZoom + offsetY
+			Local maskX# = lx * Float(maskW) / Float(TextureWidth(hmap)) * maskZoom + offsetX
+			Local maskY# = (TextureWidth(hmap) - ly) * Float(maskH) / Float(TextureWidth(hmap)) * maskZoom + offsetY
 			maskX = Min(maskX, maskW-1)
 			maskY = Min(maskY, maskH-1)
 			
