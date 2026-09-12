@@ -5534,7 +5534,7 @@ Function DrawGUI()
 							For z% = 0 To OtherSize - 1
 								If OtherOpen\Inventory\Items[z]<>Null
 									Local name$=OtherOpen\Inventory\Items[z]\itemtemplate\name
-									If name$<>"25ct" And name$<>"coin" And name$<>"key" And name$<>"scp860" And name$<>"scp714" Then
+									If name$<>"25ct" And name$<>"coin" And name$<>"key" And name$<>"scp860" Then
 										isEmpty=False
 										Exit
 									EndIf
