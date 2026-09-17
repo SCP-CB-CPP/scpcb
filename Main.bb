@@ -965,14 +965,7 @@ Function UpdateConsole()
 							If roomIndex <> 0 Then
 								roomIndex = roomIndex - 1
 							Else
-								PositionEntity (Collider, EntityX(r\obj), EntityY(r\obj)+0.7, EntityZ(r\obj))
-								ResetEntity(Collider)
-								UpdateDoors()
-								UpdateRooms()
-								For it.Items = Each Items
-									it\disttimer = 0
-								Next
-								PlayerRoom = r
+								Teleport(r)
 								roomFound = True
 								Exit
 							EndIf
@@ -1722,6 +1715,19 @@ CreateConsoleMsg("  - disable173/enable173")
 CreateConsoleMsg("  - disable106/enable106")
 CreateConsoleMsg("  - 173state/106state/096state")
 CreateConsoleMsg("  - spawn [npc type]")
+
+Function Teleport(r.Rooms)
+	PositionEntity (Collider, EntityX(r\obj), EntityY(r\obj)+0.3, EntityZ(r\obj))
+	ResetEntity(Collider)
+	MouseLook(False)
+	UpdateDoors()
+	UpdateRooms()
+	For it.Items = Each Items
+		it\disttimer = 0
+	Next
+	PlayerRoom = r
+
+End Function
 
 ;---------------------------------------------------------------------------------------------------
 
@@ -4594,7 +4600,7 @@ Function MovePlayer()
 	CatchErrors("MovePlayer")
 End Function
 
-Function MouseLook()
+Function MouseLook(handleInput% = True)
 	Local i%
 	
 	CameraShake = Max(CameraShake - (FPSfactor / 10), 0)
@@ -4633,7 +4639,7 @@ Function MouseLook()
 		;moveentity player, side, up, 0	
 		; -- Update the smoothing que To smooth the movement of the mouse.
 		mouse_x_speed_1# = CurveValue(MouseXSpeed() * (MouseSens + 0.6) , mouse_x_speed_1, (6.0 / (MouseSens + 1.0))*MouseSmooth) 
-		If Int(mouse_x_speed_1) = Int(Nan1) Then mouse_x_speed_1 = 0
+		If IsNaN(mouse_x_speed_1) Lor (Not handleInput) Then mouse_x_speed_1 = 0
 		If PrevFPSFactor>0 Then
             If Abs(FPSfactor/PrevFPSFactor-1.0)>1.0 Then
                 ;lag spike detected - stop all camera movement
@@ -4646,7 +4652,7 @@ Function MouseLook()
 		Else
 			mouse_y_speed_1# = CurveValue(MouseYSpeed () * (MouseSens + 0.6), mouse_y_speed_1, (6.0/(MouseSens+1.0))*MouseSmooth) 
 		EndIf
-		If Int(mouse_y_speed_1) = Int(Nan1) Then mouse_y_speed_1 = 0
+		If IsNaN(mouse_y_speed_1) Lor (Not handleInput) Then mouse_y_speed_1 = 0
 		
 		Local the_yaw# = ((mouse_x_speed_1#)) * mouselook_x_inc# / (1.0+WearingVest)
 		Local the_pitch# = ((mouse_y_speed_1#)) * mouselook_y_inc# / (1.0+WearingVest)
@@ -4722,7 +4728,7 @@ Function MouseLook()
 	EndIf
 	
 	; -- Limit the mouse;s movement. Using this method produces smoother mouselook movement than centering the mouse Each loop.
-	If (MouseX() > mouse_right_limit) Or (MouseX() < mouse_left_limit) Or (MouseY() > mouse_bottom_limit) Or (MouseY() < mouse_top_limit)
+	If handleInput And ((MouseX() > mouse_right_limit) Or (MouseX() < mouse_left_limit) Or (MouseY() > mouse_bottom_limit) Or (MouseY() < mouse_top_limit))
 		MoveMouse viewport_center_x, viewport_center_y
 	EndIf
 	
@@ -7351,7 +7357,16 @@ Function DrawMap()
 			Color r\RoomTemplate\r, r\RoomTemplate\g, r\RoomTemplate\b
 		EndIf
 		
-		Rect(startX + ((18 - (r\x / 8)) * cellSize), startY + ((r\z / 8) * cellSize), cellSize, cellSize, 1)
+		Local x% = startX + ((18 - (r\x / 8)) * cellSize)
+		Local y% = startY + ((r\z / 8) * cellSize)
+
+		If MouseOn(x, y, cellSize, cellSize) 
+			Color 100, 255, 100
+			If MouseHit1
+				Teleport(r)
+			EndIf
+		EndIf
+		Rect(x, y, cellSize, cellSize, 1)
 	Next
 End Function
 
