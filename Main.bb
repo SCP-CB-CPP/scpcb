@@ -1075,14 +1075,7 @@ Function UpdateConsole()
 							If roomIndex <> 0 Then
 								roomIndex = roomIndex - 1
 							Else
-								PositionEntity (Collider, EntityX(r\obj), EntityY(r\obj)+0.7, EntityZ(r\obj))
-								ResetEntity(Collider)
-								UpdateDoors()
-								UpdateRooms()
-								For it.Items = Each Items
-									it\disttimer = 0
-								Next
-								PlayerRoom = r
+								Teleport(r)
 								roomFound = True
 								Exit
 							EndIf
@@ -1848,6 +1841,19 @@ CreateConsoleMsg(" ")
 CreateConsoleMsg("  - disable/enable [npc type]")
 CreateConsoleMsg("  - npcspeed [npc type] [speed]")
 CreateConsoleMsg("  - spawn [npc type]")
+
+Function Teleport(r.Rooms)
+	PositionEntity (Collider, EntityX(r\obj), EntityY(r\obj)+0.3, EntityZ(r\obj))
+	ResetEntity(Collider)
+	MouseLook(False)
+	UpdateDoors()
+	UpdateRooms()
+	For it.Items = Each Items
+		it\disttimer = 0
+	Next
+	PlayerRoom = r
+
+End Function
 
 ;---------------------------------------------------------------------------------------------------
 
@@ -4848,7 +4854,7 @@ Function ZoomCamera(fov%)
 	CameraZoom(Camera, Min(1.0+(CurrCameraZoom/400.0),1.1) / Tan((ATan(Tan(fov%/2.0)*RealGraphicWidth/RealGraphicHeight))))
 End Function
 
-Function MouseLook()
+Function MouseLook(handleInput% = True)
 	Local i%
 	
 	CameraShake = Max(CameraShake - (FPSfactor / 10), 0)
@@ -4895,8 +4901,8 @@ Function MouseLook()
 			mouse_y_speed_1# = SmoothMouseValue(rawY, mouse_y_speed_1, tau)
 		EndIf
 
-		If IsNaN(mouse_x_speed_1) Then mouse_x_speed_1 = 0
-		If IsNaN(mouse_y_speed_1) Then mouse_y_speed_1 = 0
+		If IsNaN(mouse_x_speed_1) Lor (Not handleInput) Then mouse_x_speed_1 = 0
+		If IsNaN(mouse_y_speed_1) Lor (Not handleInput) Then mouse_y_speed_1 = 0
 
 		If InvertMouse Then mouse_y_speed_1 = -mouse_y_speed_1
 		
@@ -4973,7 +4979,7 @@ Function MouseLook()
 		End If
 	EndIf
 	
-	If SelectedEnding = "" Then MoveMouse viewport_center_x, viewport_center_y
+	If SelectedEnding = "" And handleInput Then MoveMouse viewport_center_x, viewport_center_y
 	
 	If WearingGasMask Or WearingHazmat Or Wearing1499 Then
 		If Wearing714 = False Then
@@ -7619,7 +7625,16 @@ Function DrawMap()
 			Color r\RoomTemplate\r, r\RoomTemplate\g, r\RoomTemplate\b
 		EndIf
 		
-		Rect(startX + ((18 - (r\x / 8)) * cellSize), startY + ((r\z / 8) * cellSize), cellSize, cellSize, 1)
+		Local x% = startX + ((18 - (r\x / 8)) * cellSize)
+		Local y% = startY + ((r\z / 8) * cellSize)
+
+		If MouseOn(x, y, cellSize, cellSize) 
+			Color 100, 255, 100
+			If MouseHit1
+				Teleport(r)
+			EndIf
+		EndIf
+		Rect(x, y, cellSize, cellSize, 1)
 	Next
 End Function
 
