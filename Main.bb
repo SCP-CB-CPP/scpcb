@@ -1865,6 +1865,7 @@ Global LightBlink#, LightFlash#
 
 Global BumpEnabled% = GetOptionInt("graphics", "bump mapping enabled")
 Global HUDenabled% = GetOptionInt("graphics", "HUD enabled")
+Global HUDenabledLegacy% = GetOptionInt("graphics", "HUD enabled legacy")
 
 Global Camera%, CameraShake#, CurrCameraZoom#
 
@@ -3610,7 +3611,7 @@ While IsRunning
 		EndIf
 		
 		If MsgTimer > 0 Then
-			If HUDenabled Then
+			If HUDenabled Lor HUDenabledLegacy Then
 				;If temp = True -> move the message below
 				Local temp% = False
 				If (Not InvOpen And OtherOpen = Null) Then
@@ -5163,7 +5164,7 @@ Function DrawGUI()
 	
 	
 	If ClosestButton <> 0 And (Not IsPaused()) Then
-		If HUDenabled Then
+		If HUDenabled Lor HUDenabledLegacy Then
 			temp% = CreatePivot()
 			PositionEntity temp, EntityX(Camera), EntityY(Camera), EntityZ(Camera)
 			PointEntity temp, ClosestButton
@@ -5192,7 +5193,7 @@ Function DrawGUI()
 		EndIf
 	EndIf
 	
-	If HUDenabled Then
+	If HUDenabled Lor HUDenabledLegacy Then
 		If ClosestItem <> Null Then
 			yawvalue# = -DeltaYaw(Camera, ClosestItem\collider)
 			If yawvalue > 90 And yawvalue <= 180 Then yawvalue = 90
@@ -7468,12 +7469,12 @@ Function DrawGUI()
 End Function
 
 Function DrawItemImg(i.Items)
-	If Not HUDenabled Then Return
+	If (Not HUDenabled) And (Not HUDenabledLegacy) Then Return
 	DrawImage(i\itemtemplate\invimg, GraphicWidth / 2 - ImageWidth(i\itemtemplate\invimg) / 2, GraphicHeight / 2 - ImageHeight(i\itemtemplate\invimg) / 2)
 End Function
 
 Function DrawItemUseProgress(i.Items)
-	If Not HUDenabled Then Return
+	If (Not HUDenabled) And (Not HUDenabledLegacy) Then Return
 	DrawItemImg(i)
 	DrawBar(BlinkMeterIMG, GraphicWidth / 2, GraphicHeight / 2 + 80 * HUDScale, 300 * HUDScale, i\state / 100.0, True)
 End Function
@@ -7492,42 +7493,42 @@ Function ResetDiseases()
 End Function
 
 Function DrawHUD()
-	If Not HUDenabled Then Return
-
 	If SpeedRunMode Then DrawTimer()
 
 	If ShowMap Then DrawMap()
 
-	Local width% = 204 * HUDScale
-	Local x% = HUDStartX + 80 * HUDScale
-	Local y% = HUDEndY - 95 * HUDScale
+	If HUDenabled Then
+		Local width% = 204 * HUDScale
+		Local x% = HUDStartX + 80 * HUDScale
+		Local y% = HUDEndY - 95 * HUDScale
 
-	DrawBar(BlinkMeterIMG, x, y, width, BlinkTimer / BLINKFREQ)
-	Color 0, 0, 0
-	Rect(x - 50 * HUDScale, y, 30 * HUDScale, 30 * HUDScale)
-	
-	If EyeIrritation > 0 Then
-		Color 200, 0, 0
-		Rect(x - 50 * HUDScale - 3, y - 3, 30 * HUDScale + 6, 30 * HUDScale + 6)
-	End If
-	
-	Color 255, 255, 255
-	Rect(x - 50 * HUDScale - 1, y - 1, 30 * HUDScale + 2, 30 * HUDScale + 2, False)
-	
-	DrawImage BlinkIcon, x - 50 * HUDScale, y
-	
-	y = HUDEndY - 55 * HUDScale
-	DrawBar(StaminaMeterIMG, x, y, width, Stamina / 100.0)
-	
-	Color 0, 0, 0
-	Rect(x - 50 * HUDScale, y, 30 * HUDScale, 30 * HUDScale)
-	
-	Color 255, 255, 255
-	Rect(x - 50 * HUDScale - 1, y - 1, 30 * HUDScale + 2, 30 * HUDScale + 2, False)
-	If Crouch Then
-		DrawImage CrouchIcon, x - 50 * HUDScale, y
-	Else
-		DrawImage SprintIcon, x - 50 * HUDScale, y
+		DrawBar(BlinkMeterIMG, x, y, width, BlinkTimer / BLINKFREQ)
+		Color 0, 0, 0
+		Rect(x - 50 * HUDScale, y, 30 * HUDScale, 30 * HUDScale)
+		
+		If EyeIrritation > 0 Then
+			Color 200, 0, 0
+			Rect(x - 50 * HUDScale - 3, y - 3, 30 * HUDScale + 6, 30 * HUDScale + 6)
+		End If
+		
+		Color 255, 255, 255
+		Rect(x - 50 * HUDScale - 1, y - 1, 30 * HUDScale + 2, 30 * HUDScale + 2, False)
+		
+		DrawImage BlinkIcon, x - 50 * HUDScale, y
+		
+		y = HUDEndY - 55 * HUDScale
+		DrawBar(StaminaMeterIMG, x, y, width, Stamina / 100.0)
+		
+		Color 0, 0, 0
+		Rect(x - 50 * HUDScale, y, 30 * HUDScale, 30 * HUDScale)
+		
+		Color 255, 255, 255
+		Rect(x - 50 * HUDScale - 1, y - 1, 30 * HUDScale + 2, 30 * HUDScale + 2, False)
+		If Crouch Then
+			DrawImage CrouchIcon, x - 50 * HUDScale, y
+		Else
+			DrawImage SprintIcon, x - 50 * HUDScale, y
+		EndIf
 	EndIf
 
 	If DebugHUD Then
