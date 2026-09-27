@@ -113,6 +113,7 @@ Function RegisterOptions()
     RegisterGlobalProperty("int TextureDetails", &TextureDetails)
     RegisterGlobalProperty("bool BumpEnabled", &BumpEnabled)
     RegisterGlobalProperty("bool HUDEnabled", &HUDenabled)
+    RegisterGlobalProperty("bool HUDEnabledLegacy", &HUDenabledLegacy)
     RegisterGlobalProperty("int Framelimit", &Framelimit)
     RegisterGlobalProperty("bool Vsync", &Vsync)
     RegisterGlobalProperty("int AntiAlias", &Opt_AntiAlias)
@@ -979,6 +980,8 @@ Function RegisterMap()
     RegisterTypeField("Room", "float MaxX", %Rooms\MaxX)
     RegisterTypeField("Room", "float MaxY", %Rooms\MaxY)
     RegisterTypeField("Room", "float MaxZ", %Rooms\MaxZ)
+
+    RegisterObjectMethod("Room", "void TeleportTo()", @Teleport)
 
     RegisterGlobalFunction("B3D::Pivot@ LoadRMesh(string file, RoomTemplate@ template=null)", @LoadRMesh)
 End Function

@@ -5032,7 +5032,8 @@ Function MouseLook(handleInput% = True)
 	CameraShake = Max(CameraShake - (FPSfactor / 10), 0)
 	
 	If MouseLook\Subscribers > 0 Then
-		PrepareFunction(0)
+		PrepareFunction(1)
+		SetArgInt(0, handleInput)
 		If CallHook(MouseLook) Then Return
 	EndIf
 
