@@ -1189,14 +1189,7 @@ Function UpdateConsole()
 							If roomIndex <> 0 Then
 								roomIndex = roomIndex - 1
 							Else
-								PositionEntity (Collider, EntityX(r\obj), EntityY(r\obj)+0.7, EntityZ(r\obj))
-								ResetEntity(Collider)
-								UpdateDoors()
-								UpdateRooms()
-								For it.Items = Each Items
-									it\disttimer = 0
-								Next
-								PlayerRoom = r
+								Teleport(r)
 								roomFound = True
 								Exit
 							EndIf
@@ -1974,6 +1967,19 @@ CreateConsoleMsg("  - disable/enable [npc type]")
 CreateConsoleMsg("  - npcspeed [npc type] [speed]")
 CreateConsoleMsg("  - spawn [npc type]")
 
+Function Teleport(r.Rooms)
+	PositionEntity (Collider, EntityX(r\obj), EntityY(r\obj)+0.3, EntityZ(r\obj))
+	ResetEntity(Collider)
+	MouseLook(False)
+	UpdateDoors()
+	UpdateRooms()
+	For it.Items = Each Items
+		it\disttimer = 0
+	Next
+	PlayerRoom = r
+
+End Function
+
 ;---------------------------------------------------------------------------------------------------
 
 Global DebugHUD%
@@ -1984,6 +1990,7 @@ Global LightBlink#, LightFlash#
 
 Global BumpEnabled% = GetOptionInt("graphics", "bump mapping enabled")
 Global HUDenabled% = GetOptionInt("graphics", "HUD enabled")
+Global HUDenabledLegacy% = GetOptionInt("graphics", "HUD enabled legacy")
 
 Global Camera%, CameraShake#, CurrCameraZoom#
 
@@ -3798,7 +3805,7 @@ While IsRunning
 		EndIf
 		
 		If MsgTimer > 0 Then
-			If HUDenabled Then
+			If HUDenabled Lor HUDenabledLegacy Then
 				;If temp = True -> move the message below
 				Local temp% = False
 				If (Not InvOpen And OtherOpen = Null) Then
@@ -5019,7 +5026,7 @@ Function ZoomCamera(fov#)
 	CameraZoom(Camera, Min(1.0+(CurrCameraZoom/400.0),1.1) / Tan((ATan(Tan(fov#/2.0)*RealGraphicWidth/RealGraphicHeight))))
 End Function
 
-Function MouseLook()
+Function MouseLook(handleInput% = True)
 	Local i%
 	
 	CameraShake = Max(CameraShake - (FPSfactor / 10), 0)
@@ -5071,8 +5078,8 @@ Function MouseLook()
 			mouse_y_speed_1# = SmoothMouseValue(rawY, mouse_y_speed_1, tau)
 		EndIf
 
-		If IsNaN(mouse_x_speed_1) Then mouse_x_speed_1 = 0
-		If IsNaN(mouse_y_speed_1) Then mouse_y_speed_1 = 0
+		If IsNaN(mouse_x_speed_1) Lor (Not handleInput) Then mouse_x_speed_1 = 0
+		If IsNaN(mouse_y_speed_1) Lor (Not handleInput) Then mouse_y_speed_1 = 0
 
 		If InvertMouse Then mouse_y_speed_1 = -mouse_y_speed_1
 		
@@ -5127,7 +5134,7 @@ Function MouseLook()
 		
 	EndIf
 	
-	If SelectedEnding = "" Then MoveMouse viewport_center_x, viewport_center_y
+	If SelectedEnding = "" And handleInput Then MoveMouse viewport_center_x, viewport_center_y
 End Function
 
 Function UpdateDust()
@@ -5337,7 +5344,7 @@ Function DrawGUI()
 	
 	
 	If ClosestButton <> 0 And (Not IsPaused()) Then
-		If HUDenabled Then
+		If HUDenabled Lor HUDenabledLegacy Then
 			temp% = CreatePivot()
 			PositionEntity temp, EntityX(Camera), EntityY(Camera), EntityZ(Camera)
 			PointEntity temp, ClosestButton
@@ -5366,7 +5373,7 @@ Function DrawGUI()
 		EndIf
 	EndIf
 	
-	If HUDenabled Then
+	If HUDenabled Lor HUDenabledLegacy Then
 		If ClosestItem <> Null Then
 			yawvalue# = -DeltaYaw(Camera, ClosestItem\collider)
 			If yawvalue > 90 And yawvalue <= 180 Then yawvalue = 90
@@ -6542,7 +6549,7 @@ Function DrawGUI()
 						Injuries = Max(Injuries + GetINIInt2(iniStr, loc, "damage") + GetINIInt2(iniStr, loc, "injuries"), 0);*temp
 						Bloodloss = Max(Bloodloss + GetINIInt2(iniStr, loc, "blood loss"), 0);*temp
 						
-						If GetINIInt2(iniStr, loc, "stomachache") Then SCP1025state[3]=Max(1, SCP1025state[3])
+						If GetINIInt2(iniStr, loc, "stomachache") Lor GetINIInt2(iniStr, loc, "stomach ache") Then SCP1025state[3]=Max(1, SCP1025state[3])
 						
 						;the state of refined drinks is more than 1.0 (fine setting increases it by 1, very fine doubles it)
 						strtemp = GetINIString2(iniStr, loc, "blink effect")
@@ -7642,12 +7649,12 @@ Function DrawGUI()
 End Function
 
 Function DrawItemImg(i.Items)
-	If Not HUDenabled Then Return
+	If (Not HUDenabled) And (Not HUDenabledLegacy) Then Return
 	DrawImage(i\itemtemplate\invimg, GraphicWidth / 2 - ImageWidth(i\itemtemplate\invimg) / 2, GraphicHeight / 2 - ImageHeight(i\itemtemplate\invimg) / 2)
 End Function
 
 Function DrawItemUseProgress(i.Items)
-	If Not HUDenabled Then Return
+	If (Not HUDenabled) And (Not HUDenabledLegacy) Then Return
 	DrawItemImg(i)
 	DrawBar(BlinkMeterIMG, GraphicWidth / 2, GraphicHeight / 2 + 80 * HUDScale, 300 * HUDScale, i\state / 100.0, True)
 End Function
@@ -7666,8 +7673,6 @@ Function ResetDiseases()
 End Function
 
 Function DrawHUD()
-	If Not HUDenabled Then Return
-
 	If DrawHUD\Subscribers > 0 Then
 		PrepareFunction(0)
 		If CallHook(DrawHUD) Then Return
@@ -7677,36 +7682,38 @@ Function DrawHUD()
 
 	If ShowMap Then DrawMap()
 
-	Local width% = 204 * HUDScale
-	Local x% = HUDStartX + 80 * HUDScale
-	Local y% = HUDEndY - 95 * HUDScale
+	If HUDenabled Then
+		Local width% = 204 * HUDScale
+		Local x% = HUDStartX + 80 * HUDScale
+		Local y% = HUDEndY - 95 * HUDScale
 
-	DrawBar(BlinkMeterIMG, x, y, width, BlinkTimer / BLINKFREQ)
-	Color 0, 0, 0
-	Rect(x - 50 * HUDScale, y, 30 * HUDScale, 30 * HUDScale)
-	
-	If EyeIrritation > 0 Then
-		Color 200, 0, 0
-		Rect(x - 50 * HUDScale - 3, y - 3, 30 * HUDScale + 6, 30 * HUDScale + 6)
-	End If
-	
-	Color 255, 255, 255
-	Rect(x - 50 * HUDScale - 1, y - 1, 30 * HUDScale + 2, 30 * HUDScale + 2, False)
-	
-	DrawImage BlinkIcon, x - 50 * HUDScale, y
-	
-	y = HUDEndY - 55 * HUDScale
-	DrawBar(StaminaMeterIMG, x, y, width, Stamina / 100.0)
-	
-	Color 0, 0, 0
-	Rect(x - 50 * HUDScale, y, 30 * HUDScale, 30 * HUDScale)
-	
-	Color 255, 255, 255
-	Rect(x - 50 * HUDScale - 1, y - 1, 30 * HUDScale + 2, 30 * HUDScale + 2, False)
-	If Crouch Then
-		DrawImage CrouchIcon, x - 50 * HUDScale, y
-	Else
-		DrawImage SprintIcon, x - 50 * HUDScale, y
+		DrawBar(BlinkMeterIMG, x, y, width, BlinkTimer / BLINKFREQ)
+		Color 0, 0, 0
+		Rect(x - 50 * HUDScale, y, 30 * HUDScale, 30 * HUDScale)
+		
+		If EyeIrritation > 0 Then
+			Color 200, 0, 0
+			Rect(x - 50 * HUDScale - 3, y - 3, 30 * HUDScale + 6, 30 * HUDScale + 6)
+		End If
+		
+		Color 255, 255, 255
+		Rect(x - 50 * HUDScale - 1, y - 1, 30 * HUDScale + 2, 30 * HUDScale + 2, False)
+		
+		DrawImage BlinkIcon, x - 50 * HUDScale, y
+		
+		y = HUDEndY - 55 * HUDScale
+		DrawBar(StaminaMeterIMG, x, y, width, Stamina / 100.0)
+		
+		Color 0, 0, 0
+		Rect(x - 50 * HUDScale, y, 30 * HUDScale, 30 * HUDScale)
+		
+		Color 255, 255, 255
+		Rect(x - 50 * HUDScale - 1, y - 1, 30 * HUDScale + 2, 30 * HUDScale + 2, False)
+		If Crouch Then
+			DrawImage CrouchIcon, x - 50 * HUDScale, y
+		Else
+			DrawImage SprintIcon, x - 50 * HUDScale, y
+		EndIf
 	EndIf
 
 	If DebugHUD Then
@@ -7804,7 +7811,16 @@ Function DrawMap()
 			Color r\RoomTemplate\r, r\RoomTemplate\g, r\RoomTemplate\b
 		EndIf
 		
-		Rect(startX + ((18 - (r\x / 8)) * cellSize), startY + ((r\z / 8) * cellSize), cellSize, cellSize, 1)
+		Local x% = startX + ((18 - (r\x / 8)) * cellSize)
+		Local y% = startY + ((r\z / 8) * cellSize)
+
+		If MouseOn(x, y, cellSize, cellSize) 
+			Color 100, 255, 100
+			If MouseHit1
+				Teleport(r)
+			EndIf
+		EndIf
+		Rect(x, y, cellSize, cellSize, 1)
 	Next
 End Function
 
@@ -11066,7 +11082,7 @@ Function Use294()
 					GiveAchievement(Achv294)
 
 					strtemp$ = GetINIString2(iniStr, loc, "dispensesound")
-					If strtemp="" Then
+					If strtemp<>"" Then
 						PlayerRoom\SoundCHN = PlaySound_Strict (LoadTempSound(strtemp))
 					EndIf
 					If PlayerRoom\SoundCHN=0 Then

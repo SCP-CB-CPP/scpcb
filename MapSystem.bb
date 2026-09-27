@@ -1134,14 +1134,15 @@ Function PlaceForest(fr.Forest,x#,y#,z#,r.Rooms)
 					
 					;place trees and other details
 					;only placed on spots where the value of the heightmap is above 100
-					SetBuffer TextureBuffer(hmap[tile_type])
 					Local width = TextureWidth(hmap[tile_type])
+					Local buf% = TextureBuffer(hmap[tile_type])
+					LockBuffer(buf)
 					tempf4# = (tempf3/Float(width))
 					For lx = 3 To width-2
 						For ly = 3 To width-2
-							GetColor lx,width-ly
+							Local red% = (ReadPixelFast(lx,width-ly,buf) And $FF0000) Shr 16
 							
-							If ColorRed()>Rand(100,260) Then
+							If red>Rand(100,260) Then
 								Select Rand(0,7)
 									Case 0,1,2,3,4,5,6 ;create a tree
 										detail_entity=CopyEntity(fr\DetailMesh[0])
@@ -1158,7 +1159,7 @@ Function PlaceForest(fr.Forest,x#,y#,z#,r.Rooms)
 										Next
 										
 										ScaleEntity detail_entity,tempf2*1.1,tempf2,tempf2*1.1,True
-										PositionEntity detail_entity,lx*tempf4-(tempf3/2.0),ColorRed()*0.03-Rnd(3.0,3.2),ly*tempf4-(tempf3/2.0),True
+										PositionEntity detail_entity,lx*tempf4-(tempf3/2.0),red*0.03-Rnd(3.0,3.2),ly*tempf4-(tempf3/2.0),True
 										
 										RotateEntity detail_entity,Rnd(-5,5),Rnd(360.0),0.0,True
 										
@@ -1169,7 +1170,7 @@ Function PlaceForest(fr.Forest,x#,y#,z#,r.Rooms)
 										tempf2=Rnd(0.01,0.012)
 										;ScaleEntity detail_entity,tempf2,tempf2*Rnd(1.0,2.0),tempf2,True
 										
-										PositionEntity detail_entity,lx*tempf4-(tempf3/2.0),ColorRed()*0.03-1.3,ly*tempf4-(tempf3/2.0),True
+										PositionEntity detail_entity,lx*tempf4-(tempf3/2.0),red*0.03-1.3,ly*tempf4-(tempf3/2.0),True
 										
 										EntityFX detail_entity, 1
 										
@@ -1180,16 +1181,16 @@ Function PlaceForest(fr.Forest,x#,y#,z#,r.Rooms)
 										tempf2=Rnd(0.1,0.12)
 										ScaleEntity detail_entity,tempf2,tempf2,tempf2,True
 										
-										PositionEntity detail_entity,lx*tempf4-(tempf3/2.0),ColorRed()*0.03-1.3,ly*tempf4-(tempf3/2.0),True
+										PositionEntity detail_entity,lx*tempf4-(tempf3/2.0),red*0.03-1.3,ly*tempf4-(tempf3/2.0),True
 								End Select
 								
 								EntityFX detail_entity, 1
-								;PositionEntity detail_entity,Rnd(0.0,tempf3)-(tempf3/2.0),ColorRed()*0.03-0.05,Rnd(0.0,tempf3)-(tempf3/2.0),True
+								;PositionEntity detail_entity,Rnd(0.0,tempf3)-(tempf3/2.0),red*0.03-0.05,Rnd(0.0,tempf3)-(tempf3/2.0),True
 								EntityParent detail_entity,tile_entity
 							EndIf
 						Next
 					Next
-					SetBuffer BackBuffer()
+					UnlockBuffer(buf)
 					
 					ScaleEntity tile_entity,tempf1,tempf1,tempf1
 					
@@ -1356,14 +1357,15 @@ Function PlaceForest_MapCreator(fr.Forest,x#,y#,z#,r.Rooms)
 					
 					;place trees and other details
 					;only placed on spots where the value of the heightmap is above 100
-					SetBuffer TextureBuffer(hmap[tile_type])
 					Local width = TextureWidth(hmap[tile_type])
+					Local buf% = TextureBuffer(hmap[tile_type])
+					LockBuffer(buf)
 					tempf4# = (tempf3/Float(width))
 					For lx = 3 To width-2
 						For ly = 3 To width-2
 							GetColor lx,width-ly
 							
-							If ColorRed()>Rand(100,260) Then
+							If red>Rand(100,260) Then
 								detail_entity = 0
 								Select Rand(0,7)
 									Case 0,1,2,3,4,5,6 ;create a tree
@@ -1381,7 +1383,7 @@ Function PlaceForest_MapCreator(fr.Forest,x#,y#,z#,r.Rooms)
 										Next
 										
 										ScaleEntity detail_entity,tempf2*1.1,tempf2,tempf2*1.1,True
-										PositionEntity detail_entity,lx*tempf4-(tempf3/2.0),ColorRed()*0.03-Rnd(3.0,3.2),ly*tempf4-(tempf3/2.0),True
+										PositionEntity detail_entity,lx*tempf4-(tempf3/2.0),red*0.03-Rnd(3.0,3.2),ly*tempf4-(tempf3/2.0),True
 										
 										RotateEntity detail_entity,Rnd(-5,5),Rnd(360.0),0.0,True
 										
@@ -1392,7 +1394,7 @@ Function PlaceForest_MapCreator(fr.Forest,x#,y#,z#,r.Rooms)
 										tempf2=Rnd(0.01,0.012)
 										;ScaleEntity detail_entity,tempf2,tempf2*Rnd(1.0,2.0),tempf2,True
 										
-										PositionEntity detail_entity,lx*tempf4-(tempf3/2.0),ColorRed()*0.03-1.3,ly*tempf4-(tempf3/2.0),True
+										PositionEntity detail_entity,lx*tempf4-(tempf3/2.0),red*0.03-1.3,ly*tempf4-(tempf3/2.0),True
 										
 										EntityFX detail_entity, 1
 										
@@ -1403,18 +1405,18 @@ Function PlaceForest_MapCreator(fr.Forest,x#,y#,z#,r.Rooms)
 										tempf2=Rnd(0.1,0.12)
 										ScaleEntity detail_entity,tempf2,tempf2,tempf2,True
 										
-										PositionEntity detail_entity,lx*tempf4-(tempf3/2.0),ColorRed()*0.03-1.3,ly*tempf4-(tempf3/2.0),True
+										PositionEntity detail_entity,lx*tempf4-(tempf3/2.0),red*0.03-1.3,ly*tempf4-(tempf3/2.0),True
 								End Select
 								
 								If detail_entity <> 0 Then
 									EntityFX detail_entity, 1
-									;PositionEntity detail_entity,Rnd(0.0,tempf3)-(tempf3/2.0),ColorRed()*0.03-0.05,Rnd(0.0,tempf3)-(tempf3/2.0),True
+									;PositionEntity detail_entity,Rnd(0.0,tempf3)-(tempf3/2.0),red*0.03-0.05,Rnd(0.0,tempf3)-(tempf3/2.0),True
 									EntityParent detail_entity,tile_entity
 								EndIf
 							EndIf
 						Next
 					Next
-					SetBuffer BackBuffer()
+					UnlockBuffer(buf)
 					
 					ScaleEntity tile_entity,tempf1,tempf1,tempf1
 					

@@ -8,7 +8,7 @@ http://creativecommons.org/licenses/by-sa/3.0/
 
 Requirements:
 
--	[BlitzX3D](https://github.com/krimbopple/BlitzX3D)
+-	[BlitzPRO Legacy](https://github.com/Euclid-Labs-Studio/BlitzPRO/releases/tag/legacy-v2.100)
 
 > [!IMPORTANT]
 > Make sure to copy all .decls files from this repo's `Userlibs` folder to your Blitz3D installation's `userlibs` folder before compiling.
