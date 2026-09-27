@@ -22,7 +22,7 @@ int StringSize(string str);
 
 namespace B3D::Buffer {
 B3D::Buffer@ get_Back() property;
-B3D::Buffer@ get_Depth() property;
+B3D::Buffer@ get_Z() property;
 B3D::Buffer@ get_Graphics() property;
 B3D::Buffer@ Set(B3D::Buffer@ buffer, B3D::Buffer@ depth = null, int pass = 0);
 void CopyPixel(int srcX, int srcY, B3D::Buffer@ srcBuffer, int destX, int destY, B3D::Buffer@ destBuffer = null);
@@ -356,6 +356,14 @@ string GetString(string section, string key);
 bool PutINIValue(string section, string key, string value);
 }
 
+namespace CB::Path {
+string GetDirectoryName(string path);
+string GetFileName(string path);
+string GetExtension(string path);
+string ConvertSlashes(string path);
+string SplitAfterChar(string path, string char);
+}
+
 namespace CB {
 B3D::Image@ LoadImage(string file, float scale = 0, int flags = 0);
 B3D::Image@ LoadImageHUDScaled(string file, int fixedSizeX = 0, int fixedSizeY = 0);
@@ -372,6 +380,7 @@ namespace CB::Sound {
 CB::Sound@ Load(string file);
 CB::Sound@ LoadTemporary(string file);
 CB::Stream@ Stream(string file, float volume = 1, int customMode = 2);
+void LoadAll();
 }
 
 namespace CB::Music {
@@ -531,6 +540,10 @@ CB::Skybox@ Create(string filename, B3D::Entity@ parent = null);
 namespace CB::ItemTemplate {
 CB::ItemTemplate@ get_First() property;
 CB::ItemTemplate@ get_Last() property;
+CB::ItemTemplate@ Create(string name, string group, string displayName, string modelPath, string invImgPath, string imgPath, float scale, string textureOverridePath = "", string invImg2Path = "", bool animated = false, int textureFlags = 9);
+void InitializeFromFile(string file);
+void Initialize();
+CB::ItemTemplate@ Find(string name);
 }
 
 namespace CB::Item {
@@ -546,7 +559,7 @@ CB::Inventory@ get_Last() property;
 namespace CB::Item {
 CB::Item@ Create(string name, float x, float y, float z);
 CB::Item@ CreateCup(string drinkName, float x, float y, float z, int r, int g, int b, float a = 1);
-CB::ItemTemplate@ FindTemplate(string name);
+void UpdateAll();
 }
 
 namespace CB::Player {
@@ -560,6 +573,7 @@ CB::Difficulty@ get_Last() property;
 }
 
 namespace CB::Dreamfilter {
+void Initialize();
 void Update(float power);
 }
 
@@ -659,6 +673,12 @@ CB::SubtitleColor@ InternColor(CB::SubtitleColor@ color);
 void CleanupColors();
 }
 
+namespace CB::Localization {
+void Initialize();
+void Load(string file);
+string GetLocalString(string section, string key);
+}
+
 namespace CB::Achievement {
 CB::Achievement@ get_First() property;
 CB::Achievement@ get_Last() property;
@@ -672,6 +692,12 @@ CB::AchievementMessage@ get_Last() property;
 namespace CB::Achievement {
 CB::Achievement@ Create(string name, bool isSCP = false);
 void UpdateMessages();
+}
+
+namespace CB::SCP294 {
+void Load();
+void UpdateEffects();
+void Use();
 }
 
 namespace CB::SCP914 {
@@ -2466,6 +2492,7 @@ class Room {
     CB::Room@ get_Previous() const property;
     void InsertAfter(CB::Room@);
     void InsertBefore(CB::Room@);
+    void TeleportTo();
 }
 
 class Door {
@@ -2856,6 +2883,8 @@ class Item {
     void Remove(bool inGame = true);
     void Pick();
     void Drop(bool playDropSound = true);
+    void DrawHeldHUD();
+    void DrawUseProgressHUD();
 }
 
 class Inventory {
@@ -3058,6 +3087,7 @@ string RandomSeed;
 int RandomSeedNumeric;
 int TimerStopped;
 int PlayTime;
+int DeathTime;
 }
 
 namespace CB::Menu {
@@ -3100,6 +3130,7 @@ bool EnableRoomLights;
 int TextureDetails;
 bool BumpEnabled;
 bool HUDEnabled;
+bool HUDEnabledLegacy;
 int Framelimit;
 bool Vsync;
 int AntiAlias;
@@ -3405,7 +3436,6 @@ enum Music {
     Menu,
     Forest860Chase,
     Intro,
-    SCP178,
     PocketDimensionTrench,
     Room205,
     GateA,
