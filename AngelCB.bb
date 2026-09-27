@@ -162,6 +162,19 @@ Function RegisterOptions()
     SetDefaultNamespace(ns)
 End Function
 
+Function RegisterPath()
+    Local ns$ = GetDefaultNamespace()
+    If ns <> "" Then SetDefaultNamespace(ns + "::Path") Else SetDefaultNamespace("Path")
+    
+    RegisterGlobalFunction("string GetDirectoryName(string path)", @File_GetDirName)
+    RegisterGlobalFunction("string GetFileName(string path)", @File_GetFileName)
+    RegisterGlobalFunction("string GetExtension(string path)", @File_GetExtension)
+    RegisterGlobalFunction("string ConvertSlashes(string path)", @File_ConvertSlashes)
+    RegisterGlobalFunction("string SplitAfterChar(string path, string char)", @File_SplitAfterChar)
+
+    SetDefaultNamespace(ns)
+End Function
+
 Function RegisterIO()
     ; TODO: Sanitize paths (also in audio).
     ; TODO: Consider "hijacking" the standard B3D functions.
@@ -216,6 +229,7 @@ Function RegisterCBAudio()
     RegisterGlobalFunction("CB::Sound@ Load(string file)", @LoadSound_Strict)
     RegisterGlobalFunction("CB::Sound@ LoadTemporary(string file)", @LoadTempSound)
     RegisterGlobalFunction("CB::Stream@ Stream(string file, float volume=1, int customMode=2)", @StreamSound_Strict)
+    RegisterGlobalFunction("void LoadAll()", @LoadAllSounds)
     SetDefaultNamespace(ns)
 
 
@@ -1051,6 +1065,16 @@ Function RegisterItem()
     RegisterTypeField("ItemTemplate", "B3D::Texture@ Texture", %ItemTemplates\tex)
     RegisterTypeField("ItemTemplate", "string TexturePath", %ItemTemplates\texpath)
 
+    Local ns$ = GetDefaultNamespace()
+    If ns <> "" Then SetDefaultNamespace(ns + "::ItemTemplate") Else SetDefaultNamespace("ItemTemplate")
+    Local decl$ = "ItemTemplate@+ Create(string name, string group, string displayName, string modelPath, string invImgPath, string imgPath, float scale, string textureOverridePath=" + Chr(34) + Chr(34)
+    decl = decl + ", string invImg2Path=" + Chr(34) + Chr(34) + ", bool animated = false, int textureFlags = 9)"
+    RegisterGlobalFunction(decl, @CreateItemTemplate)
+    RegisterGlobalFunction("void InitializeFromFile(string file)", @InitItemTemplatesFromFile)
+    RegisterGlobalFunction("void Initialize()", @InitItemTemplates)
+    RegisterGlobalFunction("ItemTemplate@+ Find(string name)", @FindItemTemplate)
+    SetDefaultNamespace(ns)
+
     RegisterTypeFromPtr("Item", %Items)
     RegisterTypeFromPtr("Inventory", %Inventories)
 
@@ -1088,11 +1112,11 @@ Function RegisterItem()
     RegisterObjectMethod("Item", "void DrawHeldHUD()", @DrawItemImg)
     RegisterObjectMethod("Item", "void DrawUseProgressHUD()", @DrawItemUseProgress)
 
-    Local ns$ = GetDefaultNamespace()
+    ns$ = GetDefaultNamespace()
     If ns <> "" Then SetDefaultNamespace(ns + "::Item") Else SetDefaultNamespace("Item")
     RegisterGlobalFunction("Item@+ Create(string name, float x, float y, float z)", @CreateItem)
     RegisterGlobalFunction("Item@+ CreateCup(string drinkName, float x, float y, float z, int r, int g, int b, float a=1)", @CreateCup)
-    RegisterGlobalFunction("ItemTemplate@+ FindTemplate(string name)", @FindItemTemplate)
+    RegisterGlobalFunction("void UpdateAll()", @UpdateItems)
     RegisterGlobalProperty("int LastItemID", &LastItemID)
     SetDefaultNamespace(ns)
 End Function
@@ -1251,6 +1275,8 @@ Function RegisterDreamfilter()
 
     RegisterGlobalProperty("float Volume", &BlurVolume)
     RegisterGlobalProperty("float Timer", &BlurTimer)
+
+    RegisterGlobalFunction("void Initialize()", @CreateBlurImage)
 
     RegisterGlobalFunction("void Update(float power)", @UpdateBlur)
 
@@ -1484,6 +1510,25 @@ Function RegisterSubtitles()
     SetDefaultNamespace(ns)
 End Function
 
+Function LoadLocalizationFromFile(file$)
+    LoadLocalization(I_Loc, file)
+End Function
+
+Function GetLocalString$(section$, key$)
+    Return GetModdedINIString(StringsFile, section, key)
+End Function
+
+Function RegisterLocalization()
+    Local ns$ = GetDefaultNamespace()
+    If ns <> "" Then SetDefaultNamespace(ns + "::Localization") Else SetDefaultNamespace("Localization")
+
+    RegisterGlobalFunction("void Initialize()", @InitializeLocalization)
+    RegisterGlobalFunction("void Load(string file)", @LoadLocalizationFromFile)
+    RegisterGlobalFunction("string GetLocalString(string section, string key)", @GetLocalString)
+
+    SetDefaultNamespace(ns)
+End Function
+
 Function GiveAchievementNoSteam(achv.Achievements, showMessage%=True)
     GiveAchievement(achv, showMessage, False)
 End Function
@@ -1565,6 +1610,17 @@ Function RegisterAchievements()
     SetDefaultNamespace(ns)
 End Function
 
+Function Register294()
+    Local ns$ = GetDefaultNamespace()
+    If ns <> "" Then SetDefaultNamespace(ns + "::SCP294") Else SetDefaultNamespace("SCP294")
+
+    RegisterGlobalFunction("void Load()", @Load294)
+    RegisterGlobalFunction("void UpdateEffects()", @Update294)
+    RegisterGlobalFunction("void Use()", @Use294)
+
+    SetDefaultNamespace(ns)
+End Function
+
 Function Register914()
     Local ns$ = GetDefaultNamespace()
     If ns <> "" Then SetDefaultNamespace(ns + "::SCP914") Else SetDefaultNamespace("SCP914")
@@ -1603,6 +1659,7 @@ Function RegisterCB()
     RegisterMenu()
     RegisterLoadingScreens()
     RegisterOptions()
+    RegisterPath()
     RegisterIO()
     RegisterCBAudio()
     RegisterCBInput()
@@ -1622,7 +1679,9 @@ Function RegisterCB()
     RegisterConsole()
     RegisterEvent()
     RegisterSubtitles()
+    RegisterLocalization()
     RegisterAchievements()
+    Register294()
     Register914()
     RegisterEnding()
     SetDefaultNamespace("")
