@@ -5625,7 +5625,7 @@ Function UpdateEvents()
 										e\room\NPC[0]\PathStatus = FindPath(e\room\NPC[0],EntityX(Collider),EntityY(Collider),EntityZ(Collider))
 										If e\room\NPC[0]\Sound2 <> 0 Then FreeSound_Strict(e\room\NPC[0]\Sound2)
 										e\room\NPC[0]\Sound2 = LoadSound_Strict("SFX\SCP\049\DetectedInChamber.ogg")
-										e\room\NPC[0]\SoundChn2 = LoopSound2(e\room\NPC[0]\Sound2,e\room\NPC[0]\SoundChn2,Camera,e\room\NPC[0]\obj)
+										e\room\NPC[0]\SoundChn2 = PlaySound2(e\room\NPC[0]\Sound2,Camera,e\room\NPC[0]\obj)
 										e\room\NPC[0]\Idle = 0
 										e\room\NPC[0]\HideFromNVG = False
 										e\room\NPC[0]\PrevState = 2
