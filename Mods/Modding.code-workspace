@@ -1,0 +1,17 @@
+{
+  "folders": [
+    { "name": "Mods", "path": "." },
+  ],
+  "settings": {
+    "angelScript.implicitMutualInclusion": true,
+    "files.associations": {
+      "*.as": "angelscript",
+      "as.predefined": "angelscript-predefined"
+    },
+    "files.exclude": {
+      "**/.git": true,
+      "**/.DS_Store": true,
+      "*.code-workspace": true
+    }
+  }
+}
