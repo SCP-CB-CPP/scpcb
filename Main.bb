@@ -17,7 +17,7 @@ End Function
 
 Function RuntimeErrorExt%(Message$)
 	SetErrorMsg(8, "Caught exception: " + Message)
-	MemoryAccessViolation()
+	RuntimeError(Message)
 End Function
 
 Include "StrictLoads.bb"
