@@ -1542,21 +1542,7 @@ Function DrawTagSelection(x%, y%, width%)
 End Function
 
 Function CreateGrayScaleImage%(img%)
-	Local ret% = CreateImage(ImageWidth(img), ImageHeight(img), 1, 3)
-	Local rbuf% = ImageBuffer(img)
-	Local buf% = ImageBuffer(ret)
-	LockBuffer(rbuf)
-	LockBuffer(buf)
-	For x = 0 To BufferWidth(rbuf)-1
-		For y = 0 To BufferHeight(rbuf)-1
-			Local color% = ReadPixelFast(x, y, rbuf)
-			Local g% = ((color Shr 16) And 255) * 0.21 + ((color Shr 8) And 255) * 0.72 + (color And 255) * 0.07
-			WritePixelFast(x, y, (color And $FF000000) + (g Shl 16) + (g Shl 8) + g, buf)
-		Next
-	Next
-	UnlockBuffer(rbuf)
-	UnlockBuffer(buf)
-	Return ret
+; use BX3D 2D shader for this
 End Function
 
 Dim AspectRatioWidths%(0), AspectRatioHeights%(0)
