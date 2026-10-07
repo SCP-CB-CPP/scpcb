@@ -114,10 +114,6 @@ Function RegisterB3DMisc()
     RegisterGlobalFunction("int GetCurrentScene()", @GetCurrentScene)
     RegisterGlobalFunction("int SceneExists(int sceneID)", @SceneExists)
 
-    RegisterGlobalFunction("Entity@ CreateDecal(Texture@ texture=null, Entity@ parent=null)", @CreateDecal)
-    RegisterGlobalFunction("void ClearDecal(Entity@ decal)", @ClearDecal)
-    RegisterGlobalFunction("void ProjectDecal(Entity@ decal, Entity@ source)", @ProjectDecal)
-
 End Function
 
 Function RegisterB3DTexture()
@@ -499,6 +495,10 @@ Function RegisterB3DEntityMisc()
     RegisterGlobalFunction("Entity@ get_PickedEntity() property", @PickedEntity)
     RegisterGlobalFunction("Surface@ get_PickedSurface() property", @PickedSurface)
     RegisterGlobalFunction("int get_PickedTriangle() property", @PickedTriangle)
+
+    RegisterGlobalFunction("Entity@ CreateDecal(Texture@ texture=null, Entity@ parent=null)", @CreateDecal)
+    RegisterGlobalFunction("void ClearDecal(Entity@ decal)", @ClearDecal)
+    RegisterGlobalFunction("void ProjectDecal(Entity@ decal, Entity@ source)", @ProjectDecal)
 End Function
 
 Function RegisterB3DModelSubtype(name$, isActualSubType%=True, propagateDown%=True)
@@ -558,8 +558,6 @@ Function RegisterB3DMeshSubtype(name$, isActualSubType%=True, propagateDown%=Tru
     RegisterObjectMethod(name, "int get_SurfaceCount() const property", @CountSurfaces)
     RegisterObjectMethod(name, "B3D::Surface@ GetSurface(int surfaceIndex)", @GetSurface)
     RegisterObjectMethod(name, "void SetCullBox(float x, float y, float z, float width, float height, float depth)", @MeshCullBox)
-    ; TODO: Test if this works as expected.
-    RegisterObjectMethod(name, "void GetBox(float& out, float& out, float& out, float& out, float& out, float& out)", @GetMeshBox)
 
     If isActualSubtype Then RegisterTypeInheritance(name, "B3D::Mesh")
 End Function
