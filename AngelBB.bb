@@ -25,7 +25,7 @@ Function RegisterAudio()
     RegisterObjectMethod("Sound", "void SetPitch(int pitch)", @SoundPitch)
     RegisterObjectMethod("Sound", "void SetVolume(float volume)", @SoundVolume)
     RegisterObjectMethod("Sound", "void SetPan(float pan)", @SoundPan)
-    RegisterObjectMethod("Sound", "int Verify()", @VerifySound)
+    RegisterObjectMethod("Sound", "bool Verify()", @VerifySound)
 
     RegisterGlobalFunction("Channel@ PlayMusic(string midifile, int mode=0)", @PlayMusic)
     RegisterGlobalFunction("void SetMasterVolume(float volume)", @SetMasterVolume)
@@ -40,7 +40,7 @@ End Function
 
 Function RegisterBank()
     RegisterType("Bank")
-    RegisterObjectMethod("Bank", "int Verify()", @VerifyBank)
+    RegisterObjectMethod("Bank", "bool Verify()", @VerifyBank)
     RegisterObjectMethod("Bank", "void Free()", @FreeBank)
     RegisterObjectMethod("Bank", "int get_Size() const property", @BankSize)
     RegisterObjectMethod("Bank", "void set_Size(int size) property", @ResizeBank)
