@@ -250,6 +250,7 @@ Else
 	End If
 EndIf
 
+Global GrayScaleFX% = LoadEffect_Strict("GFX\shaders\Grayscale.fx")
 Global MenuScale# = CalculateMenuScale()
 Global HUDScaleScalar# = Max(1.0, MenuScale)
 Global MinHUDScaleFactor#

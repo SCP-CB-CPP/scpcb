@@ -1277,9 +1277,11 @@ Function UpdateMainMenu()
 								EndIf
 
 								If m\Icon <> 0 Then
-									Local ico%
-									If m\IsActive Then ico = m\Icon Else ico = m\Icon ;m\DisabledIcon
-									DrawImage(ico, x + 3 * MenuScale, y + 3 * MenuScale)
+									If m\IsActive
+										DrawImageGrayscale(m\Icon, x + 3 * MenuScale, y + 3 * MenuScale, False)
+									Else
+										DrawImageGrayscale(m\Icon, x + 3 * MenuScale, y + 3 * MenuScale, True)
+									EndIf
 								EndIf
 
 								If m\IsNew And milis Mod 1200 >= 600 Then DrawImage(NewModBlink, x + 2 * MenuScale, y + 2 * MenuScale)
@@ -1541,8 +1543,12 @@ Function DrawTagSelection(x%, y%, width%)
 	Next
 End Function
 
-Function CreateGrayScaleImage%(img%)
-; use BX3D 2D shader for this
+Function DrawImageGrayscale(img%, x%, y%, grayscale%, frame% = 0)
+    If img = 0 Or GrayScaleFX = 0 Then Return
+    SetEffectFloat(GrayScaleFX, "GrayscaleEnable", Float(grayscale))
+    Set2DEffect(GrayScaleFX)
+    DrawImage(img, x, y, frame)
+    Clear2DEffect()
 End Function
 
 Dim AspectRatioWidths%(0), AspectRatioHeights%(0)
