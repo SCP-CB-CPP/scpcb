@@ -14,8 +14,6 @@ Function InitPostProcess()
 	ScreenTexture = CreateTexture(GraphicWidth, GraphicHeight, 1 + 1024)
 	
 	GammaEffect = LoadEffect_Strict("GFX\shaders\Gamma.fx")
-
-	FXAAEffect = LoadEffect_Strict("GFX\shaders\FXAA.fx")
 	
 	PostEffectQuad = CreateFullscreenQuad()
 	EntityTexture(PostEffectQuad, ScreenTexture, 0, 0)
@@ -34,16 +32,12 @@ End Function
 
 Function UpdatePostProcess()
 	ProcessGammaEffect(ScreenGamma)
-	If Opt_AntiAlias Then ProcessFXAAEffect()
+	If Opt_AntiAlias Then ; TODO, USE NEWER BX3D ANTI ALIASING HERE! OF COURSE... IM STILL FUCKING MAKING IT!
 End Function
 
 Function ProcessGammaEffect(gamma#)
 	SetEffectFloat(GammaEffect, "Gamma", Lerp(gamma, 1.0, 0.3)) ; Limit gamma
 	RenderEffectQuad(GammaEffect, BackBuffer(), "Main")
-End Function
-
-Function ProcessFXAAEffect()
-	RenderEffectQuad(FXAAEffect, BackBuffer(), "Main")
 End Function
 
 Function RenderEffectQuad(effect%, buffer%, technique$, blend% = 0)
