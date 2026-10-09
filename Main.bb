@@ -318,12 +318,12 @@ Function LoadImageHUDScaled(file$, fixedSizeX% = 0, fixedSizeY% = 0)
 	Local img%
 	Local h.HUDScaledImage = New HUDScaledImage
 	If fixedSizeX = 0 Then
-		img = LoadImage_Strict(file, HUDScale)
+		img = LoadImage_Strict(file, HUDScale, 8)
 		h\BaseWidth = ImageWidthUnscaled(img) * LoadImageScaleResult
 		h\BaseHeight = ImageHeightUnscaled(img) * LoadImageScaleResult
 	Else
 		If fixedSizeY = 0 Then fixedSizeY = fixedSizeX
-		img = LoadImage_Strict(file)
+		img = LoadImage_Strict(file, 0, 8)
 		ResizeImageFast(img, fixedSizeX * HUDScale, fixedSizeY * HUDScale)
 		h\BaseWidth = fixedSizeX
 		h\BaseHeight = fixedSizeY
