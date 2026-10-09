@@ -32,7 +32,7 @@ End Function
 
 Function UpdatePostProcess()
 	ProcessGammaEffect(ScreenGamma)
-	If Opt_AntiAlias Then ; TODO, USE NEWER BX3D ANTI ALIASING HERE! OF COURSE... IM STILL FUCKING MAKING IT!
+	AntiAlias Opt_AntiAlias <> 0
 End Function
 
 Function ProcessGammaEffect(gamma#)
