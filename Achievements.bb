@@ -22,7 +22,7 @@ Function CreateAchievement.Achievements(name$, isSCP% = False)
 	a\LocalName = GetModdedINIString(StringsFile, "Achievement", name)
 	a\Description = GetModdedINIString(StringsFile, "Achievement Desc", name)
 	a\Img = LoadImage_Strict("GFX\menu\achievements\Achv"+name+".png")
-	ResizeImage(a\Img, 64*GraphicHeight/768.0, 64*GraphicHeight/768.0)
+	ResizeImageFast(a\Img, 64*GraphicHeight/768.0, 64*GraphicHeight/768.0)
 	a\Unlocked = False
 	Return a
 End Function
@@ -74,7 +74,7 @@ Global AchievementsMenu%
 Global AchvMSGenabled% = GetOptionInt("general", "achievement popup enabled")
 
 Global AchvLocked = LoadImage_Strict("GFX\menu\achievements\achvlocked.png")
-ResizeImage(AchvLocked, 64*GraphicHeight/768.0, 64*GraphicHeight/768.0)
+ResizeImageFast(AchvLocked, 64*GraphicHeight/768.0, 64*GraphicHeight/768.0)
 
 Function GiveAchievement(achv.Achievements, showMessage%=True, steam%=True)
 	If Not achv\Unlocked Then

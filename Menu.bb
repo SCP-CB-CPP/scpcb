@@ -80,7 +80,7 @@ Global ShouldKeepModDescription% = True
 Global ModsDirty% = False
 Global SelectedMod.Mods
 Global NewModBlink% = LoadImage_Strict("GFX\newmod.png")
-ResizeImage(NewModBlink, 24 * MenuScale, 24 * MenuScale)
+ResizeImageFast(NewModBlink, 24 * MenuScale, 24 * MenuScale)
 
 Function EllipsisLeft$(txt$, maxLen%)
 	If Len(txt) > maxLen Then Return Left(txt, maxLen-3) + "…"
@@ -1235,7 +1235,7 @@ Function UpdateMainMenu()
 								If m\Icon = 0 And m\Iconpath <> "" Then
 									m\Icon = LoadImage_Strict(m\IconPath, 0, 3)
 									;m\DisabledIcon = CreateGrayScaleImage(m\Icon)
-									ResizeImage(m\Icon, 64 * MenuScale, 64 * MenuScale)
+									ResizeImageFast(m\Icon, 64 * MenuScale, 64 * MenuScale)
 									;ResizeImage(m\DisabledIcon, 64 * MenuScale, 64 * MenuScale)
 								EndIf
 
