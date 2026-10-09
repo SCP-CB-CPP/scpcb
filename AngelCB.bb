@@ -315,7 +315,6 @@ Function RegisterPostProcess()
     RegisterGlobalFunction("void Initialize()", @InitPostProcess)
     RegisterGlobalFunction("void Update()", @UpdatePostProcess)
     RegisterGlobalFunction("void ProcessGamma(float gamma)", @ProcessGammaEffect)
-    RegisterGlobalFunction("void ProcessFXAA()", @ProcessFXAAEffect)
 
     RegisterGlobalFunction("void SetQuadEffect(B3D::Effect@ effect)", @SetQuadEffect)
     RegisterGlobalFunction("B3D::Sprite@ CreateFullscreenQuad(B3D::Entity@ parent=null)", @CreateFullscreenQuad)
