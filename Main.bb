@@ -8038,6 +8038,7 @@ Function DrawMenu()
 						LoadGameQuick(SavePath + CurrSave)
 						
 						MoveMouse viewport_center_x,viewport_center_y
+						MouseXSpeed() : MouseYSpeed()
 						SetFont Font1
 						HidePointer ()
 						
@@ -8784,6 +8785,7 @@ Function InitNewGame()
 	Next
 	
 	MoveMouse viewport_center_x,viewport_center_y;320, 240
+	MouseXSpeed() : MouseYSpeed()
 	
 	SetFont Font1
 	
