@@ -891,7 +891,7 @@ Function RegisterNPC()
 
     RegisterTypeField("NPC", "float FallingPickDistance", %NPCs\FallingPickDistance)
 
-    RegisterObjectMethod("NPC", "void TeleportCloser()", @TeleportCloser)
+    RegisterObjectMethod("NPC", "void TeleportCloser(int minDist=16)", @TeleportCloser)
     RegisterObjectMethod("NPC", "void TeleportMTFGroup()", @TeleportMTFGroup)
     
     RegisterObjectMethod("NPC", "int FindPath(float x, float y, float z)", @FindPath)
