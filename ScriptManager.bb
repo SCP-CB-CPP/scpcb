@@ -96,6 +96,7 @@ Function InitializeHooks(moduleCount%)
 End Function
 
 Function SubscribeModuleHooks(m%)
+    If m = 0 Then Return
     For h.Hooks = Each Hooks
         Local f% = GetModuleFunction(m, h\FuncName)
         If f <> 0 Then
@@ -146,4 +147,31 @@ Function CreateModule%(name$, file$)
     ModuleAddFile(file$)
     EndModule()
     Return GetModule(name$)
+End Function
+
+Type ScriptModuleRecord
+    Field Module%
+    Field Name$
+End Type
+
+Function FreeScriptModules()
+    For r.ScriptModuleRecord = Each ScriptModuleRecord
+        If r\Module <> 0 Then FreeModule(r\Module)
+        r\Module = 0
+    Next
+    Delete Each ScriptModuleRecord
+End Function
+
+Function TrackScriptModule%(module%, name$)
+    Local r.ScriptModuleRecord = New ScriptModuleRecord
+    r\Module = module
+    r\Name = name
+    Return module
+End Function
+
+Function ScriptModuleNameTaken%(name$)
+    For r.ScriptModuleRecord = Each ScriptModuleRecord
+        If r\Name = name Then Return True
+    Next
+    Return False
 End Function

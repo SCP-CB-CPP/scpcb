@@ -152,11 +152,12 @@ End Function
 Function LoadScripts()
 	If Shutdown <> Null And Shutdown\Subscribers > 0 Then PrepareFunction(0) : CallHook(Shutdown)
 	InitializeHooks(ActiveModCount)
+	FreeScriptModules()
 	For m.ActiveMods = Each ActiveMods
-		If m\ScriptModule <> 0 Then FreeModule(m\ScriptModule) : m\ScriptModule = 0
+		m\ScriptModule = 0
 		Local modPath$ = m\Path + "main.as"
-		If FileType(modPath) = 1 Then
-			m\ScriptModule = CreateModule(m\Path, modPath$)
+		If FileType(modPath) = 1 And (Not ScriptModuleNameTaken(m\Path)) Then
+			m\ScriptModule = TrackScriptModule(CreateModule(m\Path, modPath$), m\Path)
 			SubscribeModuleHooks(m\ScriptModule)
 		EndIf
 	Next
