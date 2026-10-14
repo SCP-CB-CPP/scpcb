@@ -934,7 +934,7 @@ Function UpdateMainMenu()
 					y = y + 30*MenuScale
 
 					Color 255,255,255
-					Text(x + 20 * MenuScale, y, "Speed run mode:")
+					Text(x + 20 * MenuScale, y, "Speedrun mode:")
 					SpeedRunMode = DrawTick(x + 310 * MenuScale, y + MenuScale, SpeedRunMode)
 					If MouseOn(x+310*MenuScale,y+MenuScale,20*MenuScale,20*MenuScale) And OnSliderID=0
 						DrawOptionsTooltip(tx,ty,tw,th,"speedrunmode")
