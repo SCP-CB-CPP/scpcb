@@ -6334,29 +6334,29 @@ Function DrawGUI()
 
 						If GetINIInt2(iniStr, loc, "lethal") Then Kill()
 						
-						BlurTimer = Max(BlurTimer + GetINIInt2(iniStr, loc, "blur")*70, 0);*temp
-						CameraShakeTimer = Max(CameraShakeTimer + GetINIString2(iniStr, loc, "camerashake"), 0)
+						BlurTimer = Max(BlurTimer + GetINIFloat2(iniStr, loc, "blur")*70, 0);*temp
+						CameraShakeTimer = Max(CameraShakeTimer + GetINIFloat2(iniStr, loc, "camerashake"), 0)
 						
-						temp = GetINIInt2(iniStr, loc, "vomit")
-						If temp > 0 Then
+						Local value# = GetINIFloat2(iniStr, loc, "vomit")
+						If value > 0 Then
 							If VomitTimer = 0 Then
-								VomitTimer = temp
+								VomitTimer = value
 							Else
-								VomitTimer = Min(VomitTimer, temp)
+								VomitTimer = Min(VomitTimer, value)
 							EndIf
 						EndIf
 						
-						temp = GetINIInt2(iniStr, loc, "deathtimer")*70
-						If temp > 0 Then
+						value = GetINIFloat2(iniStr, loc, "deathtimer")*70
+						If value > 0 Then
 							If DeathTimer = 0 Then
-								DeathTimer = temp
+								DeathTimer = value
 							Else
-								DeathTimer = Min(DeathTimer, temp)
+								DeathTimer = Min(DeathTimer, value)
 							EndIf
 						EndIf
 						
-						Injuries = Max(Injuries + GetINIInt2(iniStr, loc, "damage") + GetINIInt2(iniStr, loc, "injuries"), 0);*temp
-						Bloodloss = Max(Bloodloss + GetINIInt2(iniStr, loc, "blood loss"), 0);*temp
+						Injuries = Max(Injuries + GetINIFloat2(iniStr, loc, "damage") + GetINIFloat2(iniStr, loc, "injuries"), 0);*temp
+						Bloodloss = Max(Bloodloss + GetINIFloat2(iniStr, loc, "blood loss"), 0);*temp
 						
 						If GetINIInt2(iniStr, loc, "stomachache") Lor GetINIInt2(iniStr, loc, "stomach ache") Then SCP1025state[3]=Max(1, SCP1025state[3])
 						
@@ -11635,6 +11635,10 @@ Function GetINIInt2%(file$, start%, parameter$, defaultvalue$="")
 	Else
 		Return Int(txt)
 	EndIf
+End Function
+
+Function GetINIFloat2#(file$, start%, parameter$, defaultvalue# = 0.0)
+	Return Float(GetINIString2(file, start, parameter$, defaultvalue))
 End Function
 
 
