@@ -1,3 +1,6 @@
+> [!CAUTION]
+> This branch is deprecated and will no longer receive new features and fixes! It existed solely to support archaic DirectX 7 engine versions, which have been made obsolete.
+
 # SCP - Containment Breach
 
 The game is based on the works of the SCP Foundation community (http://www.scp-wiki.net/).
@@ -8,7 +11,7 @@ http://creativecommons.org/licenses/by-sa/3.0/
 
 Requirements:
 
--	[BlitzPRO Legacy](https://github.com/Euclid-Labs-Studio/BlitzPRO/releases/tag/legacy-v2.100)
+-	[Blitz3D CB v1.3.12.6.1](https://github.com/SCP-CB-CPP/Blitz3D/releases/tag/CB-v1.3.12.6.1)
 
 > [!IMPORTANT]
 > Make sure to copy all .decls files from this repo's `Userlibs` folder to your Blitz3D installation's `userlibs` folder before compiling.
