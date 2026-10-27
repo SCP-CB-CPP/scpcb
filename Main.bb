@@ -142,6 +142,8 @@ Global CanOpenConsole% = GetOptionInt("console", "enabled")
 
 Global UseNumericSeeds% = GetOptionInt("general", "numeric seeds")
 
+Global PlayStartupVideo% = GetOptionInt("general", "play startup video")
+
 Dim ArrowIMG(4)
 
 ;[Block]
@@ -11799,6 +11801,7 @@ Function SaveOptionsINI()
 	PutINIValue(OptionFile, "graphics", "vsync", Vsync)
 	PutINIValue(OptionFile, "graphics", "show FPS", ShowFPS)
 	PutINIValue(OptionFile, "graphics", "framelimit", Framelimit%)
+	PutINIValue(OptionFile, "general", "intro enabled", IntroEnabled%)
 	PutINIValue(OptionFile, "general", "achievement popup enabled", AchvMSGenabled%)
 	PutINIValue(OptionFile, "launcher", "launcher enabled", LauncherEnabled%)
 	PutINIValue(OptionFile, "graphics", "texture details", TextureDetails%)
@@ -11806,6 +11809,7 @@ Function SaveOptionsINI()
 	PutINIValue(OptionFile, "console", "auto opening", ConsoleOpening%)
 	PutINIValue(OptionFile, "general", "speed run mode", SpeedRunMode%)
 	PutINIValue(OptionFile, "general", "numeric seeds", UseNumericSeeds%)
+	PutINIValue(OptionFile, "general", "play startup video", PlayStartupVideo%)
 	PutINIValue(OptionFile, "controls", "mouse smoothing", MouseSmooth)
 	PutINIValue(OptionFile, "graphics", "hud scale factor", HUDScaleFactor)
 	PutINIValue(OptionFile, "graphics", "hud offset", HUDOffsetScale)
@@ -12366,7 +12370,7 @@ Function PlayMovie(moviefile$)
 End Function
 
 Function PlayStartupVideos()
-	If GetOptionInt("general","play startup video") = 0 Lor IsRestart Lor HasCLIFlag("novid") Then Return
+	If PlayStartupVideo = 0 Lor IsRestart Lor HasCLIFlag("novid") Then Return
 
 	PlayMovie("GFX\menu\startup_Undertow")
 	PlayMovie("GFX\menu\startup_TSS")
