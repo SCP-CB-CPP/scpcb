@@ -91,12 +91,12 @@ Function UpdateEvents()
 						
 						If e\room\NPC[1] = Null Then
 							e\room\NPC[1] = CreateNPC(NPCtypeD, 0,0,0)
-							ChangeNPCTextureID(e\room\NPC[1],3)
+							ChangeNPCTextureID(e\room\NPC[1],4)
 							;tex = LoadTexture_Strict("GFX\npcs\scientist2.jpg")
 							e\room\NPC[1]\texture = "GFX\npcs\scientist2.jpg"
 							;EntityTexture e\room\NPC[1]\obj, tex
 							;FreeTexture tex
-							ChangeNPCTextureID(e\room\NPC[1],3)
+							ChangeNPCTextureID(e\room\NPC[1],4)
 						Else
 							EntityType e\room\NPC[1]\Collider, HIT_DEAD
 						EndIf
@@ -127,7 +127,7 @@ Function UpdateEvents()
 							MoveEntity e\room\NPC[4]\Collider,0,0,2.65
 							
 							e\room\NPC[5] = CreateNPC(NPCtypeD, EntityX(e\room\Objects[4], True), 0.5, EntityZ(e\room\Objects[4], True))
-							ChangeNPCTextureID(e\room\NPC[5],6)
+							ChangeNPCTextureID(e\room\NPC[5],7)
 							;PointEntity(e\room\NPC[5]\Collider, e\room\Objects[7])
 							SetNPCFrame(e\room\NPC[5], 19) : e\room\NPC[5]\State = 3
 							RotateEntity e\room\NPC[5]\Collider,0,270,0
@@ -326,26 +326,27 @@ Function UpdateEvents()
 						
 						If (i>0 And i<26) Then
 							If Not CommotionState(i) Then ;Prevents the same commotion file from playing more then once.
-								PlaySound_Strict(LoadTempSound("SFX\Room\Intro\Commotion\Commotion"+i+".ogg"))
-								CommotionState(i) = True
+								CommotionState(i) = PlaySound_Strict(LoadTempSound("SFX\Room\Intro\Commotion\Commotion"+i+".ogg"))
 							EndIf
 						EndIf
-						
-						If (i>26) Then
-							If e\room\NPC[0] <> Null Then RemoveNPC(e\room\NPC[0])
-							;If e\room\NPC[1] <> Null Then RemoveNPC(e\room\NPC[1])
-							;If e\room\NPC[2] <> Null Then RemoveNPC(e\room\NPC[2])
-							
-							FreeEntity e\room\Objects[0]
-							FreeEntity e\room\Objects[1]
-							e\room\Objects[0]=0
-							e\room\Objects[1]=0
-							
-							DebugLog "delete alarm"
-							
-							RemoveEvent(e)							
+					EndIf
+
+					If i > 26 Lor PlayerRoom\RoomTemplate\Name = "pocketdimension" Lor PlayerRoom\RoomTemplate\Name = "dimension1499" Lor PlayerRoom\RoomTemplate\Name = "halloweenfields" Lor PlayerRoom\RoomTemplate\Name = "halloweenpd" Then
+						If i <= 26 Then
+							For i = 1 To 25
+								StopChannel(CommotionState(i))
+							Next
 						EndIf
-					EndIf					
+
+						If e\room\NPC[0] <> Null Then RemoveNPC(e\room\NPC[0])
+							
+						FreeEntity e\room\Objects[0]
+						FreeEntity e\room\Objects[1]
+						e\room\Objects[0]=0
+						e\room\Objects[1]=0
+							
+						RemoveEvent(e)
+					EndIf
 				End If
 				;[End Block]
 			Case "173" ;the intro sequence
@@ -784,7 +785,7 @@ Function UpdateEvents()
 								
 								e\room\NPC[2] = CreateNPC(NPCtypeD, EntityX(e\room\Objects[2], True), 0.5, EntityZ(e\room\Objects[2], True))
 								PointEntity(e\room\NPC[2]\Collider, e\room\Objects[5])
-								ChangeNPCTextureID(e\room\NPC[2],6)
+								ChangeNPCTextureID(e\room\NPC[2],7)
 								;EntityTexture e\room\NPC[2]\obj, DTextures[7]
 								;FreeTexture DTextures[7]
 								e\room\NPC[3]\State = 9								
@@ -955,13 +956,13 @@ Function UpdateEvents()
 								;tex = LoadTexture_Strict("GFX\npcs\scientist2.jpg")
 								;EntityTexture e\room\NPC[6]\obj, DTextures[4]
 								;FreeTexture tex
-								ChangeNPCTextureID(e\room\NPC[6],3)
+								ChangeNPCTextureID(e\room\NPC[6],4)
 								e\room\NPC[7] = CreateNPC(NPCtypeD, e\room\x-3712*RoomScale, -0.3, e\room\z-2208*RoomScale)
 								;tex = LoadTexture_Strict("GFX\npcs\scientist.jpg")
 								e\room\NPC[7]\Sound = LoadSound_Strict("SFX\Room\Intro\Scientist\Conversation.ogg")
 								;EntityTexture e\room\NPC[7]\obj, DTextures[3]
 								;FreeTexture tex
-								ChangeNPCTextureID(e\room\NPC[7],2)
+								ChangeNPCTextureID(e\room\NPC[7],3)
 								pvt = CreatePivot()
 								RotateEntity pvt,90,0,0
 								
@@ -1780,7 +1781,7 @@ Function UpdateEvents()
 								
 								e\room\NPC[0]=CreateNPC(NPCtypeD, EntityX(e\room\RoomDoors[0]\obj,True), 0.5, EntityZ(e\room\RoomDoors[0]\obj,True))
 								
-								ChangeNPCTextureID(e\room\NPC[0],4)
+								ChangeNPCTextureID(e\room\NPC[0],5)
 								
 								PointEntity e\room\NPC[0]\Collider, e\room\obj
 								RotateEntity e\room\NPC[0]\Collider, 0, EntityYaw(e\room\NPC[0]\Collider),0, True
@@ -2751,7 +2752,7 @@ Function UpdateEvents()
 					de.Decals = CreateDecal(3, EntityX(e\room\Objects[0],True), 0.0005, EntityZ(e\room\Objects[0],True),90,Rnd(360),0)
 					
 					e\room\NPC[0]=CreateNPC(NPCtypeD, EntityX(e\room\Objects[0],True), 0.5, EntityZ(e\room\Objects[0],True))
-					ChangeNPCTextureID(e\room\NPC[0],0)
+					ChangeNPCTextureID(e\room\NPC[0],1)
 					
 					RotateEntity e\room\NPC[0]\Collider, 0, EntityYaw(e\room\obj)-80,0, True	
 					
@@ -3045,7 +3046,7 @@ Function UpdateEvents()
 					EndIf
 				EndIf
 				
-				If PlayerRoom\RoomTemplate\Name <> "pocketdimension" And PlayerRoom\RoomTemplate\Name <> "room860" Then
+				If PlayerRoom\RoomTemplate\Name <> "pocketdimension" And PlayerRoom\RoomTemplate\Name <> "room860" And PlayerRoom\RoomTemplate\Name <> "halloweenpd" And PlayerRoom\RoomTemplate\Name <> "halloweenfields" Then
 					If e\EventState2 = 0 Then
 						If e\EventState3 <=0 Then 
 							temp = False
@@ -4635,10 +4636,8 @@ Function UpdateEvents()
 									e\room\NPC[1]=Null
 								EndIf
 							Case 60
-								If (Not HalloweenTex) Then
-									Local tex970 = LoadTexture_Strict("GFX\npcs\173h.pt", 1)
-									EntityTexture Curr173\obj, tex970, 0, 0
-									FreeTexture tex970
+								If Curr173\TextureID <> 1 Then
+									ChangeNPCTextureID(Curr173, 1)
 								EndIf
 						End Select
 						
@@ -5100,6 +5099,7 @@ Function UpdateEvents()
 					If e\EventState = 0 Then
 						If EntityDistance(Collider, e\room\Objects[3])<2 Then
 							n.NPCs = CreateNPC(NPCtypeD, EntityX(e\room\Objects[4],True),0.5,EntityZ(e\room\Objects[4],True))
+							MoveEntity(n\Collider, 0.15 * Cos(e\room\angle), 0, 0.15 * Sin(e\room\angle))
 							
 							n\texture = "GFX\NPCs\035victim.jpg"
 							n\Model = "GFX\NPCs\035.b3d"
@@ -5145,7 +5145,7 @@ Function UpdateEvents()
 						EndIf
 						
 						If e\EventState=1 Then
-							If EntityDistance(Collider, e\room\Objects[3])<1.2 
+							If EntityDistance(Collider, e\room\Objects[3])<1.2 And (Not NoTarget) 
 								If EntityInView(e\room\NPC[0]\obj, Camera) Then
 									GiveAchievement(Achv035)
 									PlaySound_Strict(LoadTempSound("SFX\SCP\035\GetUp.ogg"))
@@ -6068,7 +6068,7 @@ Function UpdateEvents()
 						RotateEntity(e\room\Objects[6], 0, EntityYaw(e\room\Objects[6],True), 0, True)
 					EndIf
 				Else
-					If PlayerRoom\RoomTemplate\Name = "pocketdimension" Or PlayerRoom\RoomTemplate\Name = "dimension1499" Then
+					If PlayerRoom\RoomTemplate\Name = "pocketdimension" Lor PlayerRoom\RoomTemplate\Name = "dimension1499" Lor PlayerRoom\RoomTemplate\Name = "halloweenpd" Lor PlayerRoom\RoomTemplate\Name = "halloweenfields" Then
 						If (e\SoundCHN2<>0) Then
 							If ChannelPlaying(e\SoundCHN2) Then StopChannel e\SoundCHN2
 						EndIf
@@ -6338,7 +6338,7 @@ Function UpdateEvents()
 						EndIf
 						
 						If e\room\NPC[0]<>Null
-							If e\room\NPC[0]\State = 0 Or EntityDistance(Collider, e\room\NPC[0]\Collider)>HideDistance Then
+							If (e\room\NPC[0]\State = 0 Or EntityDistance(Collider, e\room\NPC[0]\Collider)>HideDistance) And (Not NoTarget) Then
 								e\EventState3 = e\EventState3 + (1+CurrSpeed)* FPSfactor
 								If (e\EventState3 Mod 500) < 10.0 And ((e\EventState3-(1+CurrSpeed)*FPSfactor) Mod 500) > 490.0 Then
 									;If e\EventState3 > 3500 And Rnd(10000)<e\EventState3 Then
@@ -6918,6 +6918,16 @@ Function UpdateEvents()
 				
 			Case "testroom173"
 				;[Block]
+				If e\EventState2 = 0 And e\room\Objects[3] <> 0 Then
+					For r2.Rooms = Each Rooms
+						If r2\RoomTemplate\Name = "room4info" Then
+							it.Items = Object.Items(e\room\Objects[3])
+							If it <> Null Then RemoveItem(it)
+							Exit
+						EndIf
+					Next
+					e\EventState2 = 1
+				EndIf
 				If PlayerRoom = e\room	
 					If Curr173\Idle = 0 Then 
 						If e\EventState = 0 Then
@@ -6939,7 +6949,7 @@ Function UpdateEvents()
 								e\EventState = Max(e\EventState, 70*12)
 							ElseIf dist > 1.4
 								;if the player moves a bit further and blinks, 173 attacks
-								If e\EventState > 70*12 And BlinkTimer =< -10 Then
+								If e\EventState > 70*12 And BlinkTimer =< -10 And (Not NoTarget) Then
 									If (EntityDistance(Curr173\Collider, e\room\Objects[0]) > 5.0) Then
 										;if 173 is far away from the room (perhaps because the player 
 										;left and 173 moved to some other room?) -> disable the event
@@ -7026,7 +7036,7 @@ Function UpdateEvents()
 							If e\EventState2=0 Then
 								ShowEntity e\room\Objects[2]
 								If EntityDistance(Curr173\Collider,e\room\Objects[4])<3.0
-									If (BlinkTimer<-10 Or (Not EntityInView(Curr173\obj,Camera))) And Curr173\Idle = 0 Then
+									If (BlinkTimer<-10 Or (Not EntityInView(Curr173\obj,Camera))) And Curr173\Idle = 0 And (Not NoTarget) Then
 										PositionEntity Curr173\Collider, EntityX(e\room\Objects[4],True),0.5,EntityZ(e\room\Objects[4],True),True
 										ResetEntity Curr173\Collider
 										
@@ -7110,7 +7120,7 @@ Function UpdateEvents()
 							If e\room\NPC[0]=Null Then
 								e\room\NPC[0]=CreateNPC(NPCtypeD, EntityX(e\room\obj), 900.0*RoomScale, EntityZ(e\room\obj))
 								RotateEntity e\room\NPC[0]\Collider, 0, Rnd(360), 0, True
-								ChangeNPCTextureID(e\room\NPC[0],5)
+								ChangeNPCTextureID(e\room\NPC[0],6)
 								e\room\NPC[0]\State=6
 								
 								PlaySound_Strict HorrorSFX(0)
@@ -7205,7 +7215,7 @@ Function UpdateEvents()
 				;[Block]
 				If e\EventState = 0 Then
 					If PlayerRoom = e\room Then e\EventState = 70 * Rand(300,1000)
-				ElseIf PlayerRoom\RoomTemplate\Name <> "pocketdimension" And PlayerRoom\RoomTemplate\Name <> "room860" And PlayerRoom\RoomTemplate\Name <> "room1123" And PlayerRoom\RoomTemplate\Name <> "dimension1499" 
+				ElseIf PlayerRoom\RoomTemplate\Name <> "pocketdimension" And PlayerRoom\RoomTemplate\Name <> "room860" And PlayerRoom\RoomTemplate\Name <> "room1123" And PlayerRoom\RoomTemplate\Name <> "dimension1499" And PlayerRoom\RoomTemplate\Name <> "halloweenpd" And PlayerRoom\RoomTemplate\Name <> "halloweenfields"
 					e\EventState = e\EventState-FPSfactor
 					
 					If e\EventState < 17*70 Then
@@ -8383,7 +8393,7 @@ Function UpdateEvents()
 							If EntityExist(e\room\Objects[i]) Then HideEntity e\room\Objects[i]
 						Next
 					EndIf
-					If EntityY(Collider)>EntityY(e\room\obj)-0.5
+					If EntityY(Collider)>EntityY(e\room\obj)-0.5 And EntityY(Collider)<EntityY(e\room\obj)+100
 						PlayerRoom = e\room
 					EndIf
 				EndIf
@@ -8437,7 +8447,7 @@ Function UpdateEvents()
 							MoveEntity e\room\NPC[0]\Collider,0,0,-0.5
 							e\room\NPC[0]\State = 3
 							e\room\NPC[0]\texture = "GFX\npcs\035victim.jpg"
-							ChangeNPCTextureID(e\room\NPC[0],7)
+							ChangeNPCTextureID(e\room\NPC[0],8)
 							SetNPCFrame(e\room\NPC[0],19)
 						EndIf
 						If e\room\NPC[1]=Null
@@ -8499,6 +8509,111 @@ Function UpdateEvents()
 							MouseHit1=0
 						EndIf
 					Next
+				EndIf
+				;[End Block]
+			Case "halloweenfields"
+				;[Block]
+				If PlayerRoom=e\room Then
+					Local spawnPos%[3], startPos%[3]
+					spawnPos[0] = 10 : spawnPos[1] = 14 : spawnPos[2] = 11
+					startPos[0] = 17 : startPos[1] = 14 : startPos[2] = 11
+					For i = 0 To 2
+						If e\room\NPC[i]=Null Then
+							e\room\NPC[i] = CreateNPC(NPCType939, EntityX(e\room\Objects[spawnPos[i]], True), EntityY(e\room\Objects[spawnPos[i]], True), EntityZ(e\room\Objects[spawnPos[i]], True))
+							e\room\NPC[i]\State = 2
+							e\room\NPC[i]\State2 = startPos[i]
+							e\room\NPC[i]\PrevState = 17
+							e\room\NPC[i]\LastDist = 8
+							ChangeNPCTextureID(e\room\NPC[i], 1)
+						ElseIf e\room\NPC[i]\State = 66 Then
+							e\room\NPC[i]\State = 2
+						EndIf
+					Next
+
+					ShouldPlay = 26
+
+					TFormPoint(EntityX(Collider), EntityY(Collider), EntityZ(Collider), 0, e\room\Objects[1])
+					Local tx# = TFormedX(), tz# = TFormedZ()
+					Local isInBarn% = Abs(tx) < 884.5 And Abs(tz) < 758
+
+					If isInBarn Then
+						If Rand(60 * 15 / FPSfactor) = 1 Then PositionEntity(e\room\Objects[2], Rnd(-884.5, 884.5), 1, Rnd(-758, 758)) : PlaySound2(LoadTempSound("SFX\Room\Halloween\Barn\BarnCreak" + Rand(5) + ".ogg"), Camera, e\room\Objects[2], 10, 2)
+						If Rand(60 * 30 / FPSfactor) = 1 Then PositionEntity(e\room\Objects[2], Rnd(-884.5, 884.5), 1, Rnd(-758, 758)) : PlaySound2(LoadTempSound("SFX\Room\Halloween\Barn\BarnSteps" + Rand(3) + ".ogg"), Camera, e\room\Objects[2], 10, 2)
+						If Rand(60 * 90 / FPSfactor) = 1 Then PositionEntity(e\room\Objects[2], Rnd(-884.5, 884.5), 1, Rnd(-758, 758)) : PlaySound2(LoadTempSound("SFX\Room\Halloween\Barn\BarnCough.ogg"), Camera, e\room\Objects[2], 10, 2)
+
+						e\EventState = CurveValue(1, e\EventState, 10)
+					Else
+						CurrStepSFX = 2
+
+						e\EventState = CurveValue(0, e\EventState, 10)
+					EndIf
+					CameraClsColor Camera,Lerp(191, 0, e\EventState), Lerp(133, 0, e\EventState), Lerp(67, 0, e\EventState)
+					CameraFogColor Camera,Lerp(191, 0, e\EventState), Lerp(133, 0, e\EventState), Lerp(67, 0, e\EventState)
+					TempLightVolume = TempLightVolume*1.5
+
+					If (Not NoClip) And EntityY(Collider) - EntityY(e\room\obj, True) > 0.6 Then
+						MoveEntity(Collider, 0, -0.1 * FPSfactor, 0)
+					EndIf
+				Else
+					For i = 0 To 2
+						If e\room\NPC[i]<>Null Then e\room\NPC[i]\State = 66
+					Next
+				EndIf
+				;[End Block]
+			Case "halloweenpd"
+				;[Block]
+				If PlayerRoom=e\room Then
+					If e\EventState = 0 Then
+						Local tempIt.TempItems = e\room\RoomTemplate\FirstTempItem
+						While tempIt<>Null
+							e\EventState = e\EventState + 1
+							tempIt = tempIt\Successor
+						Wend
+						If e\EventState = 0 Then e\EventState = -1
+					EndIf
+
+					If KillTimer >= 0 Then PlayerFallingPickDistance = 0
+					CurrStepSFX = 1
+					ShouldPlay = 3
+					BlurTimer = 900
+
+					Curr106\State = -10
+					Curr106\Idle = False
+
+					If KeyDown(KEY_BLINK) And e\EventState2 = 0 Then e\EventState2 = 1
+
+					If e\EventState2 = 1 And BlinkTimer <= -11 And (DropSpeed = 0 Lor SelectedDifficulty\otherFactors <> HARD) And KillTimer >= 0 Then
+						e\EventState2 = 2
+
+						x# = EntityX(Curr106\obj, True)
+						z# = EntityZ(Curr106\obj, True)
+						count% = 0
+						For w.WayPoints = Each WayPoints
+							If w\room = e\room And Distance(x, z, EntityX(w\obj, True), EntityZ(w\obj, True)) > 3 Then count = count + 1
+						Next
+						Local picked% = Rand(count)-1
+						For w.WayPoints = Each WayPoints
+							If w\room = e\room And Distance(x, z, EntityX(w\obj, True), EntityZ(w\obj, True)) > 3 Then
+								If picked = 0 Then
+									PositionEntity(Collider, EntityX(w\obj, True), EntityY(w\obj, True) + 0.2, EntityZ(w\obj, True))
+									ResetEntity(Collider)
+									Exit
+								EndIf
+								picked = picked - 1
+							EndIf
+						Next
+					ElseIf e\EventState2 = 2 And BlinkTimer > -11 Then
+						e\EventState2 = 0
+					EndIf
+
+					If EntityY(Collider) < e\room\y - 5 Then
+						If KillTimer => 0 Then
+							KillTimer = -1
+							PlaySound_Strict HorrorSFX(8)
+							DeathMSG = I_Loc\DeathMessage_106PdFall
+						EndIf
+						BlurTimer = 3000
+					EndIf
 				EndIf
 				;[End Block]
 		End Select

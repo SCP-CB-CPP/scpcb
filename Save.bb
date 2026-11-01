@@ -89,6 +89,7 @@ Function SaveGame(file$)
 	WriteByte f, WearingGasMask
 	WriteByte f, WearingVest
 	WriteByte f, WearingHazmat
+	WriteByte f, WearingPumpkin
 	
 	WriteByte f, WearingNightVision
 	WriteByte f, Wearing1499
@@ -369,8 +370,9 @@ Function SaveGame(file$)
 		WriteFloat f, e\EventState
 		WriteFloat f, e\EventState2	
 		WriteFloat f, e\EventState3	
-		WriteFloat f, EntityX(e\room\obj)
-		WriteFloat f, EntityZ(e\room\obj)
+		WriteFloat f, e\room\x
+		WriteFloat f, e\room\y
+		WriteFloat f, e\room\z
 		WriteString f, e\EventStr
 	Next
 	
@@ -575,6 +577,8 @@ Function LoadGame(file$)
 	WearingGasMask = ReadByte(f)
 	WearingVest = ReadByte(f)	
 	WearingHazmat = ReadByte(f)
+	WearingPumpkin = ReadByte(f)
+	If WearingPumpkin Then NoTarget = True
 	
 	WearingNightVision = ReadByte(f)
 	Wearing1499 = ReadByte(f)
@@ -700,8 +704,7 @@ Function LoadGame(file$)
 		EndIf
 		n\TextureID = ReadInt(f)
 		If n\TextureID > 0
-			ChangeNPCTextureID(n.NPCs,n\TextureID-1)
-			SetAnimTime(n\obj,frame)
+			ChangeNPCTextureID(n.NPCs,n\TextureID)
 		EndIf
 	Next
 	
@@ -830,9 +833,8 @@ Function LoadGame(file$)
 		If hasForest>0 Then ;this room has a forest
 			If r\fr<>Null Then ;remove the old forest
 				DestroyForest(r\fr)
-			Else
-				r\fr=New Forest
 			EndIf
+			r\fr=New Forest
 			For y=0 To gridsize-1
 				Local sssss$ = ""
 				For x=0 To gridsize-1
@@ -851,7 +853,6 @@ Function LoadGame(file$)
 			EndIf
 		ElseIf r\fr<>Null Then ;remove the old forest
 			DestroyForest(r\fr)
-			Delete r\fr
 		EndIf
 		
 	Next
@@ -1043,9 +1044,10 @@ Function LoadGame(file$)
 		e\EventState2 =ReadFloat(f)		
 		e\EventState3 =ReadFloat(f)
 		x = ReadFloat(f)
+		y = ReadFloat(f)
 		z = ReadFloat(f)
 		For  r.Rooms = Each Rooms
-			If EntityX(r\obj) = x And EntityZ(r\obj) = z Then
+			If r\x = x And r\y = y And r\z = z Then
 				e\room = r
 				Exit
 			EndIf
@@ -1311,6 +1313,7 @@ Function LoadGameQuick(file$)
 	DeafPlayer% = False
 	DeafTimer# = 0.0
 	UnableToMove% = False
+	LostHands = False
 	Msg = ""
 	SelectedEnding = ""
 	
@@ -1427,6 +1430,8 @@ Function LoadGameQuick(file$)
 	WearingGasMask = ReadByte(f)
 	WearingVest = ReadByte(f)	
 	WearingHazmat = ReadByte(f)
+	WearingPumpkin = ReadByte(f)
+	If WearingPumpkin Then NoTarget = True
 	
 	WearingNightVision = ReadByte(f)
 	Wearing1499 = ReadByte(f)
@@ -1552,8 +1557,7 @@ Function LoadGameQuick(file$)
 		EndIf
 		n\TextureID = ReadInt(f)
 		If n\TextureID > 0
-			ChangeNPCTextureID(n.NPCs,n\TextureID-1)
-			SetAnimTime(n\obj,frame)
+			ChangeNPCTextureID(n.NPCs,n\TextureID)
 		EndIf
 	Next
 	
@@ -1612,7 +1616,7 @@ Function LoadGameQuick(file$)
         EndIf
 		
 		For r.Rooms = Each Rooms
-			If r\x = x And r\z = z Then
+			If r\x = x And r\y = y And r\z = z Then
 				Exit
 			EndIf
 		Next
@@ -1679,7 +1683,6 @@ Function LoadGameQuick(file$)
 			Local lz# = ReadFloat(f)
 		ElseIf r\fr<>Null Then ;remove the old forest
 			DestroyForest(r\fr)
-			Delete r\fr
 		EndIf
 		
 		If temp2 = 1 Then PlayerRoom = r.Rooms
@@ -1795,9 +1798,10 @@ Function LoadGameQuick(file$)
 		e\EventState2 = ReadFloat(f)
 		e\EventState3 = ReadFloat(f)		
 		x = ReadFloat(f)
+		y = ReadFloat(f)
 		z = ReadFloat(f)
 		For r.Rooms = Each Rooms
-			If EntityX(r\obj) = x And EntityZ(r\obj) = z Then
+			If r\x = x And r\y = y And r\z = z Then
 				;If e\EventName = "room2servers" Then Stop
 				e\room = r
 				Exit
