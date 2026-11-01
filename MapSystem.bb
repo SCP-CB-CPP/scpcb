@@ -7747,38 +7747,33 @@ Function CreateDoors()
 	Next
 End Function
 
-Function ConnectAdjacentRooms()
-	For r.Rooms = Each Rooms
-		;If r\angle >= 360
-        ;    r\angle = r\angle-360
-        ;EndIf
-		r\angle = WrapAngle(r\angle)
-		r\Adjacent[0]=Null
-		r\Adjacent[1]=Null
-		r\Adjacent[2]=Null
-		r\Adjacent[3]=Null
-		For r2.Rooms = Each Rooms
-			If r2\y = 0 And r<>r2 Then
-				If r2\z=r\z Then
-					If (r2\x)=(r\x+8.0) Then
-						r\Adjacent[0]=r2
-						If r\AdjDoor[0] = Null Then r\AdjDoor[0] = r2\AdjDoor[2]
-					ElseIf (r2\x)=(r\x-8.0)
-						r\Adjacent[2]=r2
-						If r\AdjDoor[2] = Null Then r\AdjDoor[2] = r2\AdjDoor[0]
-					EndIf
-				ElseIf r2\x=r\x Then
-					If (r2\z)=(r\z-8.0) Then
-						r\Adjacent[1]=r2
-						If r\AdjDoor[1] = Null Then r\AdjDoor[1] = r2\AdjDoor[3]
-					ElseIf (r2\z)=(r\z+8.0)
-						r\Adjacent[3]=r2
-						If r\AdjDoor[3] = Null Then r\AdjDoor[3] = r2\AdjDoor[1]
-					EndIf
+Function ConnectAdjacentRooms(r.Rooms)
+	r\angle = WrapAngle(r\angle)
+	r\Adjacent[0]=Null
+	r\Adjacent[1]=Null
+	r\Adjacent[2]=Null
+	r\Adjacent[3]=Null
+	For r2.Rooms = Each Rooms
+		If r2\y = r\y And r<>r2 Then
+			If r2\z=r\z Then
+				If (r2\x)=(r\x+8.0) Then
+					r\Adjacent[0]=r2
+					If r\AdjDoor[0] = Null Then r\AdjDoor[0] = r2\AdjDoor[2]
+				ElseIf (r2\x)=(r\x-8.0)
+					r\Adjacent[2]=r2
+					If r\AdjDoor[2] = Null Then r\AdjDoor[2] = r2\AdjDoor[0]
+				EndIf
+			ElseIf r2\x=r\x Then
+				If (r2\z)=(r\z-8.0) Then
+					r\Adjacent[1]=r2
+					If r\AdjDoor[1] = Null Then r\AdjDoor[1] = r2\AdjDoor[3]
+				ElseIf (r2\z)=(r\z+8.0)
+					r\Adjacent[3]=r2
+					If r\AdjDoor[3] = Null Then r\AdjDoor[3] = r2\AdjDoor[1]
 				EndIf
 			EndIf
 			If (r\Adjacent[0]<>Null) And (r\Adjacent[1]<>Null) And (r\Adjacent[2]<>Null) And (r\Adjacent[3]<>Null) Then Exit
-		Next
+		EndIf
 	Next
 End Function
 
@@ -7824,7 +7819,9 @@ Function CreateMap(loadingstart,loadingcount#)
 	Next
 
 	CreateDoors()
-	ConnectAdjacentRooms()
+	For r.Rooms = Each Rooms
+		ConnectAdjacentRooms(r)
+	Next
 End Function
 
 ; Really, really stupid bandaid fix!
