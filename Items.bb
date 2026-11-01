@@ -310,18 +310,20 @@ Function CreateItem.Items(name$, x#, y#, z#)
 	i\DropSpeed = 0.0
 	
 	i\invimg = i\itemtemplate\invimg
-	If name="clipboard" Then
-		i\Inventory = New Inventories
-		i\Inventory\Size = 10
-		SetAnimTime i\model,17.0
-		i\invimg = i\itemtemplate\invimg2
-	ElseIf name="wallet" Then
-		i\Inventory = New Inventories
-		i\Inventory\Size = 10
-		SetAnimTime i\model,0.0
-	ElseIf name="scp330" then
-		i\state = 1 Shl Rand(0, 2)
-	EndIf
+	
+	Select name
+		Case "clipboard"
+			i\Inventory = New Inventories
+			i\Inventory\Size = 10
+			SetAnimTime i\model,17.0
+			i\invimg = i\itemtemplate\invimg2
+		Case "wallet"
+			i\Inventory = New Inventories
+			i\Inventory\Size = 10
+			SetAnimTime i\model,0.0
+		Case "scp330"
+			i\state = 1 Shl Rand(0, 2)
+	End Select
 	
 	i\ID=LastItemID+1
 	LastItemID=i\ID

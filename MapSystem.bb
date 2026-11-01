@@ -1281,66 +1281,7 @@ Function PlaceForest_MapCreator(fr.Forest,x#,y#,z#,r.Rooms)
 				DebugLog "Tile: "+tile_type+"| Angle: "+angle
 				
 				If tile_type > 0 Then 
-<<<<<<< HEAD
-					
-					;place trees and other details
-					;only placed on spots where the value of the heightmap is above 100
-					Local width = TextureWidth(hmap[tile_type])
-					Local buf% = TextureBuffer(hmap[tile_type])
-					LockBuffer(buf)
-					tempf4# = (tempf3/Float(width))
-					For lx = 3 To width-2
-						For ly = 3 To width-2
-							GetColor lx,width-ly
-							
-							If red>Rand(100,260) Then
-								detail_entity = 0
-								Select Rand(0,7)
-									Case 0,1,2,3,4,5,6 ;create a tree
-										detail_entity=CopyEntity(fr\DetailMesh[0])
-										;EntityType detail_entity,HIT_MAP
-										tempf2=Rnd(0.25,0.4)
-										
-										For i = 0 To 3
-											Local d=CopyEntity(fr\DetailMesh[2])
-											;ScaleEntity d,tempf2*1.1,tempf2,tempf2*1.1,True
-											RotateEntity d, 0, 90*i+Rnd(-20,20), 0
-											EntityParent(d,detail_entity)
-											
-											EntityFX d, 1;+8
-										Next
-										
-										ScaleEntity detail_entity,tempf2*1.1,tempf2,tempf2*1.1,True
-										PositionEntity detail_entity,lx*tempf4-(tempf3/2.0),red*0.03-Rnd(3.0,3.2),ly*tempf4-(tempf3/2.0),True
-										
-										RotateEntity detail_entity,Rnd(-5,5),Rnd(360.0),0.0,True
-										
-										;EntityAutoFade(detail_entity,4.0,6.0)
-									Case 7 ;add a rock
-										detail_entity=CopyEntity(fr\DetailMesh[1])
-										;EntityType detail_entity,HIT_MAP
-										tempf2=Rnd(0.01,0.012)
-										;ScaleEntity detail_entity,tempf2,tempf2*Rnd(1.0,2.0),tempf2,True
-										
-										PositionEntity detail_entity,lx*tempf4-(tempf3/2.0),red*0.03-1.3,ly*tempf4-(tempf3/2.0),True
-										
-										EntityFX detail_entity, 1
-										
-										RotateEntity detail_entity,0.0,Rnd(360.0),0.0,True
-								End Select
-								
-								If detail_entity <> 0 Then
-									EntityFX detail_entity, 1
-									;PositionEntity detail_entity,Rnd(0.0,tempf3)-(tempf3/2.0),red*0.03-0.05,Rnd(0.0,tempf3)-(tempf3/2.0),True
-									EntityParent detail_entity,tile_entity
-								EndIf
-							EndIf
-						Next
-					Next
-					UnlockBuffer(buf)
-=======
 					PlaceForestProps(tile_entity, hmap[tile_type], tempf3, 0.03, fr\DetailMesh[0], fr\DetailMesh[2], fr\DetailMesh[1])
->>>>>>> d7546549bdf950c3e9464d0aa0dc1fa1ef231ca2
 					
 					ScaleEntity tile_entity,tempf1,tempf1,tempf1
 					
