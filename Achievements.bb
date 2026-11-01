@@ -129,6 +129,7 @@ Global CurrAchvMSGID% = 0
 Type AchievementMsg
 	Field achv.Achievements
 	Field msgx#
+	Field msgy#
 	Field msgtime#
 	Field msgID%
 End Type
@@ -138,6 +139,7 @@ Function CreateAchievementMsg.AchievementMsg(achv.Achievements)
 	
 	amsg\achv = achv
 	amsg\msgx = 0.0
+	amsg\msgy = 0.0
 	amsg\msgtime = FPSfactor2
 	amsg\msgID = CurrAchvMSGID
 	CurrAchvMSGID = CurrAchvMSGID + 1
@@ -146,32 +148,41 @@ Function CreateAchievementMsg.AchievementMsg(achv.Achievements)
 End Function
 
 Function UpdateAchievementMsg()
+	If First AchievementMsg = Null Then Return
+
 	Local amsg.AchievementMsg,amsg2.AchievementMsg
-	Local scale# = GraphicHeight/768.0
-	Local width% = 264*scale
-	Local height% = 84*scale
-	Local x%,y%
+	Local scale# = GraphicHeight / 768.0
+	Local width% = 264 * scale
+	Local height% = 84 * scale
+	Local x%,y%, offset% = 0
 	
-	For amsg = Each AchievementMsg
+	SetFont Font1
+	
+	amsg = Last AchievementMsg
+	While amsg <> Null
+		amsg2 = Before amsg
 		If amsg\msgtime <> 0
-			x=GraphicWidth+amsg\msgx
-			y=(GraphicHeight-height)
-			For amsg2 = Each AchievementMsg
-				If amsg2 <> amsg
-					If amsg2\msgID > amsg\msgID
-						y=y-height
-					EndIf
-				EndIf
-			Next
-			DrawFrame(x,y,width,height)
+			x = GraphicWidth + amsg\msgx
+			
+			target# = offset * height
+			If amsg\msgy < target Then
+				amsg\msgy = Min(amsg\msgy+2*FPSfactor2,target)
+			ElseIf amsg\msgy > target
+				amsg\msgy = Max(amsg\msgy-2*FPSfactor2,target)
+			EndIf
+			y = GraphicHeight - height - amsg\msgy
+			
+			offset = offset + 1
+			
+			DrawFrame(x,y,width,height,0,0,False)
 			Color 0,0,0
 			Rect(x+10*scale,y+10*scale,64*scale,64*scale,True)
 			DrawImage(amsg\achv\Img,x+10*scale,y+10*scale)
 			Color 50,50,50
 			Rect(x+10*scale,y+10*scale,64*scale,64*scale,False)
 			Color 255,255,255
-			SetFont Font1
-			RowText(Format(I_Loc\HUD_AchvUnlocked, amsg\achv\LocalName),x+84*scale,y+10*scale,width-94*scale,y-20*scale)
+			RowText(Format(I_Loc\HUD_AchvUnlocked, amsg\achv\LocalName),x+84*scale,y+10*scale,width-94*scale,height-20*scale)
+			
 			If amsg\msgtime > 0.0 And amsg\msgtime < 70*7
 				amsg\msgtime = amsg\msgtime + FPSfactor2
 				If amsg\msgx > -width%
@@ -186,10 +197,12 @@ Function UpdateAchievementMsg()
 					amsg\msgtime = 0.0
 				EndIf
 			EndIf
+
 		Else
 			Delete amsg
 		EndIf
-	Next
+		amsg = amsg2
+	Wend
 	
 End Function
 
