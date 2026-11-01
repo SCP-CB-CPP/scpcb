@@ -4150,14 +4150,16 @@ Function UpdateNPCs()
 					EndIf
 					
 					; There is a really odd bug where for some reason the position of the bone entities appears incorrect (likely unscaled?) for one frame.
-					If (Not found) And EntityDistance(n\Collider, n\ManipulationType) < 1 Then
-						If n\State <> 66 Then
-							PlaySound2(LoadTempSound("SFX\SCP\066\Halloween\PowerDown.ogg"), Camera, n\Collider)
-							n\State = 66
+					If EntityDistance(n\Collider, n\ManipulationType) < 1 Then
+						If (Not found) Then
+							If n\State <> 66 Then
+								PlaySound2(LoadTempSound("SFX\SCP\066\Halloween\PowerDown.ogg"), Camera, n\Collider)
+								n\State = 66
+							EndIf
+						Else If n\State = 66 Then
+							PlaySound2(LoadTempSound("SFX\SCP\066\Halloween\PowerUp.ogg"), Camera, n\Collider)
+							n\State = 67
 						EndIf
-					Else If n\State = 66 Then
-						PlaySound2(LoadTempSound("SFX\SCP\066\Halloween\PowerUp.ogg"), Camera, n\Collider)
-						n\State = 67
 					EndIf
 				EndIf
 				
