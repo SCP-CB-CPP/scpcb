@@ -13,7 +13,7 @@ Type Difficulty
 	Field customizable%
 End Type
 
-Global Difficulties.Difficulty[4]
+Global Difficulties.Difficulty[3]
 
 Global SelectedDifficulty.Difficulty
 
@@ -23,55 +23,29 @@ Const SAVEANYWHERE = 0, SAVEONQUIT=1, SAVEONSCREENS=2
 
 Const EASY = 0, NORMAL = 1, HARD = 2
 
-difficulties[SAFE] = New Difficulty
-difficulties[SAFE]\name = "Safe"
-difficulties[SAFE]\localName = I_Loc\Difficulty_Safe
-difficulties[SAFE]\description = I_Loc\Difficulty_SafeDesc
-difficulties[SAFE]\permaDeath = False
-difficulties[SAFE]\aggressiveNPCs = False
-difficulties[SAFE]\saveType = SAVEANYWHERE
-difficulties[SAFE]\otherFactors = EASY
-difficulties[SAFE]\r = 120
-difficulties[SAFE]\g = 150
-difficulties[SAFE]\b = 50
+Function CreateDifficulty.Difficulty(name$, localName$, description$, permaDeath%, aggresiveNPCs, saveType%, otherFactors%, r%, g%, b%, customizable% = False)
+	Local d.Difficulty = new Difficulty
+	d\name = name
+	d\localName = localName
+	d\description = description
+	d\permaDeath = permaDeath
+	d\aggressiveNPCs = aggressiveNPCs
+	d\saveType = saveType
+	d\otherFactors = otherFactors
+	d\r = r 
+	d\g = g
+	d\b = b
+	d\customizable = customizable
+	Return d
+End Function
 
-difficulties[EUCLID] = New Difficulty
-difficulties[EUCLID]\name = "Euclid"
-difficulties[EUCLID]\localName = I_Loc\Difficulty_Euclid
-difficulties[EUCLID]\description = I_Loc\Difficulty_EuclidDesc
-difficulties[EUCLID]\permaDeath = False
-difficulties[EUCLID]\aggressiveNPCs = False
-difficulties[EUCLID]\saveType = SAVEONSCREENS
-difficulties[EUCLID]\otherFactors = NORMAL
-difficulties[EUCLID]\r = 200
-difficulties[EUCLID]\g = 200
-difficulties[EUCLID]\b = 0
-
-difficulties[KETER] = New Difficulty
-difficulties[KETER]\name = "Keter"
-difficulties[KETER]\localName = I_Loc\Difficulty_Keter
-difficulties[KETER]\description = I_Loc\Difficulty_KeterDesc
-difficulties[KETER]\permaDeath = True
-difficulties[KETER]\aggressiveNPCs = True
-difficulties[KETER]\saveType = SAVEONQUIT
-difficulties[KETER]\otherFactors = HARD
-difficulties[KETER]\r = 200
-difficulties[KETER]\g = 0
-difficulties[KETER]\b = 0
-
-difficulties[CUSTOM] = New Difficulty
-difficulties[CUSTOM]\name = "Esoteric"
-difficulties[CUSTOM]\localName = I_Loc\Difficulty_Esoteric
-difficulties[CUSTOM]\permaDeath = False
-difficulties[CUSTOM]\aggressiveNPCs = True
-difficulties[CUSTOM]\saveType = SAVEANYWHERE
-difficulties[CUSTOM]\customizable = True
-difficulties[CUSTOM]\otherFactors = EASY
-difficulties[CUSTOM]\r = 255
-difficulties[CUSTOM]\g = 255
-difficulties[CUSTOM]\b = 255
+difficulties[SAFE] = CreateDifficulty("Safe", I_Loc\Difficulty_Safe, I_Loc\Difficulty_SafeDesc, False, False, SAVEANYWHERE, EASY, 120, 150, 50)
+difficulties[EUCLID] = CreateDifficulty("Euclid", I_Loc\Difficulty_Euclid,  I_Loc\Difficulty_EuclidDesc, False, False, SAVEONSCREENS, NORMAL, 200, 200, 0)
+difficulties[KETER] = CreateDifficulty("Keter", I_Loc\Difficulty_Keter, I_Loc\Difficulty_KeterDesc, True, True, SAVEONQUIT, HARD, 200, 0, 0)
+difficulties[CUSTOM] = CreateDifficulty("Esoteric", I_Loc\Difficulty_Esoteric, "", False, True, SAVEANYWHERE, EASY, 255, 255, 255, True)
 
 SelectedDifficulty = difficulties[SAFE]
+
 ;~IDEal Editor Parameters:
 ;~F#0
 ;~C#Blitz3D
