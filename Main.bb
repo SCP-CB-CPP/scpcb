@@ -9128,7 +9128,6 @@ Function LoadEntities()
 	Next
 	DecalTextures(17) = LoadTexture_Strict("GFX\decal8.png", 1 + 2)	
 	DecalTextures(18) = LoadTexture_Strict("GFX\decalpd6.dc", 1 + 2)	
-	DecalTextures(19) = LoadTexture_Strict("GFX\decal19.png", 1 + 2)
 	DecalTextures(20) = LoadTexture_Strict("GFX\decal427.png", 1 + 2)
 	DecalTextures(21) = LoadTexture_Strict("GFX\smoke2.png", 1 + 2)
 	DecalTextures(22) = LoadTexture_Strict("GFX\bd\Confetti.png", 1 + 2)
