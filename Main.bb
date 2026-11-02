@@ -1166,8 +1166,6 @@ Function UpdateConsole()
 					Local itt.ItemTemplates = FindItemTemplate(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
 					If itt = Null Then
 						CreateConsoleMsg("Item not found.",255,150,0)
-					ElseIf itt\group = "candy" Lor itt\name = "bone" Lor itt\name = "boneflute" Lor itt\name = "pumpkin" Lor itt\name = "docfields" Lor itt\name = "scp330" Lor itt\name = "doc330" Then
-						CreateConsoleMsg("What pumpkin?")
 					Else
 						CreateConsoleMsg(itt\displayname + " spawned.")
 						it.Items = CreateItem(itt\name, EntityX(Collider), EntityY(Camera,True), EntityZ(Collider))
