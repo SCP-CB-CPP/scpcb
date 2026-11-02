@@ -4138,7 +4138,7 @@ Function UpdateNPCs()
 					Next
 					If Not found Then
 						For it.Items = Each Items
-							If it\itemtemplate\group = "battery" And EntityDistance(it\collider, n\ManipulationType) < 0.6 And (Not it\Picked) Then
+							If it\itemtemplate\group = "battery" And EntityDistance(it\collider, n\ManipulationType) < 0.6 And (Not it\Picked) And GetParent(it\collider) = 0 Then
 								If it\itemtemplate\name = "killbat" Then it\state = True
 								dist# = EntityDistance(it\collider, n\ManipulationType)
 								EntityParent(it\collider, n\ManipulationType)
