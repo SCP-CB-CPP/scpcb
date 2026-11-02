@@ -638,6 +638,9 @@ Function UpdateItems()
 						EndIf
 						e\EventState3 = 0
 
+						e\img = LoadImage_Strict("GFX\Halloween\blinkmortal.pd")
+						LoadEventSound(e, "SFX\Room\Halloween\PD\blink.ogg")
+
 						PositionEntity(Collider, r\x + 1470 * RoomScale, r\y + 112 * RoomScale + 0.2, r\z + -536 * RoomScale)
 						ResetEntity(Collider)
 						PositionEntity(Curr106\Collider, EntityX(Collider), EntityY(Collider) + 0.2, EntityZ(Collider))
@@ -648,7 +651,6 @@ Function UpdateItems()
 							MoveEntity(Curr106\Collider, 0, 0, -9.5)
 						EndIf
 						ResetEntity(Curr106\Collider)
-						PlaySound_Strict LoadTempSound("SFX\Room\Halloween\PD\blink.ogg")
 
 						PlaySound_Strict(Use914SFX)
 						PlaySound_Strict(OldManSFX(5))

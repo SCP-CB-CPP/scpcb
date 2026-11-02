@@ -5266,6 +5266,21 @@ Function DrawGUI()
 				EndIf
 			EndIf
 		Next
+	ElseIf PlayerRoom\RoomTemplate\Name = "halloweenpd" Then
+		For e.Events = Each Events
+			If e\room <> PlayerRoom Then Continue
+			If e\Sound = 0 Then Exit
+			If LightBlink >= 3 Then
+				DrawImage e\img, GraphicWidth/2-Rand(390,310), GraphicHeight/2-Rand(290,310)
+				If (Not ChannelPlaying(e\SoundCHN)) Then
+					e\SoundCHN = PlaySound_Strict(e\Sound)
+				EndIf
+			Else
+				If e\img <> 0 Then FreeImage e\img : e\img = 0
+				If (Not ChannelPlaying(e\SoundCHN)) Then FreeSound_Strict(e\Sound) : e\Sound = 0
+			EndIf
+			Exit
+		Next
 	EndIf
 	
 	
