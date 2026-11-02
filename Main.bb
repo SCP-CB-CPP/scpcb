@@ -4980,11 +4980,11 @@ Function MouseLook(handleInput% = True)
 		If user_camera_pitch# > 70.0 Then user_camera_pitch# = 70.0
 		If user_camera_pitch# < - 70.0 Then user_camera_pitch# = -70.0
 		
-		RotateEntity Camera, WrapAngle(user_camera_pitch + Rnd(-CameraShake*FPSfactor, CameraShake*FPSfactor)), WrapAngle(EntityYaw(Collider) + Rnd(-CameraShake*FPSfactor, CameraShake*FPSfactor)), roll ; Pitch the user;s camera up And down.
+		RotateEntity Camera, WrapAngle(user_camera_pitch + Rnd(-CameraShake*FPSfactor, CameraShake*FPSfactor)) * ViewBobScale, WrapAngle(EntityYaw(Collider) + Rnd(-CameraShake*FPSfactor, CameraShake*FPSfactor) * ViewBobScale), roll ; Pitch the user;s camera up And down.
 		
 		If PlayerRoom\RoomTemplate\Name = "pocketdimension" Lor PlayerRoom\RoomTemplate\Name = "halloweenpd" Then
 			If EntityY(Collider)<2000*RoomScale Or EntityY(Collider)>2608*RoomScale Then
-				RotateEntity Camera, WrapAngle(EntityPitch(Camera)),WrapAngle(EntityYaw(Camera)), roll+WrapAngle(Sin(MilliSecs()/150.0)*30.0) ; Pitch the user;s camera up And down.
+				RotateEntity Camera, WrapAngle(EntityPitch(Camera)),WrapAngle(EntityYaw(Camera)), roll+WrapAngle(Sin(MilliSecs()/150.0)*30.0)*ViewBobScale ; Pitch the user;s camera up And down.
 			EndIf
 		EndIf
 		
