@@ -822,11 +822,11 @@ Function PickItem(item.Items)
 							item\state = item\state Or candyMask
 							Select candy
 								Case 0
-									item = CreateItem("eyecandy", 0, 0, 0)
+									item = CreateItem("eyecandy", EntityX(Collider), EntityY(Collider), EntityZ(Collider))
 								Case 1
-									item = CreateItem("lollipop", 0, 0, 0)
+									item = CreateItem("lollipop", EntityX(Collider), EntityY(Collider), EntityZ(Collider))
 								Case 2
-									item = CreateItem("chocolate", 0, 0, 0)
+									item = CreateItem("chocolate", EntityX(Collider), EntityY(Collider), EntityZ(Collider))
 							End Select
 						Else
 							Local pvt% = CreatePivot()
