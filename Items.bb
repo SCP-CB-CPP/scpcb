@@ -811,6 +811,8 @@ Function PickItem(item.Items)
 					Case "scp330"
 						If SteamActive And (Not UsedConsole) Then Steam_SetStatInt("has_grabbed_candy", 1)
 						If PopCount(item\state) < 3 Then
+							; Reseed to to deterministically bind candy order to seed to make it more obvious that save-scumming to get all three types is not possible.
+							SeedRnd GetRandomSeed()
 							Local candyStart% = Rand(0, 2), candy%, candyMask%
 							For i% = 0 To 2
 								candy = (candyStart + i) Mod 3
