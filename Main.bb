@@ -3968,7 +3968,7 @@ Function QuickLoadEvents()
 						e\room\NPC[1] = CreateNPC(NPCtypeD, EntityX(e\room\Objects[1],True),EntityY(e\room\Objects[1],True),EntityZ(e\room\Objects[1],True))
 					EndIf
 					
-					ChangeNPCTextureID(e\room\NPC[1],4)
+					ChangeNPCTextureID(e\room\NPC[1],3)
 					e\EventStr = "load4"
 				ElseIf e\EventStr = "load4"
 					QuickLoadPercent = 80
