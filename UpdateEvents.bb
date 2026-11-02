@@ -8580,7 +8580,11 @@ Function UpdateEvents()
 					Curr106\State = -10
 					Curr106\Idle = False
 
-					If KeyDown(KEY_BLINK) And e\EventState2 = 0 Then e\EventState2 = 1
+					If KeyDown(KEY_BLINK) Then
+						If Playable And e\EventState2 = 0 Then e\EventState2 = 1
+					Else
+						If BlinkTimer > 0 And e\EventState2 = 1 Then e\EventState2 = 0
+					EndIf
 
 					If e\EventState2 = 1 And BlinkTimer <= -11 And (DropSpeed = 0 Lor SelectedDifficulty\otherFactors <> HARD) And KillTimer >= 0 Then
 						e\EventState2 = 2
