@@ -5104,7 +5104,7 @@ Function MouseLook(handleInput% = True)
 		End Select
 		For i% = 0 To MaxItemAmount - 1
 			Local it.Items = Inventory(i)
-			If it\itemtemplate\name <> "pumpkin" Then Continue
+			If it = Null Lor it\itemtemplate\name <> "pumpkin" Lor it\state < 0 Then Continue
 			If it\state < lifeTime / 2 And it\state + FPSfactor >= lifeTime / 2 Then
 				Msg = I_Loc\MessageItem_PumpkinmaskRotStart
 				MsgTimer = 5 * 70
