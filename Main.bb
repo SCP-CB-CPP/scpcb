@@ -12560,20 +12560,6 @@ Function CheckForPlayerInFacility()
 	Return True
 End Function
 
-Function CheckForPlayerInFacility2()
-	; Better way to check if player in facility
-	Select PlayerRoom\RoomTemplate\Name
-		Case "pocketdimension", "dimension1499", "gatea", "halloweenpd", "halloweenfields", "173"
-			Return False
-		Case "room860", "room2tunnel", "room1123", "exit1"
-			If EntityY(Collider,True) > 4.0 Then Return False
-		Case "room3storage"
-			If EntityY(Collider) < -4600 * RoomScale Then Return False
-	End Select
-	
-	Return True
-End Function
-
 Function IsItemGoodFor1162(itt.ItemTemplates)
 	If itt\group = "misc" Return True
 	If itt\group = "paper" Then
