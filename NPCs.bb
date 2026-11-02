@@ -955,9 +955,9 @@ Function UpdateNPCs()
 					HideEntity n\obj2
 					PositionEntity n\obj, 0,500.0,0, True
 				ElseIf n\State3 <> 0 And PlayerRoom\RoomTemplate\Name <> "gatea" Then
-					If n\Frame < 110 Lor n\Frame > 259 Then SetNPCFrame(n, 259)
-					AnimateNPC(n, 259, 110, -0.3, False)
-					If n\Frame = 110 Then
+					If n\Frame < 111 Lor n\Frame > 259 Then SetNPCFrame(n, 259)
+					AnimateNPC(n, 259, 111, -0.3, False)
+					If n\Frame = 111 Then
 						n\State3 = 0
 						n\State = Rand(22000, 27000)
 					EndIf
@@ -1009,7 +1009,7 @@ Function UpdateNPCs()
 								
 								n\PrevY = EntityY(Collider)
 								
-								SetAnimTime n\obj, 110
+								SetAnimTime n\obj, 111
 								
 								If PlayerRoom\RoomTemplate\Name <> "coffin"
 									PositionEntity(n\Collider, EntityX(Collider), EntityY(Collider) - 15, EntityZ(Collider))
@@ -1028,7 +1028,7 @@ Function UpdateNPCs()
 									PointEntity n\obj, Collider
 									RotateEntity (n\Collider, 0, CurveAngle(EntityYaw(n\obj),EntityYaw(n\Collider),100.0), 0, True)
 									
-									AnimateNPC(n, 110, 259, 0.15, False)
+									AnimateNPC(n, 111, 259, 0.15, False)
 								Else
 									n\State = -10
 								EndIf
