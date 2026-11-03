@@ -4980,7 +4980,7 @@ Function MouseLook(handleInput% = True)
 		If user_camera_pitch# > 70.0 Then user_camera_pitch# = 70.0
 		If user_camera_pitch# < - 70.0 Then user_camera_pitch# = -70.0
 		
-		RotateEntity Camera, WrapAngle(user_camera_pitch + Rnd(-CameraShake*FPSfactor, CameraShake*FPSfactor)) * ViewBobScale, WrapAngle(EntityYaw(Collider) + Rnd(-CameraShake*FPSfactor, CameraShake*FPSfactor) * ViewBobScale), roll ; Pitch the user;s camera up And down.
+		RotateEntity Camera, WrapAngle(user_camera_pitch + Rnd(-CameraShake*FPSfactor, CameraShake*FPSfactor) * ViewBobScale), WrapAngle(EntityYaw(Collider) + Rnd(-CameraShake*FPSfactor, CameraShake*FPSfactor) * ViewBobScale), roll ; Pitch the user;s camera up And down.
 		
 		If PlayerRoom\RoomTemplate\Name = "pocketdimension" Lor PlayerRoom\RoomTemplate\Name = "halloweenpd" Then
 			If EntityY(Collider)<2000*RoomScale Or EntityY(Collider)>2608*RoomScale Then
@@ -8245,7 +8245,7 @@ Function DrawMenu()
 
 					ViewBobScale = SlideBar(x + 270*MenuScale, y+6*MenuScale,100*MenuScale, ViewBobScale*100, 6)/100
 					Color 255,255,255
-					Text(x, y, I_Loc\OptionName_Viewbob)
+					Text(x, y, I_Loc\OptionName_Cammove)
 					If (MouseOn(x+270*MenuScale,y+6*MenuScale,100*MenuScale+14,20) And OnSliderID=0) Lor OnSliderID=6
 						DrawOptionsTooltip(tx,ty,tw,th,"viewbob")
 					EndIf

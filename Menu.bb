@@ -737,7 +737,7 @@ Function UpdateMainMenu()
 
 					ViewBobScale = SlideBar(x + 310*MenuScale, y+6*MenuScale,150*MenuScale, ViewBobScale*100, 6)/100
 					Color 255,255,255
-					Text(x + 20 * MenuScale, y, I_Loc\OptionName_Viewbob)
+					Text(x + 20 * MenuScale, y, I_Loc\OptionName_Cammove)
 					If (MouseOn(x+310*MenuScale,y+6*MenuScale,150*MenuScale+14,20) And OnSliderID=0) Lor OnSliderID=6
 						DrawOptionsTooltip(tx,ty,tw,th,"viewbob")
 					EndIf
@@ -2417,7 +2417,7 @@ Function DrawOptionsTooltip(x%,y%,width%,height%,option$,value#=0,ingame%=False)
 			B = 255
 			txt2 = Format(I_Loc\Option_HintDefault, "%", Str(Int(HUDOffsetScale*100)), "0")
 		Case "viewbob"
-			txt = I_Loc\OptionTooltip_Viewbob
+			txt = I_Loc\OptionTooltip_Cammove
 			R = 255
 			G = 255
 			B = 255

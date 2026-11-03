@@ -74,6 +74,7 @@ Type LocalizationTable
     Field OptionName_Vram$
     Field OptionName_Hudoffset$
     Field OptionName_Viewbob$
+    Field OptionName_Cammove$
     Field OptionName_Fov$
     Field OptionName_Musicvol$
     Field OptionName_Soundvol$
@@ -119,6 +120,7 @@ Type LocalizationTable
     Field OptionTooltip_Hudscalefactor$
     Field OptionTooltip_Hudoffset$
     Field OptionTooltip_Viewbob$
+    Field OptionTooltip_Cammove$
     Field OptionTooltip_Fov$
     Field OptionTooltip_Musicvol$
     Field OptionTooltip_Soundvol$
@@ -574,6 +576,7 @@ Function LoadLocalization(loc.LocalizationTable, file$)
                             Case "vram" If loc\OptionName_Vram = "" Then loc\OptionName_Vram = value
                             Case "hudoffset" If loc\OptionName_Hudoffset = "" Then loc\OptionName_Hudoffset = value
                             Case "viewbob" If loc\OptionName_Viewbob = "" Then loc\OptionName_Viewbob = value
+                            Case "cammove" If loc\OptionName_Cammove = "" Then loc\OptionName_Cammove = value
                             Case "fov" If loc\OptionName_Fov = "" Then loc\OptionName_Fov = value
                             Case "musicvol" If loc\OptionName_Musicvol = "" Then loc\OptionName_Musicvol = value
                             Case "soundvol" If loc\OptionName_Soundvol = "" Then loc\OptionName_Soundvol = value
@@ -622,6 +625,7 @@ Function LoadLocalization(loc.LocalizationTable, file$)
                             Case "hudscalefactor" If loc\OptionTooltip_Hudscalefactor = "" Then loc\OptionTooltip_Hudscalefactor = value
                             Case "hudoffset" If loc\OptionTooltip_Hudoffset = "" Then loc\OptionTooltip_Hudoffset = value
                             Case "viewbob" If loc\OptionTooltip_Viewbob = "" Then loc\OptionTooltip_Viewbob = value
+                            Case "cammove" If loc\OptionTooltip_Cammove = "" Then loc\OptionTooltip_Cammove = value
                             Case "fov" If loc\OptionTooltip_Fov = "" Then loc\OptionTooltip_Fov = value
                             Case "musicvol" If loc\OptionTooltip_Musicvol = "" Then loc\OptionTooltip_Musicvol = value
                             Case "soundvol" If loc\OptionTooltip_Soundvol = "" Then loc\OptionTooltip_Soundvol = value
