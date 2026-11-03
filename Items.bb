@@ -311,7 +311,7 @@ Function CreateItem.Items(name$, x#, y#, z#)
 	
 	i\invimg = i\itemtemplate\invimg
   
-  Select name
+	Select name
 		Case "clipboard"
 			i\Inventory = New Inventories
 			i\Inventory\Size = 10
@@ -322,9 +322,9 @@ Function CreateItem.Items(name$, x#, y#, z#)
 			i\Inventory\Size = 10
 			SetAnimTime i\model,0.0
 		Case "scp330"
-      i\state = 1 Shl Rand(0, 2)
-		  SetAnimTime i\model, i\state + 1
-  End Select
+			i\state = 1 Shl Rand(0, 2)
+			SetAnimTime i\model, i\state + 1
+	  End Select
 	
 	i\ID=LastItemID+1
 	LastItemID=i\ID
