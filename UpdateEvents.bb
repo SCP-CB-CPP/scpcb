@@ -7392,10 +7392,14 @@ Function UpdateEvents()
 						EndIf
 						
 						If e\EventState > (12 * 70) Then							
+							x# = EntityX(e\room\Objects[3], True)
+							y# = EntityY(e\room\Objects[3], True)
+							z# = EntityZ(e\room\Objects[3], True)
+							
 							For it.Items = Each Items
 								If it\collider <> 0 And it\Picked = False Then
 									If IsIn914Input(PlayerRoom, EntityX(it\Collider), EntityY(it\Collider), EntityZ(it\Collider)) Then
-										Use914(it, setting, EntityX(e\room\Objects[3], True), EntityY(e\room\Objects[3], True), EntityZ(e\room\Objects[3], True))
+										Use914(it, setting, x, y, z)
 									End If
 								End If
 							Next
@@ -7412,10 +7416,16 @@ Function UpdateEvents()
 										SuperMan = True
 								End Select
 								BlurTimer = 1000
-								PositionEntity(Collider, EntityX(e\room\Objects[3], True), EntityY(e\room\Objects[3], True) + 1.0, EntityZ(e\room\Objects[3], True))
+								PositionEntity(Collider, x, y + 1.0, z)
 								ResetEntity(Collider)
 								DropSpeed = 0
 							EndIf								
+
+							For n.NPCs = Each NPCs
+								If IsIn914Input(PlayerRoom, EntityX(n\Collider), EntityY(n\Collider), EntityZ(n\Collider)) Then
+									UpgradeNPC914(n, x, y, z)
+								EndIf
+							Next
 							
 							e\room\RoomDoors[0]\open = True
 							e\room\RoomDoors[1]\open = True
