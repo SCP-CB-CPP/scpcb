@@ -11024,6 +11024,35 @@ Function Use914(item.Items, setting$, x#, y#, z#)
 			
 			RemoveItem(item)
 
+		Case "scp330"
+			Select setting
+				Case "rough"
+					d.Decals = CreateDecal(22, x, 8*RoomScale+0.010, z, 90, Rand(360), 0)
+					d\Size = 0.3 : ScaleSprite(d\obj, d\Size, d\Size)
+					d.Decals = CreateDecal(22, x, 8*RoomScale+0.011, z, 90, Rand(360), 0)
+					d\Size = 0.3 : ScaleSprite(d\obj, d\Size, d\Size)
+				Case "coarse"
+					PositionEntity(item\collider, x, y, z)
+					ResetEntity(item\collider)
+					item\state = -1
+					item\invimg = item\itemtemplate\invimg2
+					SetAnimTime item\model, 9
+				Case "1:1"
+					it2 = CreateItem("bdc", x, y, z)
+					RemoveItem(item)
+				Case "fine"
+					; Can take 3 candies from it
+					PositionEntity(item\collider, x, y, z)
+					ResetEntity(item\collider)
+					item\state = 0
+					SetAnimTime item\model, 1
+				Case "very fine"
+					PositionEntity(item\collider, x, y, z)
+					ResetEntity(item\collider)
+					item\state = -2
+					SetAnimTime item\model, 1
+			End Select
+
 		Case "pumpkin"
 			Select setting
 				Case "rough", "coarse"

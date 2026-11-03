@@ -321,6 +321,7 @@ Function CreateItem.Items(name$, x#, y#, z#)
 		SetAnimTime i\model,0.0
 	ElseIf name="scp330" then
 		i\state = 1 Shl Rand(0, 2)
+		SetAnimTime i\model, i\state + 1
 	EndIf
 	
 	i\ID=LastItemID+1
@@ -810,16 +811,24 @@ Function PickItem(item.Items)
 						EndIf
 					Case "scp330"
 						If SteamActive And (Not UsedConsole) Then Steam_SetStatInt("has_grabbed_candy", 1)
-						If PopCount(item\state) < 3 Then
-							; Reseed to to deterministically bind candy order to seed to make it more obvious that save-scumming to get all three types is not possible.
-							SeedRnd GetRandomSeed()
-							Local candyStart% = Rand(0, 2), candy%, candyMask%
-							For i% = 0 To 2
-								candy = (candyStart + i) Mod 3
-								candyMask = 1 Shl candy
-								If Not (item\state And candyMask) Then Exit
-							Next
-							item\state = item\state Or candyMask
+						If item\state = -1 Then
+							; Allow it to be picked up
+						ElseIf PopCount(item\state) < 3 Lor item\state = -2 Then
+							Local candy%
+							If item\state = -2 Then
+								candy = Rand(0, 2)
+							Else
+								; Reseed to to deterministically bind candy order to seed to make it more obvious that save-scumming to get all three types is not possible.
+								SeedRnd GetRandomSeed()
+								Local candyStart% = Rand(0, 2), candyMask%
+								For i% = 0 To 2
+									candy = (candyStart + i) Mod 3
+									candyMask = 1 Shl candy
+									If Not (item\state And candyMask) Then Exit
+								Next
+								item\state = item\state Or candyMask
+								SetAnimTime item\model, item\state + 1
+							EndIf
 							Select candy
 								Case 0
 									item = CreateItem("eyecandy", EntityX(Collider), EntityY(Collider), EntityZ(Collider))
