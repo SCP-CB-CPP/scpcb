@@ -7822,6 +7822,14 @@ Function TeleportFromHalloweenRoom%()
 	Return False
 End Function
 
+Function FillHalloweenPDWithBones(r.Rooms)
+	Local i% = 0
+	While r\Objects[i] <> 0
+		CreateItem("bone", EntityX(r\Objects[i], True), EntityY(r\Objects[i], True), EntityZ(r\Objects[i], True))
+		i = i + 1
+	Wend
+End Function
+
 Function DrawItemImg(i.Items)
 	If (Not HUDenabled) And (Not HUDenabledLegacy) Then Return
 	DrawImage(i\itemtemplate\invimg, GraphicWidth / 2 - ImageWidth(i\itemtemplate\invimg) / 2, GraphicHeight / 2 - ImageHeight(i\itemtemplate\invimg) / 2)

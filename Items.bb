@@ -545,7 +545,7 @@ Function UpdateItems()
 									r = r2
 									Teleport(r)
 									CreateEvent("halloweenfields","halloweenfields",0)
-									FillRoomItems(r)
+									FillHalloweenPDWithBones(r)
 									Exit
 								EndIf
 							Next
@@ -630,7 +630,7 @@ Function UpdateItems()
 							If e\EventName = "halloweenpd" Then
 								r = e\room
 								Teleport(r)
-								FillRoomItems(r)
+								FillHalloweenPDWithBones(r)
 								Exit
 							EndIf
 						Next
@@ -641,7 +641,7 @@ Function UpdateItems()
 									r = r2
 									Teleport(r)
 									CreateEvent("halloweenpd","halloweenpd",0)
-									FillRoomItems(r)
+									FillHalloweenPDWithBones(r)
 									Exit
 								EndIf
 							Next
