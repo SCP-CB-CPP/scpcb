@@ -11055,9 +11055,12 @@ Function Use914(item.Items, setting$, x#, y#, z#)
 
 		Case "pumpkin"
 			Select setting
-				Case "rough", "coarse"
+				Case "rough"
 					d.Decals = CreateDecal(4, x, 8 * RoomScale + 0.010, z, 90, Rand(360), 0)
 					d\Size = 0.3 : ScaleSprite(d\obj, d\Size, d\Size)
+					RemoveItem(item)
+				Case "coarse"
+					it2 = CreateItem("lollipop", x, y, z)
 					RemoveItem(item)
 				Case "1:1"
 					PositionEntity(item\collider, x, y, z)
@@ -11067,6 +11070,44 @@ Function Use914(item.Items, setting$, x#, y#, z#)
 					ChangeNPCTextureID(n, 1)
 					PlaySound2(LoadTempSound("SFX\ambient\general\ambient3.ogg"), Camera, n\Collider)
 					RemoveItem(item)
+					If setting = "very fine" Then n\Speed = n\Speed * 5
+			End Select
+
+		Case "bone"
+			Select setting
+				Case "rough", "coarse"
+					d.Decals = CreateDecal(21, x, 8 * RoomScale + 0.010, z, 90, Rand(360), 0)
+					d\Size = 0.1 : ScaleSprite(d\obj, d\Size, d\Size)
+					RemoveItem(item)
+				Case "1:1"
+					PositionEntity(item\collider, x, y, z)
+					ResetEntity(item\collider)
+				Case "fine", "very fine"
+					it2 = CreateItem("boneflute", x, y, z)
+					RemoveItem(item)
+			End Select
+
+		Case "boneflute"
+			Select setting
+				Case "rough", "coarse"
+					d.Decals = CreateDecal(21, x, 8 * RoomScale + 0.010, z, 90, Rand(360), 0)
+					d\Size = 0.3 : ScaleSprite(d\obj, d\Size, d\Size)
+					RemoveItem(item)
+				Case "coarse"
+					it2 = CreateItem("bone", x, y, z)
+					it2 = CreateItem("bone", x, y, z)
+					RemoveItem(item)
+				Case "1:1"
+					PositionEntity(item\collider, x, y, z)
+					ResetEntity(item\collider)
+				Case "fine", "very fine"
+					n.NPCs = CreateNPC(NPCTypeOldMan,x,8 * RoomScale,z)
+					ChangeNPCTextureID(n, 1)
+					n\State = -1
+					d.Decals = CreateDecal(0, x, 8 * RoomScale + 0.010, z, 90, Rand(360), 0)
+					d\Size = 0.05 : d\SizeChange = 0.001 : EntityAlpha(d\obj, 0.8) : UpdateDecals
+					RemoveItem(item)
+					If setting = "very fine" Then n\Speed = n\Speed * 5 : n\State = -10
 			End Select
 
 		Default

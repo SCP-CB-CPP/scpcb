@@ -602,6 +602,28 @@ Function UpdateItems()
 					If (Not CanTeleportToHalloweenRoom()) Then
 						RemoveItem(i)
 					ElseIf i\state > 70 * 15 Then
+						RemoveItem(i)
+						Local bonesInInv% = 0
+						For j = 0 To MaxItemAmount
+							it.Items = Inventory(j)
+							If it <> Null And it\itemtemplate\name = "bone" Then
+								bonesInInv = bonesInInv + 1
+								RemoveItem(it)
+								If bonesInInv >= 3 Then Exit
+							EndIf
+						Next
+
+						If bonesInInv > 0 Then
+							PlaySound_Strict(LoadTempSound("SFX\Halloween\BonePickUp.ogg"))
+						EndIf
+
+						If bonesInInv >= 3 Then
+							; TODO: Do something cooler!!!!
+							it.Items = CreateItem("boneflute", EntityX(Collider), EntityY(Collider), EntityZ(Collider))
+							PickItem(it)
+							Continue
+						EndIf
+
 						r = Null
 						e = Null
 						For e.Events = Each Events
@@ -637,7 +659,11 @@ Function UpdateItems()
 								If e\EventName = "halloweenpd" Then Exit
 							Next
 						EndIf
-						e\EventState3 = 0
+						e\EventState3 = bonesInInv
+						If bonesInInv > 0 Then
+							Msg = Format(I_Loc\MessageItem_Bonefragment, e\EventState3, e\EventState)
+							MsgTimer = 70*5
+						EndIf
 
 						e\img = LoadImage_Strict("GFX\Halloween\blinkmortal.pd")
 						LoadEventSound(e, "SFX\Room\Halloween\PD\blink.ogg")
@@ -661,9 +687,7 @@ Function UpdateItems()
 						EndIf
 
 						LightVolume = -0.1
-						BlinkTimer = -10
-
-						RemoveItem(i)
+						BlinkTimer = -10	
 					EndIf
 				EndIf
 			Case "boneflute"
@@ -880,7 +904,7 @@ Function PickItem(item.Items)
 									MsgTimer = 70*5
 
 									If e\EventState3 = e\EventState Then
-										item = CreateItem("boneflute", 0, 0, 0)
+										item = CreateItem("boneflute", EntityX(Collider), EntityY(Collider), EntityZ(Collider))
 										Curr106\State = 10000
 										Curr106\Idle = False
 										TeleportFromHalloweenRoom()
