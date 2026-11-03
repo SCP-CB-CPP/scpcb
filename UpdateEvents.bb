@@ -8601,15 +8601,20 @@ Function UpdateEvents()
 
 						x# = EntityX(Curr106\obj, True)
 						z# = EntityZ(Curr106\obj, True)
+						px# = EntityX(Collider, True)
+						pz# = EntityZ(Collider, True)
 						count% = 0
 						For w.WayPoints = Each WayPoints
-							If w\room = e\room And Distance(x, z, EntityX(w\obj, True), EntityZ(w\obj, True)) > 3 Then count = count + 1
+							Local wx# = EntityX(w\obj, True), wz# = EntityZ(w\obj, True)
+							If w\room = e\room And Distance(x, z, wx, wz) > 3 And Distance(px, pz, wx, wz) > 1 Then count = count + 1
 						Next
 						Local picked% = Rand(count)-1
 						For w.WayPoints = Each WayPoints
-							If w\room = e\room And Distance(x, z, EntityX(w\obj, True), EntityZ(w\obj, True)) > 3 Then
+							wx# = EntityX(w\obj, True)
+							wz# = EntityZ(w\obj, True)
+							If w\room = e\room And Distance(x, z, wx, wz) > 3 And Distance(px, pz, wx, wz) > 1 Then
 								If picked = 0 Then
-									PositionEntity(Collider, EntityX(w\obj, True), EntityY(w\obj, True) + 0.2, EntityZ(w\obj, True))
+									PositionEntity(Collider, wx, EntityY(w\obj, True) + 0.2, wz)
 									ResetEntity(Collider)
 									Exit
 								EndIf
