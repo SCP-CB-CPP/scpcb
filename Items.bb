@@ -310,8 +310,8 @@ Function CreateItem.Items(name$, x#, y#, z#)
 	i\DropSpeed = 0.0
 	
 	i\invimg = i\itemtemplate\invimg
-	
-	Select name
+  
+  Select name
 		Case "clipboard"
 			i\Inventory = New Inventories
 			i\Inventory\Size = 10
@@ -322,8 +322,9 @@ Function CreateItem.Items(name$, x#, y#, z#)
 			i\Inventory\Size = 10
 			SetAnimTime i\model,0.0
 		Case "scp330"
-			i\state = 1 Shl Rand(0, 2)
-	End Select
+      i\state = 1 Shl Rand(0, 2)
+		  SetAnimTime i\model, i\state + 1
+  End Select
 	
 	i\ID=LastItemID+1
 	LastItemID=i\ID
@@ -546,7 +547,7 @@ Function UpdateItems()
 									r = r2
 									Teleport(r)
 									CreateEvent("halloweenfields","halloweenfields",0)
-									FillRoomItems(r)
+									FillHalloweenPDWithBones(r)
 									Exit
 								EndIf
 							Next
@@ -603,13 +604,35 @@ Function UpdateItems()
 					If (Not CanTeleportToHalloweenRoom()) Then
 						RemoveItem(i)
 					ElseIf i\state > 70 * 15 Then
+						RemoveItem(i)
+						Local bonesInInv% = 0
+						For j = 0 To MaxItemAmount
+							it.Items = Inventory(j)
+							If it <> Null And it\itemtemplate\name = "bone" Then
+								bonesInInv = bonesInInv + 1
+								RemoveItem(it)
+								If bonesInInv >= 3 Then Exit
+							EndIf
+						Next
+
+						If bonesInInv > 0 Then
+							PlaySound_Strict(LoadTempSound("SFX\Halloween\BonePickUp.ogg"))
+						EndIf
+
+						If bonesInInv >= 3 Then
+							; TODO: Do something cooler!!!!
+							it.Items = CreateItem("boneflute", EntityX(Collider), EntityY(Collider), EntityZ(Collider))
+							PickItem(it)
+							Continue
+						EndIf
+
 						r = Null
 						e = Null
 						For e.Events = Each Events
 							If e\EventName = "halloweenpd" Then
 								r = e\room
 								Teleport(r)
-								FillRoomItems(r)
+								FillHalloweenPDWithBones(r)
 								Exit
 							EndIf
 						Next
@@ -620,7 +643,7 @@ Function UpdateItems()
 									r = r2
 									Teleport(r)
 									CreateEvent("halloweenpd","halloweenpd",0)
-									FillRoomItems(r)
+									FillHalloweenPDWithBones(r)
 									Exit
 								EndIf
 							Next
@@ -638,7 +661,14 @@ Function UpdateItems()
 								If e\EventName = "halloweenpd" Then Exit
 							Next
 						EndIf
-						e\EventState3 = 0
+						e\EventState3 = bonesInInv
+						If bonesInInv > 0 Then
+							Msg = Format(I_Loc\MessageItem_Bonefragment, e\EventState3, e\EventState)
+							MsgTimer = 70*5
+						EndIf
+
+						e\img = LoadImage_Strict("GFX\Halloween\blinkmortal.pd")
+						LoadEventSound(e, "SFX\Room\Halloween\PD\blink.ogg")
 
 						PositionEntity(Collider, r\x + 1470 * RoomScale, r\y + 112 * RoomScale + 0.2, r\z + -536 * RoomScale)
 						ResetEntity(Collider)
@@ -650,7 +680,6 @@ Function UpdateItems()
 							MoveEntity(Curr106\Collider, 0, 0, -9.5)
 						EndIf
 						ResetEntity(Curr106\Collider)
-						PlaySound_Strict LoadTempSound("SFX\Room\Halloween\PD\blink.ogg")
 
 						PlaySound_Strict(Use914SFX)
 						PlaySound_Strict(OldManSFX(5))
@@ -660,9 +689,7 @@ Function UpdateItems()
 						EndIf
 
 						LightVolume = -0.1
-						BlinkTimer = -10
-
-						RemoveItem(i)
+						BlinkTimer = -10	
 					EndIf
 				EndIf
 			Case "boneflute"
@@ -810,21 +837,31 @@ Function PickItem(item.Items)
 						EndIf
 					Case "scp330"
 						If SteamActive And (Not UsedConsole) Then Steam_SetStatInt("has_grabbed_candy", 1)
-						If PopCount(item\state) < 3 Then
-							Local candyStart% = Rand(0, 2), candy%, candyMask%
-							For i% = 0 To 2
-								candy = (candyStart + i) Mod 3
-								candyMask = 1 Shl candy
-								If Not (item\state And candyMask) Then Exit
-							Next
-							item\state = item\state Or candyMask
+						If item\state = -1 Then
+							; Allow it to be picked up
+						ElseIf PopCount(item\state) < 3 Lor item\state = -2 Then
+							Local candy%
+							If item\state = -2 Then
+								candy = Rand(0, 2)
+							Else
+								; Reseed to to deterministically bind candy order to seed to make it more obvious that save-scumming to get all three types is not possible.
+								SeedRnd GetRandomSeed()
+								Local candyStart% = Rand(0, 2), candyMask%
+								For i% = 0 To 2
+									candy = (candyStart + i) Mod 3
+									candyMask = 1 Shl candy
+									If Not (item\state And candyMask) Then Exit
+								Next
+								item\state = item\state Or candyMask
+								SetAnimTime item\model, item\state + 1
+							EndIf
 							Select candy
 								Case 0
-									item = CreateItem("eyecandy", 0, 0, 0)
+									item = CreateItem("eyecandy", EntityX(Collider), EntityY(Collider), EntityZ(Collider))
 								Case 1
-									item = CreateItem("lollipop", 0, 0, 0)
+									item = CreateItem("lollipop", EntityX(Collider), EntityY(Collider), EntityZ(Collider))
 								Case 2
-									item = CreateItem("chocolate", 0, 0, 0)
+									item = CreateItem("chocolate", EntityX(Collider), EntityY(Collider), EntityZ(Collider))
 							End Select
 						Else
 							Local pvt% = CreatePivot()
@@ -869,7 +906,7 @@ Function PickItem(item.Items)
 									MsgTimer = 70*5
 
 									If e\EventState3 = e\EventState Then
-										item = CreateItem("boneflute", 0, 0, 0)
+										item = CreateItem("boneflute", EntityX(Collider), EntityY(Collider), EntityZ(Collider))
 										Curr106\State = 10000
 										Curr106\Idle = False
 										TeleportFromHalloweenRoom()
@@ -1044,13 +1081,6 @@ Function Update294()
 	
 	CatchErrors("Update294")
 End Function
-
-
-
-
-
-
-
 
 ;~IDEal Editor Parameters:
 ;~F#B#1E

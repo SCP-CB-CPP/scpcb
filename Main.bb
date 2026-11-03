@@ -1,6 +1,6 @@
-Const VersionNumber$ = "1.3.12.7"
+Const VersionNumber$ = "1.3.12.7.1"
 ;Only change this if the version given isn't working with the current build version - ENDSHN
-Const CompatibleNumber$ = "1.3.12.7"
+Const CompatibleNumber$ = "1.3.12.7.1"
 
 InitErrorMsgs(11, True)
 SetErrorMsg(0, "An error occured in SCP - Containment Breach v" + VersionNumber)
@@ -1166,8 +1166,6 @@ Function UpdateConsole()
 					Local itt.ItemTemplates = FindItemTemplate(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
 					If itt = Null Then
 						CreateConsoleMsg("Item not found.",255,150,0)
-					ElseIf itt\group = "candy" Lor itt\name = "bone" Lor itt\name = "boneflute" Lor itt\name = "pumpkin" Lor itt\name = "docfields" Lor itt\name = "scp330" Lor itt\name = "doc330" Then
-						CreateConsoleMsg("What pumpkin?")
 					Else
 						CreateConsoleMsg(itt\displayname + " spawned.")
 						it.Items = CreateItem(itt\name, EntityX(Collider), EntityY(Camera,True), EntityZ(Collider))
@@ -3970,7 +3968,7 @@ Function QuickLoadEvents()
 						e\room\NPC[1] = CreateNPC(NPCtypeD, EntityX(e\room\Objects[1],True),EntityY(e\room\Objects[1],True),EntityZ(e\room\Objects[1],True))
 					EndIf
 					
-					ChangeNPCTextureID(e\room\NPC[1],4)
+					ChangeNPCTextureID(e\room\NPC[1],3)
 					e\EventStr = "load4"
 				ElseIf e\EventStr = "load4"
 					QuickLoadPercent = 80
@@ -4982,11 +4980,11 @@ Function MouseLook(handleInput% = True)
 		If user_camera_pitch# > 70.0 Then user_camera_pitch# = 70.0
 		If user_camera_pitch# < - 70.0 Then user_camera_pitch# = -70.0
 		
-		RotateEntity Camera, WrapAngle(user_camera_pitch + Rnd(-CameraShake*FPSfactor, CameraShake*FPSfactor)), WrapAngle(EntityYaw(Collider) + Rnd(-CameraShake*FPSfactor, CameraShake*FPSfactor)), roll ; Pitch the user;s camera up And down.
+		RotateEntity Camera, WrapAngle(user_camera_pitch + Rnd(-CameraShake*FPSfactor, CameraShake*FPSfactor) * ViewBobScale), WrapAngle(EntityYaw(Collider) + Rnd(-CameraShake*FPSfactor, CameraShake*FPSfactor) * ViewBobScale), roll ; Pitch the user;s camera up And down.
 		
 		If PlayerRoom\RoomTemplate\Name = "pocketdimension" Lor PlayerRoom\RoomTemplate\Name = "halloweenpd" Then
 			If EntityY(Collider)<2000*RoomScale Or EntityY(Collider)>2608*RoomScale Then
-				RotateEntity Camera, WrapAngle(EntityPitch(Camera)),WrapAngle(EntityYaw(Camera)), roll+WrapAngle(Sin(MilliSecs()/150.0)*30.0) ; Pitch the user;s camera up And down.
+				RotateEntity Camera, WrapAngle(EntityPitch(Camera)),WrapAngle(EntityYaw(Camera)), roll+WrapAngle(Sin(MilliSecs()/150.0)*30.0)*ViewBobScale ; Pitch the user;s camera up And down.
 			EndIf
 		EndIf
 		
@@ -5106,7 +5104,7 @@ Function MouseLook(handleInput% = True)
 		End Select
 		For i% = 0 To MaxItemAmount - 1
 			Local it.Items = Inventory(i)
-			If it\itemtemplate\name <> "pumpkin" Then Continue
+			If it = Null Lor it\itemtemplate\name <> "pumpkin" Lor it\state < 0 Then Continue
 			If it\state < lifeTime / 2 And it\state + FPSfactor >= lifeTime / 2 Then
 				Msg = I_Loc\MessageItem_PumpkinmaskRotStart
 				MsgTimer = 5 * 70
@@ -5267,6 +5265,21 @@ Function DrawGUI()
 					Exit
 				EndIf
 			EndIf
+		Next
+	ElseIf PlayerRoom\RoomTemplate\Name = "halloweenpd" Then
+		For e.Events = Each Events
+			If e\room <> PlayerRoom Then Continue
+			If e\Sound = 0 Then Exit
+			If LightBlink >= 3 Then
+				DrawImage e\img, GraphicWidth/2-Rand(390,310), GraphicHeight/2-Rand(290,310)
+				If (Not ChannelPlaying(e\SoundCHN)) Then
+					e\SoundCHN = PlaySound_Strict(e\Sound)
+				EndIf
+			Else
+				If e\img <> 0 Then FreeImage e\img : e\img = 0
+				If (Not ChannelPlaying(e\SoundCHN)) Then FreeSound_Strict(e\Sound) : e\Sound = 0
+			EndIf
+			Exit
 		Next
 	EndIf
 	
@@ -7809,6 +7822,14 @@ Function TeleportFromHalloweenRoom%()
 	Return False
 End Function
 
+Function FillHalloweenPDWithBones(r.Rooms)
+	Local i% = 0
+	While r\Objects[i] <> 0
+		CreateItem("bone", EntityX(r\Objects[i], True), EntityY(r\Objects[i], True), EntityZ(r\Objects[i], True))
+		i = i + 1
+	Wend
+End Function
+
 Function DrawItemImg(i.Items)
 	If (Not HUDenabled) And (Not HUDenabledLegacy) Then Return
 	DrawImage(i\itemtemplate\invimg, GraphicWidth / 2 - ImageWidth(i\itemtemplate\invimg) / 2, GraphicHeight / 2 - ImageHeight(i\itemtemplate\invimg) / 2)
@@ -8232,7 +8253,7 @@ Function DrawMenu()
 
 					ViewBobScale = SlideBar(x + 270*MenuScale, y+6*MenuScale,100*MenuScale, ViewBobScale*100, 6)/100
 					Color 255,255,255
-					Text(x, y, I_Loc\OptionName_Viewbob)
+					Text(x, y, I_Loc\OptionName_Cammove)
 					If (MouseOn(x+270*MenuScale,y+6*MenuScale,100*MenuScale+14,20) And OnSliderID=0) Lor OnSliderID=6
 						DrawOptionsTooltip(tx,ty,tw,th,"viewbob")
 					EndIf
@@ -9115,7 +9136,6 @@ Function LoadEntities()
 	Next
 	DecalTextures(17) = LoadTexture_Strict("GFX\decal8.png", 1 + 2)	
 	DecalTextures(18) = LoadTexture_Strict("GFX\decalpd6.dc", 1 + 2)	
-	DecalTextures(19) = LoadTexture_Strict("GFX\decal19.png", 1 + 2)
 	DecalTextures(20) = LoadTexture_Strict("GFX\decal427.png", 1 + 2)
 	DecalTextures(21) = LoadTexture_Strict("GFX\smoke2.png", 1 + 2)
 	DecalTextures(22) = LoadTexture_Strict("GFX\bd\Confetti.png", 1 + 2)
@@ -11012,11 +11032,43 @@ Function Use914(item.Items, setting$, x#, y#, z#)
 			
 			RemoveItem(item)
 
+		Case "scp330"
+			Select setting
+				Case "rough"
+					d.Decals = CreateDecal(22, x, 8*RoomScale+0.010, z, 90, Rand(360), 0)
+					d\Size = 0.3 : ScaleSprite(d\obj, d\Size, d\Size)
+					d.Decals = CreateDecal(22, x, 8*RoomScale+0.011, z, 90, Rand(360), 0)
+					d\Size = 0.3 : ScaleSprite(d\obj, d\Size, d\Size)
+				Case "coarse"
+					PositionEntity(item\collider, x, y, z)
+					ResetEntity(item\collider)
+					item\state = -1
+					item\invimg = item\itemtemplate\invimg2
+					SetAnimTime item\model, 9
+				Case "1:1"
+					it2 = CreateItem("bdc", x, y, z)
+					RemoveItem(item)
+				Case "fine"
+					; Can take 3 candies from it
+					PositionEntity(item\collider, x, y, z)
+					ResetEntity(item\collider)
+					item\state = 0
+					SetAnimTime item\model, 1
+				Case "very fine"
+					PositionEntity(item\collider, x, y, z)
+					ResetEntity(item\collider)
+					item\state = -2
+					SetAnimTime item\model, 1
+			End Select
+
 		Case "pumpkin"
 			Select setting
-				Case "rough", "coarse"
+				Case "rough"
 					d.Decals = CreateDecal(4, x, 8 * RoomScale + 0.010, z, 90, Rand(360), 0)
 					d\Size = 0.3 : ScaleSprite(d\obj, d\Size, d\Size)
+					RemoveItem(item)
+				Case "coarse"
+					it2 = CreateItem("lollipop", x, y, z)
 					RemoveItem(item)
 				Case "1:1"
 					PositionEntity(item\collider, x, y, z)
@@ -11026,6 +11078,44 @@ Function Use914(item.Items, setting$, x#, y#, z#)
 					ChangeNPCTextureID(n, 1)
 					PlaySound2(LoadTempSound("SFX\ambient\general\ambient3.ogg"), Camera, n\Collider)
 					RemoveItem(item)
+					If setting = "very fine" Then n\Speed = n\Speed * 5
+			End Select
+
+		Case "bone"
+			Select setting
+				Case "rough", "coarse"
+					d.Decals = CreateDecal(21, x, 8 * RoomScale + 0.010, z, 90, Rand(360), 0)
+					d\Size = 0.1 : ScaleSprite(d\obj, d\Size, d\Size)
+					RemoveItem(item)
+				Case "1:1"
+					PositionEntity(item\collider, x, y, z)
+					ResetEntity(item\collider)
+				Case "fine", "very fine"
+					it2 = CreateItem("boneflute", x, y, z)
+					RemoveItem(item)
+			End Select
+
+		Case "boneflute"
+			Select setting
+				Case "rough", "coarse"
+					d.Decals = CreateDecal(21, x, 8 * RoomScale + 0.010, z, 90, Rand(360), 0)
+					d\Size = 0.3 : ScaleSprite(d\obj, d\Size, d\Size)
+					RemoveItem(item)
+				Case "coarse"
+					it2 = CreateItem("bone", x, y, z)
+					it2 = CreateItem("bone", x, y, z)
+					RemoveItem(item)
+				Case "1:1"
+					PositionEntity(item\collider, x, y, z)
+					ResetEntity(item\collider)
+				Case "fine", "very fine"
+					n.NPCs = CreateNPC(NPCTypeOldMan,x,8 * RoomScale,z)
+					ChangeNPCTextureID(n, 1)
+					n\State = -1
+					d.Decals = CreateDecal(0, x, 8 * RoomScale + 0.010, z, 90, Rand(360), 0)
+					d\Size = 0.05 : d\SizeChange = 0.001 : EntityAlpha(d\obj, 0.8) : UpdateDecals
+					RemoveItem(item)
+					If setting = "very fine" Then n\Speed = n\Speed * 5 : n\State = -10
 			End Select
 
 		Default

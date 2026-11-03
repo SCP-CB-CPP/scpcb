@@ -7392,10 +7392,14 @@ Function UpdateEvents()
 						EndIf
 						
 						If e\EventState > (12 * 70) Then							
+							x# = EntityX(e\room\Objects[3], True)
+							y# = EntityY(e\room\Objects[3], True)
+							z# = EntityZ(e\room\Objects[3], True)
+							
 							For it.Items = Each Items
 								If it\collider <> 0 And it\Picked = False Then
 									If IsIn914Input(PlayerRoom, EntityX(it\Collider), EntityY(it\Collider), EntityZ(it\Collider)) Then
-										Use914(it, setting, EntityX(e\room\Objects[3], True), EntityY(e\room\Objects[3], True), EntityZ(e\room\Objects[3], True))
+										Use914(it, setting, x, y, z)
 									End If
 								End If
 							Next
@@ -7412,10 +7416,16 @@ Function UpdateEvents()
 										SuperMan = True
 								End Select
 								BlurTimer = 1000
-								PositionEntity(Collider, EntityX(e\room\Objects[3], True), EntityY(e\room\Objects[3], True) + 1.0, EntityZ(e\room\Objects[3], True))
+								PositionEntity(Collider, x, y + 1.0, z)
 								ResetEntity(Collider)
 								DropSpeed = 0
 							EndIf								
+
+							For n.NPCs = Each NPCs
+								If IsIn914Input(PlayerRoom, EntityX(n\Collider), EntityY(n\Collider), EntityZ(n\Collider)) Then
+									UpgradeNPC914(n, x, y, z)
+								EndIf
+							Next
 							
 							e\room\RoomDoors[0]\open = True
 							e\room\RoomDoors[1]\open = True
@@ -8580,22 +8590,31 @@ Function UpdateEvents()
 					Curr106\State = -10
 					Curr106\Idle = False
 
-					If KeyDown(KEY_BLINK) And e\EventState2 = 0 Then e\EventState2 = 1
+					If KeyDown(KEY_BLINK) Then
+						If Playable And e\EventState2 = 0 Then e\EventState2 = 1
+					Else
+						If BlinkTimer > 0 And e\EventState2 = 1 Then e\EventState2 = 0
+					EndIf
 
 					If e\EventState2 = 1 And BlinkTimer <= -11 And (DropSpeed = 0 Lor SelectedDifficulty\otherFactors <> HARD) And KillTimer >= 0 Then
 						e\EventState2 = 2
 
 						x# = EntityX(Curr106\obj, True)
 						z# = EntityZ(Curr106\obj, True)
+						px# = EntityX(Collider, True)
+						pz# = EntityZ(Collider, True)
 						count% = 0
 						For w.WayPoints = Each WayPoints
-							If w\room = e\room And Distance(x, z, EntityX(w\obj, True), EntityZ(w\obj, True)) > 3 Then count = count + 1
+							Local wx# = EntityX(w\obj, True), wz# = EntityZ(w\obj, True)
+							If w\room = e\room And Distance(x, z, wx, wz) > 3 And Distance(px, pz, wx, wz) > 1 Then count = count + 1
 						Next
 						Local picked% = Rand(count)-1
 						For w.WayPoints = Each WayPoints
-							If w\room = e\room And Distance(x, z, EntityX(w\obj, True), EntityZ(w\obj, True)) > 3 Then
+							wx# = EntityX(w\obj, True)
+							wz# = EntityZ(w\obj, True)
+							If w\room = e\room And Distance(x, z, wx, wz) > 3 And Distance(px, pz, wx, wz) > 1 Then
 								If picked = 0 Then
-									PositionEntity(Collider, EntityX(w\obj, True), EntityY(w\obj, True) + 0.2, EntityZ(w\obj, True))
+									PositionEntity(Collider, wx, EntityY(w\obj, True) + 0.2, wz)
 									ResetEntity(Collider)
 									Exit
 								EndIf

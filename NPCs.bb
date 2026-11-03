@@ -955,9 +955,9 @@ Function UpdateNPCs()
 					HideEntity n\obj2
 					PositionEntity n\obj, 0,500.0,0, True
 				ElseIf n\State3 <> 0 And PlayerRoom\RoomTemplate\Name <> "gatea" Then
-					If n\Frame < 110 Lor n\Frame > 259 Then SetNPCFrame(n, 259)
-					AnimateNPC(n, 259, 110, -0.3, False)
-					If n\Frame = 110 Then
+					If n\Frame < 111 Lor n\Frame > 259 Then SetNPCFrame(n, 259)
+					AnimateNPC(n, 259, 111, -0.3, False)
+					If n\Frame = 111 Then
 						n\State3 = 0
 						n\State = Rand(22000, 27000)
 					EndIf
@@ -1009,7 +1009,7 @@ Function UpdateNPCs()
 								
 								n\PrevY = EntityY(Collider)
 								
-								SetAnimTime n\obj, 110
+								SetAnimTime n\obj, 111
 								
 								If PlayerRoom\RoomTemplate\Name <> "coffin"
 									PositionEntity(n\Collider, EntityX(Collider), EntityY(Collider) - 15, EntityZ(Collider))
@@ -1028,7 +1028,7 @@ Function UpdateNPCs()
 									PointEntity n\obj, Collider
 									RotateEntity (n\Collider, 0, CurveAngle(EntityYaw(n\obj),EntityYaw(n\Collider),100.0), 0, True)
 									
-									AnimateNPC(n, 110, 259, 0.15, False)
+									AnimateNPC(n, 111, 259, 0.15, False)
 								Else
 									n\State = -10
 								EndIf
@@ -4138,7 +4138,7 @@ Function UpdateNPCs()
 					Next
 					If Not found Then
 						For it.Items = Each Items
-							If it\itemtemplate\group = "battery" And EntityDistance(it\collider, n\ManipulationType) < 0.6 And (Not it\Picked) Then
+							If it\itemtemplate\group = "battery" And EntityDistance(it\collider, n\ManipulationType) < 0.6 And (Not it\Picked) And GetParent(it\collider) = 0 Then
 								If it\itemtemplate\name = "killbat" Then it\state = True
 								dist# = EntityDistance(it\collider, n\ManipulationType)
 								EntityParent(it\collider, n\ManipulationType)
@@ -7723,14 +7723,28 @@ Function ChangeNPCTextureID(n.NPCs,textureid%)
 	n\TextureID = textureid
 
 	Local oldObj = n\obj
-	If n\NPCtype = NPCtype066 And n\TextureID = 1 Then
+	If n\NPCtype = NPCtype066 Then
 		If Not CopyExistingNPCTextureIDObj(n) Then
-			n\obj = LoadAnimMesh_Strict("GFX\npcs\Halloween\jell066.b3d")
+			If n\TextureID = 1 Then
+				n\obj = LoadAnimMesh_Strict("GFX\npcs\Halloween\jell066.b3d")
+			Else
+				n\obj = LoadAnimMesh_Strict("GFX\NPCs\scp-066.b3d")
+			EndIf
 			Local temp# = GetModdedINIFloat("DATA\NPCs.ini", "SCP-066", "scale")/2.5
 			ScaleEntity n\obj, temp, temp, temp
 		EndIf
-		n\NVName = I_Loc\NPC_Unidentified
-		n\ManipulationType = FindChild(n\obj, GetModdedINIString(NPCBones, "SCP-066", "item_bonename"))
+		If n\TextureID = 1 Then
+			n\NVName = I_Loc\NPC_Unidentified
+			n\ManipulationType = FindChild(n\obj, GetModdedINIString(NPCBones, "SCP-066", "item_bonename"))
+		Else
+			n\NVName = I_Loc\NPC_066
+			For it.Items = Each Items
+				If GetParent(it\collider) = n\ManipulationType Then
+					EntityParent(it\collider, 0)
+				EndIf
+			Next
+			n\ManipulationType = 0
+		EndIf
 	ElseIf n\NPCtype = NPCtype939 And n\TextureID = 1 Then
 		If Not CopyExistingNPCTextureIDObj(n) Then
 			n\obj = LoadAnimMesh_Strict("GFX\npcs\Halloween\pumpkinmonster.b3d")
@@ -7781,7 +7795,37 @@ Function CopyExistingNPCTextureIDObj%(n.NPCs)
 	Return False
 End Function
 
-
+Function UpgradeNPC914(n.NPCs, x#, y#, z#)
+	Select n\NPCtype
+		Case NPCtype066
+			Select setting
+				Case "rough"
+					; yeah, he bleeds blood, what about it?
+					de.Decals = CreateDecal(2, x, 8 * RoomScale + 0.005, z, 90, Rand(360), 0)
+					de\Size = 0.4 : ScaleSprite(de\obj, de\Size, de\Size)
+				Case "coarse"
+					PositionEntity(n\Collider, x, y + 1.0, z)
+					ResetEntity(n\Collider)
+					n\Speed = n\Speed * 0.5
+				Case "1:1"
+					PositionEntity(n\Collider, x, y + 1.0, z)
+					ResetEntity(n\Collider)
+					ChangeNPCTextureID(n, Not n\TextureID)
+					If n\TextureID = 1 Then
+						n\State = 66
+						SetNPCFrame(n, 710)
+					EndIf
+				Case "fine"
+					PositionEntity(n\Collider, x, y + 1.0, z)
+					ResetEntity(n\Collider)
+					n\Speed = n\Speed * 2
+				Case "very fine"
+					PositionEntity(n\Collider, x, y + 1.0, z)
+					ResetEntity(n\Collider)
+					n\Speed = n\Speed * 5
+			End Select
+	End Select
+End Function
 
 
 
