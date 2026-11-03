@@ -6508,9 +6508,9 @@ Function DrawGUI()
 
 						If GetINIInt2(iniStr, loc, "lethal") Then Kill()
 						
-						strtemp = GetINIString2(iniStr, loc, "blur")
-						If strtemp = "" Then strtemp = GetINIString2(iniStr, loc, "blurtimer")
-						BlurTimer = Max(BlurTimer + Float(strtemp)*70, 0);*temp
+						strtemp = GetINIFloat2(iniStr, loc, "blur")
+						If strtemp = "" Then strtemp = GetINIFloat2(iniStr, loc, "blurtimer")
+						BlurTimer = Max(BlurTimer + strtemp*70, 0);*temp
 						CameraShakeTimer = Max(CameraShakeTimer + GetINIFloat2(iniStr, loc, "camerashake"), 0)
 						
 						Local value# = GetINIFloat2(iniStr, loc, "vomit")
