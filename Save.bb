@@ -737,12 +737,10 @@ Function LoadGame(file$)
 	room2gw_x = ReadFloat(f)
 	room2gw_z = ReadFloat(f)
 	
-	If version = CompatibleNumber Then
-		I_Zone\Transition[0] = ReadByte(f)
-		I_Zone\Transition[1] = ReadByte(f)
-		I_Zone\HasCustomForest = ReadByte(f)
-		I_Zone\HasCustomMT = ReadByte(f)
-	EndIf
+	I_Zone\Transition[0] = ReadByte(f)
+	I_Zone\Transition[1] = ReadByte(f)
+	I_Zone\HasCustomForest = ReadByte(f)
+	I_Zone\HasCustomMT = ReadByte(f)
 	
 	DrawLoading(50)
 
@@ -1136,7 +1134,14 @@ Function LoadGame(file$)
 			ItemAmount = ItemAmount + 1
 		EndIf
 		
-		If it\itemtemplate\isAnim<>0 Then SetAnimTime it\model,ReadFloat(f)
+		; Evil fucked up save compatibility hack
+		If it\itemtemplate\isAnim<>0 Then
+			If it\itemtemplate\name = "scp330" And version = "1.3.12.7" Then
+				SetAnimTime it\model,it\state + 1
+			Else
+				SetAnimTime it\model,ReadFloat(f)
+			EndIf
+		EndIf
 		
 		Local invSize% = ReadByte(f)
 		If invSize <> 0 Then it\Inventory = New Inventories : it\Inventory\Size = invSize
@@ -1565,12 +1570,10 @@ Function LoadGameQuick(file$)
 	room2gw_x = ReadFloat(f)
 	room2gw_z = ReadFloat(f)
 	
-	If version = CompatibleNumber Then
-		I_Zone\Transition[0] = ReadByte(f)
-		I_Zone\Transition[1] = ReadByte(f)
-		I_Zone\HasCustomForest = ReadByte(f)
-		I_Zone\HasCustomMT = ReadByte(f)
-	EndIf
+	I_Zone\Transition[0] = ReadByte(f)
+	I_Zone\Transition[1] = ReadByte(f)
+	I_Zone\HasCustomForest = ReadByte(f)
+	I_Zone\HasCustomMT = ReadByte(f)
 	
 	temp = ReadInt(f)
 	For i = 1 To temp
@@ -1840,7 +1843,14 @@ Function LoadGameQuick(file$)
 			ItemAmount = ItemAmount + 1
 		EndIf
 		
-		If it\itemtemplate\isAnim<>0 Then SetAnimTime it\model,ReadFloat(f)
+		; Evil fucked up save compatibility hack
+		If it\itemtemplate\isAnim<>0 Then
+			If it\itemtemplate\name = "scp330" And version = "1.3.12.7" Then
+				SetAnimTime it\model,it\state + 1
+			Else
+				SetAnimTime it\model,ReadFloat(f)
+			EndIf
+		EndIf
 		
 		Local invSize% = ReadByte(f)
 		If invSize <> 0 Then it\Inventory = New Inventories : it\Inventory\Size = invSize
