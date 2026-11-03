@@ -6508,7 +6508,9 @@ Function DrawGUI()
 
 						If GetINIInt2(iniStr, loc, "lethal") Then Kill()
 						
-						BlurTimer = Max(BlurTimer + GetINIFloat2(iniStr, loc, "blur")*70, 0);*temp
+						strtemp = GetINIString2(iniStr, loc, "blur")
+						If strtemp = "" Then strtemp = GetINIString2(iniStr, loc, "blurtimer")
+						BlurTimer = Max(BlurTimer + Float(strtemp)*70, 0);*temp
 						CameraShakeTimer = Max(CameraShakeTimer + GetINIFloat2(iniStr, loc, "camerashake"), 0)
 						
 						Local value# = GetINIFloat2(iniStr, loc, "vomit")
@@ -11353,6 +11355,7 @@ Function Use294()
 					GiveAchievement(Achv294)
 
 					strtemp$ = GetINIString2(iniStr, loc, "dispensesound")
+					If strtemp = "" Then strtemp = GetINIString2(iniStr, loc, "dispensersound")
 					If strtemp<>"" Then
 						PlayerRoom\SoundCHN = PlaySound_Strict (LoadTempSound(strtemp))
 					EndIf
