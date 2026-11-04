@@ -21,7 +21,6 @@ Function GetRandomSeed%()
 	If HasNumericSeed Then Return RandomSeedNumeric Else Return GenerateSeedNumber(RandomSeed)
 End Function
 
-; Seed selector
 Dim MenuBlinkTimer%(2), MenuBlinkDuration%(2)
 MenuBlinkTimer%(0) = 1
 MenuBlinkTimer%(1) = 1
