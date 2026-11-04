@@ -43,7 +43,7 @@ Dim SaveGames$(SaveGameAmount+1)
 Dim SaveGameTime$(SaveGameAmount + 1)
 Dim SaveGameDate$(SaveGameAmount + 1)
 Dim SaveGameVersion$(SaveGameAmount + 1)
-Dim SaveGamePlayTime$(SaveGameAmount + 1)
+Dim SaveGamePlayTime%(SaveGameAmount + 1)
 Global KeepDuplicateSaveCount% = GetOptionInt("general", "keep duplicate saves")
 Global HideIncompatibleSaves% = GetOptionInt("general", "hide incompatible saves")
 
