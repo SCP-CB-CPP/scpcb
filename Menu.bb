@@ -50,6 +50,11 @@ Dim SaveGameDate$(SaveGameAmount + 1)
 Dim SaveGameVersion$(SaveGameAmount + 1)
 Dim SaveGamePlayTime$(SaveGameAmount + 1)
 Global KeepDuplicateSaveCount% = GetOptionInt("general", "keep duplicate saves")
+Global HideIncompatibleSaves% = GetOptionInt("general", "hide incompatible saves")
+
+; Saves that are actually shown in the Load Game list
+Global VisibleSaveAmount%
+Dim VisibleSaveIndex%(SaveGameAmount + 1)
 
 Global SavedMapsAmount% = 0
 Dim SavedMaps$(SavedMapsAmount+1)
@@ -155,7 +160,7 @@ Function UpdateMainMenu()
 			HasNumericSeed = UseNumericSeeds
 			RandomSeedNumeric = 0
 			RandomSeed = ""
-			
+
 			MainMenuTab = 1
 		EndIf
 
@@ -449,7 +454,7 @@ Function UpdateMainMenu()
 				
 				SetFont Font2
 				
-				If CurrLoadGamePage < Ceil(Float(SaveGameAmount)/6.0)-1 And SaveMSG = "" Then 
+				If CurrLoadGamePage < Ceil(Float(VisibleSaveAmount)/6.0)-1 And SaveMSG = "" Then 
 					If DrawButton(x+530*MenuScale, y + 510*MenuScale, 50*MenuScale, 55*MenuScale, ">") Then
 						CurrLoadGamePage = CurrLoadGamePage+1
 					EndIf
@@ -470,58 +475,59 @@ Function UpdateMainMenu()
 				
 				DrawFrame(x+50*MenuScale,y+510*MenuScale,width-100*MenuScale,55*MenuScale)
 				
-				Text(x+(width/2.0),y+536*MenuScale,"Page "+Int(Max((CurrLoadGamePage+1),1))+"/"+Int(Max((Int(Ceil(Float(SaveGameAmount)/6.0))),1)),True,True)
+				Text(x+(width/2.0),y+536*MenuScale,"Page "+Int(Max((CurrLoadGamePage+1),1))+"/"+Int(Max((Int(Ceil(Float(VisibleSaveAmount)/6.0))),1)),True,True)
 				
 				SetFont Font1
 				
-				If CurrLoadGamePage > Ceil(Float(SaveGameAmount)/6.0)-1 Then
+				If CurrLoadGamePage > Ceil(Float(VisibleSaveAmount)/6.0)-1 Then
 					CurrLoadGamePage = CurrLoadGamePage - 1
 				EndIf
 				
-				If SaveGameAmount = 0 Then
+				If VisibleSaveAmount = 0 Then
 					Text (x + 20 * MenuScale, y + 20 * MenuScale, "No saved games.")
 				Else
 					x = x + 20 * MenuScale
 					y = y + 20 * MenuScale
 					
 					For i% = (1+(6*CurrLoadGamePage)) To 6+(6*CurrLoadGamePage)
-						If i <= SaveGameAmount Then
+						If i <= VisibleSaveAmount Then
+							Local SaveIdx% = VisibleSaveIndex(i - 1)
 							DrawFrame(x,y,540* MenuScale, 70* MenuScale)
 							
-							If SaveGameVersion(i - 1) <> CompatibleNumber Then
+							If SaveGameVersion(SaveIdx) <> CompatibleNumber Then
 								Color 255,0,0
 							Else
 								Color 255,255,255
 							EndIf
 							
-							Text(x + 20 * MenuScale, y + 10 * MenuScale, SaveGames(i - 1))
-							Text(x + 20 * MenuScale, y + (10+18) * MenuScale, SaveGameTime(i - 1)) ;y + (10+23) * MenuScale
-							Text(x + 120 * MenuScale, y + (10+18) * MenuScale, SaveGameDate(i - 1))
-							Text(x + 20 * MenuScale, y + (10+36) * MenuScale, SaveGameVersion(i - 1) + RSet(FormatDuration(SaveGamePlayTime(i - 1), False), 14))
+							Text(x + 20 * MenuScale, y + 10 * MenuScale, SaveGames(SaveIdx))
+							Text(x + 20 * MenuScale, y + (10+18) * MenuScale, SaveGameTime(SaveIdx)) ;y + (10+23) * MenuScale
+							Text(x + 120 * MenuScale, y + (10+18) * MenuScale, SaveGameDate(SaveIdx))
+							Text(x + 20 * MenuScale, y + (10+36) * MenuScale, SaveGameVersion(SaveIdx) + RSet(FormatDuration(SaveGamePlayTime(SaveIdx), False), 14))
 							
 							If SaveMSG = "" Then
-								If SaveGameVersion(i - 1) <> CompatibleNumber Then
+								If SaveGameVersion(SaveIdx) <> CompatibleNumber Then
 									DrawFrame(x + 280 * MenuScale, y + 20 * MenuScale, 100 * MenuScale, 30 * MenuScale)
 									Color(255, 0, 0)
 									Text(x + 330 * MenuScale, y + 34 * MenuScale, "Load", True, True)
 								Else
 									If DrawButton(x + 280 * MenuScale, y + 20 * MenuScale, 100 * MenuScale, 30 * MenuScale, "Load", False) Then
 										LoadEntities()
-										LoadGame(SaveGames(i - 1))
-										CurrSave = SaveGames(i - 1)
+										LoadGame(SaveGames(SaveIdx))
+										CurrSave = SaveGames(SaveIdx)
 										InitLoadGame()
 										MainMenuOpen = False
 									EndIf
 								EndIf
 								
 								If DrawButton(x + 400 * MenuScale, y + 20 * MenuScale, 100 * MenuScale, 30 * MenuScale, "Delete", False) Then
-									SaveMSG = SaveGames(i - 1)
+									SaveMSG = SaveGames(SaveIdx)
 									DebugLog SaveMSG
 									Exit
 								EndIf
 							Else
 								DrawFrame(x + 280 * MenuScale, y + 20 * MenuScale, 100 * MenuScale, 30 * MenuScale)
-								If SaveGameVersion(i - 1) <> CompatibleNumber Then
+								If SaveGameVersion(SaveIdx) <> CompatibleNumber Then
 									Color(255, 0, 0)
 								Else
 									Color(100, 100, 100)
@@ -947,6 +953,15 @@ Function UpdateMainMenu()
 					KeepDuplicateSaveCount% = Int(InputBox(x + 310 * MenuScale, y + MenuScale, 30 * MenuScale, 20 * MenuScale, Str(KeepDuplicateSaveCount), 123)) Mod 10
 					If MouseOn(x+310*MenuScale,y+MenuScale,15*MenuScale,20*MenuScale) And OnSliderID=0
 						DrawOptionsTooltip(tx,ty,tw,th,"keepduplicatesaves")
+					EndIf
+
+					y = y + 30*MenuScale
+
+					Color 255,255,255
+					Text(x + 20 * MenuScale, y, "Hide incompatible saves:")
+					HideIncompatibleSaves = DrawTick(x + 310 * MenuScale, y + MenuScale, HideIncompatibleSaves)
+					If MouseOn(x+310*MenuScale,y+MenuScale,20*MenuScale,20*MenuScale) And OnSliderID=0
+						DrawOptionsTooltip(tx,ty,tw,th,"hideincompatiblesaves")
 					EndIf
 
 					y = y + 50*MenuScale
@@ -2121,6 +2136,8 @@ Function DrawOptionsTooltip(x%,y%,width%,height%,option$,value#=0,ingame%=False)
 			txt = txt + " When no seed is entered, the elapsed millseconds since the computer started is used."
 		Case "keepduplicatesaves"
 			txt = "Allows configuring the number of saves of the same name that are kept at one time. If this number is exceeded, the last save will be overwritten upon creating a new save with the same name."
+		Case "hideincompatiblesaves"
+			txt = "Hides saves made on an incompatible version of the game from the Load Game list instead of showing them as unloadable in red. The save files are not deleted."
 		Case "100able"
 			txt = Chr(34) + "Check 100%-able" + Chr(34) + " is used to change the pre-game check that determines whether a specific seed is beatable to instead check whether every achievement can be attained on that seed. "
 			txt = txt + "This includes checking for the existence of all rooms that are tied to achievements."
