@@ -483,6 +483,8 @@ Function LoadGame(file$)
 	DropSpeed=0.0
 	
 	DebugHUD = False
+
+	TimeScale = 1.0
 	
 	GameSaved = True
 	
@@ -1285,6 +1287,7 @@ Function LoadGameQuick(file$)
 			tb = tb\Successor
 		Wend
 	Next
+	TimeScale = 1.0
 	GameSaved = True
 	NoTarget = False
 	InfiniteStamina = False

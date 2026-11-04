@@ -325,6 +325,7 @@ End Function
 SetBuffer(BackBuffer())
 
 Global CurTime%, PrevTime%, LoopDelay%, AccumulatedLoopDelay#, FPSfactor#, FPSfactor2#, PrevFPSFactor#
+Global TimeScale# = 1.0
 Local CheckFPS%, ElapsedLoops%, FPS%
 
 Global Framelimit% = GetOptionInt("graphics", "framelimit")
@@ -796,6 +797,7 @@ Function UpdateConsole()
 							CreateConsoleMsg("- wireframe")
 							CreateConsoleMsg("- showfps")
 							CreateConsoleMsg("- debughud")
+							CreateConsoleMsg("- timescale [value]")
 							CreateConsoleMsg("- camerafog [near] [far]")
 							CreateConsoleMsg("- viewbob [value]")
 							CreateConsoleMsg("- fov [value]")
@@ -1834,6 +1836,9 @@ Function UpdateConsole()
 					EndIf
 					If ShowMap% Then CreateConsoleMsg("TYPE " + Chr(34) + "help showmap" + Chr(34) + " FOR A LIST OF ROOM COLORS")
 					;[End Block]
+				Case "timescale"
+					TimeScale = Float(Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " "))))
+					CreateConsoleMsg("TIMESCALE SET TO " + TimeScale)
 				Case "clear", "cls"
 					Delete Each ConsoleMsg
 				Case "mav"
@@ -3258,7 +3263,7 @@ While IsRunning
 	PrevTime = CurTime
 	If (SpeedRunMode Lor (Not (MainMenuOpen Lor MenuOpen))) And SelectedEnding="" And TimerStopped=0 Then PlayTime = PlayTime + ElapsedTime
 	PrevFPSFactor = FPSfactor
-	FPSfactor = Min(ElapsedTime / 1000.0 * 70, 5.0)
+	FPSfactor = Min(ElapsedTime / 1000.0 * 70, 5.0) * TimeScale
 	FPSfactor2 = FPSfactor
 
 	If IsPaused() Then FPSfactor = 0
@@ -9682,6 +9687,7 @@ Function NullGame(playbuttonsfx%=True)
 	If Not SpeedRunMode Then PlayTime = 0
 
 	DebugHUD = False
+	TimeScale = 1.0
 	
 	UnableToMove% = False
 	
