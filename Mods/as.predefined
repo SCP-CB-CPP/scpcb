@@ -2432,7 +2432,8 @@ class NPC {
     void Animate(float startFrame, float endFrame, float speed, bool loop = true);
     void SetNPCFrame(float frame);
     void FinishWalking(float startFrame, float endFrame, float speed);
-    void ChangeNPCTexture(int textureID);
+    void ChangeTexture(int textureID);
+    bool CopyExistingObject();
     void ForceSetID(int newID);
     float Find860Angle(CB::Forest@);
     void EnableNPC();
@@ -3082,6 +3083,7 @@ class AchievementMessage {
     void InsertBefore(CB::AchievementMessage@);
 }
 float FPSFactor;
+float TimeScale;
 bool HasNumericSeed;
 string RandomSeed;
 int RandomSeedNumeric;
@@ -3166,6 +3168,7 @@ bool ConsoleAutoOpen;
 bool SpeedRunMode;
 bool NumericSeeds;
 bool KeepDuplicateSaveCount;
+bool HideIncompatibleSaves;
 bool DebugMapGen;
 bool DebugForestGen;
 int ParticleAmount;
@@ -3192,6 +3195,7 @@ bool MouseUp1;
 namespace CB::Effect {
 B3D::Effect@ Gamma;
 B3D::Effect@ FXAA;
+B3D::Effect@ Instance;
 }
 
 namespace CB::Effect::Internal {
@@ -3288,10 +3292,12 @@ int WearingGasMask;
 int WearingHazmat;
 int WearingVest;
 int Wearing714;
+int WearingPumpkin;
 int WearingNightVision;
 float NVTimer;
 bool SuperMan;
 float SuperManTimer;
+bool LostHands;
 float Injuries;
 float Bloodloss;
 float Infect;
@@ -3447,6 +3453,7 @@ enum Music {
     Ending,
     Credits,
     AfterCredits,
+    HalloweenFields,
     Invalid
 }
 }
