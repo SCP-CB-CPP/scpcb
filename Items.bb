@@ -444,7 +444,6 @@ Function UpdateItems()
 			If CallHook(UpdateItem) Then Continue
 		EndIf
 
-		
 		i\Dropped = 0
 		
 		If (Not i\Picked) Then

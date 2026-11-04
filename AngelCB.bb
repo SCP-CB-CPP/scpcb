@@ -1,5 +1,6 @@
 Function RegisterCommon()
     RegisterGlobalProperty("float FPSFactor", &FPSFactor)
+    RegisterGlobalProperty("float TimeScale", &TimeScale)
 
     RegisterGlobalProperty("bool HasNumericSeed", &HasNumericSeed)
     RegisterGlobalProperty("string RandomSeed", &RandomSeed)
@@ -153,6 +154,7 @@ Function RegisterOptions()
     RegisterGlobalProperty("bool SpeedRunMode", &SpeedRunMode)
     RegisterGlobalProperty("bool NumericSeeds", &UseNumericSeeds)
     RegisterGlobalProperty("bool KeepDuplicateSaveCount", &KeepDuplicateSaveCount)
+    RegisterGlobalProperty("bool HideIncompatibleSaves", &HideIncompatibleSaves)
 
     RegisterGlobalProperty("bool DebugMapGen", &DebugMapGen)
     RegisterGlobalProperty("bool DebugForestGen", &DebugForestGen)
@@ -259,6 +261,7 @@ Function RegisterCBAudio()
     RegisterEnumValue("Music", "Ending", 23)
     RegisterEnumValue("Music", "Credits", 24)
     RegisterEnumValue("Music", "AfterCredits", 25)
+    RegisterEnumValue("Music", "HalloweenFields", 26)
     RegisterEnumValue("Music", "Invalid", 66)
 
     If ns <> "" Then SetDefaultNamespace(ns + "::Music") Else SetDefaultNamespace("Music")
@@ -293,6 +296,7 @@ Function RegisterPostProcess()
 
     RegisterGlobalProperty("B3D::Effect@ Gamma", &GammaEffect)
     RegisterGlobalProperty("B3D::Effect@ FXAA", &FXAAEffect)
+    RegisterGlobalProperty("B3D::Effect@ Instance", &InstanceEffect)
 
     RegisterGlobalFunction("void RenderQuad(B3D::Effect@ effect, B3D::Buffer@ buffer, string technique, int blend=0)", @RenderEffectQuad)
 
@@ -905,7 +909,8 @@ Function RegisterNPC()
     RegisterObjectMethod("NPC", "void Animate(float startFrame, float endFrame, float speed, bool loop=true)", @AnimateNPC)
     RegisterObjectMethod("NPC", "void SetNPCFrame(float frame)", @SetNPCFrame)
     RegisterObjectMethod("NPC", "void FinishWalking(float startFrame, float endFrame, float speed)", @FinishWalking)
-    RegisterObjectMethod("NPC", "void ChangeNPCTexture(int textureID)", @ChangeNPCTextureID)
+    RegisterObjectMethod("NPC", "void ChangeTexture(int textureID)", @ChangeNPCTextureID)
+    RegisterObjectMethod("NPC", "bool CopyExistingObject()", @CopyExistingNPCObj)
 
     RegisterObjectMethod("NPC", "void ForceSetID(int newID)", @ForceSetNPCID)
     RegisterObjectMethod("NPC", "float Find860Angle(Forest@)", @Find860Angle)
@@ -1167,11 +1172,14 @@ Function RegisterPlayer()
     RegisterGlobalProperty("int WearingHazmat", &WearingHazmat)
     RegisterGlobalProperty("int WearingVest", &WearingVest)
     RegisterGlobalProperty("int Wearing714", &Wearing714)
+    RegisterGlobalProperty("int WearingPumpkin", &WearingPumpkin)
     RegisterGlobalProperty("int WearingNightVision", &WearingNightVision)
     RegisterGlobalProperty("float NVTimer", &NVTimer)
 
     RegisterGlobalProperty("bool SuperMan", &SuperMan)
     RegisterGlobalProperty("float SuperManTimer", &SuperManTimer)
+
+    RegisterGlobalProperty("bool LostHands", &LostHands)
 
     RegisterGlobalProperty("float Injuries", &Injuries)
     RegisterGlobalProperty("float Bloodloss", &Bloodloss)

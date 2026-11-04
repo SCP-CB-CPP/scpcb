@@ -7797,12 +7797,27 @@ Function ChangeNPCTextureID(n.NPCs,textureid%)
 		EndIf
 		Return
 	EndIf
+
+	If n\TextureID = textureid Then Return
 	
+	Local prevID = n\TextureID
 	n\TextureID = textureid
 
 	Local oldObj = n\obj
+
+	If ChangeNPCTexture\Subscribers > 0 Then
+		Local nn.NPCs = n
+		PrepareFunction(1)
+		SetArgObj(0, &nn)
+		SetArgInt(1, prevID)
+		If CallHook(ChangeNPCTexture) Then
+			If AnimTime(n\Obj) <> -1 Then SetAnimTime(n\obj,n\Frame)
+			Return
+		Endif
+	EndIf
+
 	If n\NPCtype = NPCtype066 Then
-		If Not CopyExistingNPCTextureIDObj(n) Then
+		If Not CopyExistingNPCObj(n) Then
 			If n\TextureID = 1 Then
 				n\obj = LoadAnimMesh_Strict("GFX\npcs\Halloween\jell066.b3d")
 			Else
@@ -7824,7 +7839,7 @@ Function ChangeNPCTextureID(n.NPCs,textureid%)
 			n\ManipulationType = 0
 		EndIf
 	ElseIf n\NPCtype = NPCtype939 And n\TextureID = 1 Then
-		If Not CopyExistingNPCTextureIDObj(n) Then
+		If Not CopyExistingNPCObj(n) Then
 			n\obj = LoadAnimMesh_Strict("GFX\npcs\Halloween\pumpkinmonster.b3d")
 			temp# = (GetModdedINIFloat("DATA\NPCs.ini", "forestmonster", "scale") / 20.0)
 			ScaleEntity n\obj, temp, temp, temp
@@ -7844,7 +7859,7 @@ Function ChangeNPCTextureID(n.NPCs,textureid%)
 		EndIf
 	ElseIf n\NPCtype = NPCtypeOldMan Then
 		If n\TextureID = 1 Then
-			If Not CopyExistingNPCTextureIDObj(n) Then
+			If Not CopyExistingNPCObj(n) Then
 				n\obj = LoadAnimMesh_Strict("GFX\npcs\Halloween\skinned106.b3d")
 				temp# = GetModdedINIFloat("DATA\NPCs.ini", "SCP-106", "scale")/2.5
 				ScaleEntity n\obj, temp, temp, temp
@@ -7863,7 +7878,7 @@ Function ChangeNPCTextureID(n.NPCs,textureid%)
 	FreeEntity oldObj
 End Function
 
-Function CopyExistingNPCTextureIDObj%(n.NPCs)
+Function CopyExistingNPCObj%(n.NPCs)
 	For n2.NPCs = Each NPCs
 		If n2 <> n And n2\NPCtype = n\NPCtype And n2\TextureID = n\TextureID Then
 			n\obj = CopyEntity(n2\obj)
