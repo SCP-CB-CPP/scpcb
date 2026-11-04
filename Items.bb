@@ -310,21 +310,19 @@ Function CreateItem.Items(name$, x#, y#, z#)
 	i\DropSpeed = 0.0
 	
 	i\invimg = i\itemtemplate\invimg
-  
-	Select name
-		Case "clipboard"
-			i\Inventory = New Inventories
-			i\Inventory\Size = 10
-			SetAnimTime i\model,17.0
-			i\invimg = i\itemtemplate\invimg2
-		Case "wallet"
-			i\Inventory = New Inventories
-			i\Inventory\Size = 10
-			SetAnimTime i\model,0.0
-		Case "scp330"
-			i\state = 1 Shl Rand(0, 2)
-			SetAnimTime i\model, i\state + 1
-	  End Select
+	If name="clipboard" Then
+		i\Inventory = New Inventories
+		i\Inventory\Size = 10
+		SetAnimTime i\model,17.0
+		i\invimg = i\itemtemplate\invimg2
+	ElseIf name="wallet" Then
+		i\Inventory = New Inventories
+		i\Inventory\Size = 10
+		SetAnimTime i\model,0.0
+	ElseIf name="scp330" then
+		i\state = 1 Shl Rand(0, 2)
+		SetAnimTime i\model, i\state + 1
+	EndIf
 	
 	i\ID=LastItemID+1
 	LastItemID=i\ID
@@ -1081,6 +1079,13 @@ Function Update294()
 	
 	CatchErrors("Update294")
 End Function
+
+
+
+
+
+
+
 
 ;~IDEal Editor Parameters:
 ;~F#B#1E
