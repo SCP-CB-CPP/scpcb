@@ -30,6 +30,7 @@ Function RegisterMenu()
     RegisterGlobalFunction("bool DrawButton(int x, int y, int width, int height, string text, bool bigFont=true, bool waitForMouseUp=false, bool disabled=false)", @DrawButton)
     RegisterGlobalFunction("bool DrawTick(int x, int y, bool selected, bool locked=false)", @DrawTick)
     RegisterGlobalFunction("void DrawBar(B3D::Image@ img, int x, int y, int width, float filled, bool centerX=false)", @DrawBar)
+    RegisterGlobalFunction("void RowText(string text, int x, int y, int width, int height, int align=0, float leading=1)", @RowText)
 
     RegisterGlobalProperty("int CurrentOpen", &MenuOpen)
     RegisterGlobalProperty("float StopHidingTimer", &StopHidingTimer)
