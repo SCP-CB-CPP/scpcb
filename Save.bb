@@ -2064,7 +2064,7 @@ Function LoadSaveGames()
 	Dim VisibleSaveIndex%(SaveGameAmount + 1)
 	VisibleSaveAmount = 0
 	For i = 1 To SaveGameAmount
-		If (Not HideDeprecatedSaves) Lor SaveGameVersion(i - 1) = CompatibleNumber Then
+		If (Not HideIncompatibleSaves) Lor SaveGameVersion(i - 1) = CompatibleNumber Then
 			VisibleSaveIndex(VisibleSaveAmount) = i - 1
 			VisibleSaveAmount = VisibleSaveAmount + 1
 		EndIf

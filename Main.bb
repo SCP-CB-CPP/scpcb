@@ -7844,10 +7844,10 @@ Function DrawMenu()
 					y = y + 30*MenuScale
 					
 					Color 255,255,255
-					Text(x, y, "Hide deprecated saves:")
-					HideDeprecatedSaves = DrawTick(x + 270 * MenuScale, y + MenuScale, HideDeprecatedSaves)
+					Text(x, y, "Hide incompatible saves:")
+					HideIncompatibleSaves = DrawTick(x + 270 * MenuScale, y + MenuScale, HideIncompatibleSaves)
 					If MouseOn(x+270*MenuScale,y+MenuScale,20*MenuScale,20*MenuScale) And OnSliderID=0
-						DrawOptionsTooltip(tx,ty,tw,th,"hidedeprecatedsaves")
+						DrawOptionsTooltip(tx,ty,tw,th,"hideincompatiblesaves")
 					EndIf
 					
 					y = y + 50*MenuScale
@@ -11312,7 +11312,7 @@ Function SaveOptionsINI()
 	PutINIValue(OptionFile, "general", "speed run mode", SpeedRunMode%)
 	PutINIValue(OptionFile, "general", "numeric seeds", UseNumericSeeds%)
 	PutINIValue(OptionFile, "general", "keep duplicate saves", KeepDuplicateSaveCount%)
-	PutINIValue(OptionFile, "general", "hide deprecated saves", HideDeprecatedSaves%)
+	PutINIValue(OptionFile, "general", "hide incompatible saves", HideIncompatibleSaves%)
 	PutINIValue(OptionFile, "controls", "mouse smoothing", MouseSmooth)
 	
 	PutINIValue(OptionFile, "audio", "music volume", MusicVolume)
