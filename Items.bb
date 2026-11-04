@@ -324,6 +324,9 @@ Function CreateItem.Items(name$, x#, y#, z#)
 			i\Inventory = New Inventories
 			i\Inventory\Size = 10
 			SetAnimTime i\model,0.0
+		ElseIf name="scp330" then
+			i\state = 1 Shl Rand(0, 2)
+			SetAnimTime i\model, i\state + 1
 		EndIf
 	EndIf
 
@@ -407,6 +410,8 @@ Function RemoveItem(i.Items, inGame%=True)
 				Wearing1499 = False
 			Case "scp427"
 				I_427\Using = False
+			Case "pumpkin"
+				TakeOffPumpkin()
 		End Select
 	EndIf
 	If i\itemtemplate\img <> 0
@@ -428,16 +433,18 @@ Function UpdateItems()
 	Local pick%
 	
 	Local HideDist = HideDistance*0.5
-	Local deletedItem% = False
 	
 	ClosestItem = Null
 	For i.Items = Each Items
+		CatchErrors("Uncaught (UpdateItem "+i\itemtemplate\name+")")
+		
 		If UpdateItem\Subscribers > 0 Then
 			PrepareFunction(1)
 			SetArgObj(0, &i)
 			If CallHook(UpdateItem) Then Continue
 		EndIf
 
+		
 		i\Dropped = 0
 		
 		If (Not i\Picked) Then
@@ -474,10 +481,10 @@ Function UpdateItems()
 					i\zspeed = 0.0
 				Else
 					If ShouldEntitiesFall
-						pick = LinePick(EntityX(i\collider),EntityY(i\collider),EntityZ(i\collider),0,-10,0)
+						pick = LinePick(EntityX(i\collider, True),EntityY(i\collider, True),EntityZ(i\collider, True),0,-10,0)
 						If pick
 							i\DropSpeed = i\DropSpeed - 0.0004 * FPSfactor
-							TranslateEntity i\collider, i\xspeed*FPSfactor, i\DropSpeed * FPSfactor, i\zspeed*FPSfactor
+							TranslateEntity i\collider, i\xspeed*FPSfactor, i\DropSpeed * FPSfactor, i\zspeed*FPSfactor, True
 						Else
 							i\DropSpeed = 0
 							i\xspeed = 0.0
@@ -510,15 +517,15 @@ Function UpdateItems()
 										ztemp = ztemp+Rnd(-0.002,0.002)
 									Wend
 									
-									TranslateEntity i2\collider,xtemp,0,ztemp
-									TranslateEntity i\collider,-xtemp,0,-ztemp
+									TranslateEntity i2\collider,xtemp,0,ztemp,True
+									TranslateEntity i\collider,-xtemp,0,-ztemp,True
 								EndIf
 							EndIf
 						EndIf
 					Next
 				EndIf
 				
-				If EntityY(i\collider) < - 35.0 Then DebugLog "remove: " + i\itemtemplate\name:RemoveItem(i):deletedItem=True
+				If EntityY(i\collider, True) < - 35.0 Then RemoveItem(i) : Continue
 			Else
 				HideEntity i\collider
 			EndIf
@@ -528,18 +535,191 @@ Function UpdateItems()
 			i\zspeed = 0.0
 		EndIf
 		
-		If Not deletedItem Then
-			CatchErrors(Chr(34)+i\itemtemplate\name+Chr(34)+" item")
-		EndIf
-		deletedItem = False
+		Select i\itemtemplate\name
+			Case "lollipop"
+				If i\state > 0 Then
+					i\state = i\state + FPSfactor
+
+					If Rand(50/FPSfactor) = 1
+						CameraShake = Max(CameraShake, Rnd(0.01 * i\state, 0.05 * i\state))
+						If (MilliSecs() Mod 1000) < 100 Then PlaySound_Strict(CoughSFX(Rand(0,2)))
+					EndIf
+
+					If i\state > 70 * 10 Then BlurTimer = Max(BlurTimer, 1400)
+
+					If (Not CanTeleportToHalloweenRoom()) Then
+						RemoveItem(i)
+					ElseIf i\state > 70 * 15 Then
+						Local r.Rooms = Null
+						For e.Events = Each Events
+							If e\EventName = "halloweenfields" Then
+								r = e\room
+								Teleport(r)
+								Exit
+							EndIf
+						Next
+
+						If r = Null Then
+							For r2.Rooms = Each Rooms
+								If r2\RoomTemplate\Name = "halloweenfields" Then
+									r = r2
+									Teleport(r)
+									CreateEvent("halloweenfields","halloweenfields",0)
+									FillHalloweenPDWithBones(r)
+									Exit
+								EndIf
+							Next
+						EndIf
+
+						If r = Null Then
+							r = CreateRoom(0, ROOM1, 0, 1000, 128, 0, "halloweenfields")
+							SetupTriggerBoxes(r)
+							Teleport(r)
+							CreateEvent("halloweenfields","halloweenfields",0)
+						EndIf
+						PositionEntity(Collider, r\x + 8, r\y + 0.5, r\z + 14)
+						RotateEntity(Collider, 0, -80, 0)
+						ResetEntity(Collider)
+
+						Local it.Items = CreateItem("pumpkin", r\x - 14.7, r\y + 0.5, r\z + 5.0)
+						it\State = -1
+						RotateEntity(it\collider, 0, r\angle-50, 0)
+
+						LightVolume = -0.1
+
+						BlinkTimer = -10
+
+						BlurTimer = Max(BlurTimer, 5 * 70)
+						PlaySound_Strict(CoughSFX(Rand(0,2)))
+						PlaySound_Strict(LoadTempSound("SFX\Halloween\LollipopTeleport.ogg"))
+
+						RemoveItem(i)
+					EndIf
+				EndIf
+			Case "chocolate"
+				If i\state > 0 Then
+					CurrStepSFX = 1
+
+					If i\state > 35 * 15 Then
+						CrouchState = (i\state - 35 * 15) / (35 * 15)
+					EndIf
+
+					If i\state > 70 * 13 Then
+						LightBlink = (i\State - 70 * 13) / 70 * 2
+					EndIf
+
+					If PlayerStepped Then
+						de.Decals = CreateDecal(0, EntityX(Collider),EntityY(Collider)-0.29,EntityZ(Collider), 90, Rand(360), 0)
+						de\Size = 0.2 : de\SizeChange = 0.004 : de\timer = 90000 : EntityAlpha(de\obj, 0.8) : UpdateDecals() 											
+					EndIf
+					i\state = i\state + FPSfactor
+					BlurVolume = 1 - 70 / (i\state * 3)
+
+					If Rand(25/FPSfactor) = 1 And (MilliSecs() Mod 1000) < 200
+						PlaySound_Strict(DecaySFX(Rand(3)))
+					EndIf
+
+					If (Not CanTeleportToHalloweenRoom()) Then
+						RemoveItem(i)
+					ElseIf i\state > 70 * 15 Then
+						RemoveItem(i)
+						Local bonesInInv% = 0
+						For j = 0 To MaxItemAmount
+							it.Items = Inventory(j)
+							If it <> Null And it\itemtemplate\name = "bone" Then
+								bonesInInv = bonesInInv + 1
+								RemoveItem(it)
+								If bonesInInv >= 3 Then Exit
+							EndIf
+						Next
+
+						If bonesInInv > 0 Then
+							PlaySound_Strict(LoadTempSound("SFX\Halloween\BonePickUp.ogg"))
+						EndIf
+
+						If bonesInInv >= 3 Then
+							; TODO: Do something cooler!!!!
+							it.Items = CreateItem("boneflute", EntityX(Collider), EntityY(Collider), EntityZ(Collider))
+							PickItem(it)
+							Continue
+						EndIf
+
+						r = Null
+						e = Null
+						For e.Events = Each Events
+							If e\EventName = "halloweenpd" Then
+								r = e\room
+								Teleport(r)
+								FillHalloweenPDWithBones(r)
+								Exit
+							EndIf
+						Next
+
+						If r = Null Then
+							For r2.Rooms = Each Rooms
+								If r2\RoomTemplate\Name = "halloweenpd" Then
+									r = r2
+									Teleport(r)
+									CreateEvent("halloweenpd","halloweenpd",0)
+									FillHalloweenPDWithBones(r)
+									Exit
+								EndIf
+							Next
+						EndIf
+
+						If r = Null Then
+							r = CreateRoom(0, ROOM1, 8, 1500, 128, 0, "halloweenpd")
+							SetupTriggerBoxes(r)
+							Teleport(r)
+							CreateEvent("halloweenpd","halloweenpd",0)
+						EndIf
+
+						If e = Null Then
+							For e.Events = Each Events
+								If e\EventName = "halloweenpd" Then Exit
+							Next
+						EndIf
+						e\EventState3 = bonesInInv
+						If bonesInInv > 0 Then
+							Msg = Format(I_Loc\MessageItem_Bonefragment, e\EventState3, e\EventState)
+							MsgTimer = 70*5
+						EndIf
+
+						e\img = LoadImage_Strict("GFX\Halloween\blinkmortal.pd")
+						LoadEventSound(e, "SFX\Room\Halloween\PD\blink.ogg")
+
+						PositionEntity(Collider, r\x + 1470 * RoomScale, r\y + 112 * RoomScale + 0.2, r\z + -536 * RoomScale)
+						ResetEntity(Collider)
+						PositionEntity(Curr106\Collider, EntityX(Collider), EntityY(Collider) + 0.2, EntityZ(Collider))
+						RotateEntity(Curr106\Collider, 0, EntityYaw(Collider) + 180, 0)
+						If SelectedDifficulty\aggressiveNPCs Then
+							MoveEntity(Curr106\Collider, 0, 0, -5)
+						Else
+							MoveEntity(Curr106\Collider, 0, 0, -9.5)
+						EndIf
+						ResetEntity(Curr106\Collider)
+
+						PlaySound_Strict(Use914SFX)
+						PlaySound_Strict(OldManSFX(5))
+
+						If Curr106\TextureID <> 1 Then
+							ChangeNPCTextureID(Curr106, 1)
+						EndIf
+
+						LightVolume = -0.1
+						BlinkTimer = -10	
+					EndIf
+				EndIf
+			Case "boneflute"
+				i\state = Max(0, i\state - FPSfactor)
+		End Select
 	Next
+
+	CatchErrors("Update items")
+
+	If LostHands Then ClosestItem = Null
 	
-	If ClosestItem <> Null Then
-		;DrawHandIcon = True
-		
-		If MouseHit1 Then PickItem(ClosestItem)
-	EndIf
-	
+	If ClosestItem <> Null And MouseHit1 Then PickItem(ClosestItem)
 End Function
 
 Function PickItem(item.Items)
@@ -597,11 +777,21 @@ Function PickItem(item.Items)
 						
 						Return
 					Case "killbat"
-						ShowEntity Light
-						LightFlash = 1.0
-						PlaySound_Strict(IntroSFX(11))
-						DeathMSG = I_Loc\DeathMessage_Killbat
-						Kill()
+						If item\state Then
+							If SteamActive And (Not UsedConsole) Then Steam_Achieve("AchvHlwnEye")
+							Msg = I_Loc\MessageItem_066Killbat
+							MsgTimer = 70*7
+						Else
+							ShowEntity Light
+							LightFlash = 1.0
+							PlaySound_Strict(IntroSFX(11))
+							If PlayerRoom\RoomTemplate\Name = "914" Then
+								DeathMSG = I_Loc\DeathMessage_Killbat
+							Else
+								DeathMSG = I_Loc\DeathMessage_KillbatOutside
+							EndIf
+							Kill()
+						EndIf
 					Case "scp148"
 						GiveAchievement(Achv148)	
 					Case "scp513"
@@ -670,6 +860,89 @@ Function PickItem(item.Items)
 							;TakeOffStuff(2)
 							SelectedItem = item
 						EndIf
+					Case "scp330"
+						If SteamActive And (Not UsedConsole) Then Steam_SetStatInt("has_grabbed_candy", 1)
+						If item\state = -1 Then
+							; Allow it to be picked up
+						ElseIf PopCount(item\state) < 3 Lor item\state = -2 Then
+							Local candy%
+							If item\state = -2 Then
+								candy = Rand(0, 2)
+							Else
+								; Reseed to to deterministically bind candy order to seed to make it more obvious that save-scumming to get all three types is not possible.
+								SeedRnd GetRandomSeed()
+								Local candyStart% = Rand(0, 2), candyMask%
+								For i% = 0 To 2
+									candy = (candyStart + i) Mod 3
+									candyMask = 1 Shl candy
+									If Not (item\state And candyMask) Then Exit
+								Next
+								item\state = item\state Or candyMask
+								SetAnimTime item\model, item\state + 1
+							EndIf
+							Select candy
+								Case 0
+									item = CreateItem("eyecandy", EntityX(Collider), EntityY(Collider), EntityZ(Collider))
+								Case 1
+									item = CreateItem("lollipop", EntityX(Collider), EntityY(Collider), EntityZ(Collider))
+								Case 2
+									item = CreateItem("chocolate", EntityX(Collider), EntityY(Collider), EntityZ(Collider))
+							End Select
+						Else
+							Local pvt% = CreatePivot()
+							EntityParent(pvt, Camera, False)
+							EntityParent(pvt, 0, True)
+							MoveEntity(pvt, 0.1, -0.1, 0.2)
+							item = CreateItem("hand", EntityX(pvt), EntityY(pvt), EntityZ(pvt))
+							ScaleEntity(item\model, -item\itemtemplate\scale, item\itemtemplate\scale, item\itemtemplate\scale, True)
+							RotateEntity(item\collider, 0, EntityYaw(Camera) - 90, 0)
+							MoveEntity(pvt, -0.2, -0.2, -0.2)
+							item = CreateItem("hand", EntityX(pvt), EntityY(pvt), EntityZ(pvt))
+							RotateEntity(item\collider, 0, EntityYaw(Camera) + 90 + Rnd(10, 45), 0)
+							Bloodloss = Max(Bloodloss, 50)
+							Injuries = Max(Injuries, 25)
+							BlurTimer = 10 * 70
+							CameraShake = 3
+							LostHands = True
+							If Wearing714 Then
+								For n% = 0 To MaxItemAmount-1
+									If Inventory(n) <> Null And Inventory(n)\itemtemplate\name = "scp714" Then
+										Local it.Items = Inventory(n)
+										DropItem(it)
+										PositionEntity(it\collider, EntityX(item\collider, True), EntityY(item\collider, True), EntityZ(item\collider, True), True)
+										Exit
+									EndIf
+								Next
+								Wearing714 = False
+							EndIf
+							DeathMSG = I_Loc\DeathMessage_330
+							PlaySound_Strict(LoadTempSound("SFX\General\Slash1.ogg"))
+							FreeEntity(pvt)
+							Return
+						EndIf
+					Case "bone"
+						For e.Events = Each Events
+							If e\EventName = "halloweenpd" And PlayerRoom = e\room Then
+								e\EventState3 = e\EventState3 + 1
+								If e\EventState3 <= e\EventState Then
+									PlaySound_Strict(LoadTempSound("SFX\Halloween\BonePickUp.ogg"))
+									RemoveItem(item)
+									Msg = Format(I_Loc\MessageItem_Bonefragment, e\EventState3, e\EventState)
+									MsgTimer = 70*5
+
+									If e\EventState3 = e\EventState Then
+										item = CreateItem("boneflute", EntityX(Collider), EntityY(Collider), EntityZ(Collider))
+										Curr106\State = 10000
+										Curr106\Idle = False
+										TeleportFromHalloweenRoom()
+										If SteamActive And (Not UsedConsole) Then Steam_Achieve("AchvHlwnBar")
+									Else
+										Return
+									EndIf
+								EndIf
+								Exit
+							EndIf
+						Next
 				End Select
 				
 				If item\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX(item\itemtemplate\sound))
@@ -705,11 +978,12 @@ Function DropItem(item.Items,playdropsound%=True)
 	
 	item\Dropped = 1
 	
+	EntityParent(item\collider, 0)
 	ShowEntity(item\collider)
-	PositionEntity(item\collider, EntityX(Camera), EntityY(Camera), EntityZ(Camera))
-	RotateEntity(item\collider, EntityPitch(Camera), EntityYaw(Camera)+Rnd(-20,20), 0)
-	MoveEntity(item\collider, 0, -0.1, 0.1)
-	RotateEntity(item\collider, 0, EntityYaw(Camera)+Rnd(-110,110), 0)
+	PositionEntity(item\collider, EntityX(Camera), EntityY(Camera), EntityZ(Camera), True)
+	RotateEntity(item\collider, EntityPitch(Camera), EntityYaw(Camera)+Rnd(-20,20), 0, True)
+	MoveEntity(item\collider, 0, -0.1, 0.1, True)
+	RotateEntity(item\collider, 0, EntityYaw(Camera)+Rnd(-110,110), 0, True)
 	
 	ResetEntity (item\collider)
 	
@@ -747,6 +1021,8 @@ Function DropItem(item.Items,playdropsound%=True)
 			Wearing1499 = False
 		Case "scp427"
 			I_427\Using = False
+		Case "pumpkin"
+			TakeOffPumpkin()
 	End Select
 	
 	CatchErrors("DropItem")

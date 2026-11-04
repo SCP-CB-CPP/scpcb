@@ -8,6 +8,13 @@ Steam_Shutdown():"_Shutdown@0"
 Steam_Achieve%(ID$):"_Achieve@4"
 Steam_UnAchieve%(ID$):"_UnAchieve@4"
 
+Steam_GetStatIntExists%(name$):"_GetStatIntExists@4"
+Steam_GetStatFloatExists%(name$):"_GetStatFloatExists@4"
+Steam_GetStatInt%(name$):"_GetStatInt@4"
+Steam_GetStatFloat#(name$):"_GetStatFloat@4"
+Steam_SetStatInt%(name$, value%):"_SetStatInt@8"
+Steam_SetStatFloat%(name$, value#):"_SetStatFloat@8"
+
 Steam_GetGameLanguage$():"_GetGameLanguage@0"
 
 Steam_GetOverlayState%():"_GetOverlayState@0"

@@ -43,8 +43,13 @@ Dim SaveGames$(SaveGameAmount+1)
 Dim SaveGameTime$(SaveGameAmount + 1)
 Dim SaveGameDate$(SaveGameAmount + 1)
 Dim SaveGameVersion$(SaveGameAmount + 1)
-Dim SaveGamePlayTime$(SaveGameAmount + 1)
+Dim SaveGamePlayTime%(SaveGameAmount + 1)
 Global KeepDuplicateSaveCount% = GetOptionInt("general", "keep duplicate saves")
+Global HideIncompatibleSaves% = GetOptionInt("general", "hide incompatible saves")
+
+; Saves that are actually shown in the Load Game list
+Global VisibleSaveAmount%
+Dim VisibleSaveIndex%(SaveGameAmount + 1)
 
 Global SavedMapsAmount% = 0
 Dim SavedMaps$(SavedMapsAmount+1)
@@ -458,7 +463,7 @@ Function UpdateMainMenu()
 				
 				SetFont Font2
 				
-				If CurrLoadGamePage < Ceil(Float(SaveGameAmount)/EntriesPerPage)-1 And SaveMSG = "" Then 
+				If CurrLoadGamePage < Ceil(Float(VisibleSaveAmount)/EntriesPerPage)-1 And SaveMSG = "" Then 
 					If DrawButton(x+530*MenuScale, y + PagingFrameHeight, 50*MenuScale, 55*MenuScale, ">") Then
 						CurrLoadGamePage = CurrLoadGamePage+1
 					EndIf
@@ -479,36 +484,37 @@ Function UpdateMainMenu()
 				
 				DrawFrame(x+50*MenuScale,y+PagingFrameHeight,width-100*MenuScale,55*MenuScale)
 				
-				Text(x+(width/2.0),y+PagingFrameHeight+26*MenuScale,Format(I_Loc\Menu_Page, Int(Max((CurrLoadGamePage+1),1)), Int(Max((Int(Ceil(Float(SaveGameAmount)/EntriesPerPage))),1))),True,True)
+				Text(x+(width/2.0),y+PagingFrameHeight+26*MenuScale,Format(I_Loc\Menu_Page, Int(Max((CurrLoadGamePage+1),1)), Int(Max((Int(Ceil(Float(VisibleSaveAmount)/EntriesPerPage))),1))),True,True)
 				
 				SetFont Font1
 				
-				If CurrLoadGamePage > Ceil(Float(SaveGameAmount)/EntriesPerPage)-1 Then
+				If CurrLoadGamePage > Ceil(Float(VisibleSaveAmount)/EntriesPerPage)-1 Then
 					CurrLoadGamePage = CurrLoadGamePage - 1
 				EndIf
 				
-				If SaveGameAmount = 0 Then
+				If VisibleSaveAmount = 0 Then
 					Text (x + 20 * MenuScale, y + 20 * MenuScale, I_Loc\LoadGame_Nosaved)
 				Else
 					x = x + 20 * MenuScale
 					y = y + 20 * MenuScale
 					
 					For i% = (1+(EntriesPerPage*CurrLoadGamePage)) To EntriesPerPage+(EntriesPerPage*CurrLoadGamePage)
-						If i <= SaveGameAmount Then
+						If i <= VisibleSaveAmount Then
+							Local SaveIdx% = VisibleSaveIndex(i - 1)
 							DrawFrame(x,y,540* MenuScale, 70* MenuScale)
 							
-							If SaveGameVersion(i - 1) <> CompatibleNumber Then
+							If SaveGameVersion(SaveIdx) <> CompatibleNumber And SaveGameVersion(SaveIdx) <> "1.3.12.7" Then
 								Color 255,0,0
 							Else
 								Color 255,255,255
 							EndIf
 							
-							Text(x + 20 * MenuScale, y + 10 * MenuScale, SaveGames(i - 1))
-							Text(x + 20 * MenuScale, y + (10+18) * MenuScale, SaveGameTime(i - 1) + RSet(SaveGameDate(i - 1), 21 - Len(SaveGameTime(i - 1))))
-							Text(x + 20 * MenuScale, y + (10+36) * MenuScale, SaveGameVersion(i - 1) + RSet(FormatDuration(SaveGamePlayTime(i - 1), False), 21 - Len(SaveGameVersion(i - 1))))
+							Text(x + 20 * MenuScale, y + 10 * MenuScale, SaveGames(SaveIdx))
+							Text(x + 20 * MenuScale, y + (10+18) * MenuScale, SaveGameTime(SaveIdx) + RSet(SaveGameDate(SaveIdx), 21 - Len(SaveGameTime(SaveIdx))))
+							Text(x + 20 * MenuScale, y + (10+36) * MenuScale, SaveGameVersion(SaveIdx) + RSet(FormatDuration(SaveGamePlayTime(SaveIdx), False), 21 - Len(SaveGameVersion(SaveIdx))))
 							
 							If SaveMSG = "" Then
-								If SaveGameVersion(i - 1) <> CompatibleNumber Then
+								If SaveGameVersion(SaveIdx) <> CompatibleNumber And SaveGameVersion(SaveIdx) <> "1.3.12.7" Then
 									DrawFrame(x + 300 * MenuScale, y + 20 * MenuScale, 100 * MenuScale, 30 * MenuScale)
 									Color(255, 0, 0)
 									Text(x + 350 * MenuScale, y + 35 * MenuScale, I_Loc\LoadGame_Load, True, True)
@@ -517,8 +523,8 @@ Function UpdateMainMenu()
 										LoadEntities()
 										LoadAllSounds()
 										InitRoomTemplates()
-										LoadGame(SaveGames(i - 1))
-										CurrSave = SaveGames(i - 1)
+										LoadGame(SaveGames(SaveIdx))
+										CurrSave = SaveGames(SaveIdx)
 										InitLoadGame()
 										MainMenuOpen = False
 										Return
@@ -526,13 +532,13 @@ Function UpdateMainMenu()
 								EndIf
 								
 								If DrawButton(x + 420 * MenuScale, y + 20 * MenuScale, 100 * MenuScale, 30 * MenuScale, I_Loc\LoadGame_Delete, False) Then
-									SaveMSG = SaveGames(i - 1)
+									SaveMSG = SaveGames(SaveIdx)
 									DebugLog SaveMSG
 									Exit
 								EndIf
 							Else
 								DrawFrame(x + 300 * MenuScale, y + 20 * MenuScale, 100 * MenuScale, 30 * MenuScale)
-								If SaveGameVersion(i - 1) <> CompatibleNumber Then
+								If SaveGameVersion(SaveIdx) <> CompatibleNumber And SaveGameVersion(SaveIdx) <> "1.3.12.7" Then
 									Color(255, 0, 0)
 								Else
 									Color(100, 100, 100)
@@ -701,7 +707,7 @@ Function UpdateMainMenu()
 
 					ViewBobScale = SlideBar(x + 310*MenuScale, y+6*MenuScale,150*MenuScale, ViewBobScale*100, 6)/100
 					Color 255,255,255
-					Text(x + 20 * MenuScale, y, I_Loc\OptionName_Viewbob)
+					Text(x + 20 * MenuScale, y, I_Loc\OptionName_Cammove)
 					If (MouseOn(x+310*MenuScale,y+6*MenuScale,150*MenuScale+14,20) And OnSliderID=0) Lor OnSliderID=6
 						DrawOptionsTooltip(tx,ty,tw,th,"viewbob")
 					EndIf
@@ -2458,7 +2464,7 @@ Function DrawOptionsTooltip(x%,y%,width%,height%,option$,value#=0,ingame%=False)
 			B = 255
 			txt2 = Format(I_Loc\Option_HintDefault, "%", Str(Int(HUDOffsetScale*100)), "0")
 		Case "viewbob"
-			txt = I_Loc\OptionTooltip_Viewbob
+			txt = I_Loc\OptionTooltip_Cammove
 			R = 255
 			G = 255
 			B = 255
