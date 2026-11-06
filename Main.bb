@@ -1177,6 +1177,21 @@ Function UpdateConsole()
 						EndIf
 					End If
 					;[End Block]
+				Case "giveitem"
+					;[Block]
+					If ItemAmount >= MaxItemAmount Then
+						CreateConsoleMsg("No free inventory slot.",255,150,0)
+					Else
+						itt.ItemTemplates = FindItemTemplate(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
+						If itt = Null Then
+							CreateConsoleMsg("Item not found.",255,150,0)
+						Else
+							CreateConsoleMsg(itt\displayname + " given.")
+							it.Items = CreateItem(itt\name, EntityX(Collider), EntityY(Camera,True), EntityZ(Collider))
+							PickItem(it)
+						End If
+					EndIf
+					;[End Block]
 				Case "itemlist", "items"
 					CreateConsoleMsg("Listing items:")
 					For itt.ItemTemplates = Each ItemTemplates
