@@ -1197,6 +1197,13 @@ Function UpdateConsole()
 					For itt.ItemTemplates = Each ItemTemplates
 						CreateConsoleMsg("- " + itt\displayname + "(" + itt\name + ")")
 					Next
+				Case "spawncup"
+					Local drinkName$ = Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " "))
+					If CreateCup(drinkName, EntityX(Collider), EntityY(Camera,True), EntityZ(Collider)) Then
+						CreateConsoleMsg("Cup of " + drinkName + " spawned.")
+					Else
+						CreateConsoleMsg("Drink not found.", 255, 150, 0)
+					EndIf
 				Case "wireframe"
 					;[Block]
 					StrTemp$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
@@ -11337,77 +11344,14 @@ Function Use294()
 			Input294 = Input294 + strtemp
 			
 			If temp And Input294<>"" Then ;dispense
-				Input294 = Trim(Lower(Input294))
-				For i = 1 To 2
-					Local prefix$ = I_Loc\Cup_OfPrefix[i] + " "
-					If Left(Input294, Min(Len(prefix),Len(Input294))) = prefix Then
-						Input294 = Right(Input294, Len(Input294)-Len(prefix))
-					EndIf
-				Next
-				
-				Local iniStr$ = "DATA\SCP-294.ini"
-				Local loc% = -1
-				Local hasOverride%
-				If Input294<>""
-					For m.ActiveMods = Each ActiveMods
-						Local modIniStr$ = m\Path + iniStr
-						If FileType(modIniStr) = 1 Then
-							Local sectionLocation = GetINISectionLocation(modIniStr, Input294)
-							If sectionLocation <> -1 Then
-								iniStr = modIniStr
-								loc = sectionLocation
-								Exit
-							EndIf
-							If FileType(modIniStr + ".OVERRIDE") Then
-								hasOverride = True
-								Exit
-							EndIf
-						EndIf
-					Next
-
-					If loc = -1 And (Not hasOverride) Then
-						loc = GetINISectionLocation(iniStr, Input294)
-					EndIf
-				EndIf
-				
-				If loc <> -1 Then
+				PlayerRoom\SoundCHN = CreateCup(Input294, EntityX(PlayerRoom\Objects[1],True),EntityY(PlayerRoom\Objects[1],True),EntityZ(PlayerRoom\Objects[1],True))
+				If PlayerRoom\SoundCHN<>0 Then
 					GiveAchievement(Achv294)
-
-					strtemp$ = GetINIString2(iniStr, loc, "dispensesound")
-					If strtemp = "" Then strtemp = GetINIString2(iniStr, loc, "dispensersound")
-					If strtemp<>"" Then
-						PlayerRoom\SoundCHN = PlaySound_Strict (LoadTempSound(strtemp))
-					EndIf
-					If PlayerRoom\SoundCHN=0 Then
-						PlayerRoom\SoundCHN = PlaySound_Strict (LoadTempSound("SFX\SCP\294\dispense1.ogg"))
-					EndIf
-					
-					If GetINIInt2(iniStr, loc, "explosion")=True Then 
-						ExplosionTimer = 135
-						DeathMSG = GetINIString2(iniStr, loc, "deathmessage")
-					EndIf
-					
-					strtemp$ = GetINIString2(iniStr, loc, "color")
-					
-					Local sep1 = Instr(strtemp, ",", 1)
-					Local sep2 = Instr(strtemp, ",", sep1+1)
-					Local r% = Trim(Left(strtemp, sep1-1))
-					Local g% = Trim(Mid(strtemp, sep1+1, sep2-sep1-1))
-					Local b% = Trim(Right(strtemp, Len(strtemp)-sep2))
-					
-					Local alpha# = Float(GetINIString2(iniStr, loc, "alpha",1.0))
-					Local glow = GetINIInt2(iniStr, loc, "glow")
-					;If alpha = 0 Then alpha = 1.0
-					If glow Then alpha = -alpha
-					
-					Local it.items = CreateCup(Input294, EntityX(PlayerRoom\Objects[1],True),EntityY(PlayerRoom\Objects[1],True),EntityZ(PlayerRoom\Objects[1],True), r,g,b,alpha)
-					
 				Else
 					;out of range
 					Input294 = I_Loc\HUD_294Range
 					PlayerRoom\SoundCHN = PlaySound_Strict (LoadTempSound("SFX\SCP\294\outofrange.ogg"))
 				EndIf
-				
 			EndIf
 			
 		EndIf ;if mousehit1
@@ -12185,6 +12129,20 @@ Function GetINISectionLocation%(file$, section$)
 	Return -1
 End Function
 
+; Returns properly capitalized name
+Function GetProperINISectionName$(file$, loc%, section$)
+	section = Lower(section)
+	
+	Local f% = ReadFile(file)
+	For i = 2 To loc
+		ReadLine(f)
+	Next
+
+	Local strtemp$ = ReadLine(f)
+	strtemp = Mid(strtemp, Instr(Lower(strtemp), section), Len(section))
+	CloseFile f
+	Return strtemp
+End Function
 
 
 Function PutINIValue%(file$, INI_sSection$, INI_sKey$, INI_sValue$)

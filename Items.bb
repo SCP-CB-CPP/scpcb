@@ -333,6 +333,82 @@ Function CreateItem.Items(name$, x#, y#, z#)
 	Return i
 End Function
 
+Const SCP294Data$ = "DATA\SCP-294.ini"
+
+; Returns channel of dispense sound if successful
+Function CreateCup%(drinkName$, x#, y#, z#)
+	drinkName = Trim(Lower(drinkName))
+	For i = 1 To 2
+		Local prefix$ = I_Loc\Cup_OfPrefix[i] + " "
+		If Left(drinkName, Min(Len(prefix),Len(drinkName))) = prefix Then
+			drinkName = Right(drinkName, Len(drinkName)-Len(prefix))
+		EndIf
+	Next
+	
+	Local iniStr$ = SCP294Data
+	Local loc% = -1
+	Local hasOverride%
+	If drinkName<>""
+		For m.ActiveMods = Each ActiveMods
+			Local modIniStr$ = m\Path + iniStr
+			If FileType(modIniStr) = 1 Then
+				Local sectionLocation = GetINISectionLocation(modIniStr, drinkName)
+				If sectionLocation <> -1 Then
+					iniStr = modIniStr
+					loc = sectionLocation
+					Exit
+				EndIf
+				If FileType(modIniStr + ".OVERRIDE") Then
+					hasOverride = True
+					Exit
+				EndIf
+			EndIf
+		Next
+
+		If loc = -1 And (Not hasOverride) Then
+			loc = GetINISectionLocation(iniStr, drinkName)
+		EndIf
+	EndIf
+	
+	If loc <> -1 Then
+		Local chn% = 0
+
+		strtemp$ = GetINIString2(iniStr, loc, "dispensesound")
+		If strtemp = "" Then strtemp = GetINIString2(iniStr, loc, "dispensersound")
+		If strtemp<>"" Then
+			chn = PlaySound_Strict (LoadTempSound(strtemp))
+		EndIf
+		If chn=0 Then
+			chn = PlaySound_Strict (LoadTempSound("SFX\SCP\294\dispense1.ogg"))
+		EndIf
+		
+		If GetINIInt2(iniStr, loc, "explosion")=True Then 
+			ExplosionTimer = 135
+			DeathMSG = GetINIString2(iniStr, loc, "deathmessage")
+		EndIf
+		
+		strtemp$ = GetINIString2(iniStr, loc, "color")
+		
+		Local sep1 = Instr(strtemp, ",", 1)
+		Local sep2 = Instr(strtemp, ",", sep1+1)
+		Local r% = Trim(Left(strtemp, sep1-1))
+		Local g% = Trim(Mid(strtemp, sep1+1, sep2-sep1-1))
+		Local b% = Trim(Right(strtemp, Len(strtemp)-sep2))
+		
+		Local alpha# = Float(GetINIString2(iniStr, loc, "alpha",1.0))
+		Local glow = GetINIInt2(iniStr, loc, "glow")
+		;If alpha = 0 Then alpha = 1.0
+		If glow Then alpha = -alpha
+		
+		CreateCup(GetProperINISectionName(iniStr, loc, drinkName), x, y, z, r,g,b,alpha)
+		
+		Return chn
+	Else
+		;out of range
+		Return 0
+	EndIf
+End Function
+
 Function CreateCup.Items(drinkName$, x#, y#, z#, r%, g%, b%, a#=1.0)
 	CatchErrors("Uncaught (CreateCup)")
 
