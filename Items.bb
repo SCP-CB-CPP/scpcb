@@ -680,7 +680,7 @@ Function UpdateItems()
 					ElseIf i\state > 70 * 15 Then
 						RemoveItem(i)
 						Local bonesInInv% = 0
-						For j = 0 To MaxItemAmount
+						For j = 0 To MaxItemAmount - 1
 							it.Items = Inventory(j)
 							If it <> Null And it\itemtemplate\name = "bone" Then
 								bonesInInv = bonesInInv + 1
@@ -694,9 +694,26 @@ Function UpdateItems()
 						EndIf
 
 						If bonesInInv >= 3 Then
-							; TODO: Do something cooler!!!!
-							it.Items = CreateItem("boneflute", EntityX(Collider), EntityY(Collider), EntityZ(Collider))
-							PickItem(it)
+							; Some extra SFX
+							If (Not Contained106) Then
+								For it2.Items = Each Items
+									If it2\itemtemplate\name = "scp330" Then
+										For r.Rooms = Each Rooms
+											If r\RoomTemplate\Name = "914" Then
+												de.Decals = CreateDecal(0, EntityX(it2\collider),EntityY(it2\collider)-0.009,EntityZ(it2\collider), 90, Rand(360), 0)
+												de\Size = 0.04 : de\SizeChange = 0.0004 : de\MaxSize = 0.18 : de\timer = 90000 : EntityAlpha(de\obj, 0.8) : UpdateDecals()
+												PositionEntity(it2\collider, EntityX(r\Objects[2], True), EntityY(r\Objects[2], True) - 0.4, EntityZ(r\Objects[2], True))
+												RotateEntity(it2\collider, 0, r\angle + 30, 0)
+												ResetEntity(it2\collider)
+												de.Decals = CreateDecal(0, EntityX(it2\collider),8 * RoomScale + 0.004+Rnd(-0.001,0.001),EntityZ(it2\collider), 90, Rand(360), 0)
+												de\Size = 0.08 : de\SizeChange = 0.0008 : de\MaxSize = 0.6 : de\timer = 90000 : EntityAlpha(de\obj, 0.8) : UpdateDecals()
+												Exit
+											EndIf
+										Next
+										Exit
+									EndIf
+								Next
+							EndIf
 							Continue
 						EndIf
 
@@ -912,7 +929,11 @@ Function PickItem(item.Items)
 					Case "scp330"
 						If SteamActive And (Not UsedConsole) Then Steam_SetStatInt("has_grabbed_candy", 1)
 						If item\state = -1 Then
-							; Allow it to be picked up
+							; Empty, allow it to be picked up
+						ElseIf item\state = -3 Then
+							Msg = I_Loc\MessageItem_Scp330Nouse
+							MsgTimer = 70 * 10
+							Return	
 						ElseIf PopCount(item\state) < 3 Lor item\state = -2 Then
 							Local candy%
 							If item\state = -2 Then

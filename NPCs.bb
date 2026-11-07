@@ -7795,7 +7795,7 @@ Function CopyExistingNPCTextureIDObj%(n.NPCs)
 	Return False
 End Function
 
-Function UpgradeNPC914(n.NPCs, x#, y#, z#)
+Function UpgradeNPC914(n.NPCs, setting$, x#, y#, z#)
 	Select n\NPCtype
 		Case NPCtype066
 			Select setting
@@ -7803,27 +7803,24 @@ Function UpgradeNPC914(n.NPCs, x#, y#, z#)
 					; yeah, he bleeds blood, what about it?
 					de.Decals = CreateDecal(2, x, 8 * RoomScale + 0.005, z, 90, Rand(360), 0)
 					de\Size = 0.4 : ScaleSprite(de\obj, de\Size, de\Size)
+					RemoveNPC(n) : n = Null
 				Case "coarse"
-					PositionEntity(n\Collider, x, y + 1.0, z)
-					ResetEntity(n\Collider)
 					n\Speed = n\Speed * 0.5
 				Case "1:1"
-					PositionEntity(n\Collider, x, y + 1.0, z)
-					ResetEntity(n\Collider)
 					ChangeNPCTextureID(n, Not n\TextureID)
 					If n\TextureID = 1 Then
 						n\State = 66
 						SetNPCFrame(n, 710)
 					EndIf
 				Case "fine"
-					PositionEntity(n\Collider, x, y + 1.0, z)
-					ResetEntity(n\Collider)
 					n\Speed = n\Speed * 2
 				Case "very fine"
-					PositionEntity(n\Collider, x, y + 1.0, z)
-					ResetEntity(n\Collider)
 					n\Speed = n\Speed * 5
 			End Select
+			If n <> Null Then
+				PositionEntity(n\Collider, x, y + 1.0, z)
+				ResetEntity(n\Collider)
+			EndIf
 	End Select
 End Function
 

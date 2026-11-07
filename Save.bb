@@ -1140,6 +1140,8 @@ Function LoadGame(file$)
 		If it\itemtemplate\isAnim<>0 Then
 			If it\itemtemplate\name = "scp330" And version = "1.3.12.7" Then
 				SetAnimTime it\model,it\state + 1
+			ElseIf it\itemtemplate\name = "pumpkin" And version = "1.3.12.7" Then
+				; Keep anim time at 0
 			Else
 				SetAnimTime it\model,ReadFloat(f)
 			EndIf
@@ -1850,6 +1852,8 @@ Function LoadGameQuick(file$)
 		If it\itemtemplate\isAnim<>0 Then
 			If it\itemtemplate\name = "scp330" And version = "1.3.12.7" Then
 				SetAnimTime it\model,it\state + 1
+			ElseIf it\itemtemplate\name = "pumpkin" And version = "1.3.12.7" Then
+				; Keep anim time at 0
 			Else
 				SetAnimTime it\model,ReadFloat(f)
 			EndIf

@@ -3183,7 +3183,7 @@ Global Collider%, Head%
 Global FogNVTexture%
 Global NVTexture%, NVOverlay%
 
-Global PumpkinTexture%, PumpkinOverlay%
+Global PumpkinTexture%, PumpkinTexture2%, PumpkinOverlay%
 
 Global TeslaTexture%
 
@@ -5111,16 +5111,20 @@ Function MouseLook(handleInput% = True)
 	If WearingPumpkin Then
 		If PumpkinOverlay = 0 Then
 			PumpkinTexture = LoadTexture_Strict("GFX\Halloween\PumpkinOverlay.png", 1)
+			PumpkinTexture2 = LoadTexture_Strict("GFX\Halloween\PumpkinOverlaySCP.png", 1)
 			PumpkinOverlay = CreateSprite(ark_blur_cam)
 			ScaleSprite(PumpkinOverlay, 1.0, Max(Float(GraphicHeight) / Float(GraphicWidth), 0.8))
-			EntityTexture(PumpkinOverlay, PumpkinTexture)
 			EntityBlend (PumpkinOverlay, 2)
 			EntityFX(PumpkinOverlay, 1)
 			EntityOrder PumpkinOverlay, -1004
 			MoveEntity(PumpkinOverlay, -PixelWidth, PixelHeight, 1.0)
-		Else
-			ShowEntity(PumpkinOverlay)
 		EndIf
+		If WearingPumpkin = 1 Then
+			EntityTexture(PumpkinOverlay, PumpkinTexture)
+		Else
+			EntityTexture(PumpkinOverlay, PumpkinTexture2)
+		EndIf
+		ShowEntity(PumpkinOverlay)
 		Local lifeTime%
 		Select SelectedDifficulty\otherFactors
 			Case EASY
@@ -5808,7 +5812,7 @@ Function DrawGUI()
 					Case "scp427"
 						If I_427\Using=1 Then Rect(x - 3, y - 3, width + 6, height + 6)
 					Case "pumpkin"
-						If WearingPumpkin=1 Then Rect(x - 3, y - 3, width + 6, height + 6)
+						If WearingPumpkin<>0 Then Rect(x - 3, y - 3, width + 6, height + 6)
 				End Select
 			EndIf
 			
@@ -7634,6 +7638,7 @@ Function DrawGUI()
 					If Wearing1499 = 0 And WearingHazmat = 0 And WearingGasMask = 0 Then
 						If WearingPumpkin Then
 							Msg = I_Loc\MessageItem_PumpkinmaskOff
+							WearingPumpkin = 0
 						Else
 							If SelectedItem\state < 0 Then
 								SelectedItem\state = 0
@@ -7647,8 +7652,12 @@ Function DrawGUI()
 							Msg = I_Loc\MessageItem_PumpkinmaskOn
 							If WearingNightVision Then CameraFogFar = StoredCameraFogFar
 							WearingNightVision = 0
+							If AnimTime(SelectedItem\model) = 0 Then
+								WearingPumpkin = 1
+							Else
+								WearingPumpkin = 2
+							EndIf
 						EndIf
-						WearingPumpkin = Not WearingPumpkin
 						NoTarget = WearingPumpkin
 					Else
 						Msg = I_Loc\MessageItem_PumpkinmaskConflict
@@ -11068,27 +11077,49 @@ Function Use914(item.Items, setting$, x#, y#, z#)
 					d\Size = 0.3 : ScaleSprite(d\obj, d\Size, d\Size)
 					d.Decals = CreateDecal(22, x, 8*RoomScale+0.011, z, 90, Rand(360), 0)
 					d\Size = 0.3 : ScaleSprite(d\obj, d\Size, d\Size)
+					RemoveItem(item) : item = Null
 				Case "coarse"
 					PositionEntity(item\collider, x, y, z)
 					ResetEntity(item\collider)
 					item\state = -1
 					item\invimg = item\itemtemplate\invimg2
 					SetAnimTime item\model, 9
+					d.Decals = CreateDecal(22, x, 8*RoomScale+0.010, z, 90, Rand(360), 0)
+					d\Size = 0.3 : ScaleSprite(d\obj, d\Size, d\Size)
 				Case "1:1"
 					it2 = CreateItem("bdc", x, y, z)
-					RemoveItem(item)
+					RemoveItem(item) : item = Null
 				Case "fine"
 					; Can take 3 candies from it
-					PositionEntity(item\collider, x, y, z)
-					ResetEntity(item\collider)
 					item\state = 0
 					SetAnimTime item\model, 1
 				Case "very fine"
-					PositionEntity(item\collider, x, y, z)
-					ResetEntity(item\collider)
-					item\state = -2
-					SetAnimTime item\model, 1
+					Local flute.Items = Null, killbat.Items = Null, pumpkin.Items = Null
+					For it.Items = Each Items
+						If it<>item And it\collider <> 0 And it\Picked = False Then
+							If Distance(EntityX(it\collider,True), EntityZ(it\collider,True), EntityX(item\collider, True), EntityZ(item\collider, True)) < (180.0 * RoomScale) Lor Distance(EntityX(it\collider,True), EntityZ(it\collider,True), x,z) < (180.0 * RoomScale) Then
+								If it\itemtemplate\name = "boneflute" Then flute = it
+								If it\itemtemplate\name = "killbat" Then killbat = it
+								If it\itemtemplate\name = "pumpkin" Then pumpkin = it
+							EndIf
+						EndIf
+					Next
+					If flute <> Null And killbat <> Null And pumpkin <> Null Then
+						If SteamActive And (Not UsedConsole) Then Steam_SetStatInt("has_unlocked_infinite_candy_bowl", 1)
+						RemoveItem(flute)
+						RemoveItem(killbat)
+						RemoveItem(pumpkin)
+						item\state = -2
+					Else
+						item\state = -3
+					EndIf
+
+					SetAnimTime item\model, 10
 			End Select
+			If item <> Null Then
+				PositionEntity(item\collider, x, y, z)
+				ResetEntity(item\collider)
+			EndIf
 
 		Case "pumpkin"
 			Select setting
@@ -11100,14 +11131,20 @@ Function Use914(item.Items, setting$, x#, y#, z#)
 					it2 = CreateItem("lollipop", x, y, z)
 					RemoveItem(item)
 				Case "1:1"
+					e.Events = FindEvent("914")
+					If e\room\Objects[5] <> 0 Then FreeEntity(e\room\Objects[5])
+					e\EventState3 = -1
+					RemoveItem(item)
+				Case "fine"
+					SetAnimTime item\model, 2
+					item\invimg = item\itemtemplate\invimg2
 					PositionEntity(item\collider, x, y, z)
 					ResetEntity(item\collider)
-				Case "fine", "very fine"
+				Case "very fine"
 					n.NPCs = CreateNPC(NPCtype173,x,y,z)
 					ChangeNPCTextureID(n, 1)
 					PlaySound2(LoadTempSound("SFX\ambient\general\ambient3.ogg"), Camera, n\Collider)
 					RemoveItem(item)
-					If setting = "very fine" Then n\Speed = n\Speed * 5
 			End Select
 
 		Case "bone"
@@ -11126,7 +11163,7 @@ Function Use914(item.Items, setting$, x#, y#, z#)
 
 		Case "boneflute"
 			Select setting
-				Case "rough", "coarse"
+				Case "rough"
 					d.Decals = CreateDecal(21, x, 8 * RoomScale + 0.010, z, 90, Rand(360), 0)
 					d\Size = 0.3 : ScaleSprite(d\obj, d\Size, d\Size)
 					RemoveItem(item)
@@ -12840,15 +12877,15 @@ Function PlayStartupVideos()
 End Function
 
 Function CanUseItem(canUseWithHazmat%, canUseWithGasMask%, canUseWithEyewear%)
-	If (canUseWithHazmat = False And WearingHazmat) Then
+	If (canUseWithHazmat = False And WearingHazmat<>0) Then
 		Msg = I_Loc\MessageItem_HazmatNouse
 		MsgTimer = 70*5
 		Return False
-	ElseIf (canUseWithGasMask = False And (WearingGasMask Or Wearing1499))
+	ElseIf (canUseWithGasMask = False And (WearingGasMask<>0 Or Wearing1499<>0))
 		Msg = I_Loc\MessageItem_GasmaskNouse
 		MsgTimer = 70*5
 		Return False
-	ElseIf (canUseWithEyewear = False And (WearingNightVision Or WearingPumpkin))
+	ElseIf (canUseWithEyewear = False And (WearingNightVision<>0 Or WearingPumpkin<>0))
 		Msg = I_Loc\MessageItem_NvgNouse
 		MsgTimer = 70*5
 		Return False

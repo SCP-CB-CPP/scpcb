@@ -6924,7 +6924,10 @@ Function UpdateEvents()
 					For r2.Rooms = Each Rooms
 						If r2\RoomTemplate\Name = "room4info" Then
 							it.Items = Object.Items(e\room\Objects[3])
-							If it <> Null Then RemoveItem(it)
+							If it <> Null Then
+								CreateItem("doc330", EntityX(it\collider), EntityY(it\collider), EntityZ(it\collider))
+								RemoveItem(it)
+							EndIf
 							Exit
 						EndIf
 					Next
@@ -7425,7 +7428,7 @@ Function UpdateEvents()
 
 							For n.NPCs = Each NPCs
 								If IsIn914Input(PlayerRoom, EntityX(n\Collider), EntityY(n\Collider), EntityZ(n\Collider)) Then
-									UpgradeNPC914(n, x, y, z)
+									UpgradeNPC914(n, setting, x, y, z)
 								EndIf
 							Next
 							
@@ -7454,7 +7457,7 @@ Function UpdateEvents()
 									e\EventState3 = 1
 								EndIf
 						End Select
-					Else If e\EventState3 <> 0 Then
+					Else If e\EventState3 > 0 Then
 						e\Room\Objects[4] = LoadMesh_Strict("GFX\npcs\duck_low_res.b3d")
 						ScaleEntity(e\Room\Objects[4], 0.07, 0.07, 0.07)
 						If IsBirthday Then
@@ -7464,6 +7467,18 @@ Function UpdateEvents()
 						EndIf
 						PositionEntity(e\Room\Objects[4], EntityX(e\room\Objects[3], True), 8*RoomScale, EntityZ(e\room\Objects[3], True))
 						RotateEntity(e\Room\Objects[4], 0, e\Room\angle + 210, 0)
+					EndIf
+
+					If e\room\Objects[5] <> 0 Then
+						If e\EventState3 = 0 Then FreeEntity(e\room\Objects[5]) : e\room\Objects[5] = 0
+					Else If e\EventState3 < 0 Then
+						e\Room\Objects[5] = CreatePropObj("pumpkin.b3d")
+						PositionEntity(e\Room\Objects[5], EntityX(e\room\Objects[3], True), 8 * RoomScale, EntityZ(e\room\Objects[3], True))
+						RotateEntity(e\Room\Objects[5], 0, Rnd(360), 0)
+						Local pumpkinWidth# = Rnd(0.2, 0.5)
+						ScaleEntity(e\Room\Objects[5], pumpkinWidth, Rnd(0.2, 0.5), pumpkinWidth)
+						EntityType e\Room\Objects[5], HIT_MAP
+						EntityPickMode e\Room\Objects[5], 2
 					EndIf
 					
 				EndIf
@@ -10080,6 +10095,13 @@ Function IsIn914Input(r.Rooms, x#, y#, z#)
 		Local tx# = TFormedX(), ty# = TFormedY(), tz# = TFormedZ()
 		Return tx > -926 And tx < -497 And ty > 0 And ty < 322 And tz > 521 And tz < 767
 	EndIf
+End Function
+
+Function FindEvent.Events(name$)
+	For e.Events = Each Events
+		If e\EventName = name Then Return e
+	Next
+	Return Null
 End Function
 
 ;~IDEal Editor Parameters:
