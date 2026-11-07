@@ -442,7 +442,7 @@ Function LoadRMesh(file$,rt.RoomTemplates)
 					
 					Local collType% = HIT_MAP
 					If version >= 2 Then
-						If ReadByte(f) Then collType = 0
+						collType = ReadByte(f)
 						EntityFX(model, ReadInt(f))
 						Local texOverride$ = ReadString(f)
 						If texOverride <> "" Then
