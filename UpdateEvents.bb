@@ -4885,6 +4885,8 @@ Function UpdateEvents()
 			Case "room4"
 				;[Block]
 				If e\EventState < MilliSecs() Then
+					Local removedEvent% = False
+
 					If PlayerRoom <> e\room Then
 						Local closeEnough% = Distance(EntityX(Collider),EntityZ(Collider),EntityX(e\room\obj),EntityZ(e\room\obj))<16.0
 
@@ -4894,7 +4896,7 @@ Function UpdateEvents()
 								If n\State <> 4 Then
 									; It teleported away on its own, concludes the event.
 									RemoveEvent(e)
-									e = Null
+									removedEvent = True
 								Else If Not closeEnough
 									; Reset 049.
 									n\State = 2
@@ -4931,7 +4933,7 @@ Function UpdateEvents()
 							Exit
 						Next
 					EndIf
-					If e<>Null Then e\EventState = MilliSecs()+5000
+					If (Not removedEvent) Then e\EventState = MilliSecs()+5000
 				EndIf
 				;[End Block]
 			Case "room012"
