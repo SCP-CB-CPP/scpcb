@@ -161,6 +161,8 @@ Function FreeTextureCache()
 	Next
 End Function
 
+Const RMESH_MAX_VERSION% = 2
+
 Function LoadRMesh(file$,rt.RoomTemplates)
 	Local path$ = StripFilename(file)
 	file = DetermineModdedPath(file)
@@ -204,6 +206,8 @@ Function LoadRMesh(file$,rt.RoomTemplates)
 		Case "RM" version = ReadByte(f) : hasTriggerBox = True
 		Default RuntimeErrorExt Chr(34)+file+Chr(34)+" is Not RMESH ("+isRMesh+")"
 	End Select
+
+	If version > RMESH_MAX_VERSION Then RuntimeErrorExt "RMESH version of " + Chr(34)+file+Chr(34) + " (" + version + ") + is too new for this version of the game ("+RMESH_MAX_VERSION+")"
 	
 	Local count%,count2%
 	
@@ -428,8 +432,25 @@ Function LoadRMesh(file$,rt.RoomTemplates)
 					temp1=ReadFloat(f) : temp2=ReadFloat(f) : temp3=ReadFloat(f)
 					ScaleEntity model,temp1,temp2,temp3
 					
+					Local collType% = HIT_MAP
+					If version >= 2 Then
+						If ReadByte(f) Then collType = 0
+						EntityFX(model, ReadInt(f))
+						Local texOverride$ = ReadString(f)
+						If texOverride <> "" Then
+							Local t% = GetTextureFromCache(texOverride)
+							If t = 0 Then
+								t = LoadTexture(file+texOverride)
+								If t = 0 Then t = LoadTexture("GFX\map\"+texOverride)
+								If t = 0 Then t = LoadTexture("GFX\map\Props\"+texOverride)
+								If t <> 0 Then AddTextureToCache(t)
+							EndIf
+							If t <> 0 Then EntityTexture model, t
+						EndIf
+					EndIf
+
 					EntityParent model,Opaque
-					EntityType model,HIT_MAP
+					EntityType model,collType
 					EntityPickMode model,2
 				Else
 					DebugLog "file = 0"
@@ -7087,7 +7108,8 @@ Function CreatePropObj(file$)
 	p\obj = LoadModdedMeshNonStrict("GFX\Map\Props\"+file)
 	If p\obj = 0 Then p\obj = LoadModdedMeshNonStrict("GFX\Map\"+file)
 	If p\obj = 0 Then RuntimeErrorExt("Failed to load prop " + file + ".")
-	Return p\obj
+	HideEntity p\obj
+	Return CopyEntity(p\obj)
 End Function
 
 ;-------------------------------------------------------------------------------------------------------
