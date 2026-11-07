@@ -336,6 +336,10 @@ Function LoadRMesh(file$,rt.RoomTemplates)
 				w\z = temp3
 				
 			Case "light"
+
+				; TODO
+				Local hasSprite% = True
+				If version >= 2 Then hasSprite = ReadByte(f)
 				
 				temp1=ReadFloat(f)*RoomScale
 				temp2=ReadFloat(f)*RoomScale
@@ -356,6 +360,10 @@ Function LoadRMesh(file$,rt.RoomTemplates)
 				
 			Case "spotlight"
 				
+				; TODO
+				hasSprite% = True
+				If version >= 2 Then hasSprite = ReadByte(f)
+
 				temp1=ReadFloat(f)*RoomScale
 				temp2=ReadFloat(f)*RoomScale
 				temp3=ReadFloat(f)*RoomScale
