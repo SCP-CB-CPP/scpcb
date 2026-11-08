@@ -9,9 +9,11 @@ ScaleImage(MenuText, MenuScale, MenuScale)
 ScaleImage(Menu173, MenuScale, MenuScale)
 
 For i = 0 To 3
-	ArrowIMG(i) = LoadImage_Strict("GFX\menu\arrow.png", HUDScale)
+	ArrowIMG(i) = LoadImageHUDScaled("GFX\menu\arrow.png")
 	RotateImage(ArrowIMG(i), 90 * i)
 Next
+Global MenuArrowIMG% = LoadImage_Strict("GFX\menu\arrow.png", MenuScale)
+RotateImage(MenuArrowIMG, 90)
 
 Global RandomSeed$, RandomSeedNumeric%, HasNumericSeed%
 Function GetRandomSeed%()
@@ -396,9 +398,9 @@ Function UpdateMainMenu()
 					
 					;Other factor's difficulty
 					Color 255,255,255
-					DrawImage ArrowIMG(1),x + 155 * MenuScale, y+251*MenuScale
+					DrawImage MenuArrowIMG,x + 155 * MenuScale, y+251*MenuScale
 					If MouseHit1
-						If ImageRectOverlap(ArrowIMG(1),x + 155 * MenuScale, y+251*MenuScale, ScaledMouseX(),ScaledMouseY(),0,0)
+						If ImageRectOverlap(MenuArrowIMG,x + 155 * MenuScale, y+251*MenuScale, ScaledMouseX(),ScaledMouseY(),0,0)
 							If SelectedDifficulty\otherFactors < HARD
 								SelectedDifficulty\otherFactors = SelectedDifficulty\otherFactors + 1
 							Else
