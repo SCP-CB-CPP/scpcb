@@ -8591,12 +8591,10 @@ Function UpdateEvents()
 				;[Block]
 				If PlayerRoom=e\room Then
 					If e\EventState = 0 Then
-						Local tempIt.TempItems = e\room\RoomTemplate\FirstTempItem
-						While tempIt<>Null
+						While e\room\Objects[e\EventState] <> 0
 							e\EventState = e\EventState + 1
-							tempIt = tempIt\Successor
 						Wend
-						If e\EventState = 0 Then e\EventState = -1
+						If e\EventState = 0 Then RuntimeErrorExt("Found no bone spawnpoints in halloweenpd!")
 					EndIf
 
 					If KillTimer >= 0 Then PlayerFallingPickDistance = 0

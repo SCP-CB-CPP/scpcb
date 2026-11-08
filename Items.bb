@@ -993,8 +993,8 @@ Function PickItem(item.Items)
 					Case "bone"
 						For e.Events = Each Events
 							If e\EventName = "halloweenpd" And PlayerRoom = e\room Then
-								e\EventState3 = e\EventState3 + 1
 								If e\EventState3 <= e\EventState Then
+									e\EventState3 = e\EventState3 + 1
 									PlaySound_Strict(LoadTempSound("SFX\Halloween\BonePickUp.ogg"))
 									RemoveItem(item)
 									Msg = Format(I_Loc\MessageItem_Bonefragment, e\EventState3, e\EventState)
