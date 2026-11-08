@@ -931,8 +931,12 @@ Function PickItem(item.Items)
 						If item\state = -1 Then
 							; Empty, allow it to be picked up
 						ElseIf item\state = -3 Then
-							Msg = I_Loc\MessageItem_Scp330Nouse
-							MsgTimer = 70 * 10
+							If Wearing714 Then
+								SliceOffHands()
+							Else
+								Msg = I_Loc\MessageItem_Scp330Nouse
+								MsgTimer = 70 * 10
+							EndIf
 							Return	
 						ElseIf PopCount(item\state) < 3 Lor item\state = -2 Then
 							Local candy%
@@ -959,35 +963,7 @@ Function PickItem(item.Items)
 									item = CreateItem("chocolate", EntityX(Collider), EntityY(Collider), EntityZ(Collider))
 							End Select
 						Else
-							Local pvt% = CreatePivot()
-							EntityParent(pvt, Camera, False)
-							EntityParent(pvt, 0, True)
-							MoveEntity(pvt, 0.1, -0.1, 0.2)
-							item = CreateItem("hand", EntityX(pvt), EntityY(pvt), EntityZ(pvt))
-							ScaleEntity(item\model, -item\itemtemplate\scale, item\itemtemplate\scale, item\itemtemplate\scale, True)
-							RotateEntity(item\collider, 0, EntityYaw(Camera) - 90, 0)
-							MoveEntity(pvt, -0.2, -0.2, -0.2)
-							item = CreateItem("hand", EntityX(pvt), EntityY(pvt), EntityZ(pvt))
-							RotateEntity(item\collider, 0, EntityYaw(Camera) + 90 + Rnd(10, 45), 0)
-							Bloodloss = Max(Bloodloss, 50)
-							Injuries = Max(Injuries, 25)
-							BlurTimer = 10 * 70
-							CameraShake = 3
-							LostHands = True
-							If Wearing714 Then
-								For n% = 0 To MaxItemAmount-1
-									If Inventory(n) <> Null And Inventory(n)\itemtemplate\name = "scp714" Then
-										Local it.Items = Inventory(n)
-										DropItem(it)
-										PositionEntity(it\collider, EntityX(item\collider, True), EntityY(item\collider, True), EntityZ(item\collider, True), True)
-										Exit
-									EndIf
-								Next
-								Wearing714 = False
-							EndIf
-							DeathMSG = I_Loc\DeathMessage_330
-							PlaySound_Strict(LoadTempSound("SFX\General\Slash1.ogg"))
-							FreeEntity(pvt)
+							SliceOffHands()
 							Return
 						EndIf
 					Case "bone"
@@ -1032,6 +1008,38 @@ Function PickItem(item.Items)
 		MsgTimer = 70 * 5
 	EndIf
 	CatchErrors("PickItem")
+End Function
+
+Function SliceOffHands()
+	Local pvt% = CreatePivot()
+	EntityParent(pvt, Camera, False)
+	EntityParent(pvt, 0, True)
+	MoveEntity(pvt, 0.1, -0.1, 0.2)
+	Local item.Items = CreateItem("hand", EntityX(pvt), EntityY(pvt), EntityZ(pvt))
+	ScaleEntity(item\model, -item\itemtemplate\scale, item\itemtemplate\scale, item\itemtemplate\scale, True)
+	RotateEntity(item\collider, 0, EntityYaw(Camera) - 90, 0)
+	MoveEntity(pvt, -0.2, -0.2, -0.2)
+	item = CreateItem("hand", EntityX(pvt), EntityY(pvt), EntityZ(pvt))
+	RotateEntity(item\collider, 0, EntityYaw(Camera) + 90 + Rnd(10, 45), 0)
+	Bloodloss = Max(Bloodloss, 50)
+	Injuries = Max(Injuries, 25)
+	BlurTimer = 10 * 70
+	CameraShake = 3
+	LostHands = True
+	If Wearing714 Then
+		For n% = 0 To MaxItemAmount-1
+			If Inventory(n) <> Null And Inventory(n)\itemtemplate\name = "scp714" Then
+				Local it.Items = Inventory(n)
+				DropItem(it)
+				PositionEntity(it\collider, EntityX(item\collider, True), EntityY(item\collider, True), EntityZ(item\collider, True), True)
+				Exit
+			EndIf
+		Next
+		Wearing714 = False
+	EndIf
+	DeathMSG = I_Loc\DeathMessage_330
+	PlaySound_Strict(LoadTempSound("SFX\General\Slash1.ogg"))
+	FreeEntity(pvt)
 End Function
 
 Function DropItem(item.Items,playdropsound%=True)
