@@ -953,7 +953,7 @@ Function UpdateNPCs()
 					n\Idle = True
 					HideEntity n\obj
 					HideEntity n\obj2
-					PositionEntity n\obj, 0,500.0,0, True
+					PositionEntity n\Collider, 0,500.0,0, True
 				ElseIf n\State3 <> 0 And PlayerRoom\RoomTemplate\Name <> "gatea" Then
 					If n\Frame < 111 Lor n\Frame > 259 Then SetNPCFrame(n, 259)
 					AnimateNPC(n, 259, 111, -0.3, False)
