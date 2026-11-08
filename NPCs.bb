@@ -584,10 +584,10 @@ Function CreateNPC.NPCs(NPCtype%, x#, y#, z#)
 			
 			n\obj = LoadAnimMesh_Strict("GFX\npcs\zombiesurgeon.b3d")
 			
-			temp# = 0.5 / MeshWidth(n\obj)
+			temp# = GetModdedINIFloat("DATA\NPCs.ini", "SCP-008 Zombie", "scale")
 			ScaleEntity n\obj, temp, temp, temp
 			
-			n\Speed = 2.0 / 100
+			n\Speed = GetModdedINIFloat("DATA\NPCs.ini", "SCP-008 Zombie", "speed") / 100
 			
 			MeshCullBox (n\obj, -MeshWidth(n\obj), -MeshHeight(n\obj), -MeshDepth(n\obj)*4, MeshWidth(n\obj)*2, MeshHeight(n\obj)*2, MeshDepth(n\obj)*8)
 			
