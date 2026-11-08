@@ -1376,7 +1376,9 @@ Function UpdateConsole()
 					
 					ShowEntity Collider
 					TranslateEntity Collider, 0, 1.5, 0
-					RotateEntity Collider, EntityPitch(Collider), EntityYaw(Collider), 0
+					RotateEntity Collider, 0, EntityYaw(Collider), 0
+
+					HideEntity Head
 					
 					KillTimer = 0
 					KillAnim = 0
