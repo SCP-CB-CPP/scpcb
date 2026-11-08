@@ -463,6 +463,7 @@ Function LoadRMesh(file$,rt.RoomTemplates)
 				Else
 					DebugLog "file = 0"
 					temp1=ReadFloat(f) : temp2=ReadFloat(f) : temp3=ReadFloat(f)
+					If version >= 2 Then ReadByte(f) : ReadInt(f) : ReadString(f)
 					DebugLog temp1+", "+temp2+", "+temp3
 					
 					;Stop
