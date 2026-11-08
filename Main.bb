@@ -8097,7 +8097,7 @@ Function DrawMenu()
 	Local x%, y%, width%, height%
 	Local steamOverlayActive = SteamActive And Steam_GetOverlayState()
 	If (api_GetFocus() = 0 Lor steamOverlayActive) And EndingTimer=0 And SelectedEnding="" Then ;Game is out of focus -> pause the game
-		If (Not Using294) Then
+		If (Not IsPaused()) Then
 			MenuOpen = True
 			UpdateMenuState()
 		EndIf
