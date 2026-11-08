@@ -851,7 +851,7 @@ Function PickItem(item.Items)
 							ShowEntity Light
 							LightFlash = 1.0
 							PlaySound_Strict(IntroSFX(11))
-							If PlayerRoom\RoomTemplate\Name = "914" Then
+							If PlayerRoom\RoomTemplate\Name = "914" And EntityDistance(Collider, PlayerRoom\Objects[3]) < 1 Then
 								DeathMSG = I_Loc\DeathMessage_Killbat
 							Else
 								DeathMSG = I_Loc\DeathMessage_KillbatOutside
