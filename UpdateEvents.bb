@@ -1560,9 +1560,11 @@ Function UpdateEvents()
 					e\EventState = MilliSecs()+3000
 				EndIf
 				
+				CoffinDistance = e\room\dist
 				If PlayerRoom = e\room Then
-					CoffinDistance = EntityDistance(Collider, e\room\Objects[1])
-					If CoffinDistance < 1.5 Then 
+					Local inRoomCoffinDist# = EntityDistance(Collider, e\room\Objects[0])
+					CoffinDistance = Min(4.0, inRoomCoffinDist / 14.0 * 4.0)
+					If inRoomCoffinDist < 2.0 Then 
 						GiveAchievement(Achv895)
 						If (Not Contained106) And e\EventName="coffin106" And e\EventState2 = 0 And Curr106\State > 0 Then
 							Local de.Decals = CreateDecal(0, EntityX(e\room\Objects[1],True), -1531.0*RoomScale, EntityZ(e\room\Objects[1],True), 90, Rand(360), 0)
@@ -1573,7 +1575,7 @@ Function UpdateEvents()
 							ShowEntity Curr106\obj
 							e\EventState2 = 1
 						EndIf
-					ElseIf CoffinDistance < 3.0 Then
+					ElseIf inRoomCoffinDist < 3.5 Then
 						If e\room\NPC[0]=Null Then
 							e\room\NPC[0]=CreateNPC(NPCtypeGuard,e\room\x,e\room\y,e\room\z)
 							RotateEntity e\room\NPC[0]\Collider,0,e\room\angle+90,0
@@ -1586,7 +1588,7 @@ Function UpdateEvents()
 							e\room\NPC[0]\IsDead = True
 							e\room\NPC[0]\FallingPickDistance = 0.0
 						EndIf
-					ElseIf CoffinDistance > 5.0 Then
+					ElseIf inRoomCoffinDist > 5.5 Then
 						If e\room\NPC[0]<>Null Then
 							If e\room\NPC[0]\PrevState = 0 Then
 								If ChannelPlaying(e\room\NPC[0]\SoundChn) Then
@@ -1665,7 +1667,7 @@ Function UpdateEvents()
 								EndIf
 							EndIf
 						Next
-						If (CoffinDistance < 4.0) And (hasBatteryFor895) And (Not Wearing714) Then
+						If (inRoomCoffinDist < 4.0) And (hasBatteryFor895) And (Not Wearing714) Then
 							Local tempF# = point_direction(EntityX(Collider,True),EntityZ(Collider,True),EntityX(e\room\Objects[0],True),EntityZ(e\room\Objects[0],True))
 							Local tempF2# = EntityYaw(Collider)
 							Local tempF3# = angleDist(tempF+90+Sin(WrapAngle(e\EventState3/10)),tempF2)
@@ -1765,8 +1767,6 @@ Function UpdateEvents()
 							If sc\room = e\room Then sc\Screen = False
 						Next
 					EndIf
-				Else
-					CoffinDistance = e\room\dist
 				EndIf
 				;[End Block]
 			Case "endroom106"
