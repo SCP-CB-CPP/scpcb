@@ -585,7 +585,7 @@ Function UpdateConsole()
 		
 		DrawFrame x,y,width,height+30*MenuScale
 		
-		Local consoleHeight% = 0
+		Local consoleHeight% = 15*MenuScale
 		Local scrollbarHeight% = 0
 		For cm.ConsoleMsg = Each ConsoleMsg
 			consoleHeight = consoleHeight + 15*MenuScale
