@@ -1773,7 +1773,7 @@ Function UpdateEvents()
 				;[Block]
 				If (Not Contained106) Then
 					If e\EventState = 0 Then
-						If e\room\dist < 8 And e\room\dist > 0 Then
+						If e\room\dist < 8 And e\room\dist > 0 And InFacility = 1 Then
 							If Curr106\State < 0 Then 
 								RemoveEvent(e)
 							Else
@@ -1805,7 +1805,7 @@ Function UpdateEvents()
 							PlaySound_Strict(e\Sound)		
 							
 							If e\SoundCHN<>0 Then StopChannel e\SoundCHN
-						ElseIf e\room\dist < 8
+						ElseIf e\room\dist < 8 And InFacility = 1 Then
 							If e\Sound = 0 Then e\Sound = LoadSound_Strict("SFX\Character\Janitor\Idle.ogg")
 							e\SoundCHN = LoopSound2(e\Sound, e\SoundCHN, Camera, e\room\NPC[0]\obj, 15.0)
 						EndIf
@@ -1911,7 +1911,7 @@ Function UpdateEvents()
 				;[End Block]
 			Case "lockroom173"
 				;[Block]
-				If e\room\dist < 6.0  And e\room\dist > 0 Then
+				If e\room\dist < 6.0  And e\room\dist > 0 And InFacility = 1 Then
 					If Curr173\Idle > 1 Then
 						RemoveEvent(e)
 					Else
@@ -2690,7 +2690,7 @@ Function UpdateEvents()
 			Case "room2elevator"
 				;[Block]
 				If e\EventState = 0 Then
-					If e\room\dist < 8.0 And e\room\dist > 0 Then
+					If e\room\dist < 8.0 And e\room\dist > 0 And InFacility = 1 Then
 						e\room\NPC[0]=CreateNPC(NPCtypeGuard, EntityX(e\room\obj,True), 0.5, EntityZ(e\room\obj,True))
 						PointEntity e\room\NPC[0]\Collider, Collider
 						RotateEntity e\room\NPC[0]\Collider, 0, EntityYaw(e\room\NPC[0]\Collider),0, True	
@@ -2775,7 +2775,7 @@ Function UpdateEvents()
 					e\EventState3 = CurveValue(e\EventState2*5, e\EventState3, 150.0)			
 				EndIf
 				
-				If e\room\dist < 16.0 Then 
+				If e\room\dist < 16.0 And InFacility = 1 Then 
 					If e\EventState < 0 Then
 						e\EventState = Rand(15,30)*70
 						temp = e\EventState2
@@ -4001,7 +4001,7 @@ Function UpdateEvents()
 			Case "room2pit"
 				;[Block]
 				If Curr173\Idle = 0 Then 
-					If e\room\dist < 8.0  And e\room\dist > 0 Then			
+					If e\room\dist < 8.0  And e\room\dist > 0 And InFacility = 1 Then			
 						If (Not EntityVisible(Curr173\Collider, Camera)) And (Not EntityVisible(e\room\Objects[6], Camera)) Then 
 							PositionEntity(Curr173\Collider, EntityX(e\room\Objects[6], True), 0.5, EntityZ(e\room\Objects[6], True))
 							ResetEntity(Curr173\Collider)
@@ -6976,7 +6976,7 @@ Function UpdateEvents()
 			Case "toiletguard"
 				;[Block]
 				If e\EventState = 0 Then
-					If e\room\dist < 8.0  And e\room\dist > 0 Then e\EventState = 1
+					If e\room\dist < 8.0  And e\room\dist > 0 And InFacility = 1 Then e\EventState = 1
 				ElseIf e\EventState = 1
 					e\room\NPC[0]=CreateNPC(NPCtypeGuard, EntityX(e\room\Objects[1],True), EntityY(e\room\Objects[1],True)+0.5, EntityZ(e\room\Objects[1],True))
 					PointEntity e\room\NPC[0]\Collider, e\room\obj
@@ -7541,7 +7541,7 @@ Function UpdateEvents()
 			Case "room2scps2"
 				;[Block]
 				;If PlayerRoom = e\room
-				If e\room\dist < 15
+				If e\room\dist < 15 And InFacility = 1 Then
 					If Contained106 Then e\EventState = 2.0
 					If Curr106\State < 0 Then e\EventState = 2.0
 					
