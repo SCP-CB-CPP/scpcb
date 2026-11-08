@@ -11110,11 +11110,10 @@ Function Use914(item.Items, setting$, x#, y#, z#)
 						RemoveItem(killbat)
 						RemoveItem(pumpkin)
 						item\state = -2
+						SetAnimTime item\model, 10
 					Else
 						item\state = -3
 					EndIf
-
-					SetAnimTime item\model, 10
 			End Select
 			If item <> Null Then
 				PositionEntity(item\collider, x, y, z)
