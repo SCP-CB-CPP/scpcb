@@ -74,6 +74,7 @@ Type LocalizationTable
     Field OptionName_Vram$
     Field OptionName_Hudoffset$
     Field OptionName_Viewbob$
+    Field OptionName_Cammove$
     Field OptionName_Fov$
     Field OptionName_Musicvol$
     Field OptionName_Soundvol$
@@ -119,6 +120,7 @@ Type LocalizationTable
     Field OptionTooltip_Hudscalefactor$
     Field OptionTooltip_Hudoffset$
     Field OptionTooltip_Viewbob$
+    Field OptionTooltip_Cammove$
     Field OptionTooltip_Fov$
     Field OptionTooltip_Musicvol$
     Field OptionTooltip_Soundvol$
@@ -262,6 +264,7 @@ Type LocalizationTable
     Field MessageButton_KeyNothing$
     Field MessageButton_DnaSuccess$
     Field MessageButton_DnaSelf$
+    Field MessageButton_DnaNohands$
     Field MessageButton_Nothing$
     Field MessageButton_DoorLocked$
     Field MessageButton_ElevatorCall$
@@ -304,6 +307,12 @@ Type LocalizationTable
     Field MessageItem_HazmatOff$
     Field MessageItem_Scp714On$
     Field MessageItem_Scp714Off$
+    Field MessageItem_Scp714Nohands$
+    Field MessageItem_PumpkinmaskOn$
+    Field MessageItem_PumpkinmaskOff$
+    Field MessageItem_PumpkinmaskConflict$
+    Field MessageItem_PumpkinmaskRotStart$
+    Field MessageItem_PumpkinmaskRotEnd$
     Field MessageItem_NvgOn$
     Field MessageItem_NvgOff$
     Field MessageItem_NvgBatReplace$
@@ -358,6 +367,16 @@ Type LocalizationTable
     Field MessageItem_1162UseKey$
     Field MessageItem_1162UseHearing$
     Field MessageItem_1162UseTicket$
+    Field MessageItem_066Killbat$
+    Field MessageItem_Bonefragment$
+    Field MessageItem_EyecandyUse$
+    Field MessageItem_EyecandyUseShock$
+    Field MessageItem_LollipopUse$
+    Field MessageItem_LollipopUseNumb$
+    Field MessageItem_ChocolateUse$
+    Field MessageItem_ChocolateUseNumb$
+    Field MessageItem_CandyNouse$
+    Field MessageItem_Scp330Nouse$
     Field MessageHelp_Paper$
     Field MessageHelp_Inventory$
     Field MessageHelp_View$
@@ -401,6 +420,7 @@ Type LocalizationTable
     Field DeathMessage_173Intro$
     Field DeathMessage_173Doors$
     Field DeathMessage_205$
+    Field DeathMessage_330$
     Field DeathMessage_420js$
     Field DeathMessage_427$
     Field DeathMessage_895$
@@ -425,6 +445,7 @@ Type LocalizationTable
     Field DeathMessage_NtfBloodloss$
     Field DeathMessage_Tesla$
     Field DeathMessage_Killbat$
+    Field DeathMessage_KillbatOutside$
     Field DeathMessage_Suicide$[4]
     Field DeathMessage_Gassed$
     Field Cup_Of$
@@ -556,6 +577,7 @@ Function LoadLocalization(loc.LocalizationTable, file$)
                             Case "vram" If loc\OptionName_Vram = "" Then loc\OptionName_Vram = value
                             Case "hudoffset" If loc\OptionName_Hudoffset = "" Then loc\OptionName_Hudoffset = value
                             Case "viewbob" If loc\OptionName_Viewbob = "" Then loc\OptionName_Viewbob = value
+                            Case "cammove" If loc\OptionName_Cammove = "" Then loc\OptionName_Cammove = value
                             Case "fov" If loc\OptionName_Fov = "" Then loc\OptionName_Fov = value
                             Case "musicvol" If loc\OptionName_Musicvol = "" Then loc\OptionName_Musicvol = value
                             Case "soundvol" If loc\OptionName_Soundvol = "" Then loc\OptionName_Soundvol = value
@@ -604,6 +626,7 @@ Function LoadLocalization(loc.LocalizationTable, file$)
                             Case "hudscalefactor" If loc\OptionTooltip_Hudscalefactor = "" Then loc\OptionTooltip_Hudscalefactor = value
                             Case "hudoffset" If loc\OptionTooltip_Hudoffset = "" Then loc\OptionTooltip_Hudoffset = value
                             Case "viewbob" If loc\OptionTooltip_Viewbob = "" Then loc\OptionTooltip_Viewbob = value
+                            Case "cammove" If loc\OptionTooltip_Cammove = "" Then loc\OptionTooltip_Cammove = value
                             Case "fov" If loc\OptionTooltip_Fov = "" Then loc\OptionTooltip_Fov = value
                             Case "musicvol" If loc\OptionTooltip_Musicvol = "" Then loc\OptionTooltip_Musicvol = value
                             Case "soundvol" If loc\OptionTooltip_Soundvol = "" Then loc\OptionTooltip_Soundvol = value
@@ -795,6 +818,7 @@ Function LoadLocalization(loc.LocalizationTable, file$)
                             Case "key.nothing" If loc\MessageButton_KeyNothing = "" Then loc\MessageButton_KeyNothing = value
                             Case "dna.success" If loc\MessageButton_DnaSuccess = "" Then loc\MessageButton_DnaSuccess = value
                             Case "dna.self" If loc\MessageButton_DnaSelf = "" Then loc\MessageButton_DnaSelf = value
+                            Case "dna.nohands" If loc\MessageButton_DnaNohands = "" Then loc\MessageButton_DnaNohands = value
                             Case "nothing" If loc\MessageButton_Nothing = "" Then loc\MessageButton_Nothing = value
                             Case "door.locked" If loc\MessageButton_DoorLocked = "" Then loc\MessageButton_DoorLocked = value
                             Case "elevator.call" If loc\MessageButton_ElevatorCall = "" Then loc\MessageButton_ElevatorCall = value
@@ -840,6 +864,12 @@ Function LoadLocalization(loc.LocalizationTable, file$)
                             Case "hazmat.off" If loc\MessageItem_HazmatOff = "" Then loc\MessageItem_HazmatOff = value
                             Case "scp714.on" If loc\MessageItem_Scp714On = "" Then loc\MessageItem_Scp714On = value
                             Case "scp714.off" If loc\MessageItem_Scp714Off = "" Then loc\MessageItem_Scp714Off = value
+                            Case "scp714.nohands" If loc\MessageItem_Scp714Nohands = "" Then loc\MessageItem_Scp714Nohands = value
+                            Case "pumpkinmask.on" If loc\MessageItem_PumpkinmaskOn = "" Then loc\MessageItem_PumpkinmaskOn = value
+                            Case "pumpkinmask.off" If loc\MessageItem_PumpkinmaskOff = "" Then loc\MessageItem_PumpkinmaskOff = value
+                            Case "pumpkinmask.conflict" If loc\MessageItem_PumpkinmaskConflict = "" Then loc\MessageItem_PumpkinmaskConflict = value
+                            Case "pumpkinmask.rot.start" If loc\MessageItem_PumpkinmaskRotStart = "" Then loc\MessageItem_PumpkinmaskRotStart = value
+                            Case "pumpkinmask.rot.end" If loc\MessageItem_PumpkinmaskRotEnd = "" Then loc\MessageItem_PumpkinmaskRotEnd = value
                             Case "nvg.on" If loc\MessageItem_NvgOn = "" Then loc\MessageItem_NvgOn = value
                             Case "nvg.off" If loc\MessageItem_NvgOff = "" Then loc\MessageItem_NvgOff = value
                             Case "nvg.bat.replace" If loc\MessageItem_NvgBatReplace = "" Then loc\MessageItem_NvgBatReplace = value
@@ -898,6 +928,16 @@ Function LoadLocalization(loc.LocalizationTable, file$)
                             Case "1162.use.key" If loc\MessageItem_1162UseKey = "" Then loc\MessageItem_1162UseKey = value
                             Case "1162.use.hearing" If loc\MessageItem_1162UseHearing = "" Then loc\MessageItem_1162UseHearing = value
                             Case "1162.use.ticket" If loc\MessageItem_1162UseTicket = "" Then loc\MessageItem_1162UseTicket = value
+                            Case "066.killbat" If loc\MessageItem_066Killbat = "" Then loc\MessageItem_066Killbat = value
+                            Case "bonefragment" If loc\MessageItem_Bonefragment = "" Then loc\MessageItem_Bonefragment = value
+                            Case "eyecandy.use" If loc\MessageItem_EyecandyUse = "" Then loc\MessageItem_EyecandyUse = value
+                            Case "eyecandy.use.shock" If loc\MessageItem_EyecandyUseShock = "" Then loc\MessageItem_EyecandyUseShock = value
+                            Case "lollipop.use" If loc\MessageItem_LollipopUse = "" Then loc\MessageItem_LollipopUse = value
+                            Case "lollipop.use.numb" If loc\MessageItem_LollipopUseNumb = "" Then loc\MessageItem_LollipopUseNumb = value
+                            Case "chocolate.use" If loc\MessageItem_ChocolateUse = "" Then loc\MessageItem_ChocolateUse = value
+                            Case "chocolate.use.numb" If loc\MessageItem_ChocolateUseNumb = "" Then loc\MessageItem_ChocolateUseNumb = value
+                            Case "candy.nouse" If loc\MessageItem_CandyNouse = "" Then loc\MessageItem_CandyNouse = value
+                            Case "scp330.nouse" If loc\MessageItem_Scp330Nouse = "" Then loc\MessageItem_Scp330Nouse = value
                         End Select
                     Case "Message Help"
                         Select key
@@ -953,6 +993,7 @@ Function LoadLocalization(loc.LocalizationTable, file$)
                             Case "173.intro" If loc\DeathMessage_173Intro = "" Then loc\DeathMessage_173Intro = value
                             Case "173.doors" If loc\DeathMessage_173Doors = "" Then loc\DeathMessage_173Doors = value
                             Case "205" If loc\DeathMessage_205 = "" Then loc\DeathMessage_205 = value
+                            Case "330" If loc\DeathMessage_330 = "" Then loc\DeathMessage_330 = value
                             Case "420js" If loc\DeathMessage_420js = "" Then loc\DeathMessage_420js = value
                             Case "427" If loc\DeathMessage_427 = "" Then loc\DeathMessage_427 = value
                             Case "895" If loc\DeathMessage_895 = "" Then loc\DeathMessage_895 = value
@@ -977,6 +1018,7 @@ Function LoadLocalization(loc.LocalizationTable, file$)
                             Case "ntf.bloodloss" If loc\DeathMessage_NtfBloodloss = "" Then loc\DeathMessage_NtfBloodloss = value
                             Case "tesla" If loc\DeathMessage_Tesla = "" Then loc\DeathMessage_Tesla = value
                             Case "killbat" If loc\DeathMessage_Killbat = "" Then loc\DeathMessage_Killbat = value
+                            Case "killbat.outside" If loc\DeathMessage_KillbatOutside = "" Then loc\DeathMessage_KillbatOutside = value
                             Case "suicide_1" If loc\DeathMessage_Suicide[1] = "" Then loc\DeathMessage_Suicide[1] = value
                             Case "suicide_2" If loc\DeathMessage_Suicide[2] = "" Then loc\DeathMessage_Suicide[2] = value
                             Case "suicide_3" If loc\DeathMessage_Suicide[3] = "" Then loc\DeathMessage_Suicide[3] = value

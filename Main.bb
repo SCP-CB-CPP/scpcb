@@ -1,6 +1,6 @@
-Const VersionNumber$ = "1.3.12.6"
+Const VersionNumber$ = "1.3.12.7.1"
 ;Only change this if the version given isn't working with the current build version - ENDSHN
-Const CompatibleNumber$ = "1.3.12"
+Const CompatibleNumber$ = "1.3.12.7.1"
 
 InitErrorMsgs(11, True)
 SetErrorMsg(0, "An error occured in SCP - Containment Breach v" + VersionNumber)
@@ -24,19 +24,19 @@ Include "StrictLoads.bb"
 
 Global DataDir$ = InitDataDir()
 Global OptionFile$ = InitOptionsFile()
-Global ModsFile$ = DataDir + "\mods.ini"
+Global ModsFile$ = DataDir + "mods.ini"
 Const OptionDefaultFile$ = "defaults.ini"
 
 Function InitDataDir$()
 	Local dir$ = GetEnv("AppData") + "\Undertow Games"
 	If FileType(dir) <> 2 Then CreateDir(dir)
-	dir = dir + "\SCP - Containment Breach"
+	dir = dir + "\SCP - Containment Breach\"
 	If FileType(dir) <> 2 Then CreateDir(dir)
 	Return dir
 End Function
 
 Function InitOptionsFile$()
-	Local file$ = DataDir + "\options.ini"
+	Local file$ = DataDir + "options.ini"
 	If FileType(file) <> 1 Lor HasCLIFlag("defaults") Lor HasCLIFlag("default") Then
 		Local f% = WriteFile(file)
 		CloseFile(f)
@@ -161,8 +161,8 @@ Global Fullscreen% = GetOptionInt("graphics", "fullscreen")
 Global ShowFPS = GetOptionInt("graphics", "show FPS")
 
 Global WireframeState
-Global HalloweenTex
 Global IsBirthday = Left(CurrentDate(), 7) = "15 Apr " Lor HasCLIFlag("birthday")
+Global IsHalloween = Left(CurrentDate(), 7) = "31 Oct " Lor HasCLIFlag("halloween")
 Global BirthdayHat = False
 
 Global BorderlessWindowed% = GetOptionInt("graphics", "borderless windowed")
@@ -325,6 +325,7 @@ End Function
 SetBuffer(BackBuffer())
 
 Global CurTime%, PrevTime%, LoopDelay%, AccumulatedLoopDelay#, FPSfactor#, FPSfactor2#, PrevFPSFactor#
+Global TimeScale# = 1.0
 Local CheckFPS%, ElapsedLoops%, FPS%
 
 Global Framelimit% = GetOptionInt("graphics", "framelimit")
@@ -449,10 +450,12 @@ Global SCP1025state#[6]
 
 Global HeartBeatRate#, HeartBeatTimer#, HeartBeatVolume#
 
-Global WearingGasMask%, WearingHazmat%, WearingVest%, Wearing714%, WearingNightVision%
+Global WearingGasMask%, WearingHazmat%, WearingVest%, Wearing714%, WearingNightVision%, WearingPumpkin%
 Global NVTimer#
 
 Global SuperMan%, SuperManTimer#
+
+Global LostHands%
 
 Global Injuries#, Bloodloss#, Infect#, HealTimer#
 
@@ -537,6 +540,7 @@ Global ConsoleScroll#,ConsoleScrollDragging%
 Global ConsoleMouseMem%
 Global ConsoleReissue.ConsoleMsg = Null
 Global ConsoleR% = 255,ConsoleG% = 255,ConsoleB% = 255
+Global ConsoleQuiet% = False
 
 Type ConsoleMsg
 	Field txt$
@@ -544,7 +548,26 @@ Type ConsoleMsg
 	Field r%,g%,b%
 End Type
 
+Include "Bindings.bb"
+Include "Console.bb"
+
+If FileType(DataDir + "cfg\autoexec.cfg") = 1 Then
+ExecuteCfg(DataDir + "cfg\autoexec.cfg") EndIf
+
+Function ExecAutoExec()
+	Local autoExec$ = DataDir + "autoexec.cfg"
+	If FileType(autoExec) = 1 Then
+		ExecuteCfg(autoExec)
+	Else
+		Local f% = WriteFile(autoExec)
+		WriteLine(f, "; Enter commands here to execute at each startup and load!")
+		CloseFile(f)
+	EndIf
+End Function
+
 Function CreateConsoleMsg(txt$,r%=-1,g%=-1,b%=-1,isCommand%=False)
+	If ConsoleQuiet Then Return
+
 	Local c.ConsoleMsg = New ConsoleMsg
 	Insert c Before First ConsoleMsg
 	
@@ -582,7 +605,7 @@ Function UpdateConsole()
 		
 		DrawFrame x,y,width,height+30*MenuScale
 		
-		Local consoleHeight% = 0
+		Local consoleHeight% = 15*MenuScale
 		Local scrollbarHeight% = 0
 		For cm.ConsoleMsg = Each ConsoleMsg
 			consoleHeight = consoleHeight + 15*MenuScale
@@ -729,1143 +752,7 @@ Function UpdateConsole()
 		ConsoleInput = Left(ConsoleInput, 100)
 		
 		If KeyHit(28) And ConsoleInput <> "" Then
-			UsedConsole = True
-			ConsoleReissue = Null
-			ConsoleScroll = 0
-			CreateConsoleMsg(ConsoleInput,255,255,0,True)
-			If Instr(ConsoleInput, " ") > 0 Then
-				StrTemp$ = Lower(Left(ConsoleInput, Instr(ConsoleInput, " ") - 1))
-			Else
-				StrTemp$ = Lower(ConsoleInput)
-			End If
-			
-			Select Lower(StrTemp)
-				Case "help"
-					;[Block]
-					If Instr(ConsoleInput, " ")<>0 Then
-						StrTemp$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
-					Else
-						StrTemp$ = ""
-					EndIf
-					ConsoleR = 0 : ConsoleG = 255 : ConsoleB = 255
-					
-					Select Lower(StrTemp)
-						Case "1",""
-							CreateConsoleMsg("LIST OF COMMANDS - PAGE 1/3")
-							CreateConsoleMsg("******************************")
-							CreateConsoleMsg("- asd")
-							CreateConsoleMsg("- status")
-							CreateConsoleMsg("- noclip")
-							CreateConsoleMsg("- noclipspeed")
-							CreateConsoleMsg("- godmode")
-							CreateConsoleMsg("- revive")
-							CreateConsoleMsg("- injure [value]")
-							CreateConsoleMsg("- infect [value]")
-							CreateConsoleMsg("- heal")
-							CreateConsoleMsg("- infinitestamina")
-							CreateConsoleMsg("- sanic")
-							CreateConsoleMsg("- blinkeffect [strength] [timer]")
-							CreateConsoleMsg("- notarget")
-							CreateConsoleMsg("- teleport [room name] [index]")
-							CreateConsoleMsg("- roomlist")
-							CreateConsoleMsg("- spawnitem [item name]")
-							CreateConsoleMsg("- itemlist")
-							CreateConsoleMsg("******************************")
-							CreateConsoleMsg("Use "+Chr(34)+"help 2/3"+Chr(34)+" to find more commands.")
-							CreateConsoleMsg("Use "+Chr(34)+"help [command name]"+Chr(34)+" to get more information about a command.")
-							CreateConsoleMsg("******************************")
-						Case "2"
-							CreateConsoleMsg("LIST OF COMMANDS - PAGE 2/3")
-							CreateConsoleMsg("******************************")
-							CreateConsoleMsg("- spawn [npc type] [state]")
-							CreateConsoleMsg("- npcspeed [npc type] [speed]")
-							CreateConsoleMsg("- npcstate [npc type]")
-							CreateConsoleMsg("- enable [npc type]")
-							CreateConsoleMsg("- disable [npc type]")
-							CreateConsoleMsg("- reset096")
-							CreateConsoleMsg("- halloween")
-							CreateConsoleMsg("- scp-420-j")
-							CreateConsoleMsg("******************************")
-							CreateConsoleMsg("Use "+Chr(34)+"help [command name]"+Chr(34)+" to get more information about a command.")
-							CreateConsoleMsg("******************************")
-						Case "3"
-							CreateConsoleMsg("LIST OF COMMANDS - PAGE 3/3")
-							CreateConsoleMsg("******************************")
-							CreateConsoleMsg("- wireframe")
-							CreateConsoleMsg("- showfps")
-							CreateConsoleMsg("- debughud")
-							CreateConsoleMsg("- camerafog [near] [far]")
-							CreateConsoleMsg("- viewbob [value]")
-							CreateConsoleMsg("- fov [value]")
-							CreateConsoleMsg("- gamma [value]")
-							CreateConsoleMsg("- playmusic [clip + .wav/.ogg]")
-							CreateConsoleMsg("- camerapick")
-							CreateConsoleMsg("- ending")
-							CreateConsoleMsg("- unlockcheckpoints")
-							CreateConsoleMsg("- togglewarheadlever")
-							CreateConsoleMsg("- unlockexits")
-							CreateConsoleMsg("- omni")
-							CreateConsoleMsg("- showmap")
-							CreateConsoleMsg("******************************")
-							CreateConsoleMsg("Use "+Chr(34)+"help [command name]"+Chr(34)+" to get more information about a command.")
-							CreateConsoleMsg("******************************")
-						Case "asd"
-							CreateConsoleMsg("HELP - asd")
-							CreateConsoleMsg("******************************")
-							CreateConsoleMsg("Actives godmode, noclip, wireframe and")
-							CreateConsoleMsg("sets fog distance to 20 near, 30 far")
-							CreateConsoleMsg("******************************")
-						Case "camerafog"
-							CreateConsoleMsg("HELP - camerafog")
-							CreateConsoleMsg("******************************")
-							CreateConsoleMsg("Sets the draw distance of the fog.")
-							CreateConsoleMsg("The fog begins generating at 'CameraFogNear' units")
-							CreateConsoleMsg("away from the camera and becomes completely opaque")
-							CreateConsoleMsg("at 'CameraFogFar' units away from the camera.")
-							CreateConsoleMsg("Example: camerafog 20 40")
-							CreateConsoleMsg("******************************")
-						Case "gamma"
-							CreateConsoleMsg("HELP - gamma")
-							CreateConsoleMsg("******************************")
-							CreateConsoleMsg("Sets the screen gamma.")
-							CreateConsoleMsg("Should be set to a value between 0.0 and 2.0.")
-							CreateConsoleMsg("Default is 1.0.")
-							CreateConsoleMsg("******************************")
-						Case "noclip","fly"
-							CreateConsoleMsg("HELP - noclip")
-							CreateConsoleMsg("******************************")
-							CreateConsoleMsg("Toggles noclip, unless a valid parameter")
-							CreateConsoleMsg("is specified (on/off).")
-							CreateConsoleMsg("Allows the camera to move in any direction while")
-							CreateConsoleMsg("bypassing collision.")
-							CreateConsoleMsg("******************************")
-						Case "godmode","god"
-							CreateConsoleMsg("HELP - godmode")
-							CreateConsoleMsg("******************************")
-							CreateConsoleMsg("Toggles godmode, unless a valid parameter")
-							CreateConsoleMsg("is specified (on/off).")
-							CreateConsoleMsg("Prevents player death under normal circumstances.")
-							CreateConsoleMsg("******************************")
-						Case "wireframe"
-							CreateConsoleMsg("HELP - wireframe")
-							CreateConsoleMsg("******************************")
-							CreateConsoleMsg("Toggles wireframe, unless a valid parameter")
-							CreateConsoleMsg("is specified (on/off).")
-							CreateConsoleMsg("Allows only the edges of geometry to be rendered,")
-							CreateConsoleMsg("making everything else transparent.")
-							CreateConsoleMsg("******************************")
-						Case "spawnitem"
-							CreateConsoleMsg("HELP - spawnitem")
-							CreateConsoleMsg("******************************")
-							CreateConsoleMsg("Spawns an item at the player's location.")
-							CreateConsoleMsg("Any name that can appear in your inventory")
-							CreateConsoleMsg("is a valid parameter.")
-							CreateConsoleMsg("Example: spawnitem Key Card Omni")
-							CreateConsoleMsg("******************************")
-						Case "itemlist", "items"
-							CreateConsoleMsg("HELP - itemlist")
-							CreateConsoleMsg("******************************")
-							CreateConsoleMsg("Lists all currently loaded item templates.")
-							CreateConsoleMsg("******************************")
-						Case "spawn"
-							CreateConsoleMsg("HELP - spawn")
-							CreateConsoleMsg("******************************")
-							CreateConsoleMsg("Spawns an NPC at the player's location.")
-							CreateConsoleMsg("Valid parameters are:")
-							Console_ListNPCTypes()
-							CreateConsoleMsg("******************************")
-						Case "revive","undead","resurrect"
-							CreateConsoleMsg("HELP - revive")
-							CreateConsoleMsg("******************************")
-							CreateConsoleMsg("Resets the player's death timer after the dying")
-							CreateConsoleMsg("animation triggers.")
-							CreateConsoleMsg("Does not affect injury, blood loss")
-							CreateConsoleMsg("or 008 infection values.")
-							CreateConsoleMsg("******************************")
-						Case "teleport"
-							CreateConsoleMsg("HELP - teleport")
-							CreateConsoleMsg("******************************")
-							CreateConsoleMsg("Teleports the player to the first (or specified)")
-							CreateConsoleMsg("instance of the specified room. Any room that")
-							CreateConsoleMsg("appears in rooms.ini is a valid parameter.")
-							CreateConsoleMsg("******************************")
-						Case "roomlist", "rooms"
-							CreateConsoleMsg("HELP - roomlist")
-							CreateConsoleMsg("******************************")
-							CreateConsoleMsg("Lists all currently loaded room templates.")
-							CreateConsoleMsg("Not all room templates may appear in the map.")
-							CreateConsoleMsg("******************************")
-						Case "stopsound", "stfu"
-							CreateConsoleMsg("HELP - stopsound")
-							CreateConsoleMsg("******************************")
-							CreateConsoleMsg("Stops all currently playing sounds.")
-							CreateConsoleMsg("******************************")
-						Case "camerapick"
-							CreateConsoleMsg("HELP - camerapick")
-							CreateConsoleMsg("******************************")
-							CreateConsoleMsg("Prints the texture name and coordinates of")
-							CreateConsoleMsg("the model the camera is pointing at.")
-							CreateConsoleMsg("******************************")
-						Case "fov"
-							CreateConsoleMsg("HELP - fov")
-							CreateConsoleMsg("******************************")
-							CreateConsoleMsg("Field of view (FOV) is the amount of game view")
-							CreateConsoleMsg("that is on display during a game.")
-							CreateConsoleMsg("******************************")
-						Case "status"
-							CreateConsoleMsg("HELP - status")
-							CreateConsoleMsg("******************************")
-							CreateConsoleMsg("Prints player, camera, and room information.")
-							CreateConsoleMsg("******************************")
-						Case "weed","scp-420-j","420"
-							CreateConsoleMsg("HELP - 420")
-							CreateConsoleMsg("******************************")
-							CreateConsoleMsg("Generates dank memes.")
-							CreateConsoleMsg("******************************")
-						Case "playmusic"
-							CreateConsoleMsg("HELP - playmusic")
-							CreateConsoleMsg("******************************")
-							CreateConsoleMsg("Will play tracks in .ogg/.wav format")
-							CreateConsoleMsg("from "+Chr(34)+"SFX\Radio\UserTracks\"+Chr(34)+".")
-							CreateConsoleMsg("******************************")
-						Case "setblinkeffect", "blinkeffect"
-							CreateConsoleMsg("HELP - blinkeffect")
-							CreateConsoleMsg("******************************")
-							CreateConsoleMsg("Sets the blink effect and its timer.")
-							CreateConsoleMsg("The blink effect scales how fast the blink meter")
-							CreateConsoleMsg("depletes. A value of two makes it drain twice")
-							CreateConsoleMsg("as fast, while a value of 0 disables blinking.")
-							CreateConsoleMsg("The timer is specified in seconds and controls")
-							CreateConsoleMsg("how long the effect will last.")
-							CreateConsoleMsg("If a timer value is not specified, the effect")
-							CreateConsoleMsg("will last indefinitely.")
-							CreateConsoleMsg("******************************")
-						Case "omni"
-							CreateConsoleMsg("HELP - omni")
-							CreateConsoleMsg("******************************")
-							CreateConsoleMsg("Toggles getting guaranteed Key Card Omnis")
-							CreateConsoleMsg("from SCP-914, unless a valid parameter")
-							CreateConsoleMsg("is specified (on/off).")
-							CreateConsoleMsg("Using " + Chr(34) + "omni 2" + Chr(34) + " allows")
-							CreateConsoleMsg("the option to persist between runs.")
-							CreateConsoleMsg("A Key Card Omni can be obtained from SCP-914")
-							CreateConsoleMsg("by refining a Level 5 Key Card on Fine")
-							CreateConsoleMsg("or any Key Card on Very Fine.")
-							CreateConsoleMsg("By default, the chance of success is random")
-							CreateConsoleMsg("and relies on the amount of achievements")
-							CreateConsoleMsg("unlocked in the current save.")
-							CreateConsoleMsg("******************************")
-						Case "showmap"
-							CreateConsoleMsg("HELP - showmap")
-							CreateConsoleMsg("******************************")
-							CreateConsoleMsg("Toggles drawing a 2D version of the map")
-							CreateConsoleMsg("layout on screen unless a valid parameter")
-							CreateConsoleMsg("is specified (on/off).")
-							CreateConsoleMsg("Using " + Chr(34) + "showmap 2" + Chr(34) + " allows")
-							CreateConsoleMsg("the option to persist between runs.")
-							CreateConsoleMsg("")
-
-							For i% = 3 To 1 Step -1
-								ConsoleR = 255 : ConsoleG = 255 : ConsoleB = 255
-								Select i
-									Case 3 CreateConsoleMsg("Entrance Zone")
-									Case 2 CreateConsoleMsg("Heavy Containment Zone")
-									Case 1 CreateConsoleMsg("Light Containment Zone")
-								End Select
-
-								For rt.RoomTemplates = Each RoomTemplates
-									If rt\R <> 255 Lor rt\G <> 255 Or rt\B <> 255 Then
-										For j% = 0 To ZONEAMOUNT-1
-											If rt\zone[j] = i Then
-												ConsoleR = rt\R : ConsoleG = rt\G : ConsoleB = rt\B
-												CreateConsoleMsg(rt\Name)
-												ConsoleR = 255 : ConsoleG = 255 : ConsoleB = 255
-												Exit
-											EndIf
-										Next
-									EndIf
-								Next
-
-								If i <> 1 Then CreateConsoleMsg("")
-							Next
-
-							ConsoleR = 0 : ConsoleG = 255 : ConsoleB = 255
-							CreateConsoleMsg("******************************")
-
-						Default
-							CreateConsoleMsg("There is no help available for that command.",255,150,0)
-					End Select
-					
-					;[End Block]
-				Case "asd"
-					;[Block]
-					WireFrame 1
-					WireframeState=1
-					GodMode = 1
-					NoClip = 1
-					CameraFogNear = 15
-					CameraFogFar = 20
-					;[End Block]
-				Case "status"
-					;[Block]
-					ConsoleR = 0 : ConsoleG = 255 : ConsoleB = 0
-					CreateConsoleMsg("******************************")
-					CreateConsoleMsg("Status: ")
-					CreateConsoleMsg("Coordinates: ")
-					CreateConsoleMsg("    - collider: "+EntityX(Collider)+", "+EntityY(Collider)+", "+EntityZ(Collider))
-					CreateConsoleMsg("    - camera: "+EntityX(Camera)+", "+EntityY(Camera)+", "+EntityZ(Camera))
-					
-					CreateConsoleMsg("Rotation: ")
-					CreateConsoleMsg("    - collider: "+EntityPitch(Collider)+", "+EntityYaw(Collider)+", "+EntityRoll(Collider))
-					CreateConsoleMsg("    - camera: "+EntityPitch(Camera)+", "+EntityYaw(Camera)+", "+EntityRoll(Camera))
-					
-					CreateConsoleMsg("Room: "+PlayerRoom\RoomTemplate\Name)
-					For ev.Events = Each Events
-						If ev\room = PlayerRoom Then
-							CreateConsoleMsg("Room event: "+ev\EventName)	
-							CreateConsoleMsg("-    state: "+ev\EventState)
-							CreateConsoleMsg("-    state2: "+ev\EventState2)	
-							CreateConsoleMsg("-    state3: "+ev\EventState3)
-							Exit
-						EndIf
-					Next
-					
-					CreateConsoleMsg("Room coordinates: "+Floor(EntityX(PlayerRoom\obj) / 8.0 + 0.5)+", "+ Floor(EntityZ(PlayerRoom\obj) / 8.0 + 0.5))
-					CreateConsoleMsg("Stamina: "+Stamina)
-					CreateConsoleMsg("Death timer: "+KillTimer)					
-					CreateConsoleMsg("Blinktimer: "+BlinkTimer)
-					CreateConsoleMsg("Injuries: "+Injuries)
-					CreateConsoleMsg("Bloodloss: "+Bloodloss)
-					CreateConsoleMsg("******************************")
-					;[End Block]
-				Case "camerapick"
-					;[Block]
-					ConsoleR = 0 : ConsoleG = 255 : ConsoleB = 0
-					Local c = CameraPick(Camera,GraphicWidth/2, GraphicHeight/2)
-					If c = 0 Then
-						CreateConsoleMsg("******************************")
-						CreateConsoleMsg("No entity  picked")
-						CreateConsoleMsg("******************************")								
-					Else
-						CreateConsoleMsg("******************************")
-						CreateConsoleMsg("Picked entity:")
-						Local sf = GetSurface(c,1)
-						Local b = GetSurfaceBrush( sf )
-						Local t = GetBrushTexture(b,0)
-						Local texname$ =  StripPath(TextureName(t))
-						CreateConsoleMsg("Texture name: "+texname)
-						CreateConsoleMsg("Coordinates: "+EntityX(c)+", "+EntityY(c)+", "+EntityZ(c))
-						CreateConsoleMsg("******************************")							
-					EndIf
-					;[End Block]
-				Case "hudscalefactor"
-					;[Block]
-					StrTemp$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
-
-					UpdateHUDScaleFactor(Float(StrTemp))
-					;[End Block]
-				Case "hudoffset"
-					;[Block]
-					StrTemp$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
-					HUDOffsetScale = Float(StrTemp)
-					UpdateHUDOffsets()
-					;[End Block]
-				Case "viewbob"
-					;[Block]
-					StrTemp$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
-
-					ViewBobScale = Float(StrTemp)
-					;[End Block]
-				Case "fov"
-					;[Block]
-					StrTemp$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
-					
-					FOV = Int(StrTemp)
-					;[End Block]
-				Case "hidedistance"
-					;[Block]
-					HideDistance = Float(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
-					CreateConsoleMsg("Hidedistance set to "+HideDistance)
-					;[End Block]
-				Case "ending"
-					;[Block]
-					SelectedEnding = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
-					KillTimer = -0.1
-					;EndingTimer = -0.1
-					;[End Block]
-				Case "noclipspeed"
-					;[Block]
-					StrTemp$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
-					
-					NoClipSpeed = Float(StrTemp)
-					;[End Block]
-				Case "injure"
-					;[Block]
-					StrTemp$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
-					
-					Injuries = Float(StrTemp)
-					;[End Block]
-				Case "infect"
-					;[Block]
-					StrTemp$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
-					
-					Infect = Float(StrTemp)
-					;[End Block]
-				Case "heal"
-					;[Block]
-					Injuries = 0
-					Bloodloss = 0
-					ResetDiseases()
-					;[End Block]
-				Case "teleport"
-					;[Block]
-					Local roomName$ = Piece(ConsoleInput, 2, " ")
-					Local roomIndex% = Int(Piece(ConsoleInput, 3, " "))
-
-					Select roomName
-						Case "room008", "scp-008"
-							roomName = "008"
-						Case "895", "scp-895", "room895"
-							roomName = "coffin"
-						Case "scp-914", "room914"
-							roomName = "914"
-						Case "offices", "office"
-							roomName = "room2offices"
-						Case "room372"
-							roomName = "roompj"
-						Case "room970"
-							roomName = "room2storage"
-					End Select
-					
-					Local roomFound% = False
-
-					For r.Rooms = Each Rooms
-						If r\RoomTemplate\Name = roomName Then
-							If roomIndex <> 0 Then
-								roomIndex = roomIndex - 1
-							Else
-								PositionEntity (Collider, EntityX(r\obj), EntityY(r\obj)+0.7, EntityZ(r\obj))
-								ResetEntity(Collider)
-								UpdateDoors()
-								UpdateRooms()
-								For it.Items = Each Items
-									it\disttimer = 0
-								Next
-								PlayerRoom = r
-								roomFound = True
-								Exit
-							EndIf
-						EndIf
-					Next
-					
-					If Not roomFound Then CreateConsoleMsg("Room not found.",255,150,0)
-					;[End Block]
-				Case "roomlist", "rooms"
-					CreateConsoleMsg("Listing rooms:")
-					For rt.RoomTemplates = Each RoomTemplates
-						CreateConsoleMsg("- " + rt\Name)
-					Next
-				Case "spawnitem"
-					;[Block]
-					Local itt.ItemTemplates = FindItemTemplate(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
-					If itt = Null Then
-						CreateConsoleMsg("Item not found.",255,150,0)
-					Else
-						CreateConsoleMsg(itt\displayname + " spawned.")
-						it.Items = CreateItem(itt\name, EntityX(Collider), EntityY(Camera,True), EntityZ(Collider))
-
-						If itt\name = "snavulti" Lor itt\name = "fineradio" Lor itt\name = "veryfineradio" Then
-							it\state = 101
-						EndIf
-					End If
-					;[End Block]
-				Case "itemlist", "items"
-					CreateConsoleMsg("Listing items:")
-					For itt.ItemTemplates = Each ItemTemplates
-						CreateConsoleMsg("- " + itt\displayname + "(" + itt\name + ")")
-					Next
-				Case "wireframe"
-					;[Block]
-					StrTemp$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
-					
-					Select StrTemp
-						Case "on", "1", "true"
-							WireframeState = True							
-						Case "off", "0", "false"
-							WireframeState = False
-						Default
-							WireframeState = Not WireframeState
-					End Select
-					
-					If WireframeState Then
-						CreateConsoleMsg("WIREFRAME ON")
-					Else
-						CreateConsoleMsg("WIREFRAME OFF")	
-					EndIf
-					
-					WireFrame WireframeState
-					;[End Block]
-				Case "npcspeed"
-					;[Block]
-					Local args$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
-					StrTemp$ = Piece$(args$, 1)
-					StrTemp2$ = Piece$(args$, 2)
-
-					Console_ChangeNPCSpeed(StrTemp$, Float(StrTemp2))
-					;[End Block]
-				Case "173speed"
-					;[Block]
-					StrTemp$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
-					Curr173\Speed = Float(StrTemp)
-					CreateConsoleMsg("173's speed set to " + StrTemp)
-					;[End Block]
-				Case "106speed"
-					;[Block]
-					StrTemp$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
-					Curr106\Speed = Float(StrTemp)
-					CreateConsoleMsg("106's speed set to " + StrTemp)
-					;[End Block]
-				Case "npcstate"
-					;[Block]
-					StrTemp$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
-					Console_PrintNPCState(StrTemp)
-					;[End Block]
-				Case "enable"
-					;[Block]
-					StrTemp$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
-					Console_EnableNPC(StrTemp)
-					;[End Block]
-				Case "disable"
-					;[Block]
-					StrTemp$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
-					Console_DisableNPC(StrTemp)
-					;[End Block]
-				Case "173state"
-					;[Block]
-					CreateConsoleMsg("SCP-173")
-					CreateConsoleMsg("Position: " + EntityX(Curr173\obj) + ", " + EntityY(Curr173\obj) + ", " + EntityZ(Curr173\obj))
-					CreateConsoleMsg("Idle: " + Curr173\Idle)
-					CreateConsoleMsg("State: " + Curr173\State)
-					;[End Block]
-				Case "106state"
-					;[Block]
-					CreateConsoleMsg("SCP-106")
-					CreateConsoleMsg("Position: " + EntityX(Curr106\obj) + ", " + EntityY(Curr106\obj) + ", " + EntityZ(Curr106\obj))
-					CreateConsoleMsg("Idle: " + Curr106\Idle)
-					CreateConsoleMsg("State: " + Curr106\State)
-					;[End Block]
-				Case "reset096"
-					;[Block]
-					For n.NPCs = Each NPCs
-						If n\NPCtype = NPCtype096 Then
-							n\State = 0
-							If n\SoundChn<>0
-								StopStream_Strict(n\SoundChn) : n\SoundChn=0 : n\SoundChn_isStream = False
-							EndIf
-							If n\SoundChn2<>0
-								StopStream_Strict(n\SoundChn2) : n\SoundChn2=0 : n\SoundChn2_isStream = False
-							EndIf
-							Exit
-						EndIf
-					Next
-					;[End Block]
-				Case "disable173"
-					;[Block]
-					DisableNPC(Curr173)
-					;[End Block]
-				Case "enable173"
-					;[Block]
-					EnableNPC(Curr173)
-					;[End Block]
-				Case "disable106"
-					;[Block]
-					DisableNPC(Curr106)
-					;[End Block]
-				Case "enable106"
-					;[Block]
-					EnableNPC(Curr106)
-					;[End Block]
-				Case "halloween"
-					;[Block]
-					HalloweenTex = Not HalloweenTex
-					If HalloweenTex Then
-						Local tex = LoadTexture_Strict("GFX\npcs\173h.pt", 1)
-						EntityTexture Curr173\obj, tex, 0, 0
-						FreeTexture tex
-						CreateConsoleMsg("173 JACK-O-LANTERN ON")
-					Else
-						Local tex2 = LoadTexture_Strict("GFX\npcs\173texture.jpg", 1)
-						EntityTexture Curr173\obj, tex2, 0, 0
-						FreeTexture tex2
-						CreateConsoleMsg("173 JACK-O-LANTERN OFF")
-					EndIf
-					;[End Block]
-				Case "sanic"
-					;[Block]
-					SuperMan = Not SuperMan
-					If SuperMan = True Then
-						CreateConsoleMsg("GOTTA GO FAST")
-					Else
-						CreateConsoleMsg("WHOA SLOW DOWN")
-					EndIf
-					;[End Block]
-				Case "scp-420-j","420","weed"
-					;[Block]
-					For i = 1 To 20
-						If Rand(2)=1 Then
-							it.Items = CreateItem("scp420j", EntityX(Collider,True)+Cos((360.0/20.0)*i)*Rnd(0.3,0.5), EntityY(Camera,True), EntityZ(Collider,True)+Sin((360.0/20.0)*i)*Rnd(0.3,0.5))
-						Else
-							it.Items = CreateItem("joint", EntityX(Collider,True)+Cos((360.0/20.0)*i)*Rnd(0.3,0.5), EntityY(Camera,True), EntityZ(Collider,True)+Sin((360.0/20.0)*i)*Rnd(0.3,0.5))
-						EndIf
-					Next
-					PlaySound_Strict LoadTempSound("SFX\Music\420J.ogg")
-					;[End Block]
-				Case "godmode", "god"
-					;[Block]
-					StrTemp$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
-					
-					Select StrTemp
-						Case "on", "1", "true"
-							GodMode = True						
-						Case "off", "0", "false"
-							GodMode = False
-						Default
-							GodMode = Not GodMode
-					End Select	
-					If GodMode Then
-						CreateConsoleMsg("GODMODE ON")
-					Else
-						CreateConsoleMsg("GODMODE OFF")	
-					EndIf
-					;[End Block]
-				Case "revive","undead","resurrect"
-					;[Block]
-					DropSpeed = -0.1
-					HeadDropSpeed = 0.0
-					Shake = 0
-					CurrSpeed = 0
-					
-					HeartBeatVolume = 0
-					
-					CameraShake = 0
-					Shake = 0
-					LightFlash = 0
-					BlurTimer = 0
-					
-					FallTimer = 0
-					MenuOpen = False
-					
-					GodMode = 0
-					NoClip = 0
-					
-					ShowEntity Collider
-					TranslateEntity Collider, 0, 1.5, 0
-					RotateEntity Collider, EntityPitch(Collider), EntityYaw(Collider), 0
-					
-					KillTimer = 0
-					KillAnim = 0
-					;[End Block]
-				Case "noclip","fly"
-					;[Block]
-					StrTemp$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
-					
-					Select StrTemp
-						Case "on", "1", "true"
-							NoClip = True
-							Playable = True
-						Case "off", "0", "false"
-							NoClip = False	
-							RotateEntity Collider, 0, EntityYaw(Collider), 0
-						Default
-							NoClip = Not NoClip
-							If NoClip = False Then		
-								RotateEntity Collider, 0, EntityYaw(Collider), 0
-							Else
-								Playable = True
-							EndIf
-					End Select
-					
-					If NoClip Then
-						CreateConsoleMsg("NOCLIP ON")
-					Else
-						CreateConsoleMsg("NOCLIP OFF")
-					EndIf
-					
-					DropSpeed = 0
-					;[End Block]
-				Case "showfps"
-					;[Block]
-					ShowFPS = Not ShowFPS
-					CreateConsoleMsg("ShowFPS: "+Str(ShowFPS))
-					;[End Block]
-				Case "096state"
-					;[Block]
-					For n.NPCs = Each NPCs
-						If n\NPCtype = NPCtype096 Then
-							CreateConsoleMsg("SCP-096")
-							CreateConsoleMsg("Position: " + EntityX(n\obj) + ", " + EntityY(n\obj) + ", " + EntityZ(n\obj))
-							CreateConsoleMsg("Idle: " + n\Idle)
-							CreateConsoleMsg("State: " + n\State)
-							Exit
-						EndIf
-					Next
-					CreateConsoleMsg("SCP-096 has not spawned.")
-					;[End Block]
-				Case "debughud"
-					;[Block]
-					StrTemp$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
-					Select StrTemp
-						Case "on", "1", "true"
-							DebugHUD = True
-						Case "off", "0", "false"
-							DebugHUD = False
-						Default
-							DebugHUD = Not DebugHUD
-					End Select
-					
-					If DebugHUD Then
-						CreateConsoleMsg("Debug Mode On")
-
-						For r.Rooms = Each Rooms
-							Local tb.Triggerboxes = r\FirstTriggerbox
-							While tb <> Null
-								ShowEntity(tb\Obj)
-								tb = tb\Successor
-							Wend
-						Next
-					Else
-						CreateConsoleMsg("Debug Mode Off")
-					
-						For r.Rooms = Each Rooms
-							tb.Triggerboxes = r\FirstTriggerbox
-							While tb <> Null
-								HideEntity(tb\Obj)
-								tb = tb\Successor
-							Wend
-						Next
-					EndIf
-					;[End Block]
-				Case "stopsound", "stfu"
-					;[Block]
-					KillSounds()
-					
-					For e.Events = Each Events
-						If e\EventName = "alarm" Then 
-							If e\room\NPC[0] <> Null Then RemoveNPC(e\room\NPC[0])
-							If e\room\NPC[1] <> Null Then RemoveNPC(e\room\NPC[1])
-							If e\room\NPC[2] <> Null Then RemoveNPC(e\room\NPC[2])
-							
-							FreeEntity e\room\Objects[0] : e\room\Objects[0]=0
-							FreeEntity e\room\Objects[1] : e\room\Objects[1]=0
-							PositionEntity Curr173\Collider, 0,0,0
-							ResetEntity Curr173\Collider
-							ShowEntity Curr173\obj
-							RemoveEvent(e)
-							Exit
-						EndIf
-					Next
-					CreateConsoleMsg("Stopped all sounds.")
-					;[End Block]
-				Case "camerafog"
-					;[Block]
-					args$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
-					CameraFogNear = Float(Left(args, Len(args) - Instr(args, " ")))
-					CameraFogFar = Float(Right(args, Len(args) - Instr(args, " ")))
-					CreateConsoleMsg("Near set to: " + CameraFogNear + ", far set to: " + CameraFogFar)
-					;[End Block]
-				Case "gamma"
-					;[Block]
-					StrTemp$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
-					ScreenGamma = Int(StrTemp)
-					CreateConsoleMsg("Gamma set to " + ScreenGamma)
-					;[End Block]
-				Case "spawn"
-					;[Block]
-					args$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
-					StrTemp$ = Piece$(args$, 1)
-					StrTemp2$ = Piece$(args$, 2)
-					
-					;Hacky fix for when the user doesn't input a second parameter.
-					If (StrTemp <> StrTemp2) Then
-						Console_SpawnNPC(StrTemp, StrTemp2)
-					Else
-						Console_SpawnNPC(StrTemp)
-					EndIf
-					;[End Block]
-				;new Console Commands in SCP:CB 1.3 - ENDSHN
-				Case "infinitestamina","infstam"
-					;[Block]
-					StrTemp$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
-					
-					Select StrTemp
-						Case "on", "1", "true"
-							InfiniteStamina% = True						
-						Case "off", "0", "false"
-							InfiniteStamina% = False
-						Default
-							InfiniteStamina% = Not InfiniteStamina%
-					End Select
-					
-					If InfiniteStamina
-						CreateConsoleMsg("INFINITE STAMINA ON")
-					Else
-						CreateConsoleMsg("INFINITE STAMINA OFF")	
-					EndIf
-					;[End Block]
-				Case "asd2"
-					;[Block]
-					GodMode = 1
-					InfiniteStamina = 1
-					Curr173\Idle = 3
-					Curr106\Idle = True
-					Curr106\State = 200000
-					Contained106 = True
-					;[End Block]
-				Case "toggle_warhead_lever", "togglewarheadlever"
-					;[Block]
-					For e.Events = Each Events
-						If e\EventName = "room2nuke" Then
-							e\EventState = (Not e\EventState)
-							Exit
-						EndIf
-					Next
-					;[End Block]
-				Case "unlockcheckpoints"
-					;[Block]
-					StrTemp$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
-					Select StrTemp
-						Case "lcz"
-							For e.Events = Each Events
-								If e\EventName = "room2sl" Then
-									e\EventState3 = 0.0
-									UpdateLever(e\room\Levers[0])
-									RotateEntity(e\room\Levers[0], 0.0, EntityYaw(e\room\Levers[0]), 0.0)
-									Exit
-								EndIf
-							Next
-							CreateConsoleMsg("The Heavy Containment Zone is now unlocked.")	
-						Case "hcz"
-							For e.Events = Each Events
-								If e\EventName = "008" Then
-									e\EventState = 2.0
-									UpdateLever(e\room\Objects[1])
-									RotateEntity(e\room\Objects[1], 0.0, EntityYaw(e\room\Objects[1]), 0.0)
-									Exit
-								EndIf
-							Next	
-							CreateConsoleMsg("The Entrance Zone is now unlocked.")	
-						Default
-							For e.Events = Each Events
-								If e\EventName = "room2sl" Then
-									e\EventState3 = 0.0
-									UpdateLever(e\room\Levers[0])
-									RotateEntity(e\room\Levers[0], 0.0, EntityYaw(e\room\Levers[0]), 0.0)
-								ElseIf e\EventName = "008" Then
-									e\EventState = 2.0
-									UpdateLever(e\room\Objects[1])
-									RotateEntity(e\room\Objects[1], 0.0, EntityYaw(e\room\Objects[1]), 0.0)
-								EndIf
-							Next
-							CreateConsoleMsg("The Heavy Containment Zone and Entrance Zone are now unlocked.")	
-					End Select
-					;[End Block]
-				Case "unlockexits"
-					;[Block]
-					StrTemp$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
-					
-					Select StrTemp
-						Case "a"
-							For e.Events = Each Events
-								If e\EventName = "gateaentrance" Then
-									e\EventState3 = 1
-									e\room\RoomDoors[1]\open = True
-									Exit
-								EndIf
-							Next
-							CreateConsoleMsg("Gate A is now unlocked.")	
-						Case "b"
-							For e.Events = Each Events
-								If e\EventName = "exit1" Then
-									e\EventState3 = 1
-									e\room\RoomDoors[4]\open = True
-									Exit
-								EndIf
-							Next	
-							CreateConsoleMsg("Gate B is now unlocked.")	
-						Default
-							For e.Events = Each Events
-								If e\EventName = "gateaentrance" Then
-									e\EventState3 = 1
-									e\room\RoomDoors[1]\open = True
-								ElseIf e\EventName = "exit1" Then
-									e\EventState3 = 1
-									e\room\RoomDoors[4]\open = True
-								EndIf
-							Next
-							CreateConsoleMsg("Gate A and B are now unlocked.")	
-					End Select
-					
-					RemoteDoorOn = True
-					;[End Block]
-				Case "kill","suicide"
-					;[Block]
-					KillTimer = -1
-					DeathMSG = I_Loc\DeathMessage_Suicide[Rand(4)]
-					;[End Block]
-				Case "playmusic"
-					;[Block]
-					; I think this might be broken since the FMod library streaming was added. -Mark
-					If Instr(ConsoleInput, " ")<>0 Then
-						StrTemp$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
-					Else
-						StrTemp$ = ""
-					EndIf
-					
-					If StrTemp$ <> ""
-						PlayCustomMusic% = True
-						If CustomMusic <> 0 Then FreeSound_Strict CustomMusic : CustomMusic = 0
-						If MusicCHN <> 0 Then StopChannel MusicCHN
-						CustomMusic = LoadSound_Strict("SFX\Radio\UserTracks\"+StrTemp$)
-						If CustomMusic = 0
-							PlayCustomMusic% = False
-						EndIf
-					Else
-						PlayCustomMusic% = False
-						If CustomMusic <> 0 Then FreeSound_Strict CustomMusic : CustomMusic = 0
-						If MusicCHN <> 0 Then StopChannel MusicCHN
-					EndIf
-					;[End Block]
-				Case "tp"
-					;[Block]
-					For n.NPCs = Each NPCs
-						If n\NPCtype = NPCtypeMTF
-							If n\MTFLeader = Null
-								PositionEntity Collider,EntityX(n\Collider),EntityY(n\Collider)+5,EntityZ(n\Collider)
-								ResetEntity Collider
-								Exit
-							EndIf
-						EndIf
-					Next
-					;[End Block]
-				Case "tele"
-					;[Block]
-					args$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
-					StrTemp$ = Piece$(args$,1," ")
-					StrTemp2$ = Piece$(args$,2," ")
-					StrTemp3$ = Piece$(args$,3," ")
-					PositionEntity Collider,Float(StrTemp$),Float(StrTemp2$),Float(StrTemp3$)
-					PositionEntity Camera,Float(StrTemp$),Float(StrTemp2$),Float(StrTemp3$)
-					ResetEntity Collider
-					ResetEntity Camera
-					CreateConsoleMsg("Teleported to coordinates (X|Y|Z): "+EntityX(Collider)+"|"+EntityY(Collider)+"|"+EntityZ(Collider))
-					;[End Block]
-				Case "notarget"
-					;[Block]
-					StrTemp$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
-					
-					Select StrTemp
-						Case "on", "1", "true"
-							NoTarget% = True						
-						Case "off", "0", "false"
-							NoTarget% = False	
-						Default
-							NoTarget% = Not NoTarget%
-					End Select
-					
-					If NoTarget% = False Then
-						CreateConsoleMsg("NOTARGET OFF")
-					Else
-						CreateConsoleMsg("NOTARGET ON")	
-					EndIf
-					;[End Block]
-				Case "spawnradio"
-					;[Block]
-					it.Items = CreateItem("fineradio", EntityX(Collider), EntityY(Camera,True), EntityZ(Collider))
-					it\state = 101
-					;[End Block]
-				Case "spawnnvg"
-					;[Block]
-					it.Items = CreateItem("nvgoggles", EntityX(Collider), EntityY(Camera,True), EntityZ(Collider))
-					it\state = 1000
-					;[End Block]
-				Case "spawnpumpkin","pumpkin"
-					;[Block]
-					CreateConsoleMsg("What pumpkin?")
-					;[End Block]
-				Case "spawnnav"
-					;[Block]
-					it.Items = CreateItem("snavulti", EntityX(Collider), EntityY(Camera,True), EntityZ(Collider))
-					it\state = 101
-					;[End Block]
-				Case "teleport173"
-					;[Block]
-					PositionEntity Curr173\Collider,EntityX(Collider),EntityY(Collider)+0.2,EntityZ(Collider)
-					ResetEntity Curr173\Collider
-					;[End Block]
-				Case "seteventstate"
-					;[Block]
-					args$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
-					StrTemp$ = Piece$(args$,1," ")
-					StrTemp2$ = Piece$(args$,2," ")
-					StrTemp3$ = Piece$(args$,3," ")
-					Local pl_room_found% = False
-					If StrTemp="" Or StrTemp2="" Or StrTemp3=""
-						CreateConsoleMsg("Too few parameters. This command requires 3.",255,150,0)
-					Else
-						For e.Events = Each Events
-							If e\room = PlayerRoom
-								If Lower(StrTemp)<>"keep"
-									e\EventState = Float(StrTemp)
-								EndIf
-								If Lower(StrTemp2)<>"keep"
-									e\EventState2 = Float(StrTemp2)
-								EndIf
-								If Lower(StrTemp3)<>"keep"
-									e\EventState3 = Float(StrTemp3)
-								EndIf
-								CreateConsoleMsg("Changed event states from current player room to: "+e\EventState+"|"+e\EventState2+"|"+e\EventState3)
-								pl_room_found = True
-								Exit
-							EndIf
-						Next
-						If (Not pl_room_found)
-							CreateConsoleMsg("The current room doesn't have any event applied.",255,150,0)
-						EndIf
-					EndIf
-					;[End Block]
-				Case "spawnparticles"
-					;[Block]
-					If Instr(ConsoleInput, " ")<>0 Then
-						StrTemp$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
-					Else
-						StrTemp$ = ""
-					EndIf
-
-					Local maxParticlesIdx% = 2
-					If IsBirthday Then maxParticlesIdx = 7
-
-					If Int(StrTemp) >= 0 And Int(StrTemp) <= maxParticlesIdx% ;<--- This is the maximum ID of particles by Devil Particle system, will be increased after time - ENDSHN
-						SetEmitter(Collider,ParticleEffect[Int(StrTemp)])
-						CreateConsoleMsg("Spawned particle emitter with ID "+Int(StrTemp)+" at player's position.")
-					Else
-						CreateConsoleMsg("Particle emitter with ID "+Int(StrTemp)+" not found.",255,150,0)
-					EndIf
-					;[End Block]
-				Case "giveachievement"
-					;[Block]
-					If Instr(ConsoleInput, " ")<>0 Then
-						StrTemp$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
-					Else
-						StrTemp$ = ""
-					EndIf
-					
-					i% = 0
-					Local searched% = Int(StrTemp)
-					For a.Achievements = Each Achievements
-						If i = searched%
-							a\Unlocked = True
-							CreateConsoleMsg("Achievement "+a\LocalName+" unlocked.")
-							i = -1
-							Exit
-						EndIf
-						i = i + 1
-					Next
-
-					If i <> -1 Then CreateConsoleMsg("Achievement with ID "+searched+" doesn't exist.",255,150,0)
-					;[End Block]
-				Case "427state"
-					;[Block]
-					StrTemp$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
-					
-					I_427\Timer = Float(StrTemp)*70.0
-					;[End Block]
-				Case "teleport106"
-					;[Block]
-					Curr106\State = 0
-					Curr106\Idle = False
-					;[End Block]
-				Case "setblinkeffect", "blinkeffect"
-					;[Block]
-					args$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
-					BlinkEffect = Float(Piece(args, 1, " "))
-					Local timerStr$ = Piece(args, 2, " ")
-					If timerStr = "" Then
-						If BlinkEffect = 1 Then BlinkEffectTimer = 0 Else BlinkEffectTimer = Infinity
-					Else
-						BlinkEffectTimer = Float(timerStr)
-					EndIf
-					CreateConsoleMsg("Set BlinkEffect to: " + BlinkEffect + " and BlinkEffect timer: " + BlinkEffectTimer)
-					;[End Block]
-				Case "omni"
-					;[Block]
-					StrTemp$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
-					
-					Select StrTemp
-						Case "on", "1", "true"
-							GuaranteedOmni% = True
-						Case "off", "0", "false"
-							GuaranteedOmni% = False
-						Case "2"
-							GuaranteedOmni% = 2
-						Default
-							GuaranteedOmni% = Not GuaranteedOmni%
-					End Select
-					
-					If GuaranteedOmni% = 2 Then
-						CreateConsoleMsg("GUARANTEED KEY CARD OMNI ON (PERSISTENT)")	
-					Else If GuaranteedOmni% Then
-						CreateConsoleMsg("GUARANTEED KEY CARD OMNI ON")	
-					Else
-						CreateConsoleMsg("GUARANTEED KEY CARD OMNI OFF")
-					EndIf
-					;[End Block]
-				Case "showmap"
-					;[Block]
-					StrTemp$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
-
-					Select StrTemp
-						Case "on", "1", "true"
-							ShowMap% = True						
-						Case "off", "0", "false"
-							ShowMap% = False
-						Case "2"
-							ShowMap% = 2
-						Default
-							ShowMap% = Not ShowMap%
-					End Select
-
-					If ShowMap% = 2 Then
-						CreateConsoleMsg("SHOW MAP ON (PERSISTENT)")
-					Else If ShowMap% Then
-						CreateConsoleMsg("SHOW MAP ON")
-					Else
-						CreateConsoleMsg("SHOW MAP OFF")
-					EndIf
-					If ShowMap% Then CreateConsoleMsg("TYPE " + Chr(34) + "help showmap" + Chr(34) + " FOR A LIST OF ROOM COLORS")
-					;[End Block]
-				Case "clear", "cls"
-					Delete Each ConsoleMsg
-				Case "mav"
-					RuntimeErrorExt("Violation Access Memory")
-				Case Chr($6A)+Chr($6F)+Chr($72)+Chr($67)+Chr($65)
-					;[Block]
-					ConsoleFlush = True 
-					
-					If ConsoleFlushSnd = 0 Then
-						ConsoleFlushSnd = LoadSound(Chr(83)+Chr(70)+Chr(88)+Chr(92)+Chr(83)+Chr(67)+Chr(80)+Chr(92)+Chr(57)+Chr(55)+Chr(48)+Chr(92)+Chr(116)+Chr(104)+Chr(117)+Chr(109)+Chr(98)+Chr(115)+Chr(46)+Chr(100)+Chr(98))
-						ConsoleMusFlush% = LoadSound(Chr(83)+Chr(70)+Chr(88)+Chr(92)+Chr(77)+Chr(117)+Chr(115)+Chr(105)+Chr(99)+Chr(92)+Chr(116)+Chr(104)+Chr(117)+Chr(109)+Chr(98)+Chr(115)+Chr(46)+Chr(100)+Chr(98))
-						ConsoleMusPlay = PlaySound(ConsoleMusFlush)
-						CreateConsoleMsg(Chr(74)+Chr(79)+Chr(82)+Chr(71)+Chr(69)+Chr(32)+Chr(72)+Chr(65)+Chr(83)+Chr(32)+Chr(66)+Chr(69)+Chr(69)+Chr(78)+Chr(32)+Chr(69)+Chr(88)+Chr(80)+Chr(69)+Chr(67)+Chr(84)+Chr(73)+Chr(78)+Chr(71)+Chr(32)+Chr(89)+Chr(79)+Chr(85)+Chr(46))
-					Else
-						CreateConsoleMsg(Chr(74)+Chr(32)+Chr(79)+Chr(32)+Chr(82)+Chr(32)+Chr(71)+Chr(32)+Chr(69)+Chr(32)+Chr(32)+Chr(67)+Chr(32)+Chr(65)+Chr(32)+Chr(78)+Chr(32)+Chr(78)+Chr(32)+Chr(79)+Chr(32)+Chr(84)+Chr(32)+Chr(32)+Chr(66)+Chr(32)+Chr(69)+Chr(32)+Chr(32)+Chr(67)+Chr(32)+Chr(79)+Chr(32)+Chr(78)+Chr(32)+Chr(84)+Chr(32)+Chr(65)+Chr(32)+Chr(73)+Chr(32)+Chr(78)+Chr(32)+Chr(69)+Chr(32)+Chr(68)+Chr(46))
-					EndIf
-					;[End Block]
-				Default
-					;[Block]
-					CreateConsoleMsg("Command not found.",255,0,0)
-					;[End Block]
-			End Select
-			
+			ExecuteConsoleCommand(ConsoleInput)
 			ConsoleInput = ""
 		End If
 		
@@ -1918,6 +805,23 @@ CreateConsoleMsg("  - disable/enable [npc type]")
 CreateConsoleMsg("  - npcspeed [npc type] [speed]")
 CreateConsoleMsg("  - spawn [npc type]")
 
+Function Teleport(r.Rooms)
+	PositionEntity (Collider, EntityX(r\obj), EntityY(r\obj)+0.3, EntityZ(r\obj))
+	ResetEntity(Collider)
+	MouseLook(False)
+	UpdateDoors()
+	UpdateRooms()
+	For it.Items = Each Items
+		it\disttimer = 0
+	Next
+	PlayerRoom = r
+	UpdateRooms()
+	UpdateDoorsTimer = 0
+	UpdateDoors()
+	UpdateRoomLightsTimer = 0
+	UpdateRoomLights(Camera)
+End Function
+
 ;---------------------------------------------------------------------------------------------------
 
 Global DebugHUD%
@@ -1928,6 +832,7 @@ Global LightBlink#, LightFlash#
 
 Global BumpEnabled% = GetOptionInt("graphics", "bump mapping enabled")
 Global HUDenabled% = GetOptionInt("graphics", "HUD enabled")
+Global HUDenabledLegacy% = GetOptionInt("graphics", "HUD enabled legacy")
 
 Global Camera%, CameraShake#, CurrCameraZoom#
 
@@ -1979,6 +884,7 @@ Music(22) = "914"
 Music(23) = "Ending"
 Music(24) = "Credits"
 Music(25) = "SaveMeFrom"
+Music(26) = "HalloweenFields"
 
 Global MusicVolume# = GetOptionFloat("audio", "music volume")
 ;Global MusicCHN% = StreamSound_Strict("SFX\Music\"+Music(2)+".ogg", MusicVolume, CurrMusicStream)
@@ -2171,7 +1077,6 @@ Dim NavImages(5)
 For i = 0 To 3
 	NavImages(i) = LoadImageHUDScaled("GFX\navigator\roomborder"+i+".png")
 Next
-Global NavSize% = ImageWidth(NavImages(0))
 NavImages(4) = LoadImageHUDScaled("GFX\navigator\batterymeter.png")
 
 Global NavBG%
@@ -2199,7 +1104,16 @@ Global SprintIcon% = 0
 Global BlinkIcon% = 0
 Global CrouchIcon% = 0
 Global HandIcon% = 0
+Global HandIconStump% = 0
 Global HandIcon2% = 0
+
+Function GetUsedHandIcon%()
+	If LostHands Then
+		If HandIconStump = 0 Then HandIconStump = LoadImageHUDScaled("GFX\Halloween\handsymbol_stump.png")
+		Return HandIconStump
+	EndIf
+	Return HandIcon
+End Function
 
 Global StaminaMeterIMG% = 0
 
@@ -2577,20 +1491,14 @@ Function UpdateDoors()
 							MoveEntity(d\obj, Sin(d\openstate) * -FPSfactor / 114.0, 0, 0)
 					End Select
 					
-					If d\angle = 0 Or d\angle=180 Then
-						If Abs(EntityZ(d\frameobj, True)-EntityZ(Collider))<0.15 Then
-							If Abs(EntityX(d\frameobj, True)-EntityX(Collider))<0.7*(d\dir*2+1) Then
-								z# = CurveValue(EntityZ(d\frameobj,True)+0.15*Sgn(EntityZ(Collider)-EntityZ(d\frameobj, True)), EntityZ(Collider), 5)
-								PositionEntity Collider, EntityX(Collider), EntityY(Collider), z
-							EndIf
-						EndIf
-					Else
-						If Abs(EntityX(d\frameobj, True)-EntityX(Collider))<0.15 Then	
-							If Abs(EntityZ(d\frameobj, True)-EntityZ(Collider))<0.7*(d\dir*2+1) Then
-								x# = CurveValue(EntityX(d\frameobj,True)+0.15*Sgn(EntityX(Collider)-EntityX(d\frameobj, True)), EntityX(Collider), 5)
-								PositionEntity Collider, x, EntityY(Collider), EntityZ(Collider)
-							EndIf
-						EndIf
+					TFormPoint(EntityX(Collider), 0, EntityZ(Collider), 0, d\frameobj)
+					Local dx# = TFormedX() * EntityScaleX(d\frameobj, True)
+					Local dz# = TFormedZ() * EntityScaleZ(d\frameobj, True)
+
+					If Abs(dz)<0.15 And Abs(dx)<0.7*((d\dir=1)*2+1) Then
+						z# = CurveValue(0.15*Sgn(dz), dz, 5)
+						TFormPoint(TFormedX(), 0, z / EntityScaleZ(d\frameobj, True), d\frameobj, 0)
+						PositionEntity Collider, TFormedX(), EntityY(Collider), TFormedZ()
 					EndIf
 					
 					If d\DoorHitOBJ <> 0 Then
@@ -2708,8 +1616,12 @@ Function UseDoor(d.Doors, showmsg%=True, playsfx%=True)
 			ActivateScannerMsgCooldown()
 		Else
 			If showmsg = True And (Not HasScannerMsg()) Then 
-				PlaySound_Strict ScannerSFX2
-				Msg = I_Loc\MessageButton_DnaSelf
+				If LostHands Then
+					Msg = I_Loc\MessageButton_DnaNohands
+				Else
+					PlaySound_Strict ScannerSFX2
+					Msg = I_Loc\MessageButton_DnaSelf
+				EndIf
 				MsgTimer = 70 * 10
 			EndIf
 			Return			
@@ -2788,7 +1700,7 @@ Function UseDoor(d.Doors, showmsg%=True, playsfx%=True)
 	;If d\dir = 1 Then sound = 0 Else sound=Rand(0, 2)
 	If d\dir = 1 Then sound=Rand(0, 1) Else sound=Rand(0, 2)
 	
-	If playsfx=True Then
+	If playsfx=True And d\dir < 4 Then
 		If d\open Then
 			If d\LinkedDoor <> Null Then d\LinkedDoor\timerstate = d\LinkedDoor\timer
 			d\timerstate = d\timer
@@ -3133,6 +2045,8 @@ Global Collider%, Head%
 Global FogNVTexture%
 Global NVTexture%, NVOverlay%
 
+Global PumpkinTexture%, PumpkinTexture2%, PumpkinOverlay%
+
 Global TeslaTexture%
 
 Global LightTexture%, Light%
@@ -3234,7 +2148,7 @@ While IsRunning
 	PrevTime = CurTime
 	If (SpeedRunMode Lor (Not (MainMenuOpen Lor MenuOpen))) And SelectedEnding="" And TimerStopped=0 Then PlayTime = PlayTime + ElapsedTime
 	PrevFPSFactor = FPSfactor
-	FPSfactor = Min(ElapsedTime / 1000.0 * 70, 5.0)
+	FPSfactor = Min(ElapsedTime / 1000.0 * 70, 5.0) * TimeScale
 	FPSfactor2 = FPSfactor
 
 	If IsPaused() Then FPSfactor = 0
@@ -3301,7 +2215,7 @@ While IsRunning
 		
 		If FPSfactor > 0 And PlayerRoom\RoomTemplate\Name <> "dimension1499" Then UpdateSecurityCams()
 		
-		If PlayerRoom\RoomTemplate\Name <> "pocketdimension" And PlayerRoom\RoomTemplate\Name <> "gatea" And PlayerRoom\RoomTemplate\Name <> "exit1" And (Not IsAnyMenuOpen()) Then 
+		If PlayerRoom\RoomTemplate\Name <> "pocketdimension" And PlayerRoom\RoomTemplate\Name <> "gatea" And PlayerRoom\RoomTemplate\Name <> "exit1" And PlayerRoom\RoomTemplate\Name <> "halloweenpd" And (Not IsAnyMenuOpen()) Then 
 			
 			If Rand(1500/FPSfactor) = 1 Then
 				For i = 0 To 5
@@ -3327,6 +2241,9 @@ While IsRunning
 							Exit
 						EndIf
 					Next
+				ElseIf PlayerRoom\RoomTemplate\Name = "halloweenfields"
+					PlayerZone = 5
+					PositionEntity (SoundEmitter, EntityX(SoundEmitter), EntityY(Camera), EntityZ(SoundEmitter))
 				EndIf
 				
 				CurrAmbientSFX = Rand(0,AmbientSFXAmount(PlayerZone)-1)
@@ -3347,7 +2264,7 @@ While IsRunning
 			
 			If Rand(50000/FPSfactor) = 1 Then
 				Local RN$ = PlayerRoom\RoomTemplate\Name$
-				If RN$ <> "room860" And RN$ <> "room1123" And RN$ <> "173" And RN$ <> "dimension1499" Then
+				If RN$ <> "room860" And RN$ <> "room1123" And RN$ <> "173" And RN$ <> "dimension1499" And RN$ <> "halloweenfields" Then
 					If FPSfactor > 0 Then LightBlink = Rnd(1.0,2.0)
 					PlaySound_Strict  LoadTempSound("SFX\SCP\079\Broadcast"+Rand(1,7)+".ogg")
 				EndIf 
@@ -3371,6 +2288,7 @@ While IsRunning
 			PlayerSoundVolume = CurveValue(0.0, PlayerSoundVolume, 5.0)
 			
 			CanSave% = True
+			If LostHands Then CanSave = False
 			UpdateDeafPlayer()
 			UpdateEmitters()
 			MouseLook()
@@ -3414,6 +2332,7 @@ While IsRunning
 				UpdateParticles_Devil()
 				UpdateParticles_Time# = UpdateParticles_Time# - 1
 			EndIf
+			ProcessBindings()
 		EndIf
 		
 		If InfiniteStamina% Then Stamina = Min(100, Stamina + (100.0-Stamina)*0.01*FPSfactor)
@@ -3679,7 +2598,7 @@ While IsRunning
 		EndIf
 		
 		If MsgTimer > 0 Then
-			If HUDenabled Then
+			If HUDenabled Lor HUDenabledLegacy Then
 				;If temp = True -> move the message below
 				Local temp% = False
 				If (Not InvOpen And OtherOpen = Null) Then
@@ -3755,6 +2674,7 @@ While IsRunning
 				Case 102 newAreaStr = "GateA"
 				Case 103 newAreaStr = "GateB"
 				Case 104 newAreaStr = "MT"
+				Case 666 newAreaStr = "Halloween"
 			End Select
 			Steam_SetRichPresence("gamestatus", newAreaStr)
 			SteamLastStatus = PlayerArea
@@ -3792,6 +2712,7 @@ While IsRunning
 					Case 102 newAreaStr = "Escaping through Gate A"
 					Case 103 newAreaStr = "Escaping through Gate B"
 					Case 104 newAreaStr = "Lost in the Maintenance Tunnels"
+					Case 666 newAreaStr = "Enjoying the Halloween spirit"
 				End Select
 				BlitzcordSetActivityDetails(newAreaStr)
 				BlitzcordUpdateActivity()
@@ -3833,6 +2754,7 @@ Function GetCurrentPlayerArea%()
 		Case "gatea" Return 102
 		Case "exit1" Return 103
 		Case "room2tunnel" If EntityY(Collider,True)>4.0 Then Return 104
+		Case "halloweenpd", "halloweenfields" Return 666
 		Default Return PlayerZone
 	End Select
 End Function
@@ -3921,7 +2843,7 @@ Function QuickLoadEvents()
 						e\room\NPC[0] = CreateNPC(NPCtypeD, EntityX(e\room\Objects[0],True),EntityY(e\room\Objects[0],True),EntityZ(e\room\Objects[0],True))
 					EndIf
 					
-					ChangeNPCTextureID(e\room\NPC[0],4)
+					ChangeNPCTextureID(e\room\NPC[0],5)
 					e\EventStr = "load1"
 				ElseIf e\EventStr = "load1"
 					QuickLoadPercent = 20
@@ -3937,7 +2859,7 @@ Function QuickLoadEvents()
 						e\room\NPC[1] = CreateNPC(NPCtypeD, EntityX(e\room\Objects[1],True),EntityY(e\room\Objects[1],True),EntityZ(e\room\Objects[1],True))
 					EndIf
 					
-					ChangeNPCTextureID(e\room\NPC[1],2)
+					ChangeNPCTextureID(e\room\NPC[1],3)
 					e\EventStr = "load4"
 				ElseIf e\EventStr = "load4"
 					QuickLoadPercent = 80
@@ -4156,7 +3078,6 @@ Function Kill()
 		End If
 		
 		KillTimer = Min(-1, KillTimer)
-		ShowEntity Head
 		PositionEntity(Head, EntityX(Camera, True), EntityY(Camera, True), EntityZ(Camera, True), True)
 		ResetEntity (Head)
 		RotateEntity(Head, 0, EntityYaw(Camera), 0)		
@@ -4267,13 +3188,14 @@ Function DrawEnding()
 					Local roomamount = 0, roomsfound = 0
 					For r.Rooms = Each Rooms
 						Local RN$ = r\RoomTemplate\Name$
-						If RN$ <> "dimension1499" And RN$ <> "gatea" And RN$ <> "pocketdimension" Then 
+						If RN$ <> "dimension1499" And RN$ <> "gatea" And RN$ <> "pocketdimension" And RN$ <> "halloweenfields" And RN$ <> "halloweenpd" Then 
 							roomamount = roomamount + 1
 							roomsfound = roomsfound + r\found
 						EndIf
 					Next
 					
-					Local docamount=0, docsfound=0
+					; Halloween event docs should not count here.
+					Local docamount=-2, docsfound=0
 					For itt.ItemTemplates = Each ItemTemplates
 						If itt\group = "paper" Then
 							docamount=docamount+1
@@ -4525,10 +3447,12 @@ End Function
 ;--------------------------------------- player controls -------------------------------------------
 
 Global MoveX%, MoveZ%
+Global PlayerStepped%
 
 Function MovePlayer()
 	CatchErrors("Uncaught (MovePlayer)")
 	Local Sprint# = 1.0, Speed# = 0.018, i%, angle#
+	PlayerStepped = False
 	
 	If SuperMan Then
 		Speed = Speed * 3
@@ -4641,7 +3565,8 @@ Function MovePlayer()
 			temp# = (Shake Mod 360)
 			Local tempchn%
 			If (Not UnableToMove%) Then Shake# = (Shake + FPSfactor * Min(Sprint, 1.5) * 7) Mod 720
-			If temp < 180 And (Shake Mod 360) >= 180 And KillTimer>=0 Then
+			If temp < 180 And (Shake Mod 360) >= 180 And KillTimer>=0 And FallTimer >= 0 Then
+				PlayerStepped = True
 				If CurrStepSFX=0 Then
 					temp = GetStepSound(Collider)
 					
@@ -4656,6 +3581,11 @@ Function MovePlayer()
 					tempchn% = PlaySound_Strict(Step2SFX(Rand(0, 2)))
 				ElseIf CurrStepSFX=2
 					tempchn% = PlaySound_Strict(Step2SFX(Rand(3,5)))
+					If Sprint = 1.0 Then
+						PlayerSoundVolume = Max(2.5-(Crouch*0.6),PlayerSoundVolume)
+					Else
+						PlayerSoundVolume = Max(4.0,PlayerSoundVolume)
+					End If
 				ElseIf CurrStepSFX=3
 					If Sprint = 1.0 Then
 						PlayerSoundVolume = Max(2.5-(Crouch*0.6),PlayerSoundVolume)
@@ -4760,7 +3690,7 @@ Function MovePlayer()
 			CurrSpeed = Max(CurveValue(0.0, CurrSpeed-0.1, 1.0),0.0)
 		EndIf
 		
-		If (Not UnableToMove%) Then TranslateEntity Collider, Cos(angle)*CurrSpeed * FPSfactor, 0, Sin(angle)*CurrSpeed * FPSfactor, True
+		If (Not UnableToMove%) And KillTimer >= 0 And FallTimer >= 0 Then TranslateEntity Collider, Cos(angle)*CurrSpeed * FPSfactor, 0, Sin(angle)*CurrSpeed * FPSfactor, True
 		
 		Local CollidedFloor% = False
 		For i = 1 To CountCollisions(Collider)
@@ -4879,7 +3809,7 @@ Function ZoomCamera(fov%)
 	CameraZoom(Camera, Min(1.0+(CurrCameraZoom/400.0),1.1) / Tan((ATan(Tan(fov%/2.0)*RealGraphicWidth/RealGraphicHeight))))
 End Function
 
-Function MouseLook()
+Function MouseLook(handleInput% = True)
 	Local i%
 	
 	CameraShake = Max(CameraShake - (FPSfactor / 10), 0)
@@ -4926,25 +3856,25 @@ Function MouseLook()
 			mouse_y_speed_1# = SmoothMouseValue(rawY, mouse_y_speed_1, tau)
 		EndIf
 
-		If IsNaN(mouse_x_speed_1) Then mouse_x_speed_1 = 0
-		If IsNaN(mouse_y_speed_1) Then mouse_y_speed_1 = 0
+		If IsNaN(mouse_x_speed_1) Lor (Not handleInput) Then mouse_x_speed_1 = 0
+		If IsNaN(mouse_y_speed_1) Lor (Not handleInput) Then mouse_y_speed_1 = 0
 
 		If InvertMouse Then mouse_y_speed_1 = -mouse_y_speed_1
 		
 		Local the_yaw# = mouse_x_speed_1 * mouselook_x_inc# / (1.0+WearingVest)
 		Local the_pitch# = mouse_y_speed_1 * mouselook_y_inc# / (1.0+WearingVest)
 		
-		TurnEntity Collider, 0.0, -the_yaw#, 0.0 ; Turn the user on the Y (yaw) axis.
+		TurnEntity Collider, 0.0, -the_yaw#, 0.0, 1 ; Turn the user on the Y (yaw) axis.
 		user_camera_pitch# = user_camera_pitch# + the_pitch#
 		; -- Limit the user;s camera To within 180 degrees of pitch rotation. ;EntityPitch(); returns useless values so we need To use a variable To keep track of the camera pitch.
 		If user_camera_pitch# > 70.0 Then user_camera_pitch# = 70.0
 		If user_camera_pitch# < - 70.0 Then user_camera_pitch# = -70.0
 		
-		RotateEntity Camera, WrapAngle(user_camera_pitch + Rnd(-CameraShake*FPSfactor, CameraShake*FPSfactor)), WrapAngle(EntityYaw(Collider) + Rnd(-CameraShake*FPSfactor, CameraShake*FPSfactor)), roll ; Pitch the user;s camera up And down.
+		RotateEntity Camera, WrapAngle(user_camera_pitch + Rnd(-CameraShake*FPSfactor, CameraShake*FPSfactor) * ViewBobScale), WrapAngle(EntityYaw(Collider) + Rnd(-CameraShake*FPSfactor, CameraShake*FPSfactor) * ViewBobScale), roll ; Pitch the user;s camera up And down.
 		
-		If PlayerRoom\RoomTemplate\Name = "pocketdimension" Then
+		If PlayerRoom\RoomTemplate\Name = "pocketdimension" Lor PlayerRoom\RoomTemplate\Name = "halloweenpd" Then
 			If EntityY(Collider)<2000*RoomScale Or EntityY(Collider)>2608*RoomScale Then
-				RotateEntity Camera, WrapAngle(EntityPitch(Camera)),WrapAngle(EntityYaw(Camera)), roll+WrapAngle(Sin(MilliSecs()/150.0)*30.0) ; Pitch the user;s camera up And down.
+				RotateEntity Camera, WrapAngle(EntityPitch(Camera)),WrapAngle(EntityYaw(Camera)), roll+WrapAngle(Sin(MilliSecs()/150.0)*30.0)*ViewBobScale ; Pitch the user;s camera up And down.
 			EndIf
 		EndIf
 		
@@ -5004,7 +3934,7 @@ Function MouseLook()
 		End If
 	EndIf
 	
-	If SelectedEnding = "" Then MoveMouse viewport_center_x, viewport_center_y
+	If SelectedEnding = "" And handleInput Then MoveMouse viewport_center_x, viewport_center_y
 	
 	If WearingGasMask Or WearingHazmat Or Wearing1499 Then
 		If Wearing714 = False Then
@@ -5038,6 +3968,52 @@ Function MouseLook()
 		AmbientLightRooms(AmbientLight)
 		HideEntity(NVOverlay)
 		EntityTexture(Fog, FogTexture)
+	EndIf
+
+	If WearingPumpkin Then
+		If PumpkinOverlay = 0 Then
+			PumpkinTexture = LoadTexture_Strict("GFX\Halloween\PumpkinOverlay.png", 1)
+			PumpkinTexture2 = LoadTexture_Strict("GFX\Halloween\PumpkinOverlaySCP.png", 1)
+			PumpkinOverlay = CreateSprite(ark_blur_cam)
+			ScaleSprite(PumpkinOverlay, 1.0, Max(Float(GraphicHeight) / Float(GraphicWidth), 0.8))
+			EntityBlend (PumpkinOverlay, 2)
+			EntityFX(PumpkinOverlay, 1)
+			EntityOrder PumpkinOverlay, -1004
+			MoveEntity(PumpkinOverlay, -PixelWidth, PixelHeight, 1.0)
+		EndIf
+		If WearingPumpkin = 1 Then
+			EntityTexture(PumpkinOverlay, PumpkinTexture)
+		Else
+			EntityTexture(PumpkinOverlay, PumpkinTexture2)
+		EndIf
+		ShowEntity(PumpkinOverlay)
+		Local lifeTime%
+		Select SelectedDifficulty\otherFactors
+			Case EASY
+				lifeTime = 6 * 60 * 70
+			Case NORMAL
+				lifeTime = 4 * 60 * 70
+			Case HARD
+				lifeTime = 2 * 60 * 70
+		End Select
+		For i% = 0 To MaxItemAmount - 1
+			Local it.Items = Inventory(i)
+			If it = Null Lor it\itemtemplate\name <> "pumpkin" Lor it\state < 0 Then Continue
+			If it\state < lifeTime / 2 And it\state + FPSfactor >= lifeTime / 2 Then
+				Msg = I_Loc\MessageItem_PumpkinmaskRotStart
+				MsgTimer = 5 * 70
+			EndIf
+
+			it\state = it\state + FPSfactor
+			If it\state >= lifeTime Then
+				Msg = I_Loc\MessageItem_PumpkinmaskRotEnd
+				MsgTimer = 5 * 70
+				RemoveItem(it)
+			EndIf
+			Exit
+		Next
+	Else
+		If EntityExist(PumpkinOverlay) Then HideEntity(PumpkinOverlay)
 	EndIf
 	
 	For i = 0 To 5
@@ -5184,11 +4160,26 @@ Function DrawGUI()
 				EndIf
 			EndIf
 		Next
+	ElseIf PlayerRoom\RoomTemplate\Name = "halloweenpd" Then
+		For e.Events = Each Events
+			If e\room <> PlayerRoom Then Continue
+			If e\Sound = 0 Then Exit
+			If LightBlink >= 3 Then
+				DrawImage e\img, GraphicWidth/2-Rand(390,310), GraphicHeight/2-Rand(290,310)
+				If (Not ChannelPlaying(e\SoundCHN)) Then
+					e\SoundCHN = PlaySound_Strict(e\Sound)
+				EndIf
+			Else
+				If e\img <> 0 Then FreeImage e\img : e\img = 0
+				If (Not ChannelPlaying(e\SoundCHN)) Then FreeSound_Strict(e\Sound) : e\Sound = 0
+			EndIf
+			Exit
+		Next
 	EndIf
 	
 	
 	If ClosestButton <> 0 And (Not IsPaused()) Then
-		If HUDenabled Then
+		If HUDenabled Lor HUDenabledLegacy Then
 			temp% = CreatePivot()
 			PositionEntity temp, EntityX(Camera), EntityY(Camera), EntityZ(Camera)
 			PointEntity temp, ClosestButton
@@ -5201,7 +4192,7 @@ Function DrawGUI()
 			
 			FreeEntity (temp)
 			
-			DrawImage(HandIcon, GraphicWidth / 2 + Sin(yawvalue) * (GraphicWidth / 3) - 32 * HUDScale, GraphicHeight / 2 - Sin(pitchvalue) * (GraphicHeight / 3) - 32 * HUDScale)
+			DrawImage(GetUsedHandIcon(), GraphicWidth / 2 + Sin(yawvalue) * (GraphicWidth / 3) - 32 * HUDScale, GraphicHeight / 2 - Sin(pitchvalue) * (GraphicHeight / 3) - 32 * HUDScale)
 		EndIf
 
 		If MouseUp1 Then
@@ -5214,10 +4205,14 @@ Function DrawGUI()
 					UseDoor(ClosestDoor,True)				
 				EndIf
 			EndIf
+			; Shaking from pain
+			If LostHands Then
+				CameraShake = 2
+			EndIf
 		EndIf
 	EndIf
 	
-	If HUDenabled Then
+	If HUDenabled Lor HUDenabledLegacy Then
 		If ClosestItem <> Null Then
 			yawvalue# = -DeltaYaw(Camera, ClosestItem\collider)
 			If yawvalue > 90 And yawvalue <= 180 Then yawvalue = 90
@@ -5228,8 +4223,9 @@ Function DrawGUI()
 			
 			DrawImage(HandIcon2, GraphicWidth / 2 + Sin(yawvalue) * (GraphicWidth / 3) - 32 * HUDScale, GraphicHeight / 2 - Sin(pitchvalue) * (GraphicHeight / 3) - 32 * HUDScale)
 		EndIf
-	
-		If DrawHandIcon Then DrawImage(HandIcon, GraphicWidth / 2 - 32 * HUDScale, GraphicHeight / 2 - 32 * HUDScale)
+
+		Local usedHandIcon = GetUsedHandIcon()
+		If DrawHandIcon Then DrawImage(usedHandIcon, GraphicWidth / 2 - 32 * HUDScale, GraphicHeight / 2 - 32 * HUDScale)
 		For i = 0 To 3
 			If DrawArrowIcon(i) Then
 				x = GraphicWidth / 2 - 32 * HUDScale
@@ -5244,7 +4240,7 @@ Function DrawGUI()
 					Case 3
 						x = x - 5 - 64 * HUDScale
 				End Select
-				DrawImage(HandIcon, x, y)
+				DrawImage(usedHandIcon, x, y)
 				Color 0, 0, 0
 				Rect(x + 4, y + 4, 64 * HUDScale - 8, 64 * HUDScale - 8)
 				DrawImage(ArrowIMG(i), x + 21 * HUDScale, y + 21 * HUDScale)
@@ -5677,6 +4673,8 @@ Function DrawGUI()
 						If WearingNightVision=3 Then Rect(x - 3, y - 3, width + 6, height + 6)
 					Case "scp427"
 						If I_427\Using=1 Then Rect(x - 3, y - 3, width + 6, height + 6)
+					Case "pumpkin"
+						If WearingPumpkin<>0 Then Rect(x - 3, y - 3, width + 6, height + 6)
 				End Select
 			EndIf
 			
@@ -5947,6 +4945,51 @@ Function DrawGUI()
 										MsgTimer = 70 * 5
 								End Select
 								;[End Block]
+							Case "killbat"
+								;[Block]
+								Select Inventory(MouseSlot)\itemtemplate\name
+									Case "snav", "snav300", "snav310"
+										If SelectedItem\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX(SelectedItem\itemtemplate\sound))	
+										RemoveItem (SelectedItem)
+										SelectedItem = Null
+										Inventory(MouseSlot)\state = INFINITY
+										Msg = I_Loc\MessageItem_NavBatReplace
+										MsgTimer = 70 * 5
+									Case "snavulti"
+										Msg = I_Loc\MessageItem_NavBatNoplace
+										MsgTimer = 70 * 5
+									Case "radio"
+										If SelectedItem\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX(SelectedItem\itemtemplate\sound))	
+										RemoveItem (SelectedItem)
+										SelectedItem = Null
+										Inventory(MouseSlot)\state = INFINITY
+										Msg = I_Loc\MessageItem_RadioBatReplace
+										MsgTimer = 70 * 5
+									Case "fineradio", "veryfineradio"
+										Msg = I_Loc\MessageItem_RadioBatNoplace
+										MsgTimer = 70 * 5
+									Case "18vradio"
+										If SelectedItem\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX(SelectedItem\itemtemplate\sound))	
+										RemoveItem (SelectedItem)
+										SelectedItem = Null
+										Inventory(MouseSlot)\state = INFINITY
+										Msg = I_Loc\MessageItem_RadioBatReplace
+										MsgTimer = 70 * 5
+									Case "supernv", "nvgoggles"
+										If SelectedItem\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX(SelectedItem\itemtemplate\sound))	
+										RemoveItem (SelectedItem)
+										SelectedItem = Null
+										Inventory(MouseSlot)\state = INFINITY
+										Msg = I_Loc\MessageItem_NvgBatReplace
+										MsgTimer = 70 * 5
+									Case "finenvgoggles"
+										Msg = I_Loc\MessageItem_NvgBatNoplace
+										MsgTimer = 70 * 5
+									Default
+										Msg = I_Loc\MessageItem_Cantcombine
+										MsgTimer = 70 * 5	
+								End Select
+								;[End Block]
 							Default
 								;[Block]
 								Msg = I_Loc\MessageItem_Cantcombine
@@ -5981,6 +5024,7 @@ Function DrawGUI()
 							WearingNightVision = 0
 							StoredCameraFogFar = CameraFogFar
 							CameraFogFar = 30
+							TakeOffPumpkin()
 						EndIf
 						
 						WearingNightVision = (Not WearingNightVision)
@@ -6004,6 +5048,7 @@ Function DrawGUI()
 							WearingNightVision = 0
 							StoredCameraFogFar = CameraFogFar
 							CameraFogFar = 30
+							TakeOffPumpkin()
 						EndIf
 						
 						WearingNightVision = (Not WearingNightVision) * 2
@@ -6027,6 +5072,7 @@ Function DrawGUI()
 							WearingNightVision = 0
 							StoredCameraFogFar = CameraFogFar
 							CameraFogFar = 30
+							TakeOffPumpkin()
 						EndIf
 						
 						WearingNightVision = (Not WearingNightVision) * 3
@@ -6356,29 +5402,29 @@ Function DrawGUI()
 
 						If GetINIInt2(iniStr, loc, "lethal") Then Kill()
 						
-						BlurTimer = Max(BlurTimer + GetINIInt2(iniStr, loc, "blur")*70, 0);*temp
-						CameraShakeTimer = Max(CameraShakeTimer + GetINIString2(iniStr, loc, "camerashake"), 0)
+						BlurTimer = Max(0, BlurTimer + 70*Max(GetINIFloat2(iniStr, loc, "blur"), GetINIFloat2(iniStr, loc, "blurtimer")));*temp
+						CameraShakeTimer = Max(CameraShakeTimer + GetINIFloat2(iniStr, loc, "camerashake"), 0)
 						
-						temp = GetINIInt2(iniStr, loc, "vomit")
-						If temp > 0 Then
+						Local value# = GetINIFloat2(iniStr, loc, "vomit")
+						If value > 0 Then
 							If VomitTimer = 0 Then
-								VomitTimer = temp
+								VomitTimer = value
 							Else
-								VomitTimer = Min(VomitTimer, temp)
+								VomitTimer = Min(VomitTimer, value)
 							EndIf
 						EndIf
 						
-						temp = GetINIInt2(iniStr, loc, "deathtimer")*70
-						If temp > 0 Then
+						value = GetINIFloat2(iniStr, loc, "deathtimer")*70
+						If value > 0 Then
 							If DeathTimer = 0 Then
-								DeathTimer = temp
+								DeathTimer = value
 							Else
-								DeathTimer = Min(DeathTimer, temp)
+								DeathTimer = Min(DeathTimer, value)
 							EndIf
 						EndIf
 						
-						Injuries = Max(Injuries + GetINIInt2(iniStr, loc, "damage") + GetINIInt2(iniStr, loc, "injuries"), 0);*temp
-						Bloodloss = Max(Bloodloss + GetINIInt2(iniStr, loc, "blood loss"), 0);*temp
+						Injuries = Max(Injuries + GetINIFloat2(iniStr, loc, "damage") + GetINIFloat2(iniStr, loc, "injuries"), 0);*temp
+						Bloodloss = Max(Bloodloss + GetINIFloat2(iniStr, loc, "blood loss"), 0);*temp
 						
 						If GetINIInt2(iniStr, loc, "stomachache") Lor GetINIInt2(iniStr, loc, "stomach ache") Then SCP1025state[3]=Max(1, SCP1025state[3])
 						
@@ -6485,7 +5531,7 @@ Function DrawGUI()
 					DrawImage(SelectedItem\itemtemplate\img, x, y)
 					
 					If SelectedItem\state > 0 Then
-						If PlayerRoom\RoomTemplate\Name = "pocketdimension" Or CoffinDistance < 4.0 Then
+						If PlayerRoom\RoomTemplate\Name = "pocketdimension" Lor PlayerRoom\RoomTemplate\Name = "halloweenpd" Lor CoffinDistance < 4.0 Then
 							ResumeChannelWithSubtitles(RadioCHN(5))
 							If ChannelPlaying(RadioCHN(5)) = False Then RadioCHN(5) = PlaySound_Strict(RadioStatic)	
 						Else
@@ -6849,10 +5895,12 @@ Function DrawGUI()
 					If Wearing714=1 Then
 						Msg = I_Loc\MessageItem_Scp714Off
 						Wearing714 = False
-					Else
+					Else If Not LostHands
 						GiveAchievement(Achv714)
 						Msg = I_Loc\MessageItem_Scp714On
 						Wearing714 = True
+					Else
+						Msg = I_Loc\MessageItem_Scp714Nohands
 					EndIf
 					MsgTimer = 70 * 5
 					SelectedItem = Null	
@@ -6886,6 +5934,7 @@ Function DrawGUI()
 								If WearingNightVision Then CameraFogFar = StoredCameraFogFar
 								WearingGasMask = 0
 								WearingNightVision = 0
+								TakeOffPumpkin()
 							EndIf
 							SelectedItem\state=0
 							MsgTimer = 70 * 5
@@ -6935,6 +5984,7 @@ Function DrawGUI()
 							If WearingNightVision Then CameraFogFar = StoredCameraFogFar
 							WearingNightVision = 0
 							WearingGasMask = 0
+							TakeOffPumpkin()
 						EndIf
 						If SelectedItem\itemtemplate\name="gasmask3" Then
 							If WearingGasMask = 0 Then WearingGasMask = 3 Else WearingGasMask=0
@@ -6974,7 +6024,7 @@ Function DrawGUI()
 					SetFont Font3
 					
 					Local NavWorks% = True
-					If PlayerRoom\RoomTemplate\Name$ = "pocketdimension" Or PlayerRoom\RoomTemplate\Name$ = "dimension1499" Then
+					If PlayerRoom\RoomTemplate\Name$ = "pocketdimension" Lor PlayerRoom\RoomTemplate\Name$ = "halloweenpd" Lor PlayerRoom\RoomTemplate\Name$ = "halloweenfields" Lor PlayerRoom\RoomTemplate\Name$ = "dimension1499" Then
 						NavWorks% = False
 					ElseIf PlayerRoom\RoomTemplate\Name$ = "room860" Then
 						For e.Events = Each Events
@@ -7008,7 +6058,8 @@ Function DrawGUI()
 							yy = yy + 70 * HUDScale
 							Local screenWidth% = 270*HUDScale
 
-							Local roomHalf% = NavSize / 2
+							Local navSize = ImageWidth(NavImages(0))
+							Local roomHalf% = navSize / 2
 							
 							x = x - roomHalf + (((EntityX(Collider)-4.0)+8.0) Mod 8.0)*3*HUDScale
 							y = y + roomHalf - (((EntityZ(Collider)-4.0)+8.0) Mod 8.0)*3*HUDScale
@@ -7017,7 +6068,7 @@ Function DrawGUI()
 									
 									If CoffinDistance > 16.0 Or Rnd(16.0)<CoffinDistance Then 
 										If MapTemp(x2, z2)>0 And (MapFound(x2, z2) > 0 Or SelectedItem\itemtemplate\name = "snav310" Or SelectedItem\itemtemplate\name = "snavulti") Then
-											Local drawx% = x + (PlayerX - 1 - x2) * NavSize , drawy% = y - (PlayerZ - 1 - z2) * NavSize
+											Local drawx% = x + (PlayerX - 1 - x2) * navSize , drawy% = y - (PlayerZ - 1 - z2) * navSize
 											
 											If x2+1<=MapWidth Then
 												If MapTemp(x2+1,z2)=False
@@ -7202,6 +6253,7 @@ Function DrawGUI()
 							If WearingNightVision Then CameraFogFar = StoredCameraFogFar
 							WearingGasMask = 0
 							WearingNightVision = 0
+							TakeOffPumpkin()
 							For r.Rooms = Each Rooms
 								If r\RoomTemplate\Name = "dimension1499" Then
 									BlinkTimer = -1
@@ -7347,6 +6399,158 @@ Function DrawGUI()
 						SelectedItem = Null
 					EndIf
 					;[End Block]
+				Case "eyecandy"
+					;[Block]
+					If CanUseItem(False, False, True)						
+						Local closestWaypoint.WayPoints
+						Local minDist# = INFINITY
+						Local collX# = EntityX(Collider), collY# = EntityY(Collider), collZ# = EntityZ(Collider)
+						For w.WayPoints = Each WayPoints
+							dist# = (EntityX(w\obj, True) - collX)^2 + (EntityY(w\obj, True) - collY)^2 + (EntityZ(w\obj, True) - collZ)^2
+							If dist < minDist And dist > 0.4 Then
+								closestWaypoint = w
+								minDist = dist
+							EndIf
+						Next
+						If minDist < 8 * 8 Then
+							If SteamActive And (Not UsedConsole) Then Steam_SetStatInt("candies_eaten", Steam_GetStatInt("candies_eaten") + 1)
+							
+							Local jello.NPCs = CreateNPC(NPCtype066, EntityX(closestWaypoint\obj, True), EntityY(closestWaypoint\obj, True) + 0.1, EntityZ(closestWaypoint\obj, True))
+							jello\State = 2
+							it = CreateItem("killbat", 0, 0, 0)
+							it\state = True
+							ChangeNPCTextureID(jello, 1)
+							EntityParent(it\collider, jello\ManipulationType)
+							PositionEntity(it\collider, 0, 0, 0)
+							ResetEntity(it\collider)
+
+							RemoveItem(SelectedItem)
+							
+							LightVolume = -1.25
+							
+							Msg = I_Loc\MessageItem_EyecandyUse
+						Else
+							Msg = I_Loc\MessageItem_EyecandyUseShock
+						EndIf
+						MsgTimer = 70*12
+
+						PlaySound_Strict(LoadTempSound("SFX\Room\Tesla\Shock.ogg"))
+						LightFlash = 0.5
+
+						SelectedItem = Null
+					EndIf
+					;[End Block]
+				Case "lollipop"
+					;[Block]
+					If CanUseItem(False, False, True)
+						If SteamActive And (Not UsedConsole) Then Steam_SetStatInt("candies_eaten", Steam_GetStatInt("candies_eaten") + 1)
+
+						MsgTimer = 70*10
+						If PlayerRoom\RoomTemplate\Name = "halloweenfields" Then
+							Msg = I_Loc\MessageItem_LollipopUseNumb
+							RemoveItem(SelectedItem)
+						Else
+							If CanTeleportToHalloweenRoom() And (Not IsTeleportingFromHalloweenCandy()) Then
+								Msg = I_Loc\MessageItem_LollipopUse
+								SelectedItem\state = True
+								DropItem(SelectedItem, False)
+								PositionEntity(SelectedItem\collider, 0, 0, 0)
+								ResetEntity(SelectedItem\collider)
+								PlaySound_Strict(LoadTempSound("SFX\Halloween\LollipopEat.ogg"))
+							Else
+								Msg = I_Loc\MessageItem_CandyNouse
+								MsgTimer = 70*5
+							EndIf
+						EndIf
+
+						SelectedItem = Null
+					EndIf
+					;[End Block]
+				Case "chocolate"
+					;[Block]
+					If CanUseItem(False, False, True)
+						If SteamActive And (Not UsedConsole) Then Steam_SetStatInt("candies_eaten", Steam_GetStatInt("candies_eaten") + 1)
+
+						MsgTimer = 70*10
+						If PlayerRoom\RoomTemplate\Name = "halloweenpd" Lor PlayerRoom\RoomTemplate\Name = "pocketdimension" Then
+							Msg = I_Loc\MessageItem_ChocolateUseNumb
+							RemoveItem(SelectedItem)
+						Else
+							If CanTeleportToHalloweenRoom() And (Not IsTeleportingFromHalloweenCandy()) Then
+								Msg = I_Loc\MessageItem_ChocolateUse
+								SelectedItem\state = True
+								DropItem(SelectedItem, False)
+								PositionEntity(SelectedItem\collider, 0, 0, 0)
+								ResetEntity(SelectedItem\collider)
+
+								de.Decals = CreateDecal(0, EntityX(Collider), EntityY(Collider)-0.29, EntityZ(Collider), 90, Rand(360), 0)
+								de\Size = 0.05 : de\SizeChange = 0.001 : EntityAlpha(de\obj, 0.8) : UpdateDecals
+								PlaySound_Strict(DecaySFX(0))
+							Else
+								Msg = I_Loc\MessageItem_CandyNouse
+								MsgTimer = 70*5
+							EndIf
+						EndIf
+
+						SelectedItem = Null
+					EndIf
+					;[End Block]
+				Case "pumpkin"
+					;[Block]
+					If Wearing1499 = 0 And WearingHazmat = 0 And WearingGasMask = 0 Then
+						If WearingPumpkin Then
+							Msg = I_Loc\MessageItem_PumpkinmaskOff
+							WearingPumpkin = 0
+						Else
+							If SelectedItem\state < 0 Then
+								SelectedItem\state = 0
+								If PlayerRoom\RoomTemplate\Name = "halloweenfields" Then
+									If TeleportFromHalloweenRoom() Then
+										PlaySound_Strict(HorrorSFX(11))
+										If SteamActive And (Not UsedConsole) Then Steam_Achieve("AchvHlwnLolly")
+									EndIf
+								EndIf
+							EndIf
+							Msg = I_Loc\MessageItem_PumpkinmaskOn
+							If WearingNightVision Then CameraFogFar = StoredCameraFogFar
+							WearingNightVision = 0
+							If AnimTime(SelectedItem\model) = 0 Then
+								WearingPumpkin = 1
+							Else
+								WearingPumpkin = 2
+							EndIf
+						EndIf
+						NoTarget = WearingPumpkin
+					Else
+						Msg = I_Loc\MessageItem_PumpkinmaskConflict
+					EndIf
+					SelectedItem = Null
+					MsgTimer = 70 * 5
+					;[End Block]
+				Case "boneflute"
+					;[Block]
+					PlaySound_Strict(LoadTempSound("SFX\Halloween\deathwhistle.ogg"))
+					If PlayerRoom\RoomTemplate\Name = "pocketdimension" Lor PlayerRoom\RoomTemplate\Name = "halloweenpd" Then
+						PlaySound_Strict(OldManSFX(3))
+					Else
+						If Curr106\State <= 0 And PlayerRoom\RoomTemplate\Name <> "gatea" Then
+							If SelectedItem\state > 240*70 Then
+								PlaySound_Strict(OldManSFX(3))
+							Else
+								Curr106\State3 = True
+								; Fully emerged, spawn new decal
+								If Curr106\State <= - 10 Then
+									de.Decals = CreateDecal(0, EntityX(Curr106\Collider),0.01,EntityZ(Curr106\Collider), 90, Rand(360), 0)
+									de\Size = 0.2 : de\SizeChange = 0.004 : EntityAlpha(de\obj, 0.8) : UpdateDecals()
+								EndIf
+							EndIf
+						Else
+							Curr106\State = Min(Curr106\State, 70*3)
+							SelectedItem\state = SelectedItem\state + 120*70
+						EndIf
+					EndIf
+					SelectedItem = Null
+					;[End Block]
 				Default
 					If SelectedItem\itemtemplate\group = "paper" Lor SelectedItem\itemtemplate\name = "ticket" Then
 						;[Block]
@@ -7479,13 +6683,59 @@ Function DrawGUI()
 	CatchErrors("DrawGUI")
 End Function
 
+Function CanTeleportToHalloweenRoom()
+	Select PlayerRoom\RoomTemplate\Name
+		Case "gatea", "dimension1499", "pocketdimension", "halloweenpd", "halloweenfields"
+			Return False
+		Case "exit1", "room860", "room1123"
+			Return EntityY(Collider)<1
+		Default
+			Return True
+	End Select
+End Function
+
+Function IsTeleportingFromHalloweenCandy()
+	For i.Items = Each Items
+		If i\itemtemplate\group = "candy" And i\state > 0 Then
+			Return True
+		EndIf
+	Next
+	Return False
+End Function
+
+Function TeleportFromHalloweenRoom%()
+	For r.Rooms = Each Rooms
+		If r\RoomTemplate\Name = "room4info" Then
+			Teleport(r)
+			Return True
+		EndIf
+	Next
+	If Not found Then
+		For r.Rooms = Each Rooms
+			If r\RoomTemplate\Name = "room2testroom2" Then
+				Teleport(r)
+				Return True
+			EndIf
+		Next
+	EndIf
+	Return False
+End Function
+
+Function FillHalloweenPDWithBones(r.Rooms)
+	Local i% = 0
+	While r\Objects[i] <> 0
+		CreateItem("bone", EntityX(r\Objects[i], True), EntityY(r\Objects[i], True), EntityZ(r\Objects[i], True))
+		i = i + 1
+	Wend
+End Function
+
 Function DrawItemImg(i.Items)
-	If Not HUDenabled Then Return
+	If (Not HUDenabled) And (Not HUDenabledLegacy) Then Return
 	DrawImage(i\itemtemplate\invimg, GraphicWidth / 2 - ImageWidth(i\itemtemplate\invimg) / 2, GraphicHeight / 2 - ImageHeight(i\itemtemplate\invimg) / 2)
 End Function
 
 Function DrawItemUseProgress(i.Items)
-	If Not HUDenabled Then Return
+	If (Not HUDenabled) And (Not HUDenabledLegacy) Then Return
 	DrawItemImg(i)
 	DrawBar(BlinkMeterIMG, GraphicWidth / 2, GraphicHeight / 2 + 80 * HUDScale, 300 * HUDScale, i\state / 100.0, True)
 End Function
@@ -7504,42 +6754,42 @@ Function ResetDiseases()
 End Function
 
 Function DrawHUD()
-	If Not HUDenabled Then Return
-
 	If SpeedRunMode Then DrawTimer()
 
 	If ShowMap Then DrawMap()
 
-	Local width% = 204 * HUDScale
-	Local x% = HUDStartX + 80 * HUDScale
-	Local y% = HUDEndY - 95 * HUDScale
+	If HUDenabled Then
+		Local width% = 204 * HUDScale
+		Local x% = HUDStartX + 80 * HUDScale
+		Local y% = HUDEndY - 95 * HUDScale
 
-	DrawBar(BlinkMeterIMG, x, y, width, BlinkTimer / BLINKFREQ)
-	Color 0, 0, 0
-	Rect(x - 50 * HUDScale, y, 30 * HUDScale, 30 * HUDScale)
-	
-	If EyeIrritation > 0 Then
-		Color 200, 0, 0
-		Rect(x - 50 * HUDScale - 3, y - 3, 30 * HUDScale + 6, 30 * HUDScale + 6)
-	End If
-	
-	Color 255, 255, 255
-	Rect(x - 50 * HUDScale - 1, y - 1, 30 * HUDScale + 2, 30 * HUDScale + 2, False)
-	
-	DrawImage BlinkIcon, x - 50 * HUDScale, y
-	
-	y = HUDEndY - 55 * HUDScale
-	DrawBar(StaminaMeterIMG, x, y, width, Stamina / 100.0)
-	
-	Color 0, 0, 0
-	Rect(x - 50 * HUDScale, y, 30 * HUDScale, 30 * HUDScale)
-	
-	Color 255, 255, 255
-	Rect(x - 50 * HUDScale - 1, y - 1, 30 * HUDScale + 2, 30 * HUDScale + 2, False)
-	If Crouch Then
-		DrawImage CrouchIcon, x - 50 * HUDScale, y
-	Else
-		DrawImage SprintIcon, x - 50 * HUDScale, y
+		DrawBar(BlinkMeterIMG, x, y, width, BlinkTimer / BLINKFREQ)
+		Color 0, 0, 0
+		Rect(x - 50 * HUDScale, y, 30 * HUDScale, 30 * HUDScale)
+		
+		If EyeIrritation > 0 Then
+			Color 200, 0, 0
+			Rect(x - 50 * HUDScale - 3, y - 3, 30 * HUDScale + 6, 30 * HUDScale + 6)
+		End If
+		
+		Color 255, 255, 255
+		Rect(x - 50 * HUDScale - 1, y - 1, 30 * HUDScale + 2, 30 * HUDScale + 2, False)
+		
+		DrawImage BlinkIcon, x - 50 * HUDScale, y
+		
+		y = HUDEndY - 55 * HUDScale
+		DrawBar(StaminaMeterIMG, x, y, width, Stamina / 100.0)
+		
+		Color 0, 0, 0
+		Rect(x - 50 * HUDScale, y, 30 * HUDScale, 30 * HUDScale)
+		
+		Color 255, 255, 255
+		Rect(x - 50 * HUDScale - 1, y - 1, 30 * HUDScale + 2, 30 * HUDScale + 2, False)
+		If Crouch Then
+			DrawImage CrouchIcon, x - 50 * HUDScale, y
+		Else
+			DrawImage SprintIcon, x - 50 * HUDScale, y
+		EndIf
 	EndIf
 
 	If DebugHUD Then
@@ -7637,7 +6887,16 @@ Function DrawMap()
 			Color r\RoomTemplate\r, r\RoomTemplate\g, r\RoomTemplate\b
 		EndIf
 		
-		Rect(startX + ((18 - (r\x / 8)) * cellSize), startY + ((r\z / 8) * cellSize), cellSize, cellSize, 1)
+		Local x% = startX + ((18 - (r\x / 8)) * cellSize)
+		Local y% = startY + ((r\z / 8) * cellSize)
+
+		If MouseOn(x, y, cellSize, cellSize) 
+			Color 100, 255, 100
+			If MouseHit1
+				Teleport(r)
+			EndIf
+		EndIf
+		Rect(x, y, cellSize, cellSize, 1)
 	Next
 End Function
 
@@ -7698,7 +6957,7 @@ Function DrawMenu()
 	Local x%, y%, width%, height%
 	Local steamOverlayActive = SteamActive And Steam_GetOverlayState()
 	If (api_GetFocus() = 0 Lor steamOverlayActive) And EndingTimer=0 And SelectedEnding="" Then ;Game is out of focus -> pause the game
-		If (Not Using294) Then
+		If (Not IsPaused()) Then
 			MenuOpen = True
 			UpdateMenuState()
 		EndIf
@@ -7893,7 +7152,7 @@ Function DrawMenu()
 
 					ViewBobScale = SlideBar(x + 270*MenuScale, y+6*MenuScale,100*MenuScale, ViewBobScale*100, 6)/100
 					Color 255,255,255
-					Text(x, y, I_Loc\OptionName_Viewbob)
+					Text(x, y, I_Loc\OptionName_Cammove)
 					If (MouseOn(x+270*MenuScale,y+6*MenuScale,100*MenuScale+14,20) And OnSliderID=0) Lor OnSliderID=6
 						DrawOptionsTooltip(tx,ty,tw,th,"viewbob")
 					EndIf
@@ -8330,6 +7589,7 @@ Function DrawMenu()
 							FPSfactor = 0
 							
 							ResetInput()
+							Return
 						EndIf
 					Else
 						DrawFrame(x,y,390*MenuScale, 60*MenuScale)
@@ -8386,6 +7646,8 @@ Function DrawMenu()
 						FPSfactor = 0
 						
 						ResetInput()
+						ExecAutoExec()
+						Return
 					EndIf
 				Else
 					DrawButton(x, y, 390*MenuScale, 60*MenuScale, "")
@@ -8509,6 +7771,7 @@ Function LoadEntities()
 	CameraRange(Camera, 0.05, CameraFogFar)
 	CameraFogMode (Camera, 1)
 	CameraFogRange (Camera, CameraFogNear, CameraFogFar)
+	CameraReverseZ(Camera, True)
 	AmbientLight Brightness, Brightness, Brightness
 	
 	ScreenTexs[0] = CreateTexture(512, 512, 1+256)
@@ -8773,7 +8036,6 @@ Function LoadEntities()
 	Next
 	DecalTextures(17) = LoadTexture_Strict("GFX\decal8.png", 1 + 2)	
 	DecalTextures(18) = LoadTexture_Strict("GFX\decalpd6.dc", 1 + 2)	
-	DecalTextures(19) = LoadTexture_Strict("GFX\decal19.png", 1 + 2)
 	DecalTextures(20) = LoadTexture_Strict("GFX\decal427.png", 1 + 2)
 	DecalTextures(21) = LoadTexture_Strict("GFX\smoke2.png", 1 + 2)
 	DecalTextures(22) = LoadTexture_Strict("GFX\bd\Confetti.png", 1 + 2)
@@ -8930,8 +8192,15 @@ Function LoadEntities()
 
 	InitMaterials()
 
-	If IsBirthday Then
-		tex = LoadTexture("GFX\map\miscsigns3.ae", 1)
+	tex = 0
+	If IsHalloween Then
+		tex = LoadTexture_Strict("GFX\map\Halloween\miscsigns3_Halloween.png", 1)
+	Else If IsBirthday Then
+		tex = LoadTexture_Strict("GFX\map\miscsigns3.ae", 1)
+	Else
+		tex = LoadTexture_Strict("GFX\map\Halloween\miscsigns3_Pumpkin.png", 1)
+	End If
+	If tex <> 0 Then
 		TextureBlend(tex, 5)
 		AddTextureToCache(tex, "GFX\map\miscsigns3.jpg")
 	EndIf
@@ -9201,8 +8470,8 @@ Function InitNewGame()
 
 	MoveMouse viewport_center_x,viewport_center_y
 
-	FlushKeys
-	FlushMouse
+	ResetInput()
+	ExecAutoExec()
 	
 	DropSpeed = 0
 	
@@ -9293,6 +8562,7 @@ Function InitLoadGame()
 	PrevTime = MilliSecs()
 	FPSfactor = 0
 	ResetInput()
+	ExecAutoExec()
 	
 	CatchErrors("InitLoadGame")
 End Function
@@ -9313,6 +8583,7 @@ Function NullGame(playbuttonsfx%=True)
 	If Not SpeedRunMode Then PlayTime = 0
 
 	DebugHUD = False
+	TimeScale = 1.0
 	
 	UnableToMove% = False
 	
@@ -9386,6 +8657,8 @@ Function NullGame(playbuttonsfx%=True)
 	WearingHazmat = 0
 	WearingVest = 0
 	Wearing714 = 0
+	WearingPumpkin = 0
+	PumpkinOverlay = 0
 	If WearingNightVision Then
 		CameraFogFar = StoredCameraFogFar
 		WearingNightVision = 0
@@ -9432,6 +8705,7 @@ Function NullGame(playbuttonsfx%=True)
 	BlurTimer = 0
 	SuperMan = False
 	SuperManTimer = 0
+	LostHands = False
 	Sanity = 0
 	RestoreSanity = True
 	Crouch = False
@@ -9535,6 +8809,8 @@ Function NullGame(playbuttonsfx%=True)
 	
 	DeleteDevilEmitters()
 	
+	LostHands = False
+
 	NoTarget% = False
 	
 	OptionsMenu% = 0
@@ -9554,6 +8830,10 @@ Function NullGame(playbuttonsfx%=True)
 	Delete Each AchievementMsg
 	CurrAchvMSGID = 0
 	
+	For fr.Forest = Each Forest
+		DestroyForest(fr)
+	Next
+
 	SetErrorMsg(7, "")
 
 	;DeInitExt
@@ -10653,8 +9933,121 @@ Function Use914(item.Items, setting$, x#, y#, z#)
 			End Select	
 			
 			RemoveItem(item)
+
+		Case "scp330"
+			Select setting
+				Case "rough"
+					d.Decals = CreateDecal(22, x, 8*RoomScale+0.010, z, 90, Rand(360), 0)
+					d\Size = 0.3 : ScaleSprite(d\obj, d\Size, d\Size)
+					d.Decals = CreateDecal(22, x, 8*RoomScale+0.011, z, 90, Rand(360), 0)
+					d\Size = 0.3 : ScaleSprite(d\obj, d\Size, d\Size)
+					RemoveItem(item) : item = Null
+				Case "coarse"
+					PositionEntity(item\collider, x, y, z)
+					ResetEntity(item\collider)
+					item\state = -1
+					item\invimg = item\itemtemplate\invimg2
+					SetAnimTime item\model, 9
+					d.Decals = CreateDecal(22, x, 8*RoomScale+0.010, z, 90, Rand(360), 0)
+					d\Size = 0.3 : ScaleSprite(d\obj, d\Size, d\Size)
+				Case "1:1"
+					it2 = CreateItem("bdc", x, y, z)
+					RemoveItem(item) : item = Null
+				Case "fine"
+					; Can take 3 candies from it
+					item\state = 0
+					SetAnimTime item\model, 1
+				Case "very fine"
+					Local flute.Items = Null, killbat.Items = Null, pumpkin.Items = Null
+					For it.Items = Each Items
+						If it<>item And it\collider <> 0 And it\Picked = False Then
+							If Distance(EntityX(it\collider,True), EntityZ(it\collider,True), EntityX(item\collider, True), EntityZ(item\collider, True)) < (180.0 * RoomScale) Lor Distance(EntityX(it\collider,True), EntityZ(it\collider,True), x,z) < (180.0 * RoomScale) Then
+								If it\itemtemplate\name = "boneflute" Then flute = it
+								If it\itemtemplate\name = "killbat" Then killbat = it
+								If it\itemtemplate\name = "pumpkin" Then pumpkin = it
+							EndIf
+						EndIf
+					Next
+					If flute <> Null And killbat <> Null And pumpkin <> Null Then
+						If SteamActive And (Not UsedConsole) Then Steam_SetStatInt("has_unlocked_infinite_candy_bowl", 1)
+						RemoveItem(flute)
+						RemoveItem(killbat)
+						RemoveItem(pumpkin)
+						item\state = -2
+						SetAnimTime item\model, 10
+					Else
+						item\state = -3
+					EndIf
+			End Select
+			If item <> Null Then
+				PositionEntity(item\collider, x, y, z)
+				ResetEntity(item\collider)
+			EndIf
+
+		Case "pumpkin"
+			Select setting
+				Case "rough"
+					d.Decals = CreateDecal(4, x, 8 * RoomScale + 0.010, z, 90, Rand(360), 0)
+					d\Size = 0.3 : ScaleSprite(d\obj, d\Size, d\Size)
+					RemoveItem(item)
+				Case "coarse"
+					it2 = CreateItem("lollipop", x, y, z)
+					RemoveItem(item)
+				Case "1:1"
+					e.Events = FindEvent("914")
+					If e\room\Objects[5] <> 0 Then FreeEntity(e\room\Objects[5])
+					e\EventState3 = -1
+					RemoveItem(item)
+				Case "fine"
+					SetAnimTime item\model, 2
+					item\invimg = item\itemtemplate\invimg2
+					PositionEntity(item\collider, x, y, z)
+					ResetEntity(item\collider)
+				Case "very fine"
+					n.NPCs = CreateNPC(NPCtype173,x,y,z)
+					ChangeNPCTextureID(n, 1)
+					PlaySound2(LoadTempSound("SFX\ambient\general\ambient3.ogg"), Camera, n\Collider)
+					RemoveItem(item)
+			End Select
+
+		Case "bone"
+			Select setting
+				Case "rough", "coarse"
+					d.Decals = CreateDecal(21, x, 8 * RoomScale + 0.010, z, 90, Rand(360), 0)
+					d\Size = 0.1 : ScaleSprite(d\obj, d\Size, d\Size)
+					RemoveItem(item)
+				Case "1:1"
+					PositionEntity(item\collider, x, y, z)
+					ResetEntity(item\collider)
+				Case "fine", "very fine"
+					it2 = CreateItem("boneflute", x, y, z)
+					RemoveItem(item)
+			End Select
+
+		Case "boneflute"
+			Select setting
+				Case "rough"
+					d.Decals = CreateDecal(21, x, 8 * RoomScale + 0.010, z, 90, Rand(360), 0)
+					d\Size = 0.3 : ScaleSprite(d\obj, d\Size, d\Size)
+					RemoveItem(item)
+				Case "coarse"
+					it2 = CreateItem("bone", x, y, z)
+					it2 = CreateItem("bone", x, y, z)
+					RemoveItem(item)
+				Case "1:1"
+					PositionEntity(item\collider, x, y, z)
+					ResetEntity(item\collider)
+				Case "fine", "very fine"
+					n.NPCs = CreateNPC(NPCTypeOldMan,x,8 * RoomScale,z)
+					ChangeNPCTextureID(n, 1)
+					n\State = -1
+					d.Decals = CreateDecal(0, x, 8 * RoomScale + 0.010, z, 90, Rand(360), 0)
+					d\Size = 0.05 : d\SizeChange = 0.001 : EntityAlpha(d\obj, 0.8) : UpdateDecals
+					RemoveItem(item)
+					If setting = "very fine" Then n\Speed = n\Speed * 5 : n\State = -10
+			End Select
+
 		Default
-			
 			If item\itemtemplate\group = "paper" Then
 				Select setting
 					Case "rough", "coarse"
@@ -10679,6 +10072,35 @@ Function Use914(item.Items, setting$, x#, y#, z#)
 						it2 = CreateItem("origami", x, y, z)
 				End Select
 				
+				RemoveItem(item)
+			ElseIf item\itemtemplate\group = "candy" Then
+				Select setting
+					Case "rough", "coarse"
+						d.Decals = CreateDecal(22, x, 8*RoomScale+0.011, z, 90, Rand(360), 0)
+						d\Size = 0.2 : ScaleSprite(d\obj, d\Size, d\Size)
+					Case "1:1"
+						Local newCandy$
+						Repeat
+							Select Rand(3)
+								Case 1
+									newCandy = "eyecandy"
+								Case 2
+									newCandy = "lollipop"
+								Case 3
+									newCandy = "chocolate"
+							End Select
+						Until newCandy <> item\itemtemplate\Name
+						CreateItem(newCandy, x, y, z)
+					Case "fine"
+						it2 = CreateItem("joint", x, y, z)
+					Case "very fine"
+						If Rand(3) = 1 Then
+							it2 = CreateItem("scp500", x, y, z)
+						Else
+							it2 = CreateItem("scp500death", x, y, z)
+						End If
+				End Select
+
 				RemoveItem(item)
 			Else
 				PositionEntity(item\collider, x, y, z)
@@ -10823,76 +10245,14 @@ Function Use294()
 			Input294 = Input294 + strtemp
 			
 			If temp And Input294<>"" Then ;dispense
-				Input294 = Trim(Lower(Input294))
-				For i = 1 To 2
-					Local prefix$ = I_Loc\Cup_OfPrefix[i] + " "
-					If Left(Input294, Min(Len(prefix),Len(Input294))) = prefix Then
-						Input294 = Right(Input294, Len(Input294)-Len(prefix))
-					EndIf
-				Next
-				
-				Local iniStr$ = "DATA\SCP-294.ini"
-				Local loc% = -1
-				Local hasOverride%
-				If Input294<>""
-					For m.ActiveMods = Each ActiveMods
-						Local modIniStr$ = m\Path + iniStr
-						If FileType(modIniStr) = 1 Then
-							Local sectionLocation = GetINISectionLocation(modIniStr, Input294)
-							If sectionLocation <> -1 Then
-								iniStr = modIniStr
-								loc = sectionLocation
-								Exit
-							EndIf
-							If FileType(modIniStr + ".OVERRIDE") Then
-								hasOverride = True
-								Exit
-							EndIf
-						EndIf
-					Next
-
-					If loc = -1 And (Not hasOverride) Then
-						loc = GetINISectionLocation(iniStr, Input294)
-					EndIf
-				EndIf
-				
-				If loc <> -1 Then
+				PlayerRoom\SoundCHN = CreateCup(Input294, EntityX(PlayerRoom\Objects[1],True),EntityY(PlayerRoom\Objects[1],True),EntityZ(PlayerRoom\Objects[1],True))
+				If PlayerRoom\SoundCHN<>0 Then
 					GiveAchievement(Achv294)
-
-					strtemp$ = GetINIString2(iniStr, loc, "dispensesound")
-					If strtemp<>"" Then
-						PlayerRoom\SoundCHN = PlaySound_Strict (LoadTempSound(strtemp))
-					EndIf
-					If PlayerRoom\SoundCHN=0 Then
-						PlayerRoom\SoundCHN = PlaySound_Strict (LoadTempSound("SFX\SCP\294\dispense1.ogg"))
-					EndIf
-					
-					If GetINIInt2(iniStr, loc, "explosion")=True Then 
-						ExplosionTimer = 135
-						DeathMSG = GetINIString2(iniStr, loc, "deathmessage")
-					EndIf
-					
-					strtemp$ = GetINIString2(iniStr, loc, "color")
-					
-					Local sep1 = Instr(strtemp, ",", 1)
-					Local sep2 = Instr(strtemp, ",", sep1+1)
-					Local r% = Trim(Left(strtemp, sep1-1))
-					Local g% = Trim(Mid(strtemp, sep1+1, sep2-sep1-1))
-					Local b% = Trim(Right(strtemp, Len(strtemp)-sep2))
-					
-					Local alpha# = Float(GetINIString2(iniStr, loc, "alpha",1.0))
-					Local glow = GetINIInt2(iniStr, loc, "glow")
-					;If alpha = 0 Then alpha = 1.0
-					If glow Then alpha = -alpha
-					
-					Local it.items = CreateCup(Input294, EntityX(PlayerRoom\Objects[1],True),EntityY(PlayerRoom\Objects[1],True),EntityZ(PlayerRoom\Objects[1],True), r,g,b,alpha)
-					
 				Else
 					;out of range
 					Input294 = I_Loc\HUD_294Range
 					PlayerRoom\SoundCHN = PlaySound_Strict (LoadTempSound("SFX\SCP\294\outofrange.ogg"))
 				EndIf
-				
 			EndIf
 			
 		EndIf ;if mousehit1
@@ -11124,7 +10484,7 @@ Function UpdateInfect()
 				Exit
 			EndIf
 		Next
-	ElseIf PlayerRoom\RoomTemplate\Name = "dimension1499" Or PlayerRoom\RoomTemplate\Name = "pocketdimension" Or PlayerRoom\RoomTemplate\Name = "gatea"
+	ElseIf PlayerRoom\RoomTemplate\Name = "dimension1499" Lor PlayerRoom\RoomTemplate\Name = "pocketdimension" Lor PlayerRoom\RoomTemplate\Name = "halloweenpd" Lor PlayerRoom\RoomTemplate\Name = "halloweenfields" Lor PlayerRoom\RoomTemplate\Name = "gatea"
 		teleportForInfect = False
 	ElseIf PlayerRoom\RoomTemplate\Name = "exit1" And EntityY(Collider)>1040.0*RoomScale
 		teleportForInfect = False
@@ -11378,6 +10738,15 @@ Function Unlerp#(a#, b#, f#)
 	Return (f - a) / (b - a)
 End Function
 
+Function PopCount%(value%)
+	Local cnt% = 0
+	While value <> 0
+		If value And 1 Then cnt = cnt + 1
+		value = value Shr 1
+	Wend
+	Return cnt
+End Function
+
 ;--------------------------------------- decals -------------------------------------------------------
 
 Type Decals
@@ -11629,6 +10998,10 @@ Function GetINIInt2%(file$, start%, parameter$, defaultvalue$="")
 	EndIf
 End Function
 
+Function GetINIFloat2#(file$, start%, parameter$, defaultvalue# = 0.0)
+	Return Float(GetINIString2(file$, start%, parameter$, defaultvalue#))
+End Function
+
 
 Function GetINISectionLocation%(file$, section$)
 	Local Temp%
@@ -11657,6 +11030,20 @@ Function GetINISectionLocation%(file$, section$)
 	Return -1
 End Function
 
+; Returns properly capitalized name
+Function GetProperINISectionName$(file$, loc%, section$)
+	section = Lower(section)
+	
+	Local f% = ReadFile(file)
+	For i = 2 To loc
+		ReadLine(f)
+	Next
+
+	Local strtemp$ = ReadLine(f)
+	strtemp = Mid(strtemp, Instr(Lower(strtemp), section), Len(section))
+	CloseFile f
+	Return strtemp
+End Function
 
 
 Function PutINIValue%(file$, INI_sSection$, INI_sKey$, INI_sValue$)
@@ -12163,10 +11550,6 @@ Function IsItemGoodFor1162(itt.ItemTemplates)
 			Return True
 		Case "clipboard","eyedrops","redeyedrops","nvgoggles"
 			Return True
-		Case "drawing"
-			If itt\img<>0 Then FreeImage itt\img	
-			itt\img = LoadImage_Strict("GFX\items\1048\1048_"+Rand(1,20)+".jpg") ;Gives a random drawing.
-			Return True
 	End Select
 	Return False
 End Function
@@ -12354,21 +11737,26 @@ Function PlayStartupVideos()
 End Function
 
 Function CanUseItem(canUseWithHazmat%, canUseWithGasMask%, canUseWithEyewear%)
-	If (canUseWithHazmat = False And WearingHazmat) Then
+	If (canUseWithHazmat = False And WearingHazmat<>0) Then
 		Msg = I_Loc\MessageItem_HazmatNouse
 		MsgTimer = 70*5
 		Return False
-	ElseIf (canUseWithGasMask = False And (WearingGasMask Or Wearing1499))
+	ElseIf (canUseWithGasMask = False And (WearingGasMask<>0 Or Wearing1499<>0))
 		Msg = I_Loc\MessageItem_GasmaskNouse
 		MsgTimer = 70*5
 		Return False
-	ElseIf (canUseWithEyewear = False And (WearingNightVision))
+	ElseIf (canUseWithEyewear = False And (WearingNightVision<>0 Or WearingPumpkin<>0))
 		Msg = I_Loc\MessageItem_NvgNouse
 		MsgTimer = 70*5
 		Return False
 	EndIf
 	
 	Return True
+End Function
+
+Function TakeOffPumpkin()
+	If WearingPumpkin Then NoTarget = False
+	WearingPumpkin = False
 End Function
 
 Function ResetInput()
