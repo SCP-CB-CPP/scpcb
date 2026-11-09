@@ -2,8 +2,6 @@ Global GammaEffect%, FXAAEffect%
 
 Global PostEffectQuad%, QuadCamera%, PostEffect%
 
-Global InstanceEffect%
-
 Global ScreenTexture%
 
 Global PixelWidth# = 0, PixelHeight# = 0
@@ -30,8 +28,6 @@ Function InitPostProcess()
 	HideEntity(QuadCamera)
 	
 	PostEffect = 0
-
-	InstanceEffect = LoadEffect_Strict("GFX\shaders\Instance.fx")
 End Function
 
 Function UpdatePostProcess()

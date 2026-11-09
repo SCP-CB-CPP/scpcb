@@ -1067,12 +1067,14 @@ Function PlaceForest(fr.Forest,x#,y#,z#,r.Rooms)
 	fr\DetailMesh[1]=LoadMesh_Strict("GFX\map\forest\detail\rock.b3d")
 	fr\DetailMesh[2]=LoadMesh_Strict("GFX\map\forest\detail\treetest5.b3d")
 	fr\DetailMesh[3]=LoadRMesh("GFX\map\forest\wall.rmesh",Null)
+
+	For i = 0 To 2
+		EntityFX fr\DetailMesh[i], 1
+		HideEntity fr\DetailMesh[i]
+	Next
 	
 	For i%=ROOM1 To ROOM4
 		HideEntity fr\TileMesh[i]
-	Next
-	For i%=0 To 2
-		EntityEffect fr\DetailMesh[i], InstanceEffect
 	Next
 	HideEntity fr\DetailMesh[3]
 	
@@ -1232,7 +1234,7 @@ Function PlaceForest(fr.Forest,x#,y#,z#,r.Rooms)
 	CatchErrors("PlaceForest")
 End Function
 
-Const hmapFlags% = 1+16+32+256+512+16384
+Const hmapFlags% = 1 + 131072
 Const maskFlags% = hmapFlags+2
 
 Function PlaceForest_MapCreator(fr.Forest,x#,y#,z#,r.Rooms)
@@ -1280,11 +1282,13 @@ Function PlaceForest_MapCreator(fr.Forest,x#,y#,z#,r.Rooms)
 	fr\DetailMesh[2]=LoadMesh_Strict("GFX\map\forest\detail\treetest5.b3d")
 	fr\DetailMesh[3]=LoadRMesh("GFX\map\forest\wall.rmesh",Null)
 	
+	For i = 0 To 2
+		EntityFX fr\DetailMesh[i], 1
+		HideEntity fr\DetailMesh[i]
+	Next
+
 	For i%=ROOM1 To ROOM4
 		HideEntity fr\TileMesh[i]
-	Next
-	For i%=0 To 2
-		EntityEffect fr\DetailMesh[i], InstanceEffect
 	Next
 	HideEntity fr\DetailMesh[3]
 	
@@ -5530,7 +5534,8 @@ Function FillRoom(r.Rooms)
 			Local terr% = load_terrain(hmap, 0.05, GroundTexture, PathTexture, mask, 1, 16, 1)
 
 			Local pumpkin% = LoadMesh_Strict("GFX\map\halloween\pumpkin.b3d")
-			EntityEffect(pumpkin, InstanceEffect)
+			EntityFX(pumpkin, 1)
+			HideEntity(pumpkin)
 
 			fr.Forest = First Forest
 			Local tree%, leaves%
@@ -5540,6 +5545,10 @@ Function FillRoom(r.Rooms)
 			Else
 				tree = LoadMesh_Strict("GFX\map\forest\detail\treetest4.b3d")
 				leaves = LoadMesh_Strict("GFX\map\forest\detail\treetest5.b3d")
+				EntityFX(tree, 1)
+				EntityFX(leaves, 1)
+				HideEntity(tree)
+				HideEntity(leaves)
 			EndIf
 			PlaceForestProps(terr, hmap, MeshWidth(terr), 0.05, tree, leaves, pumpkin, 100, 800, 186, 5, 0.8, 1.2)
 			If fr = Null Then

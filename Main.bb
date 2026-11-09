@@ -4013,7 +4013,7 @@ Function MouseLook(handleInput% = True)
 			Exit
 		Next
 	Else
-		If EntityExist(PumpkinOverlay) Then HideEntity(PumpkinOverlay)
+		If EntityExists(PumpkinOverlay) Then HideEntity(PumpkinOverlay)
 	EndIf
 	
 	For i = 0 To 5
@@ -7771,7 +7771,6 @@ Function LoadEntities()
 	CameraRange(Camera, 0.05, CameraFogFar)
 	CameraFogMode (Camera, 1)
 	CameraFogRange (Camera, CameraFogNear, CameraFogFar)
-	CameraReverseZ(Camera, True)
 	AmbientLight Brightness, Brightness, Brightness
 	
 	ScreenTexs[0] = CreateTexture(512, 512, 1+256)
