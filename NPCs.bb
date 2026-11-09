@@ -93,12 +93,8 @@ Function CreateNPC.NPCs(NPCtype%, x#, y#, z#)
 			
 			n\obj = LoadMesh_Strict("GFX\npcs\173_2.b3d")
 			
-			;On Halloween set jack-o-latern texture.
-			HalloweenTex = Left(CurrentDate(), 7) = "31 Oct "
-			If HalloWeenTex Then
-				Local texFestive = LoadTexture_Strict("GFX\npcs\173h.pt", 1)
-				EntityTexture n\obj, texFestive, 0, 0
-				FreeTexture texFestive
+			If IsHalloween Then
+				ChangeNPCTextureID(n, 1)
 			EndIf
 
 			If BirthdayHat Then
@@ -391,7 +387,7 @@ Function CreateNPC.NPCs(NPCtype%, x#, y#, z#)
 			
 			EntityFX(n\obj, 1)
 			
-			tex = LoadTexture_Strict("GFX\npcs\860_eyes.png",1+2)
+			Local tex = LoadTexture_Strict("GFX\npcs\860_eyes.png",1+2)
 			
 			n\obj2 = CreateSprite()
 			ScaleSprite(n\obj2, 0.1, 0.1)
@@ -433,7 +429,7 @@ Function CreateNPC.NPCs(NPCtype%, x#, y#, z#)
 			EntityRadius n\Collider, 0.3
 			EntityType n\Collider, HIT_PLAYER
 			For n2.NPCs = Each NPCs
-				If n\NPCtype = n2\NPCtype And n<>n2 Then
+				If n\NPCtype = n2\NPCtype And n<>n2 And n2\TextureID = 0 Then
 					n\obj = CopyEntity (n2\obj)
 					Exit
 				EndIf
@@ -477,6 +473,9 @@ Function CreateNPC.NPCs(NPCtype%, x#, y#, z#)
 			n\Speed = (GetModdedINIFloat("DATA\NPCs.ini", "SCP-939", "speed") / 100.0)
 			
 			n\CollRadius = 0.3
+
+			; Waypoint count			
+			n\LastDist = 4
 			;[End Block]
 		Case NPCtype066
 			;[Block]
@@ -585,10 +584,10 @@ Function CreateNPC.NPCs(NPCtype%, x#, y#, z#)
 			
 			n\obj = LoadAnimMesh_Strict("GFX\npcs\zombiesurgeon.b3d")
 			
-			temp# = 0.5 / MeshWidth(n\obj)
+			temp# = GetModdedINIFloat("DATA\NPCs.ini", "SCP-008 Zombie", "scale")
 			ScaleEntity n\obj, temp, temp, temp
 			
-			n\Speed = 2.0 / 100
+			n\Speed = GetModdedINIFloat("DATA\NPCs.ini", "SCP-008 Zombie", "speed") / 100
 			
 			MeshCullBox (n\obj, -MeshWidth(n\obj), -MeshHeight(n\obj), -MeshDepth(n\obj)*4, MeshWidth(n\obj)*2, MeshHeight(n\obj)*2, MeshDepth(n\obj)*8)
 			
@@ -637,6 +636,14 @@ Function RemoveNPC(n.NPCs)
 	
 	If n=Null Then Return
 	
+	If n\NPCtype = NPCtype066 And n\TextureID = 1 Then
+		For it.Items = Each Items
+			If GetParent(it\collider) = n\ManipulationType Then
+				EntityParent(it\collider, 0)
+			EndIf
+		Next
+	EndIf
+
 	If n\obj2 <> 0 Then 
 		FreeEntity n\obj2
 		n\obj2 = 0
@@ -693,7 +700,7 @@ Function UpdateNPCs()
 			Case NPCtype173
 				;[Block]
 				
-				If Curr173\Idle <> 3 Then
+				If n\Idle <> 3 Then
 					dist# = EntityDistance(n\Collider, Collider)		
 					
 					n\State3 = 1
@@ -747,7 +754,7 @@ Function UpdateNPCs()
 									n\LastSeen = MilliSecs()
 								EndIf
 								
-								If dist < 1.5 And Rand(700) = 1 Then PlaySound2(Scp173SFX(Rand(0, 2)), Camera, n\obj)
+								If dist < 1.5 And Rand(700/FPSfactor) = 1 Then PlaySound2(Scp173SFX(Rand(0, 2)), Camera, n\obj)
 								
 								If dist < 1.5 And n\LastDist > 2.0 And temp Then
 									CurrCameraZoom = 40.0
@@ -774,8 +781,8 @@ Function UpdateNPCs()
 							Else 
 								;more than 6 room lengths away from the player -> teleport to a room closer to the player
 								If dist > 50 Then
-									If Rand(70)=1 Then
-										If PlayerRoom\RoomTemplate\Name <> "exit1" And PlayerRoom\RoomTemplate\Name <> "gatea" And PlayerRoom\RoomTemplate\Name <> "pocketdimension" Then
+									If Rand(70/FPSfactor)=1 Then
+										If PlayerRoom\RoomTemplate\Name <> "exit1" And PlayerRoom\RoomTemplate\Name <> "gatea" And PlayerRoom\RoomTemplate\Name <> "pocketdimension" And PlayerRoom\RoomTemplate\Name <> "halloweenpd" And PlayerRoom\RoomTemplate\Name <> "halloweenfields" Then
 											For w.waypoints = Each WayPoints
 												If w\door=Null And Rand(5)=1 Then
 													x = Abs(EntityX(Collider)-EntityX(w\obj,True))
@@ -794,12 +801,12 @@ Function UpdateNPCs()
 										EndIf
 									EndIf
 								ElseIf dist > HideDistance*0.8 ;3-6 rooms away from the player -> move randomly from waypoint to another
-									If Rand(70)=1 Then TeleportCloser(n)
+									If Rand(70/FPSfactor)=1 Then TeleportCloser(n)
 								Else ;less than 3 rooms away -> actively move towards the player
 									n\State = CurveValue(SoundVol, n\State, 3)
 									
 									;try to open doors
-									If Rand(20) = 1 Then
+									If Rand(20/FPSfactor) = 1 Then
 										For d.Doors = Each Doors
 											If (Not d\locked) And d\open = False And d\Code = "" And d\KeyCard=0 Then
 												For i% = 0 To 1
@@ -807,7 +814,7 @@ Function UpdateNPCs()
 														If Abs(EntityX(n\Collider) - EntityX(d\buttons[i])) < 0.5 Then
 															If Abs(EntityZ(n\Collider) - EntityZ(d\buttons[i])) < 0.5 Then
 																If (d\openstate >= 180 Or d\openstate <= 0) Then
-																	pvt = CreatePivot()
+																	Local pvt = CreatePivot()
 																	PositionEntity pvt, EntityX(n\Collider), EntityY(n\Collider) + 0.5, EntityZ(n\Collider)
 																	PointEntity pvt, d\buttons[i]
 																	MoveEntity pvt, 0, 0, n\Speed * 0.6
@@ -872,12 +879,12 @@ Function UpdateNPCs()
 											If Distance(EntityX(n\Collider), EntityZ(n\Collider), n\EnemyX, n\EnemyZ) > 0.5 Then
 												AlignToVector(n\Collider, n\EnemyX-EntityX(n\Collider), 0, n\EnemyZ-EntityZ(n\Collider), 3)
 												MoveEntity(n\Collider, 0, 0, n\Speed * FPSfactor)
-												If Rand(500) = 1 Then n\EnemyX = 0 : n\EnemyY = 0 : n\EnemyZ = 0
+												If Rand(500/FPSfactor) = 1 Then n\EnemyX = 0 : n\EnemyY = 0 : n\EnemyZ = 0
 											Else
 												n\EnemyX = 0 : n\EnemyY = 0 : n\EnemyZ = 0
 											End If
 										Else
-											If Rand(400)=1 Then RotateEntity (n\Collider, 0, Rnd(360), 10)
+											If Rand(400/FPSfactor)=1 Then RotateEntity (n\Collider, 0, Rnd(360), 10)
 											TranslateEntity n\Collider,Cos(EntityYaw(n\Collider)+90.0)*n\Speed*FPSfactor,0.0,Sin(EntityYaw(n\Collider)+90.0)*n\Speed*FPSfactor
 											
 										End If
@@ -946,14 +953,21 @@ Function UpdateNPCs()
 					n\Idle = True
 					HideEntity n\obj
 					HideEntity n\obj2
-					PositionEntity n\obj, 0,500.0,0, True
+					PositionEntity n\Collider, 0,500.0,0, True
+				ElseIf n\State3 <> 0 And PlayerRoom\RoomTemplate\Name <> "gatea" Then
+					If n\Frame < 111 Lor n\Frame > 259 Then SetNPCFrame(n, 259)
+					AnimateNPC(n, 259, 111, -0.3, False)
+					If n\Frame = 111 Then
+						n\State3 = 0
+						n\State = Rand(22000, 27000)
+					EndIf
 				Else
-					
 					dist = EntityDistance(n\Collider, Collider)
 					
 					Local spawn106% = True
 					;checking if 106 is allowed to spawn
 					If PlayerRoom\RoomTemplate\Name$ = "dimension1499" Then spawn106% = False
+					If PlayerRoom\RoomTemplate\Name$ = "halloweenfields" Then spawn106% = False
 					For e.Events = Each Events
 						If e\EventName = "room860"
 							If e\EventState = 1
@@ -995,7 +1009,7 @@ Function UpdateNPCs()
 								
 								n\PrevY = EntityY(Collider)
 								
-								SetAnimTime n\obj, 110
+								SetAnimTime n\obj, 111
 								
 								If PlayerRoom\RoomTemplate\Name <> "coffin"
 									PositionEntity(n\Collider, EntityX(Collider), EntityY(Collider) - 15, EntityZ(Collider))
@@ -1004,7 +1018,7 @@ Function UpdateNPCs()
 								PlaySound_Strict(DecaySFX(0))
 							End If
 							
-							If Rand(500) = 1 Then PlaySound2(OldManSFX(Rand(0, 2)), Camera, n\Collider)
+							If Rand(500/FPSfactor) = 1 Then PlaySound2(OldManSFX(Rand(0, 2)), Camera, n\Collider)
 							n\SoundChn = LoopSound2(OldManSFX(4), n\SoundChn, Camera, n\Collider, 8.0, 0.8)
 							
 							If n\State > - 10 Then
@@ -1012,9 +1026,9 @@ Function UpdateNPCs()
 								If n\Frame<259 Then
 									PositionEntity n\Collider, EntityX(n\Collider), n\PrevY-0.15, EntityZ(n\Collider)
 									PointEntity n\obj, Collider
-									RotateEntity (n\Collider, 0, CurveValue(EntityYaw(n\obj),EntityYaw(n\Collider),100.0), 0, True)
+									RotateEntity (n\Collider, 0, CurveAngle(EntityYaw(n\obj),EntityYaw(n\Collider),100.0), 0, True)
 									
-									AnimateNPC(n, 110, 259, 0.15, False)
+									AnimateNPC(n, 111, 259, 0.15, False)
 								Else
 									n\State = -10
 								EndIf
@@ -1048,11 +1062,20 @@ Function UpdateNPCs()
 									n\State=n\State-FPSfactor
 								End If
 								
-								If dist > 0.8 Lor PlayerRoom\RoomTemplate\Name = "gatea" Then
-									If (dist > 25.0 Or PlayerRoom\RoomTemplate\Name = "pocketdimension" Or Visible Or n\PathStatus <> 1) And PlayerRoom\RoomTemplate\Name <> "gatea" Then 
+								Local isAtGate% = PlayerRoom\RoomTemplate\Name = "gatea"
+								Local isInPd% = PlayerRoom\RoomTemplate\Name = "pocketdimension" Lor PlayerRoom\RoomTemplate\Name = "halloweenpd"
+								If dist > 0.8 Lor isAtGate Then
+									If (dist > 25.0 Or isInPd Or Visible Or n\PathStatus <> 1) And (Not isAtGate) And (Not NoTarget) Then 
 										
-										If (dist > 40 Or PlayerRoom\RoomTemplate\Name = "pocketdimension") Then
-											TranslateEntity n\Collider, 0, ((EntityY(Collider) - 0.14) - EntityY(n\Collider)) * FPSFactor / 50.0, 0
+										If (dist > 40 Or isInPd) Then
+											Local verticalAscentDivisor% = 50
+											If PlayerRoom\RoomTemplate\Name = "halloweenpd" Then
+												Select SelectedDifficulty\otherFactors
+													Case EASY
+														verticalAscentDivisor = 75
+												End Select
+											EndIf
+											TranslateEntity n\Collider, 0, ((EntityY(Collider) - 0.14) - EntityY(n\Collider)) * FPSFactor / verticalAscentDivisor, 0
 										EndIf
 										
 										n\CurrSpeed = CurveValue(n\Speed,n\CurrSpeed,10.0)
@@ -1079,7 +1102,10 @@ Function UpdateNPCs()
 											n\PathStatus = FindPath (n, EntityX(Collider,True), EntityY(Collider,True), EntityZ(Collider,True))
 											n\PathTimer = 70*10
 										EndIf
-									Else 
+									ElseIf NoTarget And (Not isAtGate)
+										AnimateNPC(n, 334, 494, 0.3)
+ 										n\CurrSpeed = CurveValue(0,n\CurrSpeed,10.0)
+									Else
 										If n\PathTimer <= 0 Then
 											n\PathStatus = FindPath (n, EntityX(Collider,True), EntityY(Collider,True), EntityZ(Collider,True))
 											n\PathTimer = 70*10
@@ -1147,7 +1173,7 @@ Function UpdateNPCs()
 										If Ceil(n\Frame) = 110 And (Not GodMode) Then
 											PlaySound_Strict(DamageSFX(1))
 											PlaySound_Strict(HorrorSFX(5))											
-											If PlayerRoom\RoomTemplate\Name = "pocketdimension" Then
+											If isInPd Then
 												DeathMSG = I_Loc\DeathMessage_106Pd
 												Kill()
 											Else
@@ -1182,13 +1208,25 @@ Function UpdateNPCs()
                                 If dist > 10 And PlayerRoom\RoomTemplate\Name <> "pocketdimension" And PlayerRoom\RoomTemplate\Name <> "gatea" And n\State <-5 Then ;timer idea by Juanjpro
                                     If (Not EntityInView(n\obj,Camera))
                                         TurnEntity Collider,0,180,0
-                                        pick = EntityPick(Collider,5)
+                                        Local pick = EntityPick(Collider,5)
                                         TurnEntity Collider,0,180,0
                                         If pick<>0
 											TeleportEntity(n\Collider,PickedX(),PickedY(),PickedZ(),n\CollRadius)
                                             PointEntity(n\Collider,Collider)
                                             RotateEntity(n\Collider,0,EntityYaw(n\Collider),0)
-                                            MoveEntity(n\Collider,0,0,-2)
+											Local moveDist# = -2
+											If PlayerRoom\RoomTemplate\Name = "halloweenpd" Then
+												moveDist = Distance(PickedX(), PickedZ(), EntityX(Collider), EntityZ(Collider))
+												Select SelectedDifficulty\otherFactors
+													Case EASY
+														moveDist = Min(-5 + moveDist, -2)
+													Case NORMAL
+														moveDist = Min(-3 + moveDist, -2)
+													Default
+														moveDist = -2
+												End Select
+											EndIf
+											MoveEntity(n\Collider,0,0,moveDist)
                                             PlaySound2(OldManSFX(3),Camera,n\Collider)
 											n\SoundChn2 = PlaySound2(OldManSFX(6+Rand(0,2)),Camera,n\Collider)
                                             n\PathTimer = 0
@@ -1228,7 +1266,7 @@ Function UpdateNPCs()
 						RotateEntity(n\obj2, 0, EntityYaw(n\Collider) - 180, 0)
 						MoveEntity(n\obj2, 0, 8.6 * 0.11, -1.5 * 0.11)
 						
-						If PlayerRoom\RoomTemplate\Name = "pocketdimension" Or PlayerRoom\RoomTemplate\Name = "gatea" Then
+						If PlayerRoom\RoomTemplate\Name = "pocketdimension" Lor PlayerRoom\RoomTemplate\Name = "gatea" Lor n\TextureID = 1 Then
 							HideEntity n\obj2
 						Else
 							If dist < CameraFogFar*LightVolume*0.6 Then
@@ -1478,7 +1516,7 @@ Function UpdateNPCs()
 							EndIf
 							
 							If dist > 32.0 Or EntityY(n\Collider)<-50 Then
-								If Rand(50)=1 Then TeleportCloser(n)
+								If Rand(50/FPSfactor)=1 Then TeleportCloser(n)
 							EndIf
 						Else ;play the eating animation if killtimer < 0 
 							AnimateNPC(n, Min(27,AnimTime(n\obj)), 193, 0.5)
@@ -1707,8 +1745,9 @@ Function UpdateNPCs()
 							;[Block]
 							If (dist < HideDistance*2) And (Not n\Idle) And PlayerInReachableRoom(True) Then
 								n\SoundChn = LoopSound2(n\Sound, n\SoundChn, Camera, n\Collider)
-								PlayerSeeAble% = MeNPCSeesPlayer(n)
-								If PlayerSeeAble%=True Or n\State2>0 Then ;Player is visible for 049's sight - attacking
+								If MeNPCSeesPlayer(n) = True Then n\State2 = 70*2
+								If NoTarget Then n\State2 = 0
+								If n\State2>0 Then ;Player is visible for 049's sight - attacking
 									GiveAchievement(Achv049)
 									
 									;Playing a sound after detecting the player
@@ -1721,7 +1760,6 @@ Function UpdateNPCs()
 									n\PathStatus = 0
 									n\PathTimer# = 0.0
 									n\PathLocation = 0
-									If PlayerSeeAble%=True Then n\State2 = 70*2
 									
 									PointEntity n\obj,Collider
 									RotateEntity n\Collider,0,CurveAngle(EntityYaw(n\obj),EntityYaw(n\Collider),10.0),0
@@ -1867,7 +1905,7 @@ Function UpdateNPCs()
 											EndIf
 											
 											;Resetting the "PrevState" value randomly, to make 049 talking randomly 
-											If Rand(600)=1 And ChannelPlaying(n\SoundChn2)=False Then n\PrevState = 0
+											If Rand(600/FPSfactor)=1 And ChannelPlaying(n\SoundChn2)=False Then n\PrevState = 0
 											
 											If n\PrevState > 1 Then n\PrevState = 1
 										EndIf
@@ -2150,7 +2188,7 @@ Function UpdateNPCs()
 								AnimateNPC(n, 719, 777, 0.2, False)
 								
 								If n\Frame=777 Then
-									If Rand(700)=1 Then
+									If Rand(700/FPSfactor)=1 Then
 										If EntityDistance(Collider, n\Collider)<5.0 Then
 											n\Frame = 719
 										EndIf
@@ -2407,7 +2445,7 @@ Function UpdateNPCs()
 						;Animate2(n\obj, AnimTime(n\obj), 1539, 1553, 0.35, False)
 						If n\Reload = 0 ;And n\Frame > 1545 Then 
 							PlaySound2(GunshotSFX, Camera, n\Collider, 20)
-							p.Particles = CreateParticle(EntityX(n\obj, True), EntityY(n\obj, True), EntityZ(n\obj, True), 1, 0.2, 0.0, 5)
+							Local p.Particles = CreateParticle(EntityX(n\obj, True), EntityY(n\obj, True), EntityZ(n\obj, True), 1, 0.2, 0.0, 5)
 							PositionEntity(p\pvt, EntityX(n\obj), EntityY(n\obj), EntityZ(n\obj))
 							RotateEntity(p\pvt, EntityPitch(n\Collider), EntityYaw(n\Collider), 0, True)
 							MoveEntity (p\pvt,0.8*0.079, 10.75*0.079, 6.9*0.079)
@@ -2451,7 +2489,7 @@ Function UpdateNPCs()
 						AnimateNPC(n,77,201,0.2)
 						;Animate2(n\obj, AnimTime(n\obj), 923, 1354, 0.2)
 						
-						If Rand(400) = 1 Then n\Angle = Rnd(-180, 180)
+						If Rand(400/FPSfactor) = 1 Then n\Angle = Rnd(-180, 180)
 						
 						RotateEntity(n\Collider, 0, CurveAngle(n\Angle + Sin(MilliSecs() / 50) * 2, EntityYaw(n\Collider), 150.0), 0, True)
 						
@@ -2706,7 +2744,7 @@ Function UpdateNPCs()
 						;[End Block]
 					Default
 						;[Block]
-						If Rand(400) = 1 Then n\PrevState = Rnd(-30, 30)
+						If Rand(400/FPSfactor) = 1 Then n\PrevState = Rnd(-30, 30)
 						n\PathStatus = 0
 						AnimateNPC(n,77,201,0.2)
 						
@@ -2800,11 +2838,11 @@ Function UpdateNPCs()
 				;[Block]
 				;If KeyHit(48) Then n\Idle = True : n\State2 = 0
 				
-				If PlayerRoom\RoomTemplate\Name <> "pocketdimension" Then 
+				If PlayerRoom\RoomTemplate\Name <> "pocketdimension" And PlayerRoom\RoomTemplate\Name <> "halloweenpd" Then 
 					If n\Idle Then
 						HideEntity(n\obj)
 						HideEntity(n\obj2)
-						If Rand(200)=1 Then
+						If Rand(200/FPSfactor)=1 Then
 							For w.WayPoints = Each WayPoints
 								If w\room<>PlayerRoom Then
 									x = Abs(EntityX(Collider)-EntityX(w\obj,True))
@@ -2838,7 +2876,7 @@ Function UpdateNPCs()
 						n\PrevX = CurveValue(0.0, n\PrevX, 10.0)
 						n\PrevZ = CurveValue(0.0, n\PrevZ, 10.0)
 						
-						If Rand(100)=1 Then
+						If Rand(100/FPSfactor)=1 Then
 							If Rand(5)=1 Then
 								n\PrevX = (EntityX(Collider)-EntityX(n\Collider))*0.9
 								n\PrevZ = (EntityZ(Collider)-EntityZ(n\Collider))*0.9
@@ -2866,7 +2904,7 @@ Function UpdateNPCs()
 								RotateEntity n\obj, 0, CurveAngle(EntityYaw(n\obj2),EntityYaw(n\obj),40), 0
 								If dist < 4 Then n\State = Rand(1,2)
 							Else
-								If dist < 6 And Rand(5)=1 Then
+								If dist < 6 And Rand(5/FPSfactor)=1 Then
 									If EntityInView(n\Collider,Camera) Then
 										If EntityVisible(Collider, n\Collider) Then
 											n\LastSeen = 1
@@ -2907,7 +2945,7 @@ Function UpdateNPCs()
 									RotateEntity n\Collider, CurveAngle(EntityPitch(n\obj),EntityPitch(n\Collider),15.0), CurveAngle(EntityYaw(n\obj),EntityYaw(n\Collider),15.0), 0, True
 									n\CurrSpeed = CurveValue(0.05*Max((7.0-dist)/7.0,0.0),n\CurrSpeed,15.0)
 									MoveEntity n\Collider, 0,0,n\CurrSpeed*FPSfactor
-									If Rand(200)=1 Then MoveEntity n\Collider, 0, 0, 0.5
+									If Rand(200/FPSfactor)=1 Then MoveEntity n\Collider, 0, 0, 0.5
 									RotateEntity n\Collider, 0, EntityYaw(n\Collider), 0, True
 								Else
 									For i = 0 To 4
@@ -2974,10 +3012,10 @@ Function UpdateNPCs()
 			Case NPCtype372 ;------------------------------------------------------------------------------------------------------------------
 				;[Block]
 				RN$ = PlayerRoom\RoomTemplate\Name
-				If RN$ <> "pocketdimension" And RN$ <> "dimension1499" Then 
+				If RN$ <> "pocketdimension" And RN$ <> "halloweenpd" And RN$ <> "halloweenfields" And RN$ <> "dimension1499" Then 
 					If n\Idle Then
 						HideEntity(n\obj)
-						If Rand(50) = 1 And (BlinkTimer < -5 And BlinkTimer > -15) Then
+						If Rand(50/FPSfactor) = 1 And (BlinkTimer < -5 And BlinkTimer > -15) Then
 							ShowEntity(n\obj)
 							angle# = EntityYaw(Collider)+Rnd(-90,90)
 							
@@ -2986,7 +3024,7 @@ Function UpdateNPCs()
 							n\Idle = False
 							n\State = Rand(20, 60)
 							
-							If Rand(300)=1 Then PlaySound2(RustleSFX(Rand(0,2)),Camera, n\Collider, 8, Rnd(0.0,0.2))
+							If Rand(300/FPSfactor)=1 Then PlaySound2(RustleSFX(Rand(0,2)),Camera, n\Collider, 8, Rnd(0.0,0.2))
 						End If
 					EndIf
 					
@@ -3000,7 +3038,7 @@ Function UpdateNPCs()
 						If EntityInView(n\obj, Camera) And (BlinkTimer < - 16 Or BlinkTimer > - 6) Then
 							GiveAchievement(Achv372)
 							
-							If Rand(30)=1 Then 
+							If Rand(30/FPSfactor)=1 Then 
 								If (Not ChannelPlaying(n\SoundChn)) Then
 									If EntityVisible(Camera, n\obj) Then 
 										n\SoundChn = PlaySound2(RustleSFX(Rand(0,2)),Camera, n\obj, 8, 0.3)
@@ -3060,7 +3098,7 @@ Function UpdateNPCs()
 							If Abs(EntityX(Collider)-EntityX(n\Collider))< 30.0 Then
 								If Abs(EntityZ(Collider)-EntityZ(n\Collider))<30.0 Then
 									If Abs(EntityY(Collider)-EntityY(n\Collider))<20.0 Then
-										If Rand(20)=1 Then 
+										If Rand(20/FPSfactor)=1 Then 
 											If EntityVisible(Collider, n\Collider) Then
 												n\State = 2
 												PlaySound2(AlarmSFX(2), Camera, n\Collider, 50, 1.0)
@@ -3226,7 +3264,7 @@ Function UpdateNPCs()
 							EndIf
 							n\SoundChn2 = LoopSound2(n\Sound2,n\SoundChn2,Camera,n\Collider)
 							
-							If dist < 1.8 Then 
+							If dist < 1.8 And (Not NoTarget) Then 
 								If Abs(DeltaYaw(n\Collider, Collider))<20 Then 
 									n\State = 2
 									If n\Sound<>0 Then FreeSound_Strict n\Sound : n\Sound = 0 
@@ -3320,7 +3358,7 @@ Function UpdateNPCs()
 								EndIf
 							EndIf
 							If ForestNPCData[1]=0.0
-								If Rand(200)=1
+								If Rand(200/FPSfactor)=1
 									ForestNPCData[1]=FPSfactor
 									EntityTexture ForestNPC,ForestNPCTex,ForestNPCData[0]+1
 								EndIf
@@ -3424,7 +3462,7 @@ Function UpdateNPCs()
 											EndIf
 										Next
 										
-										If Rand(1,860-docchance)=1
+										If Rand(860-docchance)=1
 											ShowEntity ForestNPC
 											ForestNPCData[2]=1
 											If Rand(2)=1
@@ -3445,7 +3483,7 @@ Function UpdateNPCs()
 								EndIf
 								
 								If n\State2 = 0 Then ;don't start moving until the player is looking
-									If EntityInView(n\Collider, Camera) Then 
+									If EntityInView(n\Collider, Camera) And (Not NoTarget) Then 
 										n\State2 = 1
 										If Rand(8)=1 Then
 											PlaySound2(LoadTempSound("SFX\SCP\860\Cancer"+Rand(0,2)+".ogg"), Camera, n\Collider, 20.0)
@@ -3509,7 +3547,7 @@ Function UpdateNPCs()
 											
 											DebugLog(TFormedX()+", "+TFormedZ())
 											
-											If EntityInView(n\Collider, Camera) Then
+											If EntityInView(n\Collider, Camera) And (Not NoTarget) Then
 												BlinkTimer=-10
 											Else
 												x2 = gridsize
@@ -3530,7 +3568,7 @@ Function UpdateNPCs()
 								
 								If n\State2 = 0 Then
 									If dist<8.0 Then
-										If EntityInView(n\Collider,Camera) Then
+										If EntityInView(n\Collider,Camera) And (Not NoTarget) Then
 											PlaySound_Strict LoadTempSound("SFX\SCP\860\Chase"+Rand(1,2)+".ogg")
 											
 											PlaySound2(LoadTempSound("SFX\SCP\860\Cancer"+Rand(0,2)+".ogg"), Camera, n\Collider)	
@@ -3539,9 +3577,9 @@ Function UpdateNPCs()
 									EndIf
 								EndIf
 								
-								If CurrSpeed > 0.03 Then ;the player is running
+								If CurrSpeed > 0.03 And (Not NoTarget) Then ;the player is running
 									n\State3 = n\State3 + FPSfactor
-									If Rnd(5000)<n\State3 Then
+									If Rnd(5000/FPSfactor)<n\State3 Then
 										temp = True
 										If n\SoundChn <> 0 Then
 											If ChannelPlaying (n\SoundChn) Then temp = False
@@ -3585,7 +3623,7 @@ Function UpdateNPCs()
 							If n\Sound2 = 0 Then n\Sound2 = LoadSound_Strict("SFX\General\Slash2.ogg")
 							
 							;if close enough to attack OR already attacking, play the attack anim
-							If (dist<1.1 Or (n\Frame>451 And n\Frame<493) Or KillTimer < 0) Then
+							If (dist<1.1 Or (n\Frame>451 And n\Frame<493) Or KillTimer < 0) And (Not NoTarget) Then
 								DeathMSG = ""
 								
 								n\CurrSpeed = CurveValue(0.0, n\CurrSpeed, 5.0)
@@ -3644,7 +3682,7 @@ Function UpdateNPCs()
 			Case NPCtype939
 				;[Block]
 				
-				If PlayerRoom\RoomTemplate\Name <> "room3storage"
+				If PlayerRoom\RoomTemplate\Name <> "room3storage" And PlayerRoom\RoomTemplate\Name <> "halloweenfields"
 					n\State = 66
 				EndIf
 				
@@ -3679,7 +3717,7 @@ Function UpdateNPCs()
 							MoveEntity n\Collider, 0,0,n\CurrSpeed*FPSfactor						
 							
 						Case 2
-							n\State2 = Max(n\State2, (n\PrevState-3))
+							n\State2 = Max(n\State2, (n\PrevState-(n\LastDist-1)))
 							
 							dist = EntityDistance(n\Collider, PlayerRoom\Objects[n\State2])
 							
@@ -3693,7 +3731,13 @@ Function UpdateNPCs()
 							;Animate2(n\obj,AnimTime(n\obj),644,683,28*n\CurrSpeed) ;walk
 							
 							If (prevFrame<664 And n\Frame=>664) Or (prevFrame>673 And n\Frame<654) Then
-								PlaySound2(StepSFX(4, 0, Rand(0,3)), Camera, n\Collider, 12.0)
+								Local stepSound%
+								If n\TextureID = 1 Then
+									stepSound = Step2SFX(Rand(3,5))
+								Else
+									stepSound = StepSFX(4, 0, Rand(0,3))
+								EndIf
+								PlaySound2(stepSound, Camera, n\Collider, 12.0)
 								If Rand(10)=1 Then
 									temp = False
 									If n\SoundChn = 0 Then 
@@ -3703,7 +3747,11 @@ Function UpdateNPCs()
 									EndIf
 									If temp Then
 										If n\Sound <> 0 Then FreeSound_Strict n\Sound : n\Sound = 0
-										n\Sound = LoadSound_Strict("SFX\SCP\939\"+(n\ID Mod 3)+"Lure"+Rand(1,10)+".ogg")
+										If n\TextureID = 1 Then
+											n\Sound = LoadSound_Strict("SFX\SCP\939\Halloween\0Lure"+Rand(1,5)+".ogg")
+										Else
+											n\Sound = LoadSound_Strict("SFX\SCP\939\"+(n\ID Mod 3)+"Lure"+Rand(1,10)+".ogg")
+										EndIf
 										n\SoundChn = PlaySound2(n\Sound, Camera, n\Collider)
 									EndIf
 								EndIf
@@ -3714,7 +3762,7 @@ Function UpdateNPCs()
 							
 							If dist<0.4 Then
 								n\State2 = n\State2 + 1
-								If n\State2 > n\PrevState Then n\State2 = (n\PrevState-3)
+								If n\State2 > n\PrevState Then n\State2 = (n\PrevState-(n\LastDist-1))
 								n\State = 1
 							EndIf
 							
@@ -3755,8 +3803,13 @@ Function UpdateNPCs()
 										EndIf
 									EndIf
 									
-									If Injuries>4.0 Then 
-										DeathMSG=I_Loc\DeathMessage_939
+									If Injuries>4.0 Then
+										If n\TextureID = 1 Then
+											; Consistent with 860-2 - if the player's body is not (partially) recoverable, no death message is shown.
+											DeathMSG=""
+										Else
+											DeathMSG=I_Loc\DeathMessage_939
+										EndIf 
 										Kill()
 										If (Not GodMode) Then n\State = 5
 									EndIf								
@@ -3768,7 +3821,12 @@ Function UpdateNPCs()
 										;Animate2(n\obj,AnimTime(n\obj),449,464,6*n\CurrSpeed) ;run
 										
 										If (prevFrame<452 And n\Frame=>452) Or (prevFrame<459 And n\Frame=>459) Then
-											PlaySound2(StepSFX(1, 1, Rand(0,7)), Camera, n\Collider, 12.0)
+											If n\TextureID = 1 Then
+												stepSound = Step2SFX(Rand(3,5))
+											Else
+												stepSound = StepSFX(0, 1, Rand(0,7))
+											EndIf
+											PlaySound2(stepSound, Camera, n\Collider, 12.0)
 										EndIf										
 										
 										If Distance(n\EnemyX, n\EnemyZ, EntityX(n\Collider), EntityZ(n\Collider))<1.1 Then ;player is visible
@@ -3814,10 +3872,18 @@ Function UpdateNPCs()
 						If PlayerSoundVolume*1.2>dist Or dist < 1.5 Then
 							If n\State3 = 0 Then
 								If n\Sound <> 0 Then FreeSound_Strict n\Sound : n\Sound = 0
-								n\Sound = LoadSound_Strict("SFX\SCP\939\"+(n\ID Mod 3)+"Attack"+Rand(1,3)+".ogg")
+								If n\TextureID = 1 Then
+									n\Sound = LoadSound_Strict("SFX\SCP\939\Halloween\0Attack"+Rand(1,3)+".ogg")
+								Else
+									n\Sound = LoadSound_Strict("SFX\SCP\939\"+(n\ID Mod 3)+"Attack"+Rand(1,3)+".ogg")
+								EndIf
 								n\SoundChn = PlaySound2(n\Sound, Camera, n\Collider)										
 								
-								PlaySound_Strict(LoadTempSound("SFX\SCP\939\attack.ogg"))
+								If n\TextureID = 1 Then
+									PlaySound_Strict(LoadTempSound("SFX\SCP\939\Halloween\attack.ogg"))
+								Else
+									PlaySound_Strict(LoadTempSound("SFX\SCP\939\attack.ogg"))
+								EndIf
 								n\State3 = 1
 							EndIf
 							
@@ -3825,7 +3891,11 @@ Function UpdateNPCs()
 						ElseIf PlayerSoundVolume*1.6>dist
 							If n\State<>1 And n\Reload <= 0 Then
 								If n\Sound <> 0 Then FreeSound_Strict n\Sound : n\Sound = 0
-								n\Sound = LoadSound_Strict("SFX\SCP\939\"+(n\ID Mod 3)+"Alert"+Rand(1,3)+".ogg")
+								If n\TextureID = 1 Then
+									n\Sound = LoadSound_Strict("SFX\SCP\939\Halloween\0Alert"+Rand(1,3)+".ogg")
+								Else
+									n\Sound = LoadSound_Strict("SFX\SCP\939\"+(n\ID Mod 3)+"Alert"+Rand(1,3)+".ogg")
+								EndIf
 								n\SoundChn = PlaySound2(n\Sound, Camera, n\Collider)	
 								
 								n\Frame = 175
@@ -3894,11 +3964,19 @@ Function UpdateNPCs()
 						EndIf
 						dist = Distance(EntityX(Collider),EntityZ(Collider),EntityX(n\Collider),EntityZ(n\Collider))
 						
-						If Rand(700)=1 Then PlaySound2(LoadTempSound("SFX\SCP\066\Eric"+Rand(1,3)+".ogg"),Camera, n\Collider, 8.0)
-						
+						If Rand(700/FPSfactor)=1 Then
+							Local soundPath$ = "SFX\SCP\066\"
+							If n\TextureID = 1 Then soundPath = soundPath + "Halloween\"
+							PlaySound2(LoadTempSound(soundPath+"Eric"+Rand(1,3)+".ogg"),Camera, n\Collider, 8.0)
+						EndIf
+
 						If dist < 1.0+n\LastDist Then
-							GiveAchievement(Achv066)
-							n\State = Rand(2,3)
+							If n\TextureID = 1 Then
+								n\State = Rand(4,6) / 2 ; Only 1/3 chance to try and flee
+							Else
+								n\State = Rand(2,3)
+								GiveAchievement(Achv066)
+							EndIf
 						EndIf
 					Case 2 ;roll towards the player and make a sound, and then escape	
 						If n\Frame < 647 Then 
@@ -3914,13 +3992,20 @@ Function UpdateNPCs()
 						Else
 							If n\Frame=683 Then 
 								If n\State2 = 0 Then
+									soundPath$ = "SFX\SCP\066\"
+									If n\TextureID = 1 Then soundPath = soundPath + "Halloween\"
 									If Rand(2)=1 Then
-										PlaySound2(LoadTempSound("SFX\SCP\066\Eric"+Rand(1,3)+".ogg"),Camera, n\Collider, 8.0)
+										PlaySound2(LoadTempSound(soundPath+"Eric"+Rand(1,3)+".ogg"),Camera, n\Collider, 8.0)
 									Else
-										PlaySound2(LoadTempSound("SFX\SCP\066\Notes"+Rand(1,6)+".ogg"), Camera, n\Collider, 8.0)
-									EndIf									
-									
-									Select Rand(1,6)
+										PlaySound2(LoadTempSound(soundPath+"Notes"+Rand(1,6)+".ogg"), Camera, n\Collider, 8.0)
+									EndIf
+
+									Local minAction% = 1, maxAction% = 6
+									If n\TextureID = 1 Then
+										minAction = 2 ; We don't want beethoven on Jell-0-66
+										maxAction = 5 ; We don't want the stomp either, as the transparency breaks with Jell-0-66
+									EndIf
+									Select Rand(minAction,maxAction)
 										Case 1
 											If n\Sound2=0 Then n\Sound2=LoadSound_Strict("SFX\SCP\066\Beethoven.ogg")
 											n\SoundChn2 = PlaySound2(n\Sound2, Camera, n\Collider, 20.0, 1.0, False)
@@ -3931,7 +4016,7 @@ Function UpdateNPCs()
 											n\State3 = Rand(700,1400)
 										Case 3
 											For d.Doors = Each Doors
-												If d\locked = False And d\KeyCard = 0 And d\Code = "" Then
+												If d\locked = False And d\KeyCard = 0 And d\Code = "" And d\MTFClose Then
 													If Abs(EntityX(d\frameobj)-EntityX(n\Collider))<16.0 Then
 														If Abs(EntityZ(d\frameobj)-EntityZ(n\Collider))<16.0 Then
 															UseDoor(d, False)
@@ -3939,7 +4024,7 @@ Function UpdateNPCs()
 													EndIf
 												EndIf
 											Next
-										Case 4
+										Case 6
 											If PlayerRoom\RoomTemplate\DisableDecals = False Then
 												CameraShake = 5.0
 												de.Decals = CreateDecal(1, EntityX(n\Collider), 0.01, EntityZ(n\Collider), 90, Rand(360), 0)
@@ -3980,7 +4065,7 @@ Function UpdateNPCs()
 						
 						;Animate2(n\obj, AnimTime(n\obj), 684, 647, -n\CurrSpeed*25)
 						
-						If Rand(100)=1 Then n\Angle = Rnd(-20,20)
+						If Rand(100/FPSfactor)=1 Then n\Angle = Rnd(-20,20)
 						
 						n\State2 = n\State2 + FPSfactor
 						If n\State2>250 Then 
@@ -3995,7 +4080,14 @@ Function UpdateNPCs()
 							
 							;Animate2(n\obj, AnimTime(n\obj), 684, 647, -n\CurrSpeed*25)
 						EndIf
-						
+					Case 66
+						AnimateNPC(n, 685, 710, 0.4, False)
+					Case 67
+						AnimateNPC(n, 710, 685, -0.4, False)
+						If n\Frame = 685 Then 
+							n\State = 0
+							n\State2 = 0
+						EndIf
 				End Select
 				
 				If n\State > 1 Then
@@ -4019,13 +4111,56 @@ Function UpdateNPCs()
 				
 				If n\State3 > 0 Then
 					n\State3 = n\State3-FPSfactor
-					LightVolume = TempLightVolume-TempLightVolume*Min(Max(n\State3/500,0.01),0.6)
+					LightVolume = Min(LightVolume, TempLightVolume-TempLightVolume*Min(Max(n\State3/500,0.01),0.6))
 					HeartBeatRate = Max(HeartBeatRate, 130)
 					HeartBeatVolume = Max(HeartBeatVolume,Min(n\State3/1000,1.0))
 				EndIf
 				
 				If ChannelPlaying(n\SoundChn2)
 					BlurTimer = Max((5.0-dist)*300,0)
+				EndIf
+
+				If n\TextureID = 1 Then
+					Local found% = False
+					For it.Items = Each Items
+						If it\itemtemplate\group = "battery" And GetParent(it\collider) = n\ManipulationType Then
+							If it\Picked Then
+								If it\itemtemplate\name = "killbat" Then it\state = False
+								EntityParent(it\collider, 0)
+								PositionEntity(it\collider, 0, 0, 0)
+							Else
+								it\DropSpeed = 0
+								PositionEntity(it\collider, CurveValue(0, EntityX(it\collider), 20), CurveValue(0, EntityY(it\collider), 20), CurveValue(0, EntityZ(it\collider), 20))
+							EndIf
+							found = True
+							Exit
+						EndIf
+					Next
+					If Not found Then
+						For it.Items = Each Items
+							If it\itemtemplate\group = "battery" And EntityDistance(it\collider, n\ManipulationType) < 0.6 And (Not it\Picked) And GetParent(it\collider) = 0 Then
+								If it\itemtemplate\name = "killbat" Then it\state = True
+								dist# = EntityDistance(it\collider, n\ManipulationType)
+								EntityParent(it\collider, n\ManipulationType)
+								If dist < 0.01 Then PositionEntity(it\collider, 0, 0, 0)
+								found = True
+								Exit
+							EndIf
+						Next
+					EndIf
+					
+					; There is a really odd bug where for some reason the position of the bone entities appears incorrect (likely unscaled?) for one frame.
+					If EntityDistance(n\Collider, n\ManipulationType) < 1 Then
+						If (Not found) Then
+							If n\State <> 66 Then
+								PlaySound2(LoadTempSound("SFX\SCP\066\Halloween\PowerDown.ogg"), Camera, n\Collider)
+								n\State = 66
+							EndIf
+						Else If n\State = 66 Then
+							PlaySound2(LoadTempSound("SFX\SCP\066\Halloween\PowerUp.ogg"), Camera, n\Collider)
+							n\State = 67
+						EndIf
+					EndIf
 				EndIf
 				
 				PositionEntity(n\obj, EntityX(n\Collider), EntityY(n\Collider) - 0.2, EntityZ(n\Collider))
@@ -4273,7 +4408,7 @@ Function UpdateNPCs()
 										
 										n\State2=MilliSecs()+1000
 										
-										If Rand(5)=1 Then n\State=0
+										If Rand(5/FPSfactor)=1 Then n\State=0
 									EndIf	
 									
 									n\CurrSpeed = CurveValue(n\Speed*0.5, n\CurrSpeed, 20.0)
@@ -4351,7 +4486,7 @@ Function UpdateNPCs()
 					End Select
 				Else
 					HideEntity n\obj
-					If (Rand(600)=1) Then
+					If (Rand(600/FPSfactor)=1) Then
 						TeleportCloser(n)
 					EndIf
 				EndIf
@@ -4501,7 +4636,7 @@ Function UpdateNPCs()
 									RotateEntity n\Collider,0,CurveAngle(n\Angle,EntityYaw(n\Collider),10.0),0
 									
 									If n\Target=Null Then
-										If Rand(200) = 1 Then n\Angle = n\Angle + Rnd(-45,45)
+										If Rand(200/FPSfactor) = 1 Then n\Angle = n\Angle + Rnd(-45,45)
 										
 										HideEntity n\Collider
 										EntityPick(n\Collider, 1.5)
@@ -4599,7 +4734,7 @@ Function UpdateNPCs()
 								EndIf
 								If n\PrevState = 0 Then
 									If n\Target = Null Then
-										If Rand(1,1200)=1 Then
+										If Rand(1200/FPSfactor)=1 Then
 											For n2.NPCs = Each NPCs
 												If n2<>n Then
 													If n2\NPCtype=n\NPCtype Then
@@ -4623,7 +4758,7 @@ Function UpdateNPCs()
 							
 							;randomly play the "screaming animation" and revert back to state 0
 							If n\Target=Null And n\PrevState=0 Then
-								If (Rand(5000)=1) Then
+								If (Rand(5000/FPSfactor)=1) Then
 									n\State = 2
 									n\State2 = 0
 									
@@ -4963,7 +5098,7 @@ Function UpdateNPCs()
 								n\Idle = Max(n\Idle-(1+(1*SelectedDifficulty\aggressiveNPCs))*FPSfactor,0)
 							Else
 								If PlayerInReachableRoom() ;Player is in a room where SCP-008-1 can teleport to
-									If Rand(50-(20*SelectedDifficulty\aggressiveNPCs))=1
+									If Rand((50-(20*SelectedDifficulty\aggressiveNPCs))/FPSfactor)=1
 										ShowEntity n\Collider
 										ShowEntity n\obj
 										For w.waypoints = Each WayPoints
@@ -5014,7 +5149,7 @@ Function UpdateNPCs()
 		
 		Local gravityDist = Distance(EntityX(Collider),EntityZ(Collider),EntityX(n\Collider),EntityZ(n\Collider))
 		
-		If gravityDist<HideDistance*0.7 Or n\NPCtype = NPCtype1499 Then
+		If gravityDist<HideDistance*0.7 Lor n\NPCtype = NPCtype1499 Lor (n\NPCtype = NPCtype939 And n\InFacility = InFacility) Then
 			If n\InFacility = InFacility
 				TranslateEntity n\Collider, 0, n\DropSpeed, 0
 				
@@ -5431,7 +5566,7 @@ Function UpdateMTFUnit(n.NPCs)
                 ElseIf (n\PathTimer<=70.0 * 2.5) And (n\MTFLeader=Null) Then
 					n\PathTimer=n\PathTimer-FPSfactor
 					n\CurrSpeed = 0.0
-					If Rand(1,35)=1 Then
+					If Rand(35/FPSfactor)=1 Then
 						RotateEntity n\Collider,0.0,Rnd(360.0),0.0,True
 					EndIf
 					FinishWalking(n,488,522,n\Speed*26)
@@ -5441,7 +5576,7 @@ Function UpdateMTFUnit(n.NPCs)
 					If n\PathStatus=2 Then
 						n\PathTimer=n\PathTimer-(FPSfactor*2.0) ;timer goes down fast
 						n\CurrSpeed = 0.0
-						If Rand(1,35)=1 Then
+						If Rand(35/FPSfactor)=1 Then
 							RotateEntity n\Collider,0.0,Rnd(360.0),0.0,True
 						EndIf
 						FinishWalking(n,488,522,n\Speed*26)
@@ -5514,7 +5649,7 @@ Function UpdateMTFUnit(n.NPCs)
 					Else
 						n\PathTimer=n\PathTimer-(FPSfactor*2.0) ;timer goes down fast
 						If n\MTFLeader = Null Then
-							If Rand(1,35)=1 Then
+							If Rand(35/FPSfactor)=1 Then
 								RotateEntity n\Collider,0.0,Rnd(360.0),0.0,True
 							EndIf
 							FinishWalking(n,488,522,n\Speed*26)
@@ -5527,7 +5662,7 @@ Function UpdateMTFUnit(n.NPCs)
 							TranslateEntity n\Collider, Cos(EntityYaw(n\Collider,True)+90.0)*n\CurrSpeed * FPSfactor, 0, Sin(EntityYaw(n\Collider,True)+90.0)*n\CurrSpeed * FPSfactor, True
 							AnimateNPC(n,488, 522, n\CurrSpeed*26)
 						Else
-							If Rand(1,35)=1 Then
+							If Rand(35/FPSfactor)=1 Then
 								RotateEntity n\Collider,0.0,Rnd(360.0),0.0,True
 							EndIf
 							FinishWalking(n,488,522,n\Speed*26)
@@ -5714,6 +5849,7 @@ Function UpdateMTFUnit(n.NPCs)
                 If MeNPCSeesPlayer(n) = True Then
 					
 					;if close enough, start shooting at the player
+					Local playerDist# = EntityDistance(n\Collider,Collider)
 					If playerDist < 4.0 Then
 						
 						Local angle# = VectorYaw(EntityX(Collider)-EntityX(n\Collider),0,EntityZ(Collider)-EntityZ(n\Collider))
@@ -5725,7 +5861,7 @@ Function UpdateMTFUnit(n.NPCs)
 							If EntityVisible(n\Collider, Camera) Then
 								angle# = WrapAngle(angle - EntityYaw(n\Collider))
 								If angle < 5 Or angle > 355 Then 
-									prev% = KillTimer
+									Local prev% = KillTimer
 									
 									PlaySound2(GunshotSFX, Camera, n\Collider, 15)
 									
@@ -5820,7 +5956,7 @@ Function UpdateMTFUnit(n.NPCs)
 					ElseIf n\PathTimer<=70.0 * 2.5 Then
 						n\PathTimer=n\PathTimer-FPSfactor
 						n\CurrSpeed = 0.0
-						If Rand(1,35)=1 Then
+						If Rand(35/FPSfactor)=1 Then
 							RotateEntity n\Collider,0.0,Rnd(360.0),0.0,True
 						EndIf
 						FinishWalking(n,488,522,n\Speed*26)
@@ -5830,7 +5966,7 @@ Function UpdateMTFUnit(n.NPCs)
 						If n\PathStatus=2 Then
 							n\PathTimer=n\PathTimer-(FPSfactor*2.0) ;timer goes down fast
 							n\CurrSpeed = 0.0
-							If Rand(1,35)=1 Then
+							If Rand(35/FPSfactor)=1 Then
 								RotateEntity n\Collider,0.0,Rnd(360.0),0.0,True
 							EndIf
 							FinishWalking(n,488,522,n\Speed*26)
@@ -5880,11 +6016,11 @@ Function UpdateMTFUnit(n.NPCs)
 						Else
 							PositionEntity n\obj,n\EnemyX,n\EnemyY,n\EnemyZ,True
 							If (Distance(EntityX(n\Collider,True),EntityZ(n\Collider,True),n\EnemyX,n\EnemyZ)<0.2) Or (Not EntityVisible(n\obj,n\Collider)) Then
-								If Rand(1,35)=1 Then
+								If Rand(35/FPSfactor)=1 Then
 									RotateEntity n\Collider,0.0,Rnd(360.0),0.0,True
 								EndIf
 								FinishWalking(n,488,522,n\Speed*26)
-								If Rand(1,35)=1 Then
+								If Rand(35/FPSfactor)=1 Then
 									For wp.Waypoints = Each WayPoints
 										If (Rand(1,3)=1) Then
 											If (EntityDistance(wp\obj,n\Collider)<6.0) Then
@@ -6107,7 +6243,7 @@ Function UpdateMTFUnit(n.NPCs)
 						ElseIf n\PathTimer<=70.0 * 2.5 Then
 							n\PathTimer=n\PathTimer-FPSfactor
 							n\CurrSpeed = 0.0
-							If Rand(1,35)=1 Then
+							If Rand(35/FPSfactor)=1 Then
 								RotateEntity n\Collider,0.0,Rnd(360.0),0.0,True
 							EndIf
 							FinishWalking(n,488,522,n\Speed*26)
@@ -6117,7 +6253,7 @@ Function UpdateMTFUnit(n.NPCs)
 							If n\PathStatus=2 Then
 								n\PathTimer=n\PathTimer-(FPSfactor*2.0) ;timer goes down fast
 								n\CurrSpeed = 0.0
-								If Rand(1,35)=1 Then
+								If Rand(35/FPSfactor)=1 Then
 									RotateEntity n\Collider,0.0,Rnd(360.0),0.0,True
 								EndIf
 								FinishWalking(n,488,522,n\Speed*26)
@@ -6167,7 +6303,7 @@ Function UpdateMTFUnit(n.NPCs)
 							Else
 								n\PathTimer=n\PathTimer-(FPSfactor*2.0) ;timer goes down fast
 								n\CurrSpeed = 0.0
-								If Rand(1,35)=1 Then
+								If Rand(35/FPSfactor)=1 Then
 									RotateEntity n\Collider,0.0,Rnd(360.0),0.0,True
 								EndIf
 								FinishWalking(n,488,522,n\Speed*26)
@@ -6230,7 +6366,7 @@ Function UpdateMTFUnit(n.NPCs)
 								EndIf
 							EndIf
 						Else
-							If Rand(20)=1 Then 
+							If Rand(20/FPSfactor)=1 Then 
 								PositionEntity n\Collider, EntityX(n\Path[n\PathLocation]\obj,True),EntityY(n\Path[n\PathLocation]\obj,True)+0.25,EntityZ(n\Path[n\PathLocation]\obj,True),True
 								n\PathLocation = n\PathLocation + 1
 								ResetEntity n\Collider
@@ -6918,7 +7054,7 @@ Function Shoot(x#, y#, z#, hitProb# = 1.0, particles% = True, instaKill% = False
 			;Kill()
 			PlaySound_Strict BullethitSFX
 		ElseIf particles And ParticleAmount>0
-			pvt = CreatePivot()
+			Local pvt = CreatePivot()
 			PositionEntity pvt, EntityX(Collider),(EntityY(Collider)+EntityY(Camera))/2,EntityZ(Collider)
 			PointEntity pvt, p\obj
 			TurnEntity pvt, 0, 180, 0
@@ -6996,6 +7132,9 @@ Function MoveToPocketDimension()
 			PositionEntity(Collider, EntityX(r\obj),0.8,EntityZ(r\obj))
 			DropSpeed = 0
 			ResetEntity Collider
+
+			PositionEntity(Head, 0, 0, 0)
+			ResetEntity Head
 			
 			BlinkTimer = -10
 			
@@ -7442,7 +7581,7 @@ Function PlayerInReachableRoom(canSpawnIn049Chamber%=False)
 	Local e.Events, temp
 	
 	;Player is in these rooms, returning false
-	If RN = "pocketdimension" Or RN = "gatea" Or RN = "dimension1499" Or RN = "173" Then
+	If RN = "pocketdimension" Lor RN = "gatea" Lor RN = "dimension1499" Lor RN = "173" Lor RN = "halloweenfields" Lor RN = "halloweenpd" Then
 		Return False
 	EndIf
 	;Player is at GateB and is at the surface, returning false
@@ -7584,21 +7723,109 @@ Function ChangeNPCTextureID(n.NPCs,textureid%)
 		Return
 	EndIf
 	
-	n\TextureID = textureid%+1
-	FreeEntity n\obj
-	n\obj = CopyEntity(DTextures[textureid%+1])
+	n\TextureID = textureid
+
+	Local oldObj = n\obj
+	If n\NPCtype = NPCtype066 Then
+		If Not CopyExistingNPCTextureIDObj(n) Then
+			If n\TextureID = 1 Then
+				n\obj = LoadAnimMesh_Strict("GFX\npcs\Halloween\jell066.b3d")
+			Else
+				n\obj = LoadAnimMesh_Strict("GFX\NPCs\scp-066.b3d")
+			EndIf
+			Local temp# = GetModdedINIFloat("DATA\NPCs.ini", "SCP-066", "scale")/2.5
+			ScaleEntity n\obj, temp, temp, temp
+		EndIf
+		If n\TextureID = 1 Then
+			n\NVName = I_Loc\NPC_Unidentified
+			n\ManipulationType = FindChild(n\obj, GetModdedINIString(NPCBones, "SCP-066", "item_bonename"))
+		Else
+			n\NVName = I_Loc\NPC_066
+			For it.Items = Each Items
+				If GetParent(it\collider) = n\ManipulationType Then
+					EntityParent(it\collider, 0)
+				EndIf
+			Next
+			n\ManipulationType = 0
+		EndIf
+	ElseIf n\NPCtype = NPCtype939 And n\TextureID = 1 Then
+		If Not CopyExistingNPCTextureIDObj(n) Then
+			n\obj = LoadAnimMesh_Strict("GFX\npcs\Halloween\pumpkinmonster.b3d")
+			temp# = (GetModdedINIFloat("DATA\NPCs.ini", "forestmonster", "scale") / 20.0)
+			ScaleEntity n\obj, temp, temp, temp
+		EndIf
+		n\NVName = I_Loc\NPC_Unidentified
+	ElseIf n\NPCtype = NPCtype173 Then
+		oldObj = 0 ; We don't change the obj
+		Local tex% = 0
+		If n\TextureID = 1 Then
+			tex = LoadTexture_Strict("GFX\npcs\173h.pt", 1)
+		ElseIf n\TextureID = 0 Then
+			tex = LoadTexture_Strict("GFX\npcs\173texture.jpg", 1)
+		EndIf
+		If tex <> 0 Then
+			EntityTexture n\obj, tex, 0, 0
+			FreeTexture tex
+		EndIf
+	ElseIf n\NPCtype = NPCtypeOldMan Then
+		If n\TextureID = 1 Then
+			If Not CopyExistingNPCTextureIDObj(n) Then
+				n\obj = LoadAnimMesh_Strict("GFX\npcs\Halloween\skinned106.b3d")
+				temp# = GetModdedINIFloat("DATA\NPCs.ini", "SCP-106", "scale")/2.5
+				ScaleEntity n\obj, temp, temp, temp
+			EndIf
+		EndIf
+	Else
+		n\obj = CopyEntity(DTextures[textureid])
+		
+		temp# = 0.5 / MeshWidth(n\obj)
+		ScaleEntity n\obj, temp, temp, temp
+		MeshCullBox (n\obj, -MeshWidth(ClassDObj), -MeshHeight(ClassDObj), -MeshDepth(ClassDObj)*4, MeshWidth(ClassDObj)*2, MeshHeight(ClassDObj)*2, MeshDepth(ClassDObj)*8)
+	EndIf
 	
-	temp# = 0.5 / MeshWidth(n\obj)
-	ScaleEntity n\obj, temp, temp, temp
-	MeshCullBox (n\obj, -MeshWidth(ClassDObj), -MeshHeight(ClassDObj), -MeshDepth(ClassDObj)*4, MeshWidth(ClassDObj)*2, MeshHeight(ClassDObj)*2, MeshDepth(ClassDObj)*8)
-	
-	SetNPCFrame(n,n\Frame)
-	
+	If AnimTime(n\Obj) <> -1 Then SetAnimTime(n\obj,n\Frame)
+
+	FreeEntity oldObj
 End Function
 
+Function CopyExistingNPCTextureIDObj%(n.NPCs)
+	For n2.NPCs = Each NPCs
+		If n2 <> n And n2\NPCtype = n\NPCtype And n2\TextureID = n\TextureID Then
+			n\obj = CopyEntity(n2\obj)
+			Return True
+		EndIf
+	Next
+	Return False
+End Function
 
-
-
+Function UpgradeNPC914(n.NPCs, setting$, x#, y#, z#)
+	Select n\NPCtype
+		Case NPCtype066
+			Select setting
+				Case "rough"
+					; yeah, he bleeds blood, what about it?
+					de.Decals = CreateDecal(2, x, 8 * RoomScale + 0.005, z, 90, Rand(360), 0)
+					de\Size = 0.4 : ScaleSprite(de\obj, de\Size, de\Size)
+					RemoveNPC(n) : n = Null
+				Case "coarse"
+					n\Speed = n\Speed * 0.5
+				Case "1:1"
+					ChangeNPCTextureID(n, Not n\TextureID)
+					If n\TextureID = 1 Then
+						n\State = 66
+						SetNPCFrame(n, 710)
+					EndIf
+				Case "fine"
+					n\Speed = n\Speed * 2
+				Case "very fine"
+					n\Speed = n\Speed * 5
+			End Select
+			If n <> Null Then
+				PositionEntity(n\Collider, x, y + 1.0, z)
+				ResetEntity(n\Collider)
+			EndIf
+	End Select
+End Function
 
 
 

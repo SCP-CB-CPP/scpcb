@@ -27,9 +27,9 @@ Function CreateParticle.Particles(x#, y#, z#, image%, size#, gravity# = 1.0, lif
 	SpriteViewMode (p\obj, 3)
 	
 	Select image
-		Case 0,5,6
+		Case 0,2,5,6
 			EntityBlend(p\obj, 1)
-		Case 1,2,3,4,7
+		Case 1,3,4,7
 			EntityBlend(p\obj, 3)
 	End Select
 	
@@ -144,7 +144,7 @@ Function UpdateEmitters()
 		EndIf
 		
 		If KillTimer => 0 Then 
-			If Rand(150) = 1 Then
+			If Rand(150/FPSfactor) = 1 Then
 				If CoughCHN = 0 Then
 					CoughCHN = PlaySound_Strict(CoughSFX(Rand(0, 2)))
 				Else
@@ -259,7 +259,7 @@ Function UpdateDevilEmitters()
 		EndIf
 		
 		If KillTimer => 0 Then 
-			If Rand(150) = 1 Then
+			If Rand(150/FPSfactor) = 1 Then
 				If CoughCHN = 0 Then
 					CoughCHN = PlaySound_Strict(CoughSFX(Rand(0, 2)))
 				Else

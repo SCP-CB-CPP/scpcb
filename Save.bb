@@ -89,6 +89,7 @@ Function SaveGame(file$)
 	WriteByte f, WearingGasMask
 	WriteByte f, WearingVest
 	WriteByte f, WearingHazmat
+	WriteByte f, WearingPumpkin
 	
 	WriteByte f, WearingNightVision
 	WriteByte f, Wearing1499
@@ -369,8 +370,9 @@ Function SaveGame(file$)
 		WriteFloat f, e\EventState
 		WriteFloat f, e\EventState2	
 		WriteFloat f, e\EventState3	
-		WriteFloat f, EntityX(e\room\obj)
-		WriteFloat f, EntityZ(e\room\obj)
+		WriteFloat f, e\room\x
+		WriteFloat f, e\room\y
+		WriteFloat f, e\room\z
 		WriteString f, e\EventStr
 	Next
 	
@@ -481,6 +483,8 @@ Function LoadGame(file$)
 	DropSpeed=0.0
 	
 	DebugHUD = False
+
+	TimeScale = 1.0
 	
 	GameSaved = True
 	
@@ -575,6 +579,8 @@ Function LoadGame(file$)
 	WearingGasMask = ReadByte(f)
 	WearingVest = ReadByte(f)	
 	WearingHazmat = ReadByte(f)
+	WearingPumpkin = ReadByte(f)
+	If WearingPumpkin Then NoTarget = True
 	
 	WearingNightVision = ReadByte(f)
 	Wearing1499 = ReadByte(f)
@@ -672,7 +678,7 @@ Function LoadGame(file$)
 		
 		n\texture = ReadString(f)
 		If n\texture <> "" Then
-			tex = LoadTexture_Strict (n\texture)
+			Local tex = LoadTexture_Strict (n\texture)
 			EntityTexture n\obj, tex
 		EndIf
 		
@@ -700,8 +706,7 @@ Function LoadGame(file$)
 		EndIf
 		n\TextureID = ReadInt(f)
 		If n\TextureID > 0
-			ChangeNPCTextureID(n.NPCs,n\TextureID-1)
-			SetAnimTime(n\obj,frame)
+			ChangeNPCTextureID(n.NPCs,n\TextureID)
 		EndIf
 	Next
 	
@@ -734,12 +739,10 @@ Function LoadGame(file$)
 	room2gw_x = ReadFloat(f)
 	room2gw_z = ReadFloat(f)
 	
-	If version = CompatibleNumber Then
-		I_Zone\Transition[0] = ReadByte(f)
-		I_Zone\Transition[1] = ReadByte(f)
-		I_Zone\HasCustomForest = ReadByte(f)
-		I_Zone\HasCustomMT = ReadByte(f)
-	EndIf
+	I_Zone\Transition[0] = ReadByte(f)
+	I_Zone\Transition[1] = ReadByte(f)
+	I_Zone\HasCustomForest = ReadByte(f)
+	I_Zone\HasCustomMT = ReadByte(f)
 	
 	DrawLoading(50)
 
@@ -752,11 +755,11 @@ Function LoadGame(file$)
 		y = ReadFloat(f)
 		z = ReadFloat(f)
 		
-		found = ReadByte(f)
+		Local found = ReadByte(f)
 		
-		level = ReadInt(f)
+		Local level = ReadInt(f)
 		
-		temp2 = ReadByte(f)		
+		Local temp2 = ReadByte(f)		
 		
 ;		If angle >= 360
 ;            angle = angle-360
@@ -830,9 +833,8 @@ Function LoadGame(file$)
 		If hasForest>0 Then ;this room has a forest
 			If r\fr<>Null Then ;remove the old forest
 				DestroyForest(r\fr)
-			Else
-				r\fr=New Forest
 			EndIf
+			r\fr=New Forest
 			For y=0 To gridsize-1
 				Local sssss$ = ""
 				For x=0 To gridsize-1
@@ -841,9 +843,9 @@ Function LoadGame(file$)
 				Next
 				DebugLog sssss
 			Next
-			lx# = ReadFloat(f)
-			ly# = ReadFloat(f)
-			lz# = ReadFloat(f)
+			Local lx# = ReadFloat(f)
+			Local ly# = ReadFloat(f)
+			Local lz# = ReadFloat(f)
 			If hasForest=1 Then
 				PlaceForest(r\fr,lx,ly,lz,r)
 			Else
@@ -851,7 +853,6 @@ Function LoadGame(file$)
 			EndIf
 		ElseIf r\fr<>Null Then ;remove the old forest
 			DestroyForest(r\fr)
-			Delete r\fr
 		EndIf
 		
 	Next
@@ -1043,9 +1044,10 @@ Function LoadGame(file$)
 		e\EventState2 =ReadFloat(f)		
 		e\EventState3 =ReadFloat(f)
 		x = ReadFloat(f)
+		y = ReadFloat(f)
 		z = ReadFloat(f)
 		For  r.Rooms = Each Rooms
-			If EntityX(r\obj) = x And EntityZ(r\obj) = z Then
+			If r\x = x And r\y = y And r\z = z Then
 				e\room = r
 				Exit
 			EndIf
@@ -1107,10 +1109,10 @@ Function LoadGame(file$)
 		If ittName = "cup" Then
 			Local drinkName$ = ReadString(f)
 
-			red = ReadByte(f)
-			green = ReadByte(f)
-			blue = ReadByte(f)
-			a# = ReadFloat(f)
+			Local red = ReadByte(f)
+			Local green = ReadByte(f)
+			Local blue = ReadByte(f)
+			Local a# = ReadFloat(f)
 
 			it = CreateCup(drinkName, x, y, z, red, green, blue, a)
 		Else
@@ -1125,7 +1127,7 @@ Function LoadGame(file$)
 		it\Picked = ReadByte(f)
 		If it\Picked Then HideEntity(it\collider)
 		
-		nt = ReadByte(f)
+		Local nt = ReadByte(f)
 		If nt = True Then SelectedItem = it
 		
 		nt = ReadByte(f)
@@ -1134,7 +1136,16 @@ Function LoadGame(file$)
 			ItemAmount = ItemAmount + 1
 		EndIf
 		
-		If it\itemtemplate\isAnim<>0 Then SetAnimTime it\model,ReadFloat(f)
+		; Evil fucked up save compatibility hack
+		If it\itemtemplate\isAnim<>0 Then
+			If it\itemtemplate\name = "scp330" And version = "1.3.12.7" Then
+				SetAnimTime it\model,it\state + 1
+			ElseIf it\itemtemplate\name = "pumpkin" And version = "1.3.12.7" Then
+				; Keep anim time at 0
+			Else
+				SetAnimTime it\model,ReadFloat(f)
+			EndIf
+		EndIf
 		
 		Local invSize% = ReadByte(f)
 		If invSize <> 0 Then it\Inventory = New Inventories : it\Inventory\Size = invSize
@@ -1180,10 +1191,10 @@ Function LoadGame(file$)
 	
 	For do.Doors = Each Doors
 		If do\room <> Null Then
-			dist# = 20.0
+			Local dist# = 20.0
 			Local closestroom.Rooms
 			For r.Rooms = Each Rooms
-				dist2# = EntityDistance(r\obj, do\obj)
+				Local dist2# = EntityDistance(r\obj, do\obj)
 				If dist2 < dist Then
 					dist = dist2
 					closestroom = r.Rooms
@@ -1216,33 +1227,8 @@ Function LoadGame(file$)
 	CloseFile f
 	
 	For r.Rooms = Each Rooms
-		r\Adjacent[0]=Null
-		r\Adjacent[1]=Null
-		r\Adjacent[2]=Null
-		r\Adjacent[3]=Null
-		For r2.Rooms = Each Rooms
-			If r<>r2 Then
-				If r2\z=r\z Then
-					If (r2\x)=(r\x+8.0) Then
-						r\Adjacent[0]=r2
-						If r\AdjDoor[0] = Null Then r\AdjDoor[0] = r2\AdjDoor[2]
-					ElseIf (r2\x)=(r\x-8.0)
-						r\Adjacent[2]=r2
-						If r\AdjDoor[2] = Null Then r\AdjDoor[2] = r2\AdjDoor[0]
-					EndIf
-				ElseIf r2\x=r\x Then
-					If (r2\z)=(r\z-8.0) Then
-						r\Adjacent[1]=r2
-						If r\AdjDoor[1] = Null Then r\AdjDoor[1] = r2\AdjDoor[3]
-					ElseIf (r2\z)=(r\z+8.0)
-						r\Adjacent[3]=r2
-						If r\AdjDoor[3] = Null Then r\AdjDoor[3] = r2\AdjDoor[1]
-					EndIf
-				EndIf
-			EndIf
-			If (r\Adjacent[0]<>Null) And (r\Adjacent[1]<>Null) And (r\Adjacent[2]<>Null) And (r\Adjacent[3]<>Null) Then Exit
-		Next
-		
+		ConnectAdjacentRooms(r)
+
 		For do.Doors = Each Doors
 			If (do\KeyCard = 0) And (do\Code="") Then
 				If EntityZ(do\frameobj,True)=r\z Then
@@ -1297,12 +1283,13 @@ Function LoadGameQuick(file$)
 	
 	DebugHUD = False
 	For r.Rooms = Each Rooms
-		tb.Triggerboxes = r\FirstTriggerbox
+		Local tb.Triggerboxes = r\FirstTriggerbox
 		While tb <> Null
 			HideEntity(tb\Obj)
 			tb = tb\Successor
 		Wend
 	Next
+	TimeScale = 1.0
 	GameSaved = True
 	NoTarget = False
 	InfiniteStamina = False
@@ -1311,6 +1298,7 @@ Function LoadGameQuick(file$)
 	DeafPlayer% = False
 	DeafTimer# = 0.0
 	UnableToMove% = False
+	LostHands = False
 	Msg = ""
 	SelectedEnding = ""
 	
@@ -1427,6 +1415,8 @@ Function LoadGameQuick(file$)
 	WearingGasMask = ReadByte(f)
 	WearingVest = ReadByte(f)	
 	WearingHazmat = ReadByte(f)
+	WearingPumpkin = ReadByte(f)
+	If WearingPumpkin Then NoTarget = True
 	
 	WearingNightVision = ReadByte(f)
 	Wearing1499 = ReadByte(f)
@@ -1524,7 +1514,7 @@ Function LoadGameQuick(file$)
 		
 		n\texture = ReadString(f)
 		If n\texture <> "" Then
-			tex = LoadTexture_Strict (n\texture)
+			Local tex = LoadTexture_Strict (n\texture)
 			EntityTexture n\obj, tex
 		EndIf
 		
@@ -1552,8 +1542,7 @@ Function LoadGameQuick(file$)
 		EndIf
 		n\TextureID = ReadInt(f)
 		If n\TextureID > 0
-			ChangeNPCTextureID(n.NPCs,n\TextureID-1)
-			SetAnimTime(n\obj,frame)
+			ChangeNPCTextureID(n.NPCs,n\TextureID)
 		EndIf
 	Next
 	
@@ -1586,12 +1575,10 @@ Function LoadGameQuick(file$)
 	room2gw_x = ReadFloat(f)
 	room2gw_z = ReadFloat(f)
 	
-	If version = CompatibleNumber Then
-		I_Zone\Transition[0] = ReadByte(f)
-		I_Zone\Transition[1] = ReadByte(f)
-		I_Zone\HasCustomForest = ReadByte(f)
-		I_Zone\HasCustomMT = ReadByte(f)
-	EndIf
+	I_Zone\Transition[0] = ReadByte(f)
+	I_Zone\Transition[1] = ReadByte(f)
+	I_Zone\HasCustomForest = ReadByte(f)
+	I_Zone\HasCustomMT = ReadByte(f)
 	
 	temp = ReadInt(f)
 	For i = 1 To temp
@@ -1601,18 +1588,18 @@ Function LoadGameQuick(file$)
 		y = ReadFloat(f)
 		z = ReadFloat(f)
 		
-		found = ReadByte(f)
+		Local found = ReadByte(f)
 		
-		level = ReadInt(f)
+		Local level = ReadInt(f)
 		
-		temp2 = ReadByte(f)	
+		Local temp2 = ReadByte(f)	
 		
 		If angle >= 360
             angle = angle-360
         EndIf
 		
 		For r.Rooms = Each Rooms
-			If r\x = x And r\z = z Then
+			If r\x = x And r\y = y And r\z = z Then
 				Exit
 			EndIf
 		Next
@@ -1674,12 +1661,11 @@ Function LoadGameQuick(file$)
 					ReadByte(f)
 				Next
 			Next
-			lx# = ReadFloat(f)
-			ly# = ReadFloat(f)
-			lz# = ReadFloat(f)
+			Local lx# = ReadFloat(f)
+			Local ly# = ReadFloat(f)
+			Local lz# = ReadFloat(f)
 		ElseIf r\fr<>Null Then ;remove the old forest
 			DestroyForest(r\fr)
-			Delete r\fr
 		EndIf
 		
 		If temp2 = 1 Then PlayerRoom = r.Rooms
@@ -1795,9 +1781,10 @@ Function LoadGameQuick(file$)
 		e\EventState2 = ReadFloat(f)
 		e\EventState3 = ReadFloat(f)		
 		x = ReadFloat(f)
+		y = ReadFloat(f)
 		z = ReadFloat(f)
 		For r.Rooms = Each Rooms
-			If EntityX(r\obj) = x And EntityZ(r\obj) = z Then
+			If r\x = x And r\y = y And r\z = z Then
 				;If e\EventName = "room2servers" Then Stop
 				e\room = r
 				Exit
@@ -1834,10 +1821,10 @@ Function LoadGameQuick(file$)
 		If ittName = "cup" Then
 			Local drinkName$ = ReadString(f)
 
-			red = ReadByte(f)
-			green = ReadByte(f)
-			blue = ReadByte(f)
-			a# = ReadFloat(f)
+			Local red = ReadByte(f)
+			Local green = ReadByte(f)
+			Local blue = ReadByte(f)
+			Local a# = ReadFloat(f)
 
 			it = CreateCup(drinkName, x, y, z, red, green, blue, a)
 		Else
@@ -1852,7 +1839,7 @@ Function LoadGameQuick(file$)
 		it\Picked = ReadByte(f)
 		If it\Picked Then HideEntity(it\collider)
 		
-		nt = ReadByte(f)
+		Local nt = ReadByte(f)
 		If nt = True Then SelectedItem = it
 		
 		nt = ReadByte(f)
@@ -1861,7 +1848,16 @@ Function LoadGameQuick(file$)
 			ItemAmount = ItemAmount + 1
 		EndIf
 		
-		If it\itemtemplate\isAnim<>0 Then SetAnimTime it\model,ReadFloat(f)
+		; Evil fucked up save compatibility hack
+		If it\itemtemplate\isAnim<>0 Then
+			If it\itemtemplate\name = "scp330" And version = "1.3.12.7" Then
+				SetAnimTime it\model,it\state + 1
+			ElseIf it\itemtemplate\name = "pumpkin" And version = "1.3.12.7" Then
+				; Keep anim time at 0
+			Else
+				SetAnimTime it\model,ReadFloat(f)
+			EndIf
+		EndIf
 		
 		Local invSize% = ReadByte(f)
 		If invSize <> 0 Then it\Inventory = New Inventories : it\Inventory\Size = invSize
@@ -1905,10 +1901,10 @@ Function LoadGameQuick(file$)
 	
 	For do.Doors = Each Doors
 		If do\room <> Null Then
-			dist# = 20.0
+			Local dist# = 20.0
 			Local closestroom.Rooms
 			For r.Rooms = Each Rooms
-				dist2# = EntityDistance(r\obj, do\obj)
+				Local dist2# = EntityDistance(r\obj, do\obj)
 				If dist2 < dist Then
 					dist = dist2
 					closestroom = r.Rooms
@@ -2034,9 +2030,9 @@ Function LoadSaveGames()
 	SaveGameAmount = 0
 	If FileType(SavePath)=1 Then RuntimeErrorExt "Can't create dir "+Chr(34)+SavePath+Chr(34)
 	If FileType(SavePath)=0 Then CreateDir(SavePath)
-	myDir=ReadDir(SavePath) 
+	Local myDir=ReadDir(SavePath) 
 	Repeat 
-		file$=NextFile$(myDir) 
+		Local file$=NextFile$(myDir) 
 		If file$="" Then Exit 
 		If FileType(SavePath+"\"+file$) = 1 And Instr(file, ".cbsav") = Len(file) - 5 Then 
 			SaveGameAmount=SaveGameAmount+1
@@ -2047,7 +2043,7 @@ Function LoadSaveGames()
 	Dim SaveGames$(SaveGameAmount+1) 
 	
 	myDir=ReadDir(SavePath) 
-	i = 0
+	Local i = 0
 	Repeat 
 		file$=NextFile$(myDir) 
 		If file$="" Then Exit 
@@ -2061,7 +2057,7 @@ Function LoadSaveGames()
 	Dim SaveGameTime$(SaveGameAmount + 1)
 	Dim SaveGameDate$(SaveGameAmount + 1)
 	Dim SaveGameVersion$(SaveGameAmount + 1)
-	Dim SaveGamePlayTime$(SaveGameAmount + 1)
+	Dim SaveGamePlayTime%(SaveGameAmount + 1)
 	For i = 1 To SaveGameAmount
 		DebugLog (SavePath + SaveGames(i - 1))
 		Local f% = ReadFile(SavePath + SaveGames(i - 1) + ".cbsav")
@@ -2079,6 +2075,16 @@ Function LoadSaveGames()
 		SaveGameVersion(i - 1) = ReadString(f)
 		
 		CloseFile f
+	Next
+	
+	; Build the list of saves to display
+	Dim VisibleSaveIndex%(SaveGameAmount + 1)
+	VisibleSaveAmount = 0
+	For i = 1 To SaveGameAmount
+		If (Not HideIncompatibleSaves) Lor SaveGameVersion(i - 1) = CompatibleNumber Lor SaveGameVersion(i - 1) = "1.3.12.7" Then
+			VisibleSaveIndex(VisibleSaveAmount) = i - 1
+			VisibleSaveAmount = VisibleSaveAmount + 1
+		EndIf
 	Next
 	
 	CatchErrors("LoadSaveGames")
@@ -2104,7 +2110,7 @@ End Function
 Function LoadSavedMapsFrom%(folder$, i%)
 	Local dir%=ReadDir(folder) 
 	Repeat
-		file$=NextFile$(dir)
+		Local file$=NextFile$(dir)
 		
 		DebugLog file
 		
@@ -2579,32 +2585,7 @@ Function LoadMap(file$, loadingstart, loadingcount#)
 	CreateEvent("dimension1499", "dimension1499", 0)
 	
 	For r.Rooms = Each Rooms
-		r\Adjacent[0]=Null
-		r\Adjacent[1]=Null
-		r\Adjacent[2]=Null
-		r\Adjacent[3]=Null
-		For r2.Rooms = Each Rooms
-			If r<>r2 Then
-				If r2\z=r\z Then
-					If (r2\x)=(r\x+8.0) Then
-						r\Adjacent[0]=r2
-						If r\AdjDoor[0] = Null Then r\AdjDoor[0] = r2\AdjDoor[2]
-					ElseIf (r2\x)=(r\x-8.0)
-						r\Adjacent[2]=r2
-						If r\AdjDoor[2] = Null Then r\AdjDoor[2] = r2\AdjDoor[0]
-					EndIf
-				ElseIf r2\x=r\x Then
-					If (r2\z)=(r\z-8.0) Then
-						r\Adjacent[1]=r2
-						If r\AdjDoor[1] = Null Then r\AdjDoor[1] = r2\AdjDoor[3]
-					ElseIf (r2\z)=(r\z+8.0)
-						r\Adjacent[3]=r2
-						If r\AdjDoor[3] = Null Then r\AdjDoor[3] = r2\AdjDoor[1]
-					EndIf
-				EndIf
-			EndIf
-			If (r\Adjacent[0]<>Null) And (r\Adjacent[1]<>Null) And (r\Adjacent[2]<>Null) And (r\Adjacent[3]<>Null) Then Exit
-		Next
+		ConnectAdjacentRooms(r)
 		SetupTriggerBoxes(r)
 	Next
 	

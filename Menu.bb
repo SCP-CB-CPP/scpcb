@@ -3,18 +3,17 @@ Global MenuText% = LoadImage_Strict("GFX\menu\scptext.jpg")
 Global Menu173% = LoadImage_Strict("GFX\menu\173back.png")
 MenuWhite = LoadImage_Strict("GFX\menu\menuwhite.jpg")
 MenuBlack = LoadImage_Strict("GFX\menu\menublack.jpg")
-MaskImage MenuBlack, 255,255,0
 
-ResizeImage(MenuBack, ImageWidth(MenuBack) * MenuScale, ImageHeight(MenuBack) * MenuScale)
-ResizeImage(MenuText, ImageWidth(MenuText) * MenuScale, ImageHeight(MenuText) * MenuScale)
-ResizeImage(Menu173, ImageWidth(Menu173) * MenuScale, ImageHeight(Menu173) * MenuScale)
+ScaleImage(MenuBack, MenuScale, MenuScale)
+ScaleImage(MenuText, MenuScale, MenuScale)
+ScaleImage(Menu173, MenuScale, MenuScale)
 
 For i = 0 To 3
-	ArrowIMG(i) = LoadImage_Strict("GFX\menu\arrow.png")
-	ScaleImage(ArrowIMG(i), HUDScale, HUDScale)
+	ArrowIMG(i) = LoadImageHUDScaled("GFX\menu\arrow.png")
 	RotateImage(ArrowIMG(i), 90 * i)
-	HandleImage(ArrowIMG(i), 0, 0)
 Next
+Global MenuArrowIMG% = LoadImage_Strict("GFX\menu\arrow.png", MenuScale)
+RotateImage(MenuArrowIMG, 90)
 
 Global RandomSeed$, RandomSeedNumeric%, HasNumericSeed%
 Function GetRandomSeed%()
@@ -45,8 +44,13 @@ Dim SaveGames$(SaveGameAmount+1)
 Dim SaveGameTime$(SaveGameAmount + 1)
 Dim SaveGameDate$(SaveGameAmount + 1)
 Dim SaveGameVersion$(SaveGameAmount + 1)
-Dim SaveGamePlayTime$(SaveGameAmount + 1)
+Dim SaveGamePlayTime%(SaveGameAmount + 1)
 Global KeepDuplicateSaveCount% = GetOptionInt("general", "keep duplicate saves")
+Global HideIncompatibleSaves% = GetOptionInt("general", "hide incompatible saves")
+
+; Saves that are actually shown in the Load Game list
+Global VisibleSaveAmount%
+Dim VisibleSaveIndex%(SaveGameAmount + 1)
 
 Global SavedMapsAmount% = 0
 Dim SavedMaps$(SavedMapsAmount+1)
@@ -205,7 +209,7 @@ Function UpdateMainMenu()
 							RandomSeed = "whatpumpkin"
 					End Select
 				Else
-					n = Rand(4,8)
+					Local n = Rand(4,8)
 					For i = 1 To n
 						If Rand(3)=1 Then
 							RandomSeed = RandomSeed + Rand(0,9)
@@ -266,10 +270,9 @@ Function UpdateMainMenu()
 				Case 3,5,6,7 ;save the options
 					SaveOptionsINI()
 					
-					UserTrackCheck% = 0
+					UserTrackCheck% = -1
 					UserTrackCheck2% = 0
 					
-					AntiAlias Opt_AntiAlias
 					UpdateHUDOffsets()
 					MainMenuTab = 0
 				Case 4 ;move back to the "new game" tab
@@ -395,9 +398,9 @@ Function UpdateMainMenu()
 					
 					;Other factor's difficulty
 					Color 255,255,255
-					DrawImage ArrowIMG(1),x + 155 * MenuScale, y+251*MenuScale
+					DrawImage MenuArrowIMG,x + 155 * MenuScale, y+251*MenuScale
 					If MouseHit1
-						If ImageRectOverlap(ArrowIMG(1),x + 155 * MenuScale, y+251*MenuScale, ScaledMouseX(),ScaledMouseY(),0,0)
+						If ImageRectOverlap(MenuArrowIMG,x + 155 * MenuScale, y+251*MenuScale, ScaledMouseX(),ScaledMouseY(),0,0)
 							If SelectedDifficulty\otherFactors < HARD
 								SelectedDifficulty\otherFactors = SelectedDifficulty\otherFactors + 1
 							Else
@@ -464,6 +467,7 @@ Function UpdateMainMenu()
 					
 					PutINIValue(OptionFile, "general", "intro enabled", IntroEnabled%)
 					
+					Return
 				EndIf
 				
 				;[End Block]
@@ -496,7 +500,7 @@ Function UpdateMainMenu()
 				
 				SetFont Font2
 				
-				If CurrLoadGamePage < Ceil(Float(SaveGameAmount)/EntriesPerPage)-1 And SaveMSG = "" Then 
+				If CurrLoadGamePage < Ceil(Float(VisibleSaveAmount)/EntriesPerPage)-1 And SaveMSG = "" Then 
 					If DrawButton(x+530*MenuScale, y + PagingFrameHeight, 50*MenuScale, 55*MenuScale, ">") Then
 						CurrLoadGamePage = CurrLoadGamePage+1
 					EndIf
@@ -517,36 +521,37 @@ Function UpdateMainMenu()
 				
 				DrawFrame(x+50*MenuScale,y+PagingFrameHeight,width-100*MenuScale,55*MenuScale)
 				
-				Text(x+(width/2.0),y+PagingFrameHeight+26*MenuScale,Format(I_Loc\Menu_Page, Int(Max((CurrLoadGamePage+1),1)), Int(Max((Int(Ceil(Float(SaveGameAmount)/EntriesPerPage))),1))),True,True)
+				Text(x+(width/2.0),y+PagingFrameHeight+26*MenuScale,Format(I_Loc\Menu_Page, Int(Max((CurrLoadGamePage+1),1)), Int(Max((Int(Ceil(Float(VisibleSaveAmount)/EntriesPerPage))),1))),True,True)
 				
 				SetFont Font1
 				
-				If CurrLoadGamePage > Ceil(Float(SaveGameAmount)/EntriesPerPage)-1 Then
+				If CurrLoadGamePage > Ceil(Float(VisibleSaveAmount)/EntriesPerPage)-1 Then
 					CurrLoadGamePage = CurrLoadGamePage - 1
 				EndIf
 				
-				If SaveGameAmount = 0 Then
+				If VisibleSaveAmount = 0 Then
 					Text (x + 20 * MenuScale, y + 20 * MenuScale, I_Loc\LoadGame_Nosaved)
 				Else
 					x = x + 20 * MenuScale
 					y = y + 20 * MenuScale
 					
 					For i% = (1+(EntriesPerPage*CurrLoadGamePage)) To EntriesPerPage+(EntriesPerPage*CurrLoadGamePage)
-						If i <= SaveGameAmount Then
+						If i <= VisibleSaveAmount Then
+							Local SaveIdx% = VisibleSaveIndex(i - 1)
 							DrawFrame(x,y,540* MenuScale, 70* MenuScale)
 							
-							If SaveGameVersion(i - 1) <> CompatibleNumber Then
+							If SaveGameVersion(SaveIdx) <> CompatibleNumber And SaveGameVersion(SaveIdx) <> "1.3.12.7" Then
 								Color 255,0,0
 							Else
 								Color 255,255,255
 							EndIf
 							
-							Text(x + 20 * MenuScale, y + 10 * MenuScale, SaveGames(i - 1))
-							Text(x + 20 * MenuScale, y + (10+18) * MenuScale, SaveGameTime(i - 1) + RSet(SaveGameDate(i - 1), 21 - Len(SaveGameTime(i - 1))))
-							Text(x + 20 * MenuScale, y + (10+36) * MenuScale, SaveGameVersion(i - 1) + RSet(FormatDuration(SaveGamePlayTime(i - 1), False), 21 - Len(SaveGameVersion(i - 1))))
+							Text(x + 20 * MenuScale, y + 10 * MenuScale, SaveGames(SaveIdx))
+							Text(x + 20 * MenuScale, y + (10+18) * MenuScale, SaveGameTime(SaveIdx) + RSet(SaveGameDate(SaveIdx), 21 - Len(SaveGameTime(SaveIdx))))
+							Text(x + 20 * MenuScale, y + (10+36) * MenuScale, SaveGameVersion(SaveIdx) + RSet(FormatDuration(SaveGamePlayTime(SaveIdx), False), 21 - Len(SaveGameVersion(SaveIdx))))
 							
 							If SaveMSG = "" Then
-								If SaveGameVersion(i - 1) <> CompatibleNumber Then
+								If SaveGameVersion(SaveIdx) <> CompatibleNumber And SaveGameVersion(SaveIdx) <> "1.3.12.7" Then
 									DrawFrame(x + 300 * MenuScale, y + 20 * MenuScale, 100 * MenuScale, 30 * MenuScale)
 									Color(255, 0, 0)
 									Text(x + 350 * MenuScale, y + 35 * MenuScale, I_Loc\LoadGame_Load, True, True)
@@ -555,8 +560,8 @@ Function UpdateMainMenu()
 										LoadEntities()
 										LoadAllSounds()
 										InitRoomTemplates()
-										LoadGame(SaveGames(i - 1))
-										CurrSave = SaveGames(i - 1)
+										LoadGame(SaveGames(SaveIdx))
+										CurrSave = SaveGames(SaveIdx)
 										InitLoadGame()
 										MainMenuOpen = False
 										Return
@@ -564,13 +569,13 @@ Function UpdateMainMenu()
 								EndIf
 								
 								If DrawButton(x + 420 * MenuScale, y + 20 * MenuScale, 100 * MenuScale, 30 * MenuScale, I_Loc\LoadGame_Delete, False) Then
-									SaveMSG = SaveGames(i - 1)
+									SaveMSG = SaveGames(SaveIdx)
 									DebugLog SaveMSG
 									Exit
 								EndIf
 							Else
 								DrawFrame(x + 300 * MenuScale, y + 20 * MenuScale, 100 * MenuScale, 30 * MenuScale)
-								If SaveGameVersion(i - 1) <> CompatibleNumber Then
+								If SaveGameVersion(SaveIdx) <> CompatibleNumber And SaveGameVersion(SaveIdx) <> "1.3.12.7" Then
 									Color(255, 0, 0)
 								Else
 									Color(100, 100, 100)
@@ -648,7 +653,7 @@ Function UpdateMainMenu()
 				y = y + 70 * MenuScale
 				
 				If MainMenuTab <> 5
-					UserTrackCheck% = 0
+					UserTrackCheck% = -1
 					UserTrackCheck2% = 0
 				EndIf
 				
@@ -661,7 +666,8 @@ Function UpdateMainMenu()
 				
 				If MainMenuTab = 3 ;Graphics
 					;[Block]
-					height = 380 * MenuScale
+					;height = 380 * MenuScale
+					height = 360 * MenuScale
 					DrawFrame(x, y, width, height)
 					
 					y=y+20*MenuScale
@@ -713,17 +719,19 @@ Function UpdateMainMenu()
 					If (MouseOn(x+310*MenuScale,y-6*MenuScale,150*MenuScale+14,20) And OnSliderID=0) Or OnSliderID=3
 						DrawOptionsTooltip(tx,ty,tw,th+100*MenuScale,"texquality")
 					EndIf
-					
-					y=y+50*MenuScale
-					
-					Color 255,255,255
-					Text(x + 20 * MenuScale, y, I_Loc\OptionName_Vram)
-					EnableVRam = DrawTick(x + 310 * MenuScale, y + MenuScale, EnableVRam)
-					If MouseOn(x+310*MenuScale,y+MenuScale,20*MenuScale,20*MenuScale) And OnSliderID=0
-						DrawOptionsTooltip(tx,ty,tw,th,"vram")
-					EndIf
 
 					y=y+50*MenuScale
+
+					Local l# = Unlerp(MinHUDScaleFactor, MaxHUDScaleFactor, HUDScaleFactor)
+					l = SlideBar(x + 310*MenuScale, y+6*MenuScale,150*MenuScale, l#*100, 7)/100
+					Color 255,255,255
+					Text(x + 20 * MenuScale, y, I_Loc\Launcher_Hudscalefactor)
+					UpdateHUDScaleFactor(Lerp(MinHUDScaleFactor, MaxHUDScaleFactor, l))
+					If (MouseOn(x+310*MenuScale,y+6*MenuScale,150*MenuScale+14,20) And OnSliderID=0) Lor OnSliderID=7
+						DrawOptionsTooltip(tx,ty,tw,th,"hudscalefactor")
+					EndIf
+
+					y=y+30*MenuScale
 
 					HUDOffsetScale = SlideBar(x + 310*MenuScale, y+6*MenuScale,150*MenuScale, HUDOffsetScale*100, 5)/100
 					Color 255,255,255
@@ -736,7 +744,7 @@ Function UpdateMainMenu()
 
 					ViewBobScale = SlideBar(x + 310*MenuScale, y+6*MenuScale,150*MenuScale, ViewBobScale*100, 6)/100
 					Color 255,255,255
-					Text(x + 20 * MenuScale, y, I_Loc\OptionName_Viewbob)
+					Text(x + 20 * MenuScale, y, I_Loc\OptionName_Cammove)
 					If (MouseOn(x+310*MenuScale,y+6*MenuScale,150*MenuScale+14,20) And OnSliderID=0) Lor OnSliderID=6
 						DrawOptionsTooltip(tx,ty,tw,th,"viewbob")
 					EndIf
@@ -760,7 +768,7 @@ Function UpdateMainMenu()
 					height = 225 * MenuScale
 					If HasDubbedAudio Then height = height + 50*MenuScale
 					If EnableUserTracks Then height = height + 65*MenuScale
-					If UserTrackCheck>0 Then height = height + 25*MenuScale
+					If UserTrackCheck >= 0 Then height = height + 25*MenuScale
 					DrawFrame(x, y, width, height)
 					
 					y = y + 20*MenuScale
@@ -855,17 +863,20 @@ Function UpdateMainMenu()
 							UserTrackCheck% = 0
 							UserTrackCheck2% = 0
 							
-							Dir=ReadDir("SFX\Radio\UserTracks\")
+							Local Dir=ReadDir("SFX\Radio\UserTracks\")
 							Repeat
-								file$=NextFile(Dir)
+								Local file$=NextFile(Dir)
 								If file$="" Then Exit
 								If FileType("SFX\Radio\UserTracks\"+file$) = 1 Then
-									UserTrackCheck = UserTrackCheck + 1
-									test = LoadSound("SFX\Radio\UserTracks\"+file$)
-									If test<>0
-										UserTrackCheck2 = UserTrackCheck2 + 1
-									EndIf
-									FreeSound test
+									Local ext$ = File_GetExtension(file$)
+									For i=1 To SoundExtensionCount
+										If ext = SoundExtensions[i-1] Then
+											UserTrackCheck = UserTrackCheck + 1
+											Local test = LoadSound("SFX\Radio\UserTracks\"+file$)
+											If test<>0 Then UserTrackCheck2 = UserTrackCheck2 + 1
+											FreeSound test
+										EndIf
+									Next
 								EndIf
 							Forever
 							CloseDir Dir
@@ -875,11 +886,11 @@ Function UpdateMainMenu()
 						If MouseOn(x+20*MenuScale,y+30*MenuScale,190*MenuScale,25*MenuScale) And OnSliderID=0
 							DrawOptionsTooltip(tx,ty,tw,th,"usertrackscan")
 						EndIf
-						If UserTrackCheck%>0
+						If UserTrackCheck >= 0
 							Text x + 20 * MenuScale, y + 70 * MenuScale, Format(I_Loc\OptionName_UsertrackscanFound, UserTrackCheck2, UserTrackCheck)
 						EndIf
 					Else
-						UserTrackCheck%=0
+						UserTrackCheck% = -1
 					EndIf
 					;[End Block]
 				ElseIf MainMenuTab = 6 ;Controls
@@ -921,31 +932,32 @@ Function UpdateMainMenu()
 					y = y + 10*MenuScale
 					
 					Text(x + 20 * MenuScale, y + 20 * MenuScale, I_Loc\OptionName_BindMoveForward)
-					InputBox(x + 170 * MenuScale, y + 20 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_UP,210)),5,-1)
+					InputBox(x + 170 * MenuScale, y + 20 * MenuScale,100*MenuScale,20*MenuScale,GetKeyName(Min(KEY_UP,210)),5,-1)		
 					Text(x + 20 * MenuScale, y + 40 * MenuScale, I_Loc\OptionName_BindMoveLeft)
-					InputBox(x + 170 * MenuScale, y + 40 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_LEFT,210)),3,-1)
+					InputBox(x + 170 * MenuScale, y + 40 * MenuScale,100*MenuScale,20*MenuScale,GetKeyName(Min(KEY_LEFT,210)),3,-1)	
 					Text(x + 20 * MenuScale, y + 60 * MenuScale, I_Loc\OptionName_BindMoveBack)
-					InputBox(x + 170 * MenuScale, y + 60 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_DOWN,210)),6,-1)
+					InputBox(x + 170 * MenuScale, y + 60 * MenuScale,100*MenuScale,20*MenuScale,GetKeyName(Min(KEY_DOWN,210)),6,-1)				
 					Text(x + 20 * MenuScale, y + 80 * MenuScale, I_Loc\OptionName_BindMoveRight)
-					InputBox(x + 170 * MenuScale, y + 80 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_RIGHT,210)),4,-1)
+					InputBox(x + 170 * MenuScale, y + 80 * MenuScale,100*MenuScale,20*MenuScale,GetKeyName(Min(KEY_RIGHT,210)),4,-1)	
 					Text(x + 20 * MenuScale, y + 100 * MenuScale, I_Loc\OptionName_BindSave)
-					InputBox(x + 170 * MenuScale, y + 100 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_SAVE,210)),11,-1)
+					InputBox(x + 170 * MenuScale, y + 100 * MenuScale,100*MenuScale,20*MenuScale,GetKeyName(Min(KEY_SAVE,210)),11,-1)
 
 					Text(x + 280 * MenuScale, y + 20 * MenuScale, I_Loc\OptionName_BindBlink)
-					InputBox(x + 470 * MenuScale, y + 20 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_BLINK,210)),7,-1)
+					InputBox(x + 470 * MenuScale, y + 20 * MenuScale,100*MenuScale,20*MenuScale,GetKeyName(Min(KEY_BLINK,210)),7,-1)				
 					Text(x + 280 * MenuScale, y + 40 * MenuScale, I_Loc\OptionName_BindSprint)
-					InputBox(x + 470 * MenuScale, y + 40 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_SPRINT,210)),8,-1)
+					InputBox(x + 470 * MenuScale, y + 40 * MenuScale,100*MenuScale,20*MenuScale,GetKeyName(Min(KEY_SPRINT,210)),8,-1)
 					Text(x + 280 * MenuScale, y + 60 * MenuScale, I_Loc\OptionName_BindInv)
-					InputBox(x + 470 * MenuScale, y + 60 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_INV,210)),9,-1)
+					InputBox(x + 470 * MenuScale, y + 60 * MenuScale,100*MenuScale,20*MenuScale,GetKeyName(Min(KEY_INV,210)),9,-1)
 					Text(x + 280 * MenuScale, y + 80 * MenuScale, I_Loc\OptionName_BindCrouch)
-					InputBox(x + 470 * MenuScale, y + 80 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_CROUCH,210)),10,-1)
+					InputBox(x + 470 * MenuScale, y + 80 * MenuScale,100*MenuScale,20*MenuScale,GetKeyName(Min(KEY_CROUCH,210)),10,-1)	
 					Text(x + 280 * MenuScale, y + 100 * MenuScale, I_Loc\OptionName_BindConsole)
-					InputBox(x + 470 * MenuScale, y + 100 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_CONSOLE,210)),12,-1)
+					InputBox(x + 470 * MenuScale, y + 100 * MenuScale,100*MenuScale,20*MenuScale,GetKeyName(Min(KEY_CONSOLE,210)),12,-1)
 					
 					If MouseOn(x+20*MenuScale,y,width-40*MenuScale,120*MenuScale) And OnSliderID=0
 						DrawOptionsTooltip(tx,ty,tw,th,"controls")
 					EndIf
 					
+					Local key
 					For i = 0 To 227
 						If KeyHit(i) Then key = i : Exit
 					Next
@@ -1210,12 +1222,10 @@ Function UpdateMainMenu()
 				If ModCount = 0 Then
 					Text (x + 20 * MenuScale, y + 20 * MenuScale, I_Loc\Mods_Nomods)
 				Else
-					x = x + 10 * MenuScale
+					x = x + 35 * MenuScale
 					y = y + (20 + (EntriesPerPage-1) * 80) * MenuScale
 					
 					UpdateUpdatingMod()
-
-					Local xStart = x
 
 					Local milis% = MilliSecs()
 					i% = ModCount
@@ -1223,22 +1233,44 @@ Function UpdateMainMenu()
 					Local drawn% = 0
 					Local m.Mods = Last Mods
 					Repeat
+						Local nextM.Mods = Before m
 						If i <= (EntriesPerPage+(EntriesPerPage*CurrLoadGamePage)) Then
 							If i <= ModCount Then
-								x = xStart
+								If KeyDown(29) Then
+									If DrawButton(x + 500 * MenuScale, y + 10 * MenuScale, 30 * MenuScale, 20 * MenuScale, "◄", False, False, i = 1) Then
+										If m\IsActive And m\RequiresReload Then ModsDirty = True
+										Insert m Before First Mods
+									EndIf
+									
+									If DrawButton(x + 500 * MenuScale, y + (70 - 30) * MenuScale, 30 * MenuScale, 20 * MenuScale, "►", False, False, i = ModCount) Then
+										If m\IsActive And m\RequiresReload Then ModsDirty = True
+										Insert m After Last Mods
+									EndIf
+								Else
+									If DrawButton(x + 500 * MenuScale, y + 10 * MenuScale, 30 * MenuScale, 20 * MenuScale, "▲", False, False, i = 1) Then
+										If m\IsActive And m\RequiresReload Then ModsDirty = True
+										Insert m Before Before m
+										nextM = m
+										m = After m
+									EndIf
+									
+									If DrawButton(x + 500 * MenuScale, y + (70 - 30) * MenuScale, 30 * MenuScale, 20 * MenuScale, "▼", False, False, i = ModCount) Then
+										If m\IsActive And m\RequiresReload Then ModsDirty = True
+										Insert m After After m
+									EndIf
+								EndIf
 
-								Local mActive = DrawTick(x, y + 25 * MenuScale, m\IsActive)
+
+								Local mActive = DrawTick(x - 25 * MenuScale, y + 25 * MenuScale, m\IsActive)
 								If mActive <> m\IsActive Then
 									m\IsActive = mActive
 									m\IsNew = False
 									If m\RequiresReload Then ModsDirty = True
 								EndIf
 
-								x = x + 25 * MenuScale
-
 								DrawFrame(x,y,490* MenuScale, 70 * MenuScale)
 								If m\Icon = 0 And m\Iconpath <> "" Then
-									m\Icon = LoadImage_Strict(m\IconPath)
+									m\Icon = LoadImage_Strict(m\IconPath, 0, 3)
 									m\DisabledIcon = CreateGrayScaleImage(m\Icon)
 									ResizeImage(m\Icon, 64 * MenuScale, 64 * MenuScale)
 									ResizeImage(m\DisabledIcon, 64 * MenuScale, 64 * MenuScale)
@@ -1261,18 +1293,6 @@ Function UpdateMainMenu()
 								Text(x + 85 * MenuScale, y + 10 * MenuScale, EllipsisLeft(m\Name, 24))
 								Text(x + 85 * MenuScale, y + (10+18) * MenuScale, EllipsisLeft(m\Description, 24))
 								Text(x + 85 * MenuScale, y + (10+18*2) * MenuScale, EllipsisLeft(m\Author, 24))
-
-								If DrawButton(x + 500 * MenuScale, y + 10 * MenuScale, 30 * MenuScale, 20 * MenuScale, "▲", False, False, i = 1) Then
-									Insert m Before Before m
-									m = After m
-									If m\IsActive And m\RequiresReload Then ModsDirty = True
-								EndIf
-								
-								If DrawButton(x + 500 * MenuScale, y + (70 - 30) * MenuScale, 30 * MenuScale, 20 * MenuScale, "▼", False, False, i = ModCount) Then
-									Insert m After After m
-									m = Before m
-									If m\IsActive And m\RequiresReload Then ModsDirty = True
-								EndIf
 
 								If UpdatingMod = m Then
 									Local strr$ = ""
@@ -1331,7 +1351,7 @@ Function UpdateMainMenu()
 							y = y - 80 * MenuScale
 							drawn = drawn + 1
 						EndIf
-						If i <= ModCount Then m = Before m
+						If i <= ModCount Then m = nextM
 						i = i - 1
 					Until i <= 0 Lor drawn => EntriesPerPage
 
@@ -1522,13 +1542,13 @@ Function DrawTagSelection(x%, y%, width%)
 End Function
 
 Function CreateGrayScaleImage%(img%)
-	Local ret% = CreateImage(ImageWidth(img), ImageHeight(img))
+	Local ret% = CreateImage(ImageWidth(img), ImageHeight(img), 1, 3)
 	Local rbuf% = ImageBuffer(img)
 	Local buf% = ImageBuffer(ret)
 	LockBuffer(rbuf)
 	LockBuffer(buf)
-	For x = 0 To ImageWidth(img)-1
-		For y = 0 To ImageHeight(img)-1
+	For x = 0 To BufferWidth(rbuf)-1
+		For y = 0 To BufferHeight(rbuf)-1
 			Local color% = ReadPixelFast(x, y, rbuf)
 			Local g% = ((color Shr 16) And 255) * 0.21 + ((color Shr 8) And 255) * 0.72 + (color And 255) * 0.07
 			WritePixelFast(x, y, (color And $FF000000) + (g Shl 16) + (g Shl 8) + g, buf)
@@ -1539,16 +1559,13 @@ Function CreateGrayScaleImage%(img%)
 	Return ret
 End Function
 
-Dim GfxDrivers$(0)
 Dim AspectRatioWidths%(0), AspectRatioHeights%(0)
 Dim GfxModeCountPerAspectRatio%(0)
 Dim GfxModeWidthsByAspectRatio%(0, 0), GfxModeHeightsByAspectRatio%(0, 0)
 
 Function UpdateLauncher()
-	AspectRatioRatio = 1.0
-
 	MenuScale = 1
-	
+
 	Graphics3DExt(LauncherWidth, LauncherHeight, 0, 2)
 
 	;InitExt
@@ -1558,6 +1575,9 @@ Function UpdateLauncher()
 	RealGraphicWidth = GraphicWidth
 	RealGraphicHeight = GraphicHeight
 
+	ScaledGraphicWidth = GraphicWidth
+	ScaledGraphicHeight = GraphicHeight
+
 	Local TotalGfxModes% = CountGfxModes3D()
 
 	Local selectedGdc% = GreatestCommonDivisor(GraphicWidth, GraphicHeight)
@@ -1566,7 +1586,7 @@ Function UpdateLauncher()
 	Local SelectedGfxMode% = -1, AspectRatioCount%
 	Local SelectedAspectRatio% = -1
 	Local nativeGdc% = GreatestCommonDivisor(DesktopWidth(), DesktopHeight())
-	Local NativeAspectRatioWidth = DesktopWidth() / nativeGdc : NativeAspectRatioHeight = DesktopHeight() / nativeGdc
+	Local NativeAspectRatioWidth = DesktopWidth() / nativeGdc, NativeAspectRatioHeight = DesktopHeight() / nativeGdc
 	Local nativeAspectRatio%, nativeGfxMode
 
 	Dim AspectRatioWidths%(TotalGfxModes), AspectRatioHeights%(TotalGfxModes)
@@ -1577,15 +1597,8 @@ Function UpdateLauncher()
 	SetFont Font1
 	MenuWhite = LoadImage_Strict("GFX\menu\menuwhite.jpg")
 	MenuBlack = LoadImage_Strict("GFX\menu\menublack.jpg")	
-	MaskImage MenuBlack, 255,255,0
 	Local LauncherIMG% = LoadImage_Strict("GFX\menu\launcher.png")
 	Local i%	
-	
-	For i = 0 To 3
-		ArrowIMG(i) = LoadImage_Strict("GFX\menu\arrow.png")
-		RotateImage(ArrowIMG(i), 90 * i)
-		HandleImage(ArrowIMG(i), 0, 0)
-	Next
 	
 	For i% = 1 To TotalGfxModes
 		Local w% = GfxModeWidth(i), h% = GfxModeHeight(i)
@@ -1623,19 +1636,13 @@ Function UpdateLauncher()
 
 	If SelectedGfxMode = -1 Then SelectedGfxMode = nativeGfxMode : SelectedAspectRatio = nativeAspectRatio
 
-	Local gfxDriverCount = CountGfxDrivers()
-	Dim GfxDrivers$(gfxDriverCount + 1)
-	For i = 1 To gfxDriverCount
-		GfxDrivers(i) = GfxDriverName(i)
-	Next
-	
 	AppTitle "SCP - Containment Breach Launcher"
 
 	Local quit% = False
 
 	Local height% = 18
 	
-	If SteamActive Then Steam_SetOverlayNotificationPosition(1)
+	If SteamActive Then Steam_SetOverlayNotificationPosition(2)
 
 	Repeat
 		;Cls
@@ -1709,61 +1716,21 @@ Function UpdateLauncher()
 		Next
 		
 		;-----------------------------------------------------------------
-		Color 255, 255, 255
-		x = 30
-		y = 369
-		Rect(x - 10, y, 340, 95)
-		Text(x - 10, y - 25, I_Loc\Launcher_Graphics)
-		
-		y=y+10
-		For i = 1 To gfxDriverCount
-			Color 0, 0, 0
-			txt$ = EllipsisLeft(GfxDrivers(i), 30)
-			txtW% = StringWidth(txt)
-			If SelectedGFXDriver = i Then Rect(x - 4, y - 4, txtW + 8, height, False)
-			Text(x, y, txt)
-			If MouseOn(x - 4, y - 4, txtW + 8, height) Then
-				Color 100, 100, 100
-				Rect(x - 4, y - 4, txtW + 8, height, False)
-				If MouseHit1 Then SelectedGFXDriver = i
-			EndIf
-			
-			y=y+20
-		Next
-		
 		Fullscreen = DrawTick(40 + 430 - 15, 260 - 55 + 5 - 8, Fullscreen)
 		If Fullscreen Then BorderlessWindowed = False
 		BorderlessWindowed = DrawTick(40 + 430 - 15, 260 - 55 + 35, BorderlessWindowed)
 		If BorderlessWindowed Then Fullscreen = False
 
-		lock% = False
-
-		If BorderlessWindowed Or (Not Fullscreen) Then lock% = True
-		Bit16Mode = DrawTick(40 + 430 - 15, 260 - 55 + 65 + 8, Bit16Mode,lock%)
 		LauncherEnabled = DrawTick(40 + 430 - 15, 260 - 55 + 95 + 8, LauncherEnabled)
 
 		Text(40 + 430 + 15, 262 - 55 + 5 - 8, I_Loc\Launcher_FullscreenExclusive)
 		Color 255, 255, 255
 		RowText(I_Loc\Launcher_Fullscreen, 40 + 430 + 15, 262 - 55 + 35 - 6, 150, 50)
-
-		If BorderlessWindowed Or (Not Fullscreen)
- 		   Color 255, 0, 0
- 		   Bit16Mode = False
-		Else
-		    Color 255, 255, 255
-		EndIf
-
-		Text(40 + 430 + 15, 262 - 55 + 65 + 8, I_Loc\Launcher_16bit)
-		Color 255, 255, 255
 		Text(40 + 430 + 15, 262 - 55 + 95 + 8, I_Loc\Launcher_Launcher)
 		
 		gfxWidth% = GfxModeWidthsByAspectRatio(SelectedAspectRatio, SelectedGfxMode) : gfxHeight% = GfxModeHeightsByAspectRatio(SelectedAspectRatio, SelectedGfxMode)
 
-		If Fullscreen
-			Text(260 + 15, 262 - 55 + 140, I_Loc\Launcher_ResolutionCurrent+" "+gfxWidth + "x" + gfxHeight + "," + (16+(16*(Not Bit16Mode))))
-		Else
-			Text(260 + 15, 262 - 55 + 140, I_Loc\Launcher_ResolutionCurrent+" "+gfxWidth + "x" + gfxHeight + ",32")
-		EndIf
+		Text(260 + 50, 262 - 55 + 140, I_Loc\Launcher_ResolutionCurrent+" "+gfxWidth + "x" + gfxHeight)
 
 		If DrawButton(LauncherWidth - 30 - 90 - 130 - 15, LauncherHeight - 50 - 55, 130, 30, I_Loc\Launcher_Mapcreator, False, False) Then
 			ExecFile(Chr(34)+"Map Creator\StartMapCreator.bat"+Chr(34))
@@ -1804,12 +1771,6 @@ Function UpdateLauncher()
 	Else
 		PutINIValue(OptionFile, "graphics", "borderless windowed", "false")
 	EndIf
-	If Bit16Mode Then
-		PutINIValue(OptionFile, "graphics", "16bit", "true")
-	Else
-		PutINIValue(OptionFile, "graphics", "16bit", "false")
-	EndIf
-	PutINIValue(OptionFile, "graphics", "gfx driver", SelectedGFXDriver)
 	
 	FreeImage(LauncherIMG) : LauncherIMG = 0
 	
@@ -1969,12 +1930,11 @@ Function DrawLoading(percent%, shortloading=False)
 	If percent = 0 Then
 		LoadingScreenStartTime = MilliSecs()
 		
-		temp = Rand(1,LoadingScreenAmount)
+		Local temp = Rand(1,LoadingScreenAmount)
 		For ls.loadingscreens = Each LoadingScreens
 			If ls\id = temp Then
 				If ls\img=0 Then
-					ls\img = LoadImage_Strict("Loadingscreens\"+ls\imgpath)
-					ScaleImage(ls\img, MenuScale, MenuScale)
+					ls\img = LoadImage_Strict("Loadingscreens\"+ls\imgpath, MenuScale)
 					MaskImage(ls\img, 0, 0, 0)
 				EndIf
 				SelectedLoadingScreen = ls 
@@ -1983,7 +1943,7 @@ Function DrawLoading(percent%, shortloading=False)
 		Next
 	EndIf	
 	
-	firstloop = True
+	Local firstloop = True
 	Repeat 
 		
 		;Color 0,0,0
@@ -2047,7 +2007,7 @@ Function DrawLoading(percent%, shortloading=False)
 			EndIf
 			
 			SetFont Font2
-			strtemp$ = ""
+			Local strtemp$ = ""
 			temp = Rand(2,9)
 			For i = 0 To temp
 				strtemp$ = STRTEMP + RandomDefaultWidthChar(48,122,"?")
@@ -2120,7 +2080,7 @@ Function DrawLoading(percent%, shortloading=False)
 		EndIf
 		
 		Color 0,0,0
-		Text(GraphicWidth / 2 + Max(1, enuScale), GraphicHeight / 2 - 100 * MenuScale + Max(1, MenuScale), Format(I_Loc\Menu_Loading, percent), True, True)
+		Text(GraphicWidth / 2 + Max(1, MenuScale), GraphicHeight / 2 - 100 * MenuScale + Max(1, MenuScale), Format(I_Loc\Menu_Loading, percent), True, True)
 		Color 255,255,255
 		Text(GraphicWidth / 2, GraphicHeight / 2 - 100 * MenuScale, Format(I_Loc\Menu_Loading, percent), True, True)
 		
@@ -2132,51 +2092,7 @@ Function DrawLoading(percent%, shortloading=False)
 			FlushMouse()
 		EndIf
 		
-		If BorderlessWindowed Then
-			If (RealGraphicWidth<>GraphicWidth) Or (RealGraphicHeight<>GraphicHeight) Then
-				SetBuffer TextureBuffer(fresize_texture)
-				ClsColor 0,0,0 : Cls
-				CopyRect 0,0,GraphicWidth,GraphicHeight,1024-GraphicWidth/2,1024-GraphicHeight/2,BackBuffer(),TextureBuffer(fresize_texture)
-				SetBuffer BackBuffer()
-				ClsColor 0,0,0 : Cls
-				ScaleRender(0,0,2050.0 / Float(GraphicWidth) * AspectRatioRatio, 2050.0 / Float(GraphicWidth) * AspectRatioRatio)
-				;might want to replace Float(GraphicWidth) with Max(GraphicWidth,GraphicHeight) if portrait sizes cause issues
-				;everyone uses landscape so it's probably a non-issue
-			EndIf
-		EndIf
-		
-		;not by any means a perfect solution
-		;Not even proper gamma correction but it's a nice looking alternative that works in windowed mode
-		If ScreenGamma>1.0 Then
-			CopyRect 0,0,RealGraphicWidth,RealGraphicHeight,1024-RealGraphicWidth/2,1024-RealGraphicHeight/2,BackBuffer(),TextureBuffer(fresize_texture)
-			EntityBlend fresize_image,1
-			ClsColor 0,0,0 : Cls
-			ScaleRender(-1.0/Float(RealGraphicWidth),1.0/Float(RealGraphicWidth),2048.0 / Float(RealGraphicWidth),2048.0 / Float(RealGraphicWidth))
-			EntityFX fresize_image,1+32
-			EntityBlend fresize_image,3
-			EntityAlpha fresize_image,ScreenGamma-1.0
-			ScaleRender(-1.0/Float(RealGraphicWidth),1.0/Float(RealGraphicWidth),2048.0 / Float(RealGraphicWidth),2048.0 / Float(RealGraphicWidth))
-		ElseIf ScreenGamma<1.0 Then ;todo: maybe optimize this if it's too slow, alternatively give players the option to disable gamma
-			CopyRect 0,0,RealGraphicWidth,RealGraphicHeight,1024-RealGraphicWidth/2,1024-RealGraphicHeight/2,BackBuffer(),TextureBuffer(fresize_texture)
-			EntityBlend fresize_image,1
-			ClsColor 0,0,0 : Cls
-			ScaleRender(-1.0/Float(RealGraphicWidth),1.0/Float(RealGraphicWidth),2048.0 / Float(RealGraphicWidth),2048.0 / Float(RealGraphicWidth))
-			EntityFX fresize_image,1+32
-			EntityBlend fresize_image,2
-			EntityAlpha fresize_image,1.0
-			SetBuffer TextureBuffer(fresize_texture2)
-			ClsColor 255*ScreenGamma,255*ScreenGamma,255*ScreenGamma
-			Cls
-			SetBuffer BackBuffer()
-			ScaleRender(-1.0/Float(RealGraphicWidth),1.0/Float(RealGraphicWidth),2048.0 / Float(RealGraphicWidth),2048.0 / Float(RealGraphicWidth))
-			SetBuffer(TextureBuffer(fresize_texture2))
-			ClsColor 0,0,0
-			Cls
-			SetBuffer(BackBuffer())
-		EndIf
-		EntityFX fresize_image,1
-		EntityBlend fresize_image,1
-		EntityAlpha fresize_image,1.0
+		ApplyBorderlessResizing()
 		
 		Flip False
 		
@@ -2487,8 +2403,6 @@ Function DrawOptionsTooltip(x%,y%,width%,height%,option$,value#=0,ingame%=False)
 			txt = I_Loc\OptionTooltip_Vsync
 		Case "antialias"
 			txt = I_Loc\OptionTooltip_Antialias
-			txt2 = I_Loc\Option_HintFullscreen
-			R = 255
 		Case "gamma"
 			txt = I_Loc\OptionTooltip_Gamma
 			R = 255
@@ -2497,10 +2411,12 @@ Function DrawOptionsTooltip(x%,y%,width%,height%,option$,value#=0,ingame%=False)
 			txt2 = Format(I_Loc\Option_HintDefault, "%", Str(Int(value*100)), "100")
 		Case "texquality"
 			txt = I_Loc\OptionTooltip_Texlod
-		Case "vram"
-			txt = I_Loc\OptionTooltip_Vram
-			txt2 = I_Loc\Option_HintMenuonly
+		Case "hudscalefactor"
+			txt = I_Loc\OptionTooltip_Hudscalefactor
 			R = 255
+			G = 255
+			B = 255
+			txt2 = Format(I_Loc\Option_HintDefault, "%", Str(Int(HUDScaleFactor*100)), "100")
 		Case "hudoffset"
 			txt = I_Loc\OptionTooltip_Hudoffset
 			R = 255
@@ -2508,7 +2424,7 @@ Function DrawOptionsTooltip(x%,y%,width%,height%,option$,value#=0,ingame%=False)
 			B = 255
 			txt2 = Format(I_Loc\Option_HintDefault, "%", Str(Int(HUDOffsetScale*100)), "0")
 		Case "viewbob"
-			txt = I_Loc\OptionTooltip_Viewbob
+			txt = I_Loc\OptionTooltip_Cammove
 			R = 255
 			G = 255
 			B = 255
@@ -2582,7 +2498,7 @@ Function DrawOptionsTooltip(x%,y%,width%,height%,option$,value#=0,ingame%=False)
 		Case "hud"
 			txt = I_Loc\OptionTooltip_Showhud
 		Case "consoleenable"
-			txt = Format(I_Loc\OptionTooltip_Console, KeyName(KEY_CONSOLE))
+			txt = Format(I_Loc\OptionTooltip_Console, GetKeyName(KEY_CONSOLE))
 			R = 255
 			txt2 = I_Loc\OptionTooltip_ConsoleNote
 		Case "speedrunmode"

@@ -198,6 +198,8 @@ For i = 0 To 7
 	If i < 4
         StepSFX(4, 0, i) = LoadSound_Strict("SFX\Step\SCP\StepSCP" + (i + 1) + ".ogg");new one 1.3.9
     EndIf
+	StepSFX(5, 0, i) = LoadSound_Strict("SFX\Step\StepWood" + (i + 1) + ".ogg")
+	StepSFX(5, 1, i) = StepSFX(5, 0, i)
 Next
 
 ;Dim Step2SFX(6)

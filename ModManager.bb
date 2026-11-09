@@ -21,7 +21,7 @@ Global ModCount%
 Const STEAM_ITEM_ID_FILENAME$ = "steam_itemid.txt"
 
 Function InstantiateMod.Mods(id$, path$)
-    m.Mods = new Mods
+    Local m.Mods = new Mods
     m\IsNew = True
     m\Id = id
     m\Path = path
@@ -63,13 +63,13 @@ End Function
 
 Function ReloadMods()
     For m.Mods = Each Mods
-        If Icon <> 0 Then FreeImage(Icon)
+        If m\Icon <> 0 Then FreeImage(m\Icon)
     Next
     Delete Each Mods
     ModCount = 0
-    d% = ReadDir("Mods")
+    Local d% = ReadDir("Mods")
     Repeat
-        f$=NextFile(d)
+        Local f$=NextFile(d)
         If f$="" Then Exit
         If f$<>"." And f$<>".." And FileType("Mods\"+f) = 2 Then
             m.Mods = InstantiateMod("local " + f, "Mods\"+f+"\")
@@ -100,14 +100,14 @@ Function ReloadMods()
 
     If FileType(ModsFile) = 1 Then
         Local mods% = OpenFile(ModsFile)
-        Local firstSorted.Mods = First Mods
+        Local firstSorted.Mods = Last Mods
         While Not Eof(mods)
-            l$ = Trim(ReadLine(mods))
+            Local l$ = Trim(ReadLine(mods))
             If l <> "" And Instr(l, "#") <> 1 And Instr(l, ";") <> 1 Then
-                splitterPos = Instr(l, "=")
+                Local splitterPos = Instr(l, "=")
                 If splitterPos = 0 Then Continue
-                key$ = Trim(Left(l, splitterPos - 1))
-                value$ = Trim(Right(l, Len(l) - splitterPos))
+                Local key$ = Trim(Left(l, splitterPos - 1))
+                Local value$ = Trim(Right(l, Len(l) - splitterPos))
                 For m.Mods = Each Mods
                     If key = m\Id Then
                         Insert m After firstSorted
@@ -171,10 +171,20 @@ Function UpdateActiveMods()
     UsesDubbedAudio = HasDubbedAudio And DubbedAudio
 End Function
 
-Function LoadModdedTextureNonStrict%(file$, flags%)
+Function DetermineModdedTexturePath$(file$)
+    If Instr(file, "Mods\") = 1 Then file = Right(file, Len(file) - Instr(file, "\", 6))
+    If Instr(file, ":") = 2 Then
+        ; Could be a mod load path.. Check if any of them fit.
+        For m.ActiveMods = Each ActiveMods
+            If Instr(file, m\Path) = 1 Then
+                file = Right(file, Len(file) - Len(m\Path))
+                Exit
+            EndIf
+        Next
+    EndIf
+
     Local ext$ = File_GetExtension(File)
 	Local fileNoExt$ = Left(File, Len(File) - Len(ext))
-	Local tmp%
 
 	For m.ActiveMods = Each ActiveMods
 		For i = 0 To ImageExtensionCount
@@ -186,30 +196,15 @@ Function LoadModdedTextureNonStrict%(file$, flags%)
 			EndIf
 			Local modPath$ = m\Path + fileNoExt + usedExtension
 			If FileType(modPath) = 1 Then
-				tmp = LoadTexture(modPath, flags)
-				If tmp <> 0 Then
-					Return tmp
-				Else
-					RuntimeErrorExt("Failed to load texture " + Chr(34) + modPath + Chr(34) + ".")
-				EndIf
+				Return modPath
 			EndIf
 		Next
 	Next
 
-    tmp = LoadTexture(file, flags)
-    If tmp <> 0 Then Return tmp
-
-    For i = 0 To ImageExtensionCount-1
-        usedExtension$ = ImageExtensions[i]
-        Local path$ = fileNoExt + usedExtension
-        If FileType(path) = 1 Then
-            tmp = LoadTexture(path, flags)
-            If tmp <> 0 Then Return tmp
-        EndIf
-    Next
-
-    Return 0
+    Return file
 End Function
+
+SetTextureLoadPathMutator(@DetermineModdedTexturePath)
 
 Function LoadModdedMeshNonStrict%(File$, parent%=0)
 	Local ext$ = File_GetExtension(File)
@@ -241,7 +236,7 @@ End Function
 
 Function DetermineModdedPath$(f$)
     For m.ActiveMods = Each ActiveMods
-        modPath$ = m\Path + f
+        Local modPath$ = m\Path + f
         If FileType(modPath) = 1 Then Return modPath
     Next
     Return f
