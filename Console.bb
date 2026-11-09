@@ -912,7 +912,7 @@ Function ExecuteConsoleCommand(cmd$, quiet% = False)
             ;[End Block]
         Case "kill","suicide"
             ;[Block]
-            KillTimer = -1
+            Kill()
             DeathMSG = I_Loc\DeathMessage_Suicide[Rand(4)]
             ;[End Block]
         Case "playmusic"
