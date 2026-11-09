@@ -13,7 +13,7 @@ Type Difficulty
 	Field customizable%
 End Type
 
-Global Difficulties.Difficulty[3]
+Global Difficulties.Difficulty[4]
 
 Global SelectedDifficulty.Difficulty
 
