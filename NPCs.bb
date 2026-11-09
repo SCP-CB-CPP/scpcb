@@ -7132,6 +7132,9 @@ Function MoveToPocketDimension()
 			PositionEntity(Collider, EntityX(r\obj),0.8,EntityZ(r\obj))
 			DropSpeed = 0
 			ResetEntity Collider
+
+			PositionEntity(Head, 0, 0, 0)
+			ResetEntity Head
 			
 			BlinkTimer = -10
 			

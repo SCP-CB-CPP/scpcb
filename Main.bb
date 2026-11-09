@@ -1378,8 +1378,9 @@ Function UpdateConsole()
 					TranslateEntity Collider, 0, 1.5, 0
 					RotateEntity Collider, 0, EntityYaw(Collider), 0
 
-					HideEntity Head
-					
+					PositionEntity(Head, 0, 0, 0)
+					ResetEntity Head
+
 					KillTimer = 0
 					KillAnim = 0
 					;[End Block]
@@ -4217,7 +4218,6 @@ Function Kill()
 		End If
 		
 		KillTimer = Min(-1, KillTimer)
-		ShowEntity Head
 		PositionEntity(Head, EntityX(Camera, True), EntityY(Camera, True), EntityZ(Camera, True), True)
 		ResetEntity (Head)
 		RotateEntity(Head, 0, EntityYaw(Camera), 0)		
@@ -4705,7 +4705,7 @@ Function MovePlayer()
 			temp# = (Shake Mod 360)
 			Local tempchn%
 			If (Not UnableToMove%) Then Shake# = (Shake + FPSfactor * Min(Sprint, 1.5) * 7) Mod 720
-			If temp < 180 And (Shake Mod 360) >= 180 And KillTimer>=0 Then
+			If temp < 180 And (Shake Mod 360) >= 180 And KillTimer>=0 And FallTimer >= 0 Then
 				PlayerStepped = True
 				If CurrStepSFX=0 Then
 					temp = GetStepSound(Collider)
@@ -4830,7 +4830,7 @@ Function MovePlayer()
 			CurrSpeed = Max(CurveValue(0.0, CurrSpeed-0.1, 1.0),0.0)
 		EndIf
 		
-		If (Not UnableToMove%) And KillTimer >= 0 Then TranslateEntity Collider, Cos(angle)*CurrSpeed * FPSfactor, 0, Sin(angle)*CurrSpeed * FPSfactor, True
+		If (Not UnableToMove%) And KillTimer >= 0 And FallTimer >= 0 Then TranslateEntity Collider, Cos(angle)*CurrSpeed * FPSfactor, 0, Sin(angle)*CurrSpeed * FPSfactor, True
 		
 		Local CollidedFloor% = False
 		For i = 1 To CountCollisions(Collider)
