@@ -333,6 +333,82 @@ Function CreateItem.Items(name$, x#, y#, z#)
 	Return i
 End Function
 
+Const SCP294Data$ = "DATA\SCP-294.ini"
+
+; Returns channel of dispense sound if successful
+Function CreateCup%(drinkName$, x#, y#, z#)
+	drinkName = Trim(Lower(drinkName))
+	For i = 1 To 2
+		Local prefix$ = I_Loc\Cup_OfPrefix[i] + " "
+		If Left(drinkName, Min(Len(prefix),Len(drinkName))) = prefix Then
+			drinkName = Right(drinkName, Len(drinkName)-Len(prefix))
+		EndIf
+	Next
+	
+	Local iniStr$ = SCP294Data
+	Local loc% = -1
+	Local hasOverride%
+	If drinkName<>""
+		For m.ActiveMods = Each ActiveMods
+			Local modIniStr$ = m\Path + iniStr
+			If FileType(modIniStr) = 1 Then
+				Local sectionLocation = GetINISectionLocation(modIniStr, drinkName)
+				If sectionLocation <> -1 Then
+					iniStr = modIniStr
+					loc = sectionLocation
+					Exit
+				EndIf
+				If FileType(modIniStr + ".OVERRIDE") Then
+					hasOverride = True
+					Exit
+				EndIf
+			EndIf
+		Next
+
+		If loc = -1 And (Not hasOverride) Then
+			loc = GetINISectionLocation(iniStr, drinkName)
+		EndIf
+	EndIf
+	
+	If loc <> -1 Then
+		Local chn% = 0
+
+		strtemp$ = GetINIString2(iniStr, loc, "dispensesound")
+		If strtemp = "" Then strtemp = GetINIString2(iniStr, loc, "dispensersound")
+		If strtemp<>"" Then
+			chn = PlaySound_Strict (LoadTempSound(strtemp))
+		EndIf
+		If chn=0 Then
+			chn = PlaySound_Strict (LoadTempSound("SFX\SCP\294\dispense1.ogg"))
+		EndIf
+		
+		If GetINIInt2(iniStr, loc, "explosion")=True Then 
+			ExplosionTimer = 135
+			DeathMSG = GetINIString2(iniStr, loc, "deathmessage")
+		EndIf
+		
+		strtemp$ = GetINIString2(iniStr, loc, "color")
+		
+		Local sep1 = Instr(strtemp, ",", 1)
+		Local sep2 = Instr(strtemp, ",", sep1+1)
+		Local r% = Trim(Left(strtemp, sep1-1))
+		Local g% = Trim(Mid(strtemp, sep1+1, sep2-sep1-1))
+		Local b% = Trim(Right(strtemp, Len(strtemp)-sep2))
+		
+		Local alpha# = Float(GetINIString2(iniStr, loc, "alpha",1.0))
+		Local glow = GetINIInt2(iniStr, loc, "glow")
+		;If alpha = 0 Then alpha = 1.0
+		If glow Then alpha = -alpha
+		
+		CreateCup(GetProperINISectionName(iniStr, loc, drinkName), x, y, z, r,g,b,alpha)
+		
+		Return chn
+	Else
+		;out of range
+		Return 0
+	EndIf
+End Function
+
 Function CreateCup.Items(drinkName$, x#, y#, z#, r%, g%, b%, a#=1.0)
 	CatchErrors("Uncaught (CreateCup)")
 
@@ -604,7 +680,7 @@ Function UpdateItems()
 					ElseIf i\state > 70 * 15 Then
 						RemoveItem(i)
 						Local bonesInInv% = 0
-						For j = 0 To MaxItemAmount
+						For j = 0 To MaxItemAmount - 1
 							it.Items = Inventory(j)
 							If it <> Null And it\itemtemplate\name = "bone" Then
 								bonesInInv = bonesInInv + 1
@@ -618,9 +694,26 @@ Function UpdateItems()
 						EndIf
 
 						If bonesInInv >= 3 Then
-							; TODO: Do something cooler!!!!
-							it.Items = CreateItem("boneflute", EntityX(Collider), EntityY(Collider), EntityZ(Collider))
-							PickItem(it)
+							; Some extra SFX
+							If (Not Contained106) Then
+								For it2.Items = Each Items
+									If it2\itemtemplate\name = "scp330" Then
+										For r.Rooms = Each Rooms
+											If r\RoomTemplate\Name = "914" Then
+												de.Decals = CreateDecal(0, EntityX(it2\collider),EntityY(it2\collider)-0.009,EntityZ(it2\collider), 90, Rand(360), 0)
+												de\Size = 0.04 : de\SizeChange = 0.0004 : de\MaxSize = 0.18 : de\timer = 90000 : EntityAlpha(de\obj, 0.8) : UpdateDecals()
+												PositionEntity(it2\collider, EntityX(r\Objects[2], True), EntityY(r\Objects[2], True) - 0.4, EntityZ(r\Objects[2], True))
+												RotateEntity(it2\collider, 0, r\angle + 30, 0)
+												ResetEntity(it2\collider)
+												de.Decals = CreateDecal(0, EntityX(it2\collider),8 * RoomScale + 0.004+Rnd(-0.001,0.001),EntityZ(it2\collider), 90, Rand(360), 0)
+												de\Size = 0.08 : de\SizeChange = 0.0008 : de\MaxSize = 0.6 : de\timer = 90000 : EntityAlpha(de\obj, 0.8) : UpdateDecals()
+												Exit
+											EndIf
+										Next
+										Exit
+									EndIf
+								Next
+							EndIf
 							Continue
 						EndIf
 
@@ -758,7 +851,7 @@ Function PickItem(item.Items)
 							ShowEntity Light
 							LightFlash = 1.0
 							PlaySound_Strict(IntroSFX(11))
-							If PlayerRoom\RoomTemplate\Name = "914" Then
+							If PlayerRoom\RoomTemplate\Name = "914" And EntityDistance(Collider, PlayerRoom\Objects[3]) < 1 Then
 								DeathMSG = I_Loc\DeathMessage_Killbat
 							Else
 								DeathMSG = I_Loc\DeathMessage_KillbatOutside
@@ -836,7 +929,15 @@ Function PickItem(item.Items)
 					Case "scp330"
 						If SteamActive And (Not UsedConsole) Then Steam_SetStatInt("has_grabbed_candy", 1)
 						If item\state = -1 Then
-							; Allow it to be picked up
+							; Empty, allow it to be picked up
+						ElseIf item\state = -3 Then
+							If Wearing714 Then
+								SliceOffHands()
+							Else
+								Msg = I_Loc\MessageItem_Scp330Nouse
+								MsgTimer = 70 * 10
+							EndIf
+							Return	
 						ElseIf PopCount(item\state) < 3 Lor item\state = -2 Then
 							Local candy%
 							If item\state = -2 Then
@@ -862,42 +963,14 @@ Function PickItem(item.Items)
 									item = CreateItem("chocolate", EntityX(Collider), EntityY(Collider), EntityZ(Collider))
 							End Select
 						Else
-							Local pvt% = CreatePivot()
-							EntityParent(pvt, Camera, False)
-							EntityParent(pvt, 0, True)
-							MoveEntity(pvt, 0.1, -0.1, 0.2)
-							item = CreateItem("hand", EntityX(pvt), EntityY(pvt), EntityZ(pvt))
-							ScaleEntity(item\model, -item\itemtemplate\scale, item\itemtemplate\scale, item\itemtemplate\scale, True)
-							RotateEntity(item\collider, 0, EntityYaw(Camera) - 90, 0)
-							MoveEntity(pvt, -0.2, -0.2, -0.2)
-							item = CreateItem("hand", EntityX(pvt), EntityY(pvt), EntityZ(pvt))
-							RotateEntity(item\collider, 0, EntityYaw(Camera) + 90 + Rnd(10, 45), 0)
-							Bloodloss = Max(Bloodloss, 50)
-							Injuries = Max(Injuries, 25)
-							BlurTimer = 10 * 70
-							CameraShake = 3
-							LostHands = True
-							If Wearing714 Then
-								For n% = 0 To MaxItemAmount-1
-									If Inventory(n) <> Null And Inventory(n)\itemtemplate\name = "scp714" Then
-										Local it.Items = Inventory(n)
-										DropItem(it)
-										PositionEntity(it\collider, EntityX(item\collider, True), EntityY(item\collider, True), EntityZ(item\collider, True), True)
-										Exit
-									EndIf
-								Next
-								Wearing714 = False
-							EndIf
-							DeathMSG = I_Loc\DeathMessage_330
-							PlaySound_Strict(LoadTempSound("SFX\General\Slash1.ogg"))
-							FreeEntity(pvt)
+							SliceOffHands()
 							Return
 						EndIf
 					Case "bone"
 						For e.Events = Each Events
 							If e\EventName = "halloweenpd" And PlayerRoom = e\room Then
-								e\EventState3 = e\EventState3 + 1
 								If e\EventState3 <= e\EventState Then
+									e\EventState3 = e\EventState3 + 1
 									PlaySound_Strict(LoadTempSound("SFX\Halloween\BonePickUp.ogg"))
 									RemoveItem(item)
 									Msg = Format(I_Loc\MessageItem_Bonefragment, e\EventState3, e\EventState)
@@ -935,6 +1008,38 @@ Function PickItem(item.Items)
 		MsgTimer = 70 * 5
 	EndIf
 	CatchErrors("PickItem")
+End Function
+
+Function SliceOffHands()
+	Local pvt% = CreatePivot()
+	EntityParent(pvt, Camera, False)
+	EntityParent(pvt, 0, True)
+	MoveEntity(pvt, 0.1, -0.1, 0.2)
+	Local item.Items = CreateItem("hand", EntityX(pvt), EntityY(pvt), EntityZ(pvt))
+	ScaleEntity(item\model, -item\itemtemplate\scale, item\itemtemplate\scale, item\itemtemplate\scale, True)
+	RotateEntity(item\collider, 0, EntityYaw(Camera) - 90, 0)
+	MoveEntity(pvt, -0.2, -0.2, -0.2)
+	item = CreateItem("hand", EntityX(pvt), EntityY(pvt), EntityZ(pvt))
+	RotateEntity(item\collider, 0, EntityYaw(Camera) + 90 + Rnd(10, 45), 0)
+	Bloodloss = Max(Bloodloss, 50)
+	Injuries = Max(Injuries, 25)
+	BlurTimer = 10 * 70
+	CameraShake = 3
+	LostHands = True
+	If Wearing714 Then
+		For n% = 0 To MaxItemAmount-1
+			If Inventory(n) <> Null And Inventory(n)\itemtemplate\name = "scp714" Then
+				Local it.Items = Inventory(n)
+				DropItem(it)
+				PositionEntity(it\collider, EntityX(item\collider, True), EntityY(item\collider, True), EntityZ(item\collider, True), True)
+				Exit
+			EndIf
+		Next
+		Wearing714 = False
+	EndIf
+	DeathMSG = I_Loc\DeathMessage_330
+	PlaySound_Strict(LoadTempSound("SFX\General\Slash1.ogg"))
+	FreeEntity(pvt)
 End Function
 
 Function DropItem(item.Items,playdropsound%=True)

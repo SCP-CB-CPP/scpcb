@@ -1140,6 +1140,8 @@ Function LoadGame(file$)
 		If it\itemtemplate\isAnim<>0 Then
 			If it\itemtemplate\name = "scp330" And version = "1.3.12.7" Then
 				SetAnimTime it\model,it\state + 1
+			ElseIf it\itemtemplate\name = "pumpkin" And version = "1.3.12.7" Then
+				; Keep anim time at 0
 			Else
 				SetAnimTime it\model,ReadFloat(f)
 			EndIf
@@ -1850,6 +1852,8 @@ Function LoadGameQuick(file$)
 		If it\itemtemplate\isAnim<>0 Then
 			If it\itemtemplate\name = "scp330" And version = "1.3.12.7" Then
 				SetAnimTime it\model,it\state + 1
+			ElseIf it\itemtemplate\name = "pumpkin" And version = "1.3.12.7" Then
+				; Keep anim time at 0
 			Else
 				SetAnimTime it\model,ReadFloat(f)
 			EndIf
@@ -2053,7 +2057,7 @@ Function LoadSaveGames()
 	Dim SaveGameTime$(SaveGameAmount + 1)
 	Dim SaveGameDate$(SaveGameAmount + 1)
 	Dim SaveGameVersion$(SaveGameAmount + 1)
-	Dim SaveGamePlayTime$(SaveGameAmount + 1)
+	Dim SaveGamePlayTime%(SaveGameAmount + 1)
 	For i = 1 To SaveGameAmount
 		DebugLog (SavePath + SaveGames(i - 1))
 		Local f% = ReadFile(SavePath + SaveGames(i - 1) + ".cbsav")
@@ -2071,6 +2075,16 @@ Function LoadSaveGames()
 		SaveGameVersion(i - 1) = ReadString(f)
 		
 		CloseFile f
+	Next
+	
+	; Build the list of saves to display
+	Dim VisibleSaveIndex%(SaveGameAmount + 1)
+	VisibleSaveAmount = 0
+	For i = 1 To SaveGameAmount
+		If (Not HideIncompatibleSaves) Lor SaveGameVersion(i - 1) = CompatibleNumber Lor SaveGameVersion(i - 1) = "1.3.12.7" Then
+			VisibleSaveIndex(VisibleSaveAmount) = i - 1
+			VisibleSaveAmount = VisibleSaveAmount + 1
+		EndIf
 	Next
 	
 	CatchErrors("LoadSaveGames")

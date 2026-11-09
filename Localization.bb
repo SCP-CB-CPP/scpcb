@@ -376,6 +376,7 @@ Type LocalizationTable
     Field MessageItem_ChocolateUse$
     Field MessageItem_ChocolateUseNumb$
     Field MessageItem_CandyNouse$
+    Field MessageItem_Scp330Nouse$
     Field MessageHelp_Paper$
     Field MessageHelp_Inventory$
     Field MessageHelp_View$
@@ -936,6 +937,7 @@ Function LoadLocalization(loc.LocalizationTable, file$)
                             Case "chocolate.use" If loc\MessageItem_ChocolateUse = "" Then loc\MessageItem_ChocolateUse = value
                             Case "chocolate.use.numb" If loc\MessageItem_ChocolateUseNumb = "" Then loc\MessageItem_ChocolateUseNumb = value
                             Case "candy.nouse" If loc\MessageItem_CandyNouse = "" Then loc\MessageItem_CandyNouse = value
+                            Case "scp330.nouse" If loc\MessageItem_Scp330Nouse = "" Then loc\MessageItem_Scp330Nouse = value
                         End Select
                     Case "Message Help"
                         Select key
