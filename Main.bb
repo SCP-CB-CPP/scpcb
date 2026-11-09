@@ -1491,20 +1491,14 @@ Function UpdateDoors()
 							MoveEntity(d\obj, Sin(d\openstate) * -FPSfactor / 114.0, 0, 0)
 					End Select
 					
-					If d\angle = 0 Or d\angle=180 Then
-						If Abs(EntityZ(d\frameobj, True)-EntityZ(Collider))<0.15 Then
-							If Abs(EntityX(d\frameobj, True)-EntityX(Collider))<0.7*(d\dir*2+1) Then
-								z# = CurveValue(EntityZ(d\frameobj,True)+0.15*Sgn(EntityZ(Collider)-EntityZ(d\frameobj, True)), EntityZ(Collider), 5)
-								PositionEntity Collider, EntityX(Collider), EntityY(Collider), z
-							EndIf
-						EndIf
-					Else
-						If Abs(EntityX(d\frameobj, True)-EntityX(Collider))<0.15 Then	
-							If Abs(EntityZ(d\frameobj, True)-EntityZ(Collider))<0.7*(d\dir*2+1) Then
-								x# = CurveValue(EntityX(d\frameobj,True)+0.15*Sgn(EntityX(Collider)-EntityX(d\frameobj, True)), EntityX(Collider), 5)
-								PositionEntity Collider, x, EntityY(Collider), EntityZ(Collider)
-							EndIf
-						EndIf
+					TFormPoint(EntityX(Collider), 0, EntityZ(Collider), 0, d\frameobj)
+					Local dx# = TFormedX() * EntityScaleX(d\frameobj, True)
+					Local dz# = TFormedZ() * EntityScaleZ(d\frameobj, True)
+
+					If Abs(dz)<0.15 And Abs(dx)<0.7*((d\dir=1)*2+1) Then
+						z# = CurveValue(0.15*Sgn(dz), dz, 5)
+						TFormPoint(TFormedX(), 0, z / EntityScaleZ(d\frameobj, True), d\frameobj, 0)
+						PositionEntity Collider, TFormedX(), EntityY(Collider), TFormedZ()
 					EndIf
 					
 					If d\DoorHitOBJ <> 0 Then
