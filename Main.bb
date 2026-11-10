@@ -2,6 +2,8 @@ Const VersionNumber$ = "1.3.12.7.1"
 ;Only change this if the version given isn't working with the current build version - ENDSHN
 Const CompatibleNumber$ = "1.3.12.7.1"
 
+SetDarkMode(True)
+
 InitErrorMsgs(11, True)
 SetErrorMsg(0, "An error occured in SCP - Containment Breach v" + VersionNumber)
 SetErrorMsg(1, "Please send us the generated minidump along with a screenshot of this window!")

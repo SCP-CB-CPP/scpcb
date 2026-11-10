@@ -11,6 +11,7 @@ ScaleImage(Menu173, MenuScale, MenuScale)
 For i = 0 To 3
 	ArrowIMG(i) = LoadImageHUDScaled("GFX\menu\arrow.png")
 	RotateImage(ArrowIMG(i), 90 * i)
+	HandleImage(ArrowIMG(i), 0, 0)
 Next
 Global MenuArrowIMG% = LoadImage_Strict("GFX\menu\arrow.png", MenuScale)
 RotateImage(MenuArrowIMG, 90)
