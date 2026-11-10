@@ -1072,7 +1072,7 @@ Function PlaceForest(fr.Forest,x#,y#,z#,r.Rooms)
 		HideEntity fr\TileMesh[i]
 	Next
 	For i%=0 To 2
-		EntityEffect fr\DetailMesh[i], InstanceEffect
+		;EntityEffect fr\DetailMesh[i], InstanceEffect
 	Next
 	HideEntity fr\DetailMesh[3]
 	
@@ -1284,7 +1284,7 @@ Function PlaceForest_MapCreator(fr.Forest,x#,y#,z#,r.Rooms)
 		HideEntity fr\TileMesh[i]
 	Next
 	For i%=0 To 2
-		EntityEffect fr\DetailMesh[i], InstanceEffect
+		;EntityEffect fr\DetailMesh[i], InstanceEffect
 	Next
 	HideEntity fr\DetailMesh[3]
 	
@@ -1410,7 +1410,7 @@ Function PlaceForestProps(parent%, hmap%, tempf3#, yscale#, treeMesh%, leafMesh%
 				Select Rand(0,treeProp)
 					Case 0 ;add a rock
 						Local detail_entity=CreatePivot()
-						EntityInstance(detail_entity, rockMesh)
+						;EntityInstance(detail_entity, rockMesh)
 						;EntityType detail_entity,HIT_MAP
 						Local tempf2#=Rnd(rockMinSize,rockMaxSize)
 						ScaleEntity detail_entity,tempf2,tempf2,tempf2,True
@@ -1420,13 +1420,13 @@ Function PlaceForestProps(parent%, hmap%, tempf3#, yscale#, treeMesh%, leafMesh%
 						RotateEntity detail_entity,0.0,Rnd(360.0),0.0,True
 					Default ;create a tree
 						detail_entity%=CreatePivot()
-						EntityInstance(detail_entity, treeMesh)
+						;EntityInstance(detail_entity, treeMesh)
 						;EntityType detail_entity,HIT_MAP
 						tempf2#=Rnd(0.25,0.4)
 						
 						For i = 0 To 3
 							Local d=CreatePivot()
-							EntityInstance(d, leafMesh)
+							;EntityInstance(d, leafMesh)
 							;ScaleEntity d,tempf2*1.1,tempf2,tempf2*1.1,True
 							RotateEntity d, 0, 90*i+Rnd(-20,20), 0
 							EntityParent(d,detail_entity)
@@ -5530,7 +5530,7 @@ Function FillRoom(r.Rooms)
 			Local terr% = load_terrain(hmap, 0.05, GroundTexture, PathTexture, mask, 1, 16, 1)
 
 			Local pumpkin% = LoadMesh_Strict("GFX\map\halloween\pumpkin.b3d")
-			EntityEffect(pumpkin, InstanceEffect)
+			;EntityEffect(pumpkin, InstanceEffect)
 
 			fr.Forest = First Forest
 			Local tree%, leaves%

@@ -1060,7 +1060,7 @@ Function DropItem(item.Items,playdropsound%=True)
 	ShowEntity(item\collider)
 	PositionEntity(item\collider, EntityX(Camera), EntityY(Camera), EntityZ(Camera), True)
 	RotateEntity(item\collider, EntityPitch(Camera), EntityYaw(Camera)+Rnd(-20,20), 0, True)
-	MoveEntity(item\collider, 0, -0.1, 0.1, True)
+	TranslateEntity(item\collider, 0, -0.1, 0.1)
 	RotateEntity(item\collider, 0, EntityYaw(Camera)+Rnd(-110,110), 0, True)
 	
 	ResetEntity (item\collider)

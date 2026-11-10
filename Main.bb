@@ -7772,7 +7772,6 @@ Function LoadEntities()
 	CameraRange(Camera, 0.05, CameraFogFar)
 	CameraFogMode (Camera, 1)
 	CameraFogRange (Camera, CameraFogNear, CameraFogFar)
-	CameraReverseZ(Camera, True)
 	AmbientLight Brightness, Brightness, Brightness
 	
 	ScreenTexs[0] = CreateTexture(512, 512, 1+256+1024)
