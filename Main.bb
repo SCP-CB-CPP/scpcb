@@ -551,9 +551,6 @@ End Type
 Include "Bindings.bb"
 Include "Console.bb"
 
-If FileType(DataDir + "cfg\autoexec.cfg") = 1 Then
-ExecuteCfg(DataDir + "cfg\autoexec.cfg") EndIf
-
 Function ExecAutoExec()
 	Local autoExec$ = DataDir + "autoexec.cfg"
 	If FileType(autoExec) = 1 Then

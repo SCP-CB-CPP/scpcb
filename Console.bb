@@ -1156,8 +1156,8 @@ Function ExecuteConsoleCommand(cmd$, quiet% = False)
                 If keyName <> "" Then CreateConsoleMsg(i + ": " + keyName)
             Next
         Case "bind"
-            Local argStart% = Instr(cmd, " ")
-            Local cmdStart% = Instr(cmd, " ", argStart + 1)
+            Local argStart% = Instr(cmd, " ") + 1
+            Local cmdStart% = Instr(cmd, " ", argStart)
             Local bindingKey% = Int(Mid(cmd, argStart, cmdStart - argStart))
             Local bindingCmd$ = Right(cmd, Len(cmd) - cmdStart)
             Local verb$ = "Bound "
