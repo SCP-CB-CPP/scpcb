@@ -2651,7 +2651,6 @@ Function UpdateEvents()
 									it2.Items = CreateItem("25ct",1,1,1)
 									it2\Picked = True
 									it2\Dropped = -1
-									it2\itemtemplate\found=True
 									it\Inventory\Items[i] = it2
 									HideEntity(it2\collider)
 								Next
