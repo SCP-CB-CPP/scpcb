@@ -2042,6 +2042,8 @@ Function UpdateNPCs()
 							;Animate2(n\obj, AnimTime(n\obj), 537, 660, 0.7, False)
 							PositionEntity n\Collider, CurveValue(EntityX(Collider),EntityX(n\Collider),20.0),EntityY(n\Collider),CurveValue(EntityZ(Collider),EntityZ(n\Collider),20.0)
 							RotateEntity n\Collider, 0, CurveAngle(EntityYaw(Collider)-180.0,EntityYaw(n\Collider),40), 0
+
+							If KillTimer >= 0 Then n\State = 1
 							;[End Block]
 						Case 4 ;Standing on catwalk in room4
 							;[Block]
