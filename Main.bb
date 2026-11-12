@@ -3889,11 +3889,11 @@ Function MouseLook(handleInput% = True)
 		Else
 			
 			If KillAnim = 0 Then 
-				MoveEntity Head, 0, 0, HeadDropSpeed
+				MoveEntity Head, 0, 0, HeadDropSpeed * FPSfactor
 				RotateEntity(Head, CurveAngle(-90.0, EntityPitch(Head), 20.0), EntityYaw(Head), EntityRoll(Head))
 				RotateEntity(Camera, CurveAngle(EntityPitch(Head) - 40.0, EntityPitch(Camera), 40.0), EntityYaw(Camera), EntityRoll(Camera))
 			Else
-				MoveEntity Head, 0, 0, -HeadDropSpeed
+				MoveEntity Head, 0, 0, -HeadDropSpeed * FPSfactor
 				RotateEntity(Head, CurveAngle(90.0, EntityPitch(Head), 20.0), EntityYaw(Head), EntityRoll(Head))
 				RotateEntity(Camera, CurveAngle(EntityPitch(Head) + 40.0, EntityPitch(Camera), 40.0), EntityYaw(Camera), EntityRoll(Camera))
 			EndIf
