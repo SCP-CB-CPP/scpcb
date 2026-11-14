@@ -1142,7 +1142,7 @@ Function ExecuteConsoleCommand(cmd$, quiet% = False)
             Else
                 CreateConsoleMsg("SHOW MAP OFF")
             EndIf
-            If ShowMap% Then CreateConsoleMsg("TYPE " + Chr(34) + "help showmap" + Chr(34) + " FOR A LIST OF ROOM COLORS")
+            If ShowMap% Then CreateConsoleMsg("TYPE " + Chr(34) + "help showmap" + Chr(34) + " FOR A LIST OF ROOM COLORS") : CreateConsoleMsg("HOLD CTRL WHILE HOVERING A ROOM FOR EVENT DETAILS")
             ;[End Block]
         Case "timescale"
             TimeScale = Float(Lower(Right(cmd, Len(cmd) - Instr(cmd, " "))))
