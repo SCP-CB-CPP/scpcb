@@ -5363,7 +5363,11 @@ Function Sees096Face%(n.NPCs, isSitting%=False)
 		Else
 			Local y# = EntityY(n\Collider)+0.96
 			If isSitting Then y = y - 0.71
-			Return PointInView(EntityX(n\Collider), y, EntityZ(n\Collider), Camera) And EntityVisible(Collider, n\Collider)
+			Local pvt% = CreatePivot()
+			PositionEntity pvt, EntityX(n\Collider), y, EntityZ(n\Collider)
+			Local ret% = EntityInView(pvt, Camera) And EntityVisible(Camera, pvt)
+			FreeEntity(pvt)
+			Return ret%
 		EndIf
 	Else
 		Return False
