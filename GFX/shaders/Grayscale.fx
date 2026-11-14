@@ -42,7 +42,11 @@ float4 PS(VS_OUT input) : COLOR
     float4 color = tex2D(samp, input.tex);
     float grey = dot(color.rgb, float3(0.299, 0.587, 0.114));
     float3 mixed = lerp(color.rgb, grey.xxx, GrayscaleEnable);
-    return float4(mixed, color.a);
+    // TODO: Any alpha that is returned here seems to be ignored.
+    // Meanwhile, manually blending with the alpha we sample doesn't seem to work either!
+    // Something is fucked in the shader system, fix your shit Krim!
+    if (color.a == 0) return float4(0, 0, 0, 0);
+    return float4(mixed, 1);
 }
 
 technique Greyscale
