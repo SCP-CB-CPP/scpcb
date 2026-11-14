@@ -9298,7 +9298,13 @@ End Function
 ;--------------------------------------- random -------------------------------------------------------
 
 Function f2s$(n#, count%)
-	Return Left(n, Len(Int(Str(n)))+count+1)
+	Local targetSize% = Len(Int(Str(n)))+count+1
+	Local ret$ = Left(n, targetSize)
+	If Len(ret) < targetSize Then
+		If Instr(ret, ".") = 0 Then ret = ret + "."
+		ret = ret + String("0", targetSize - Len(ret))
+	EndIf
+	Return ret
 End Function
 
 Function AnimateNPC(n.NPCs, start#, quit#, speed#, loop=True)
@@ -11373,10 +11379,10 @@ Function RenderWorld2()
 			Local plusY% = 0
 			If hasBattery=1 Then plusY% = 40
 			
-			Text GraphicWidth/2,HUDStartY+(20+plusY)*HUDScale,I_Loc\HUD_NvgRefresh,True,False
+			Text GraphicWidth/2,HUDStartY+(16+plusY)*HUDScale,I_Loc\HUD_NvgRefresh,True,False
 			
-			Text GraphicWidth/2,HUDStartY+(60+plusY)*HUDScale,Max(f2s(NVTimer/60.0,1),0.0),True,False
-			Text GraphicWidth/2,HUDStartY+(100+plusY)*HUDScale,I_Loc\HUD_NvgRefreshSeconds,True,False
+			Text GraphicWidth/2,HUDStartY+(44+plusY)*HUDScale,f2s(Max(NVTimer/60.0,0.0),1),True,False
+			Text GraphicWidth/2,HUDStartY+(72+plusY)*HUDScale,I_Loc\HUD_NvgRefreshSeconds,True,False
 			
 			Local temp% = CreatePivot(), temp2% = CreatePivot()
 			PositionEntity temp, EntityX(Collider), EntityY(Collider), EntityZ(Collider)
