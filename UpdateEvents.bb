@@ -8686,7 +8686,7 @@ End Function
 
 Function UpdateDimension1499()
 	; Saving while wearing 1499 in the PD very weird behavior, bandaid fix.
-	If NTF_1499PrevRoom\RoomTemplate\Name = "pocketdimension" Then CanSave = False
+	If NTF_1499PrevRoom <> Null And NTF_1499PrevRoom\RoomTemplate\Name = "pocketdimension" Then CanSave = False
 
 	Local e.Events,n.NPCs,n2.NPCs,r.Rooms,it.Items,i%,j%,du.Dummy1499,du2.Dummy1499,temp%,scale#,x%,y%
 	
