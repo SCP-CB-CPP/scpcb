@@ -49,6 +49,8 @@ Dim SaveGameTime$(SaveGameAmount + 1)
 Dim SaveGameDate$(SaveGameAmount + 1)
 Dim SaveGameVersion$(SaveGameAmount + 1)
 Dim SaveGamePlayTime$(SaveGameAmount + 1)
+Global KeepDuplicateSaveCount% = GetOptionInt("general", "keep duplicate saves")
+Global HideIncompatibleSaves% = GetOptionInt("general", "hide incompatible saves")
 
 ; Saves that are actually shown in the Load Game list
 Global VisibleSaveAmount%
@@ -950,6 +952,15 @@ Function UpdateMainMenu()
 					KeepDuplicateSaveCount% = Int(InputBox(x + 310 * MenuScale, y + MenuScale, 30 * MenuScale, 20 * MenuScale, Str(KeepDuplicateSaveCount), 123)) Mod 10
 					If MouseOn(x+310*MenuScale,y+MenuScale,15*MenuScale,20*MenuScale) And OnSliderID=0
 						DrawOptionsTooltip(tx,ty,tw,th,"keepduplicatesaves")
+					EndIf
+
+					y = y + 30*MenuScale
+
+					Color 255,255,255
+					Text(x + 20 * MenuScale, y, "Hide incompatible saves:")
+					HideIncompatibleSaves = DrawTick(x + 310 * MenuScale, y + MenuScale, HideIncompatibleSaves)
+					If MouseOn(x+310*MenuScale,y+MenuScale,20*MenuScale,20*MenuScale) And OnSliderID=0
+						DrawOptionsTooltip(tx,ty,tw,th,"hideincompatiblesaves")
 					EndIf
 
 					y = y + 30*MenuScale
@@ -2133,6 +2144,8 @@ Function DrawOptionsTooltip(x%,y%,width%,height%,option$,value#=0,ingame%=False)
 			txt = txt + " When no seed is entered, the elapsed millseconds since the computer started is used."
 		Case "keepduplicatesaves"
 			txt = "Allows configuring the number of saves of the same name that are kept at one time. If this number is exceeded, the last save will be overwritten upon creating a new save with the same name."
+		Case "hideincompatiblesaves"
+			txt = "Hides saves made on an incompatible version of the game from the Load Game list instead of showing them as unloadable in red. The save files are not deleted."
 		Case "100able"
 			txt = Chr(34) + "Check 100%-able" + Chr(34) + " is used to change the pre-game check that determines whether a specific seed is beatable to instead check whether every achievement can be attained on that seed. "
 			txt = txt + "This includes checking for the existence of all rooms that are tied to achievements."
