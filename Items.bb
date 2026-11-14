@@ -997,9 +997,9 @@ Function PickItem(item.Items)
 				
 				item\itemtemplate\found=True
 				If item\Inventory <> Null Then
-					For n% = 0 To item\Inventory\Size
-						If item\Inventory\Items[n] <> Null Then
-							item\Inventory\Items[n]\itemtemplate\found = True
+					For i% = 0 To item\Inventory\Size-1
+						If item\Inventory\Items[i] <> Null Then
+							item\Inventory\Items[i]\itemtemplate\found = True
 						EndIf
 					Next
 				EndIf
