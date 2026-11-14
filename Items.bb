@@ -927,7 +927,7 @@ Function PickItem(item.Items)
 							SelectedItem = item
 						EndIf
 					Case "scp330"
-						If SteamActive And (Not UsedConsole) Then Steam_SetStatInt("has_grabbed_candy", 1)
+						If IsHalloween And SteamActive And (Not UsedConsole) Then Steam_SetStatInt("has_grabbed_candy", 1)
 						If item\state = -1 Then
 							; Empty, allow it to be picked up
 						ElseIf item\state = -3 Then

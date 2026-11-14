@@ -6919,7 +6919,7 @@ Function UpdateEvents()
 				
 			Case "testroom173"
 				;[Block]
-				If e\EventState2 = 0 And e\room\Objects[3] <> 0 Then
+				If IsHalloween And e\EventState2 = 0 And e\room\Objects[3] <> 0 Then
 					For r2.Rooms = Each Rooms
 						If r2\RoomTemplate\Name = "room4info" Then
 							it.Items = Object.Items(e\room\Objects[3])
