@@ -67,7 +67,7 @@ LoadSaveGames()
 Global CurrLoadGamePage% = 0
 
 Function EllipsisLeft$(txt$, maxLen%)
-	If Len(txt) > maxLen Then Return Left(txt, maxLen-3) + "…"
+	If Len(txt) > maxLen Then Return Left(txt, maxLen-3) + "â€¦"
 	Return txt
 End Function
 
@@ -160,7 +160,6 @@ Function UpdateMainMenu()
 			HasNumericSeed = UseNumericSeeds
 			RandomSeedNumeric = 0
 			RandomSeed = ""
-
 			MainMenuTab = 1
 		EndIf
 
@@ -962,6 +961,15 @@ Function UpdateMainMenu()
 					HideIncompatibleSaves = DrawTick(x + 310 * MenuScale, y + MenuScale, HideIncompatibleSaves)
 					If MouseOn(x+310*MenuScale,y+MenuScale,20*MenuScale,20*MenuScale) And OnSliderID=0
 						DrawOptionsTooltip(tx,ty,tw,th,"hideincompatiblesaves")
+					EndIf
+
+					y = y + 30*MenuScale
+
+					Color 255,255,255
+					Text(x + 20 * MenuScale, y, "Achievement viewer:")
+					ShowAchvViewer = DrawTick(x + 310 * MenuScale, y + MenuScale, ShowAchvViewer)
+					If MouseOn(x+310*MenuScale,y+MenuScale,20*MenuScale,20*MenuScale) And OnSliderID=0
+						DrawOptionsTooltip(tx,ty,tw,th,"achvviewer")
 					EndIf
 
 					y = y + 50*MenuScale
@@ -2148,6 +2156,8 @@ Function DrawOptionsTooltip(x%,y%,width%,height%,option$,value#=0,ingame%=False)
 			txt = txt + "and directly exiting the pocket dimension via the tunnel room."
 		Case "achpopup"
 			txt = "Displays a pop-up notification when an achievement is unlocked."
+		Case "achvviewer"
+			txt = "Displays an unlocked achievements counter and miniature achievement icons at the top right-hand corner of the screen. Locked achievements are dimmed."
 		Case "launcher"
 			txt = "Allows re-enabling the launcher if it has been disabled."
 		Case "showfps"
