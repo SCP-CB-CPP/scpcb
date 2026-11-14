@@ -4563,14 +4563,16 @@ Function UpdateEvents()
 								
 								TFormPoint EntityX(it\collider),EntityY(it\collider),EntityZ(it\collider),0,e\room\obj
 								x = TFormedX() : y = TFormedY() : z = TFormedZ()
-								If TFormedX()>264 Then
-									TFormPoint x-1024,y,z,e\room\obj,0
-									PositionEntity it\collider, TFormedX(), TFormedY(), TFormedZ()
-									ResetEntity it\collider
-								ElseIf TFormedX()<-264
-									TFormPoint x+1024,y,z,e\room\obj,0
-									PositionEntity it\collider, TFormedX(), TFormedY(), TFormedZ()
-									ResetEntity it\collider
+								If z>=-290 And z<=560 Then
+									If x>=264 And x<=760 Then
+										TFormPoint x-1024,y,z,e\room\obj,0
+										PositionEntity it\collider, TFormedX(), TFormedY(), TFormedZ()
+										ResetEntity it\collider
+									ElseIf x<=-264 And x>=-760
+										TFormPoint x+1024,y,z,e\room\obj,0
+										PositionEntity it\collider, TFormedX(), TFormedY(), TFormedZ()
+										ResetEntity it\collider
+									EndIf
 								EndIf
 								
 							EndIf
@@ -4662,19 +4664,34 @@ Function UpdateEvents()
 						
 						;If Abs(TFormedX())<264 Then 
 						For it.Items = Each Items
-							If (it\Dropped=1 And Abs(TFormedX())<264) Or it\Dropped=-1 Then
-								DebugLog "dropping/picking: "+it\Dropped+" - "+EntityX(it\collider)+", "+EntityY(it\collider)+", "+EntityZ(it\collider)
-								
+							If it\Dropped=1 Or it\Dropped=-1 Then
 								TFormPoint EntityX(it\collider),EntityY(it\collider),EntityZ(it\collider),0,e\room\obj
 								x = TFormedX() : y = TFormedY() : z = TFormedZ()
 								
-								If it\Dropped=1 Then
+								If it\Dropped=1 And Abs(x)<264 Then
+									DebugLog "dropping: "+EntityX(it\collider)+", "+EntityY(it\collider)+", "+EntityZ(it\collider)
+									
 									For i = - 1 To 1 Step 2
 										TFormPoint x+1024*i,y,z,e\room\obj,0
-										it2.items = CreateItem(it\itemtemplate\name, TFormedX(), EntityY(it\collider), TFormedZ())
+										If it\itemtemplate\name = "cup" Then
+											it2.Items = CreateCup(it\drinkName, TFormedX(), EntityY(it\collider), TFormedZ(), it\r, it\g, it\b, it\a)
+										Else
+											it2.Items = CreateItem(it\itemtemplate\name, TFormedX(), EntityY(it\collider), TFormedZ())
+										EndIf
+										it2\state = it\state : it2\state2 = it\state2
+										If it2\Inventory<>Null And it\Inventory<>Null Then
+											it2\Inventory\Size = it\Inventory\Size
+											For j = 0 To it2\Inventory\Size-1
+												it2\Inventory\Items[j] = it\Inventory\Items[j]
+											Next
+											SetAnimTime it2\model, AnimTime(it\model)
+											it2\invimg = it\invimg
+										EndIf
 										RotateEntity(it2\collider, EntityPitch(it\collider),EntityYaw(it\collider),0)
 									Next
-								Else
+								ElseIf it\Dropped=-1
+									DebugLog "picking: "+EntityX(it\collider)+", "+EntityY(it\collider)+", "+EntityZ(it\collider)
+									
 									For it2.items = Each Items
 										If it2<>it And it2\dist < 15.0 Then
 											
