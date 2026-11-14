@@ -4673,7 +4673,20 @@ Function UpdateEvents()
 									
 									For i = - 1 To 1 Step 2
 										TFormPoint x+1024*i,y,z,e\room\obj,0
-										it2.items = CreateItem(it\itemtemplate\name, TFormedX(), EntityY(it\collider), TFormedZ())
+										If it\itemtemplate\name = "cup" Then
+											it2.Items = CreateCup(it\drinkName, TFormedX(), EntityY(it\collider), TFormedZ(), it\r, it\g, it\b, it\a)
+										Else
+											it2.Items = CreateItem(it\itemtemplate\name, TFormedX(), EntityY(it\collider), TFormedZ())
+										EndIf
+										it2\state = it\state : it2\state2 = it\state2
+										If it2\Inventory<>Null And it\Inventory<>Null Then
+											it2\Inventory\Size = it\Inventory\Size
+											For j = 0 To it2\Inventory\Size-1
+												it2\Inventory\Items[j] = it\Inventory\Items[j]
+											Next
+											SetAnimTime it2\model, AnimTime(it\model)
+											it2\invimg = it\invimg
+										EndIf
 										RotateEntity(it2\collider, EntityPitch(it\collider),EntityYaw(it\collider),0)
 									Next
 								ElseIf it\Dropped=-1
