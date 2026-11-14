@@ -9453,11 +9453,11 @@ Function Use914(item.Items, setting$, x#, y#, z#)
 					PositionEntity(item\collider, x, y, z)
 					ResetEntity(item\collider)
 				Case "fine"
-					item\Inventory\Size = Max(item\state2,15)
+					item\Inventory\Size = Max(item\Inventory\Size,15)
 					PositionEntity(item\collider, x, y, z)
 					ResetEntity(item\collider)
 				Case "very fine"
-					item\Inventory\Size = Max(item\state2,20)
+					item\Inventory\Size = Max(item\Inventory\Size,20)
 					PositionEntity(item\collider, x, y, z)
 					ResetEntity(item\collider)
 			End Select
