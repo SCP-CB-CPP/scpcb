@@ -39,6 +39,7 @@
 		SaitoFox
 		Sam Lynch ("InnocentSam")
 		Shaun Gaylard ("ENDSHN")
+		Steven Garcia ("General_101")
 		Tom Malinowski
 		Vladislav Borisevich ("Vane Brain")
 
