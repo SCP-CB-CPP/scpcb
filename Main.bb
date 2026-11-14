@@ -3,6 +3,7 @@ Const VersionNumber$ = "1.3.12.8"
 Const CompatibleNumber$ = "1.3.12.7.1"
 
 SetDarkMode(True)
+BumpNormalize(True)
 
 InitErrorMsgs(11, True)
 SetErrorMsg(0, "An error occured in SCP - Containment Breach v" + VersionNumber)
