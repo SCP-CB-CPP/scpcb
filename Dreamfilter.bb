@@ -32,7 +32,7 @@ Function CreateBlurImage()
 	ark_blur_image = spr
 	
 	;Create blur texture
-	ark_blur_texture = CreateTexture(SMALLEST_POWER_TWO, SMALLEST_POWER_TWO, 1 + 256 + 1024)
+	ark_blur_texture = CreateTexture(SMALLEST_POWER_TWO, SMALLEST_POWER_TWO, 1 + 256)
 	EntityTexture spr, ark_blur_texture
 End Function
 

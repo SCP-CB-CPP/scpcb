@@ -32,24 +32,11 @@ float4x4 ViewProj 		: MATRIX_VIEWPROJ;
 static const float BUFFER_RCP_WIDTH = 1.0 / ScreenSize.x;
 static const float BUFFER_RCP_HEIGHT = 1.0 / ScreenSize.y;
 
-#ifdef D3D11
-texture2D tScreenTex : register(t0);
-sampler ScreenTex = sampler_state { Filter = MIN_MAG_MIP_LINEAR; AddressU = Clamp; AddressV = Clamp; };
-#else
-sampler ScreenTex : register(s0) = sampler_state
-{
-    MinFilter = Linear;
-    MagFilter = Linear;
-	MipFilter = Linear;
-	AddressU = Clamp;
-	AddressV = Clamp;
-	AddressW = Clamp;
-};
-#endif
+DeclareSampler(ScreenTex, 0, BLITZ_FILTER_LINEAR, BLITZ_ADDR_CLAMP, BLITZ_ADDR_CLAMP, 0.0, 1);
 
 struct PS_INPUT
 { 
-	float4 Pos 				: POSITION0;
+	float4 Pos 				: OUT_POSITION;
 	float2 TexCoord 		: TEXCOORD0;
 };
 
@@ -61,7 +48,7 @@ PS_INPUT VertexProcess(VS_INPUT input)
 	return output;
 }
 
-float4 FXAA(PS_INPUT input) : COLOR
+float4 FXAA(PS_INPUT input) : OUTPUT(0)
 {
 	#ifdef D3D11
 		FxaaTex fxaatex = {ScreenTex, tScreenTex};
@@ -88,10 +75,13 @@ technique Main
 {
 	pass p0
 	{
-		VertexShader = compile vs_3_0 VertexProcess();
-		PixelShader = compile ps_3_0 FXAA();
-		ZWriteEnable = false;
-		ClipPlaneEnable = false;
-		Lighting = false;
+		Vertex(VertexProcess);
+		Pixel(FXAA);
+
+		#ifndef D3D11
+			ZWriteEnable = false;
+			ClipPlaneEnable = false;
+			Lighting = false;
+		#endif
 	}
 }

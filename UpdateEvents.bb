@@ -8416,7 +8416,7 @@ Function UpdateEvents()
 				If PlayerRoom<>e\room
 					If e\room\Objects[0]<>0
 						For i = 1 To 15
-							If EntityExist(e\room\Objects[i]) Then HideEntity e\room\Objects[i]
+							If EntityExists(e\room\Objects[i]) Then HideEntity e\room\Objects[i]
 						Next
 					EndIf
 					If EntityY(Collider)>EntityY(e\room\obj)-0.5 And EntityY(Collider)<EntityY(e\room\obj)+100
@@ -8430,7 +8430,7 @@ Function UpdateEvents()
 					If e\SoundCHN2<>0 Then
 						StopChannel(e\SoundCHN2) : e\SoundCHN2 = 0
 					EndIf
-					If EntityExist(NTF_1499Sky) Then HideEntity NTF_1499Sky
+					If EntityExists(NTF_1499Sky) Then HideEntity NTF_1499Sky
 					HideChunks()
 					For n.NPCs = Each NPCs
 						If n\NPCtype = NPCtype1499
@@ -8892,7 +8892,7 @@ Function UpdateDimension1499()
 				If QuickLoadPercent = 100 Or QuickLoadPercent = -1
 					UpdateChunks(e\room,15)
 					; This is an attempt at a bandaid fix for very inconsistent 1499 crashes.
-					If EntityExist(NTF_1499Sky) Then
+					If EntityExists(NTF_1499Sky) Then
 						ShowEntity NTF_1499Sky
 						Update1499Sky()
 					EndIf

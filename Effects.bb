@@ -2,18 +2,16 @@ Global GammaEffect%, FXAAEffect%
 
 Global PostEffectQuad%, QuadCamera%, PostEffect%
 
-Global InstanceEffect%
-
 Global ScreenTexture%
 
 Global PixelWidth# = 0, PixelHeight# = 0
-If GetGraphicsLevel() < 100
+If GetEngineSetting("Graphics::DXLevel") < 100
 	PixelWidth# = 0.5 / GraphicWidth
 	PixelHeight# = 0.5 / GraphicHeight
 EndIf
 
 Function InitPostProcess()
-	ScreenTexture = CreateTexture(GraphicWidth, GraphicHeight, 1 + 1024)
+	ScreenTexture = CreateTexture(GraphicWidth, GraphicHeight, 1 + 256)
 	
 	GammaEffect = LoadEffect_Strict("GFX\shaders\Gamma.fx")
 
@@ -30,8 +28,6 @@ Function InitPostProcess()
 	HideEntity(QuadCamera)
 	
 	PostEffect = 0
-
-	InstanceEffect = LoadEffect_Strict("GFX\shaders\Instance.fx")
 End Function
 
 Function UpdatePostProcess()

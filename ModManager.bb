@@ -204,7 +204,7 @@ Function DetermineModdedTexturePath$(file$)
     Return file
 End Function
 
-SetTextureLoadPathMutator(@DetermineModdedTexturePath)
+SetTextureLoadPathMutator(FuncPtr DetermineModdedTexturePath)
 
 Function LoadModdedMeshNonStrict%(File$, parent%=0)
 	Local ext$ = File_GetExtension(File)

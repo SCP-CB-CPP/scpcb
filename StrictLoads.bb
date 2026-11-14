@@ -150,11 +150,16 @@ Function PlaySound_Strict%(sndHandle%)
 					EndIf
 				EndIf
 				If ConsoleFlushSnd Then
+					SoundPause(ConsoleFlushSnd, True)
 					snd\channels[i] = PlaySound(ConsoleFlushSnd)
+					SoundPause(ConsoleFlushSnd, False)
 				Else
+					SoundPause(snd\internalHandle, True)
 					snd\channels[i] = PlaySound(snd\internalHandle)
+					SoundPause(snd\internalHandle, False)
 				EndIf
 				ChannelVolume snd\channels[i],SFXVolume#
+				ResumeChannel(snd\channels[i])
 				QueueSubtitle(snd\name, snd\internalHandle, snd\channels[i])
 				snd\releaseTime = MilliSecs()+5000 ;release after 5 seconds
 				Return snd\channels[i]
