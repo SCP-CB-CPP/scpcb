@@ -21,229 +21,6 @@ Function GetRandomSeed%()
 	If HasNumericSeed Then Return RandomSeedNumeric Else Return GenerateSeedNumber(RandomSeed)
 End Function
 
-; Seed selector
-Const MaxSavedSeeds = 999
-Const SeedsPerPage = 8
-Global NumberOfSeeds%
-Global SelectedSeedIndex% = -1 ; -1 = nothing selected
-Global CurrentSeedPage%
-Global SeedToAdd$ ; text box: new seed when nothing is selected, description when a seed is selected
-Dim SavedSeeds$(MaxSavedSeeds)
-Dim SavedDescs$(MaxSavedSeeds)
-Dim SavedModes%(MaxSavedSeeds) ; True = numeric seed, False = textual seed
-
-Function LoadSavedSeeds()
-	Local f%, l$, rest$, seed$, desc$, modeStr$, tab1%, tab2%, numeric%
-	
-	NumberOfSeeds = 0
-	SelectedSeedIndex = -1
-	
-	f = ReadFile("Data\seeds.txt")
-	If f <> 0 Then
-		While (Not Eof(f)) And NumberOfSeeds < MaxSavedSeeds
-			l = ReadLine(f)
-			desc = ""
-			modeStr = ""
-			
-			tab1 = Instr(l, Chr(9))
-			If tab1 > 0 Then
-				seed = Trim(Left(l, tab1 - 1))
-				rest = Mid(l, tab1 + 1)
-				tab2 = Instr(rest, Chr(9))
-				If tab2 > 0 Then
-					desc = Trim(Left(rest, tab2 - 1))
-					modeStr = Trim(Mid(rest, tab2 + 1))
-				Else
-					desc = Trim(rest)
-				EndIf
-			Else
-				seed = Trim(l)
-			EndIf
-			
-			If seed <> "" Then
-				; no (or unknown) mode saved: guess it from the seed itself
-				If modeStr = "N" Then
-					numeric = True
-				ElseIf modeStr = "T" Then
-					numeric = False
-				Else
-					numeric = IsNumericSeed(seed)
-				EndIf
-				If numeric And (Not IsNumericSeed(seed)) Then numeric = False
-				
-				SavedSeeds(NumberOfSeeds) = seed
-				SavedDescs(NumberOfSeeds) = desc
-				SavedModes(NumberOfSeeds) = numeric
-				NumberOfSeeds = NumberOfSeeds + 1
-			EndIf
-		Wend
-		CloseFile(f)
-	EndIf
-End Function
-
-Function WriteSavedSeeds()
-	Local f%, i%, modeChar$
-	
-	f = WriteFile("Data\seeds.txt")
-	If f <> 0 Then
-		For i = 0 To NumberOfSeeds - 1
-			If SavedModes(i) Then modeChar = "N" Else modeChar = "T"
-			WriteLine(f, SavedSeeds(i) + Chr(9) + SavedDescs(i) + Chr(9) + modeChar)
-		Next
-		CloseFile(f)
-	EndIf
-End Function
-
-; Returns the index of the seed (an existing one if it's a duplicate), or -1 if it couldn't be added.
-; The same seed can be saved twice if one is numeric and the other textual, since the game treats them differently.
-Function AddSavedSeed%(seed$, numeric%)
-	Local i%
-	
-	If seed = "" Then Return -1
-	
-	; a seed that isn't a valid number can only be used as a textual seed
-	If numeric And (Not IsNumericSeed(seed)) Then numeric = False
-	
-	For i = 0 To NumberOfSeeds - 1
-		If SavedSeeds(i) = seed And SavedModes(i) = numeric Then Return i
-	Next
-	
-	If NumberOfSeeds >= MaxSavedSeeds Then Return -1
-	
-	SavedSeeds(NumberOfSeeds) = seed
-	SavedDescs(NumberOfSeeds) = ""
-	SavedModes(NumberOfSeeds) = numeric
-	NumberOfSeeds = NumberOfSeeds + 1
-	
-	WriteSavedSeeds()
-	
-	Return NumberOfSeeds - 1
-End Function
-
-Function SetSeedDescription(seedIndex%, desc$)
-	If seedIndex < 0 Or seedIndex >= NumberOfSeeds Then Return
-	
-	SavedDescs(seedIndex) = Trim(Replace(desc, Chr(9), " "))
-	
-	WriteSavedSeeds()
-End Function
-
-Function DeleteSavedSeed(seedIndex%)
-	Local i%
-	
-	If seedIndex < 0 Or seedIndex >= NumberOfSeeds Then Return
-	
-	For i = seedIndex To NumberOfSeeds - 2
-		SavedSeeds(i) = SavedSeeds(i + 1)
-		SavedDescs(i) = SavedDescs(i + 1)
-		SavedModes(i) = SavedModes(i + 1)
-	Next
-	NumberOfSeeds = NumberOfSeeds - 1
-	SavedSeeds(NumberOfSeeds) = ""
-	SavedDescs(NumberOfSeeds) = ""
-	SavedModes(NumberOfSeeds) = False
-	
-	WriteSavedSeeds()
-	
-	SelectedSeedIndex = -1
-End Function
-
-; Moves a seed one place up (direction = -1) or down (direction = 1) and keeps it selected
-Function MoveSavedSeed(seedIndex%, direction%)
-	Local other% = seedIndex + direction
-	Local tmpSeed$, tmpDesc$, tmpMode%
-	
-	If seedIndex < 0 Or seedIndex >= NumberOfSeeds Then Return
-	If other < 0 Or other >= NumberOfSeeds Then Return
-	
-	tmpSeed = SavedSeeds(seedIndex)
-	tmpDesc = SavedDescs(seedIndex)
-	tmpMode = SavedModes(seedIndex)
-	
-	SavedSeeds(seedIndex) = SavedSeeds(other)
-	SavedDescs(seedIndex) = SavedDescs(other)
-	SavedModes(seedIndex) = SavedModes(other)
-	
-	SavedSeeds(other) = tmpSeed
-	SavedDescs(other) = tmpDesc
-	SavedModes(other) = tmpMode
-	
-	SelectedSeedIndex = other
-	CurrentSeedPage = other / SeedsPerPage ; follow the seed if it moved onto another page
-	
-	WriteSavedSeeds()
-End Function
-
-; Digits only
-Function SanitizeNumericSeed$(s$)
-	Local out$ = "", i%, c%
-	
-	For i = 1 To Len(s)
-		c = Asc(Mid(s, i, 1))
-		If c >= 48 And c <= 57 Then out = out + Chr(c)
-	Next
-	
-	Return out
-End Function
-
-Function IsNumericSeed%(s$)
-	If s = "" Then Return False
-	If SanitizeNumericSeed(s) <> s Then Return False
-	If Float(s) > 2147483647 Then Return False
-	
-	Return True
-End Function
-
-; Puts a saved seed into the game's seed fields, switching between Numeric and Textual mode to match the seed.
-Function ApplySavedSeed(seed$, numeric%)
-	If numeric And IsNumericSeed(seed) Then
-		UseNumericSeeds = True
-		RandomSeed = ""
-		RandomSeedNumeric = Int(seed)
-	Else
-		UseNumericSeeds = False
-		RandomSeedNumeric = 0
-		RandomSeed = seed
-	EndIf
-End Function
-
-Function SelectSavedSeed(seedIndex%)
-	If seedIndex < 0 Or seedIndex >= NumberOfSeeds Then Return
-	
-	SelectedSeedIndex = seedIndex
-	CurrentSeedPage = seedIndex / SeedsPerPage
-	SeedToAdd = SavedDescs(seedIndex) ; the text box now edits this seed's description
-	
-	ApplySavedSeed(SavedSeeds(seedIndex), SavedModes(seedIndex))
-End Function
-
-Function DeselectSavedSeed()
-	SelectedSeedIndex = -1
-	SeedToAdd = ""
-	RandomSeed = ""
-	RandomSeedNumeric = 0
-End Function
-
-; A small button with a triangle on it. Returns True when clicked.
-Function DrawSeedArrow%(x%, y%, width%, height%, up%)
-	Local clicked% = DrawButton(x, y, width, height, "", False)
-	Local cx% = x + width / 2
-	Local cy% = y + height / 2
-	Local t% = height / 4
-	Local k%
-	
-	Color 255, 255, 255
-	For k = 0 To t
-		If up Then
-			Line(cx - k, cy - t / 2 + k, cx + k, cy - t / 2 + k)
-		Else
-			Line(cx - k, cy + t / 2 - k, cx + k, cy + t / 2 - k)
-		EndIf
-	Next
-	
-	Return clicked
-End Function
-
 Dim MenuBlinkTimer%(2), MenuBlinkDuration%(2)
 MenuBlinkTimer%(0) = 1
 MenuBlinkTimer%(1) = 1
@@ -272,8 +49,6 @@ Dim SaveGameTime$(SaveGameAmount + 1)
 Dim SaveGameDate$(SaveGameAmount + 1)
 Dim SaveGameVersion$(SaveGameAmount + 1)
 Dim SaveGamePlayTime$(SaveGameAmount + 1)
-Global KeepDuplicateSaveCount% = GetOptionInt("general", "keep duplicate saves")
-Global HideIncompatibleSaves% = GetOptionInt("general", "hide incompatible saves")
 
 ; Saves that are actually shown in the Load Game list
 Global VisibleSaveAmount%
@@ -290,7 +65,7 @@ LoadSaveGames()
 Global CurrLoadGamePage% = 0
 
 Function EllipsisLeft$(txt$, maxLen%)
-	If Len(txt) > maxLen Then Return Left(txt, maxLen-3) + "…"
+	If Len(txt) > maxLen Then Return Left(txt, maxLen-3) + "â€¦"
 	Return txt
 End Function
 
@@ -383,12 +158,6 @@ Function UpdateMainMenu()
 			HasNumericSeed = UseNumericSeeds
 			RandomSeedNumeric = 0
 			RandomSeed = ""
-			
-			LoadSavedSeeds()
-			CurrentSeedPage = 0
-			SeedToAdd = ""
-			SelectedInputBox = 3 ; 3 is the ID of the seed input box, the whole idea is that it automatically focuses on it
-			
 			MainMenuTab = 1
 		EndIf
 
@@ -463,109 +232,12 @@ Function UpdateMainMenu()
 				SetFont Font2
 				Text(x + width / 2, y + height / 2, "NEW GAME", True, True)
 				
-				; Seed Selector title frame
-				Local SeedPanelX% = 160 * MenuScale + 580 * MenuScale + 20
-				Local SeedPanelW% = 580 * MenuScale * 1.2
-				DrawFrame(SeedPanelX, y, SeedPanelW, height)
-				Text(SeedPanelX + SeedPanelW / 2, y + height / 2, "Seed Selector", True, True)
-				
 				x = 160 * MenuScale
 				y = y + height + 20 * MenuScale
 				width = 580 * MenuScale
 				height = 360 * MenuScale
 				
 				DrawFrame(x, y, width, height)				
-				
-				; Seed Selector frame (table: header row, SeedsPerPage rows, page controls row)
-				DrawFrame(SeedPanelX, y, SeedPanelW, height)
-				
-				Local SeedRowH% = height / 10
-				Local SeedNumX% = SeedPanelX + SeedPanelW * 0.03
-				Local SeedSeedX% = SeedPanelX + SeedPanelW * 0.12
-				Local SeedDescX% = SeedPanelX + SeedPanelW * 0.4
-				Local SeedRowX% = SeedPanelX + 8 * MenuScale
-				Local SeedRowW% = SeedPanelW - 16 * MenuScale
-				Local SeedArrowS% = SeedRowH - 8 * MenuScale ; size of the move up / move down buttons
-				Local SeedArrowX% = SeedRowX + SeedRowW - 2 * SeedArrowS - 10 * MenuScale
-				Local SeedPages% = Ceil(Float(NumberOfSeeds) / Float(SeedsPerPage))
-				
-				If SeedPages < 1 Then SeedPages = 1
-				If CurrentSeedPage >= SeedPages Then CurrentSeedPage = SeedPages - 1
-				If CurrentSeedPage < 0 Then CurrentSeedPage = 0
-				
-				SetFont Font1
-				Color 255, 255, 255
-				Text(SeedNumX, y + SeedRowH / 2, "#", False, True)
-				Text(SeedSeedX, y + SeedRowH / 2, "Seed", False, True)
-				Text(SeedDescX, y + SeedRowH / 2, "Description", False, True)
-				
-				If NumberOfSeeds = 0 Then Text(SeedPanelX + SeedPanelW / 2, y + SeedRowH * 5, "No saved seeds yet", True, True)
-				
-				Local sdRow%, sdEntry%, sdRowY%, sdMoveDir%
-				sdMoveDir = 0
-				For sdRow = 0 To SeedsPerPage - 1
-					sdEntry = CurrentSeedPage * SeedsPerPage + sdRow
-					If sdEntry >= NumberOfSeeds Then Exit
-					
-					sdRowY = y + SeedRowH * (sdRow + 1)
-					
-					If sdEntry = SelectedSeedIndex Then
-						Color 90, 90, 90
-						Rect(SeedRowX, sdRowY, SeedRowW, SeedRowH)
-					ElseIf MouseOn(SeedRowX, sdRowY, SeedRowW, SeedRowH) Then
-						Color 40, 40, 40
-						Rect(SeedRowX, sdRowY, SeedRowW, SeedRowH)
-					EndIf
-					
-					; clicking a row selects it, clicking the selected row deselects it
-					; (clicks on the arrows of the selected row must not count as a row click)
-					If MouseOn(SeedRowX, sdRowY, SeedRowW, SeedRowH) And MouseHit1 And (Not (sdEntry = SelectedSeedIndex And MouseOn(SeedArrowX, sdRowY, SeedRowX + SeedRowW - SeedArrowX, SeedRowH))) Then
-						PlaySound_Strict(ButtonSFX)
-						If sdEntry = SelectedSeedIndex Then
-							DeselectSavedSeed()
-						Else
-							SelectSavedSeed(sdEntry)
-						EndIf
-					EndIf
-					
-					Color 255, 255, 255
-					Text(SeedNumX, sdRowY + SeedRowH / 2, "" + (sdEntry + 1), False, True)
-					Text(SeedSeedX, sdRowY + SeedRowH / 2, SavedSeeds(sdEntry), False, True)
-					Text(SeedDescX, sdRowY + SeedRowH / 2, SavedDescs(sdEntry), False, True)
-					
-					; move up / move down, only shown on the selected row
-					If sdEntry = SelectedSeedIndex Then
-						If sdEntry > 0 Then
-							If DrawSeedArrow(SeedArrowX, sdRowY + 4 * MenuScale, SeedArrowS, SeedArrowS, True) Then sdMoveDir = -1
-						EndIf
-						If sdEntry < NumberOfSeeds - 1 Then
-							If DrawSeedArrow(SeedArrowX + SeedArrowS + 4 * MenuScale, sdRowY + 4 * MenuScale, SeedArrowS, SeedArrowS, False) Then sdMoveDir = 1
-						EndIf
-					EndIf
-				Next
-				
-				; separator under the header row (tiled texture, same as the frames)
-				Color 255, 255, 255
-				DrawTiledImageRect(MenuWhite, (SeedRowX Mod 256), ((y + SeedRowH) Mod 256), 512, 3 * MenuScale, SeedRowX, y + SeedRowH - 1 * MenuScale, SeedRowW, 3 * MenuScale)
-				
-				; apply the move after the loop, so the list isn't changed while it's being drawn
-				If sdMoveDir <> 0 Then MoveSavedSeed(SelectedSeedIndex, sdMoveDir)
-				
-				Local SeedPageY% = y + SeedRowH * 9
-				Color 255, 255, 255
-				Text(SeedPanelX + SeedPanelW / 2, SeedPageY + SeedRowH / 2, "Page " + (CurrentSeedPage + 1) + "/" + SeedPages, True, True)
-				
-				If CurrentSeedPage > 0 Then
-					If DrawButton(SeedPanelX + 15 * MenuScale, SeedPageY + 3 * MenuScale, SeedRowH * 1.5, SeedRowH - 6 * MenuScale, "<", False) Then
-						CurrentSeedPage = CurrentSeedPage - 1
-					EndIf
-				EndIf
-				If CurrentSeedPage < SeedPages - 1 Then
-					If DrawButton(SeedPanelX + SeedPanelW - 15 * MenuScale - SeedRowH * 1.5, SeedPageY + 3 * MenuScale, SeedRowH * 1.5, SeedRowH - 6 * MenuScale, ">", False) Then
-						CurrentSeedPage = CurrentSeedPage + 1
-					EndIf
-				EndIf
-				
 				
 				SetFont Font1
 				
@@ -702,42 +374,6 @@ Function UpdateMainMenu()
 				If DrawButton(x, y + height + 20 * MenuScale, 160 * MenuScale, 70 * MenuScale, "Load map", False) Then
 					MainMenuTab = 4
 					LoadSavedMaps()
-				EndIf
-				
-				; Seed text box, Add Seed / Set Description, Delete
-				Local SeedBtnW% = 160 * MenuScale
-				Local SeedAddW% = 200 * MenuScale
-				Local SeedBoxW% = SeedPanelW - SeedBtnW - SeedAddW - 40 * MenuScale
-				Local SeedBoxY% = y + height + 20 * MenuScale
-				Local SeedNewIdx%
-				
-				If SelectedSeedIndex >= 0 Then
-					; a seed is selected: the box edits its description
-					SeedToAdd = Left(InputBox(SeedPanelX, SeedBoxY, SeedBoxW, 70 * MenuScale, SeedToAdd, 40), 24)
-				Else
-					; nothing selected: the box is a new seed
-					SeedToAdd = Left(InputBox(SeedPanelX, SeedBoxY, SeedBoxW, 70 * MenuScale, SeedToAdd, 40, 3 * UseNumericSeeds), 15)
-					If UseNumericSeeds Then SeedToAdd = SanitizeNumericSeed(SeedToAdd)
-				EndIf
-				
-				Local SeedAddTxt$ = "Add Seed"
-				If SelectedSeedIndex >= 0 Then SeedAddTxt = "Set Description"
-				If DrawButton(SeedPanelX + SeedBoxW + 20 * MenuScale, SeedBoxY, SeedAddW, 70 * MenuScale, SeedAddTxt, False) Then
-					If SelectedSeedIndex >= 0 Then
-						SetSeedDescription(SelectedSeedIndex, SeedToAdd)
-					ElseIf SeedToAdd <> "" Then
-						SeedNewIdx = AddSavedSeed(SeedToAdd, UseNumericSeeds)
-						If SeedNewIdx >= 0 Then SelectSavedSeed(SeedNewIdx)
-					EndIf
-				EndIf
-				
-				Local SeedDelTxt$ = "Delete"
-				If SelectedSeedIndex >= 0 Then SeedDelTxt = "Delete #" + (SelectedSeedIndex + 1)
-				If DrawButton(SeedPanelX + SeedPanelW - SeedBtnW, SeedBoxY, SeedBtnW, 70 * MenuScale, SeedDelTxt, False) Then
-					If SelectedSeedIndex >= 0 Then
-						DeleteSavedSeed(SelectedSeedIndex)
-						DeselectSavedSeed()
-					EndIf
 				EndIf
 				
 				SetFont Font2
@@ -1319,13 +955,13 @@ Function UpdateMainMenu()
 					y = y + 30*MenuScale
 
 					Color 255,255,255
-					Text(x + 20 * MenuScale, y, "Hide incompatible saves:")
-					HideIncompatibleSaves = DrawTick(x + 310 * MenuScale, y + MenuScale, HideIncompatibleSaves)
+					Text(x + 20 * MenuScale, y, "Achievement viewer:")
+					ShowAchvViewer = DrawTick(x + 310 * MenuScale, y + MenuScale, ShowAchvViewer)
 					If MouseOn(x+310*MenuScale,y+MenuScale,20*MenuScale,20*MenuScale) And OnSliderID=0
-						DrawOptionsTooltip(tx,ty,tw,th,"hideincompatiblesaves")
+						DrawOptionsTooltip(tx,ty,tw,th,"achvviewer")
 					EndIf
 
-					y = y + 50*MenuScale
+					y = y + 40*MenuScale
 					
 					Color 255,255,255
 					Text(x + 20 * MenuScale, y, "Achievement popups:")
@@ -1334,7 +970,7 @@ Function UpdateMainMenu()
 						DrawOptionsTooltip(tx,ty,tw,th,"achpopup")
 					EndIf
 
-					y = y + 50*MenuScale
+					y = y + 40*MenuScale
 
 					Color 255,255,255
 					Text(x + 20 * MenuScale, y, "Use launcher:")
@@ -1343,7 +979,7 @@ Function UpdateMainMenu()
 						DrawOptionsTooltip(tx,ty,tw,th,"launcher")
 					EndIf
 					
-					y = y + 50*MenuScale
+					y = y + 40*MenuScale
 					
 					Color 255,255,255
 					Text(x + 20 * MenuScale, y, "Framelimit:")
@@ -1748,10 +1384,11 @@ Function DrawTiledImageRect(img%, srcX%, srcY%, srcwidth#, srcheight#, x%, y%, w
 	
 	Local x2% = x
 	While x2 < x+width
-		If x2 + srcwidth > x + width Then srcwidth = (x + width) - x2
 		Local y2% = y
 		While y2 < y+height
-			DrawImageRect(img, x2, y2, srcX, srcY, srcwidth, Min((y + height) - y2, srcheight))
+			If x2 + srcwidth > x + width Then srcwidth = srcwidth - Max((x2 + srcwidth) - (x + width), 1)
+			If y2 + srcheight > y + height Then srcheight = srcheight - Max((y2 + srcheight) - (y + height), 1)
+			DrawImageRect(img, x2, y2, srcX, srcY, srcwidth, srcheight)
 			y2 = y2 + srcheight
 		Wend
 		x2 = x2 + srcwidth
@@ -2496,8 +2133,6 @@ Function DrawOptionsTooltip(x%,y%,width%,height%,option$,value#=0,ingame%=False)
 			txt = txt + " When no seed is entered, the elapsed millseconds since the computer started is used."
 		Case "keepduplicatesaves"
 			txt = "Allows configuring the number of saves of the same name that are kept at one time. If this number is exceeded, the last save will be overwritten upon creating a new save with the same name."
-		Case "hideincompatiblesaves"
-			txt = "Hides saves made on an incompatible version of the game from the Load Game list instead of showing them as unloadable in red. The save files are not deleted."
 		Case "100able"
 			txt = Chr(34) + "Check 100%-able" + Chr(34) + " is used to change the pre-game check that determines whether a specific seed is beatable to instead check whether every achievement can be attained on that seed. "
 			txt = txt + "This includes checking for the existence of all rooms that are tied to achievements."
@@ -2508,6 +2143,8 @@ Function DrawOptionsTooltip(x%,y%,width%,height%,option$,value#=0,ingame%=False)
 			txt = txt + "and directly exiting the pocket dimension via the tunnel room."
 		Case "achpopup"
 			txt = "Displays a pop-up notification when an achievement is unlocked."
+		Case "achvviewer"
+			txt = "Displays an unlocked achievements counter and miniature achievement icons at the top right-hand corner of the screen. Locked achievements are dimmed."
 		Case "launcher"
 			txt = "Allows re-enabling the launcher if it has been disabled."
 		Case "showfps"

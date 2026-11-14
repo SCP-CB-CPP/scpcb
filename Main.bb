@@ -7228,6 +7228,7 @@ Function DrawHUD()
 	If Not HUDenabled Then Return
 
 	If SpeedRunMode Then DrawTimer()
+	DrawAchvViewer()
 
 	If ShowMap Then DrawMap()
 
@@ -7390,6 +7391,64 @@ Function DrawTimer()
 	Color otherComponents, otherComponents, blueComponent
 	Text(x, y, durText)
 	SetFont(Font1)
+End Function
+
+Function DrawAchvViewer()
+	If Not ShowAchvViewer Then Return
+	
+	Local scale# = GraphicHeight / 768.0
+	Local cols% = 10
+	Local size% = AchvMiniSize
+	Local gap% = Max(2, Int(3 * scale))
+	Local gridW% = cols * size + (cols - 1) * gap
+	Local right% = GraphicWidth - 24
+	Local x0% = right - gridW
+	Local y% = 24
+	Local i%, count%
+	
+	; Sit below the speedrun timer when it is visible
+	If SpeedRunMode Then
+		SetFont Font2
+		y = y + StringHeight("0") + 6 * scale
+	EndIf
+	
+	For i = 0 To MAXACHIEVEMENTS - 1
+		If Achievements(i) = True Then count = count + 1
+	Next
+	Local id%
+	
+	SetFont Font1
+	Local txt$ = "ACHIEVEMENTS: " + count + "/" + MAXACHIEVEMENTS
+	Local tx% = right - StringWidth(txt)
+	Color 0, 0, 0
+	Text(tx + 1, y + 1, txt)
+	If count = MAXACHIEVEMENTS Then
+		Color 255, 215, 0
+	Else
+		Color 255, 255, 255
+	EndIf
+	Text(tx, y, txt)
+	y = y + StringHeight(txt) + 4 * scale
+	
+	Local px%, py%
+	For i = 0 To MAXACHIEVEMENTS - 1
+		px = x0 + (i Mod cols) * (size + gap)
+		py = y + (i / cols) * (size + gap)
+		id = AchvViewOrder(i)
+		Color 0, 0, 0
+		Rect(px, py, size, size, True)
+		If Achievements(id) = True Then
+			DrawImage(AchvMini(id), px, py)
+			; Green outline (2px) for unlocked achievements
+			Color 0, 200, 0
+			Rect(px - 1, py - 1, size + 2, size + 2, False)
+			Rect(px, py, size, size, False)
+		Else
+			DrawImage(AchvMiniDim(id), px, py)
+			Color 35, 35, 35
+			Rect(px, py, size, size, False)
+		EndIf
+	Next
 End Function
 
 Function PadLeft$(txt$, padding$, targetLen%)
@@ -7844,13 +7903,13 @@ Function DrawMenu()
 					y = y + 30*MenuScale
 					
 					Color 255,255,255
-					Text(x, y, "Hide incompatible saves:")
-					HideIncompatibleSaves = DrawTick(x + 270 * MenuScale, y + MenuScale, HideIncompatibleSaves)
+					Text(x, y, "Achievement viewer:")
+					ShowAchvViewer = DrawTick(x + 270 * MenuScale, y + MenuScale, ShowAchvViewer)
 					If MouseOn(x+270*MenuScale,y+MenuScale,20*MenuScale,20*MenuScale) And OnSliderID=0
-						DrawOptionsTooltip(tx,ty,tw,th,"hideincompatiblesaves")
+						DrawOptionsTooltip(tx,ty,tw,th,"achvviewer")
 					EndIf
 					
-					y = y + 50*MenuScale
+					y = y + 40*MenuScale
 					
 					Color 255,255,255
 					Text(x, y, "Achievement popups:")
@@ -7859,7 +7918,7 @@ Function DrawMenu()
 						DrawOptionsTooltip(tx,ty,tw,th,"achpopup")
 					EndIf
 					
-					y = y + 50*MenuScale
+					y = y + 40*MenuScale
 
 					Color 255,255,255
 					Text(x, y, "Use launcher:")
@@ -7868,7 +7927,7 @@ Function DrawMenu()
 						DrawOptionsTooltip(tx,ty,tw,th,"launcher")
 					EndIf
 					
-					y = y + 50*MenuScale
+					y = y + 40*MenuScale
 					
 					Color 255,255,255
 					Text(x, y, "Framelimit:")
@@ -11306,13 +11365,13 @@ Function SaveOptionsINI()
 	;PutINIValue(OptionFile, "graphics", "show FPS", ShowFPS)
 	PutINIValue(OptionFile, "graphics", "framelimit", Framelimit%)
 	PutINIValue(OptionFile, "general", "achievement popup enabled", AchvMSGenabled%)
+	PutINIValue(OptionFile, "general", "show achievement viewer", ShowAchvViewer%)
 	PutINIValue(OptionFile, "launcher", "launcher enabled", LauncherEnabled%)
 	PutINIValue(OptionFile, "graphics", "texture details", TextureDetails%)
 	PutINIValue(OptionFile, "console", "enabled", CanOpenConsole%)
 	PutINIValue(OptionFile, "general", "speed run mode", SpeedRunMode%)
 	PutINIValue(OptionFile, "general", "numeric seeds", UseNumericSeeds%)
 	PutINIValue(OptionFile, "general", "keep duplicate saves", KeepDuplicateSaveCount%)
-	PutINIValue(OptionFile, "general", "hide incompatible saves", HideIncompatibleSaves%)
 	PutINIValue(OptionFile, "controls", "mouse smoothing", MouseSmooth)
 	
 	PutINIValue(OptionFile, "audio", "music volume", MusicVolume)
