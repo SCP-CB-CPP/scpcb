@@ -1287,22 +1287,20 @@ Function UpdateNPCs()
 								If angle<90 Or angle>270 Then
 									CameraProject Camera,EntityX(n\Collider), EntityY(n\Collider)+0.25, EntityZ(n\Collider)
 									
-									If ProjectedX()>0 And ProjectedX()<GraphicWidth Then
-										If ProjectedY()>0 And ProjectedY()<GraphicHeight Then
-											If EntityVisible(Collider, n\Collider) Then
-												If (BlinkTimer < - 16 Or BlinkTimer > - 6)
-													PlaySound_Strict LoadTempSound("SFX\SCP\096\Triggered.ogg")
-													
-													CurrCameraZoom = 10
-													
-													n\Frame = 194
-													;n\Frame = 307
-													StopStream_Strict(n\SoundChn) : n\SoundChn=0
-													n\Sound = 0
-													n\State = 1
-													n\State3 = 0
-												EndIf
-											EndIf									
+									If PointInView(EntityX(n\Collider), EntityY(n\Collider)+0.25, EntityZ(n\Collider), Camera)
+										If EntityVisible(Collider, n\Collider) Then
+											If (BlinkTimer < - 16 Or BlinkTimer > - 6)
+												PlaySound_Strict LoadTempSound("SFX\SCP\096\Triggered.ogg")
+												
+												CurrCameraZoom = 10
+												
+												n\Frame = 194
+												;n\Frame = 307
+												StopStream_Strict(n\SoundChn) : n\SoundChn=0
+												n\Sound = 0
+												n\State = 1
+												n\State3 = 0
+											EndIf
 										EndIf
 									EndIf								
 									
@@ -1626,24 +1624,20 @@ Function UpdateNPCs()
 							angle = WrapAngle(DeltaYaw(n\Collider, Camera));-EntityYaw(n\Collider))
 							If (Not NoTarget)
 								If angle<55 Or angle>360-55 Then
-									CameraProject Camera,EntityX(n\Collider), EntityY(Collider)+5.8*0.2-0.25, EntityZ(n\Collider)
-									
-									If ProjectedX()>0 And ProjectedX()<GraphicWidth Then
-										If ProjectedY()>0 And ProjectedY()<GraphicHeight Then
-											If EntityVisible(Collider, n\Collider) Then
-												If (BlinkTimer < - 16 Or BlinkTimer > - 6)
-													PlaySound_Strict LoadTempSound("SFX\SCP\096\Triggered.ogg")
-													
-													CurrCameraZoom = 10
-													
-													If n\Frame >= 422
-														n\Frame = 677 ;833
-													EndIf
-													StopStream_Strict(n\SoundChn) : n\SoundChn=0
-													n\Sound = 0
-													n\State = 2
+									If PointInView(EntityX(n\Collider), EntityY(Collider)+5.8*0.2-0.25, EntityZ(n\Collider), Camera)
+										If EntityVisible(Collider, n\Collider) Then
+											If (BlinkTimer < - 16 Or BlinkTimer > - 6)
+												PlaySound_Strict LoadTempSound("SFX\SCP\096\Triggered.ogg")
+												
+												CurrCameraZoom = 10
+												
+												If n\Frame >= 422
+													n\Frame = 677 ;833
 												EndIf
-											EndIf									
+												StopStream_Strict(n\SoundChn) : n\SoundChn=0
+												n\Sound = 0
+												n\State = 2
+											EndIf
 										EndIf
 									EndIf
 									
