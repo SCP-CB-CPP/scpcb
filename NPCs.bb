@@ -251,7 +251,7 @@ Function CreateNPC.NPCs(NPCtype%, x#, y#, z#)
 			EntityRadius n\Collider, 0.26
 			EntityType n\Collider, HIT_PLAYER
 			n\obj = LoadAnimMesh_Strict("GFX\npcs\scp096.b3d")
-			n\obj2 = CreatePivot(FindChild(n\obj, GetModdedINIString(NPCBones, "SCP-096", "face_bonename")))
+			n\obj2 = FindChild(n\obj, GetModdedINIString(NPCBones, "SCP-096", "face_bonename"))
 			
 			n\Speed = (GetModdedINIFloat("DATA\NPCs.ini", "SCP-096", "speed") / 100.0)
 			
@@ -1324,7 +1324,7 @@ Function UpdateNPCs()
 							EndIf
 							;AnimateNPC(n, 1085,1412, 0.1) ;sitting
 							
-							If dist < (CameraFogFar * LightVolume) And Sees096Face(n) Then
+							If dist < (CameraFogFar * LightVolume) And Sees096Face(n, True) Then
 								PlaySound_Strict LoadTempSound("SFX\SCP\096\Triggered.ogg")
 								
 								CurrCameraZoom = 10
@@ -2042,6 +2042,8 @@ Function UpdateNPCs()
 							;Animate2(n\obj, AnimTime(n\obj), 537, 660, 0.7, False)
 							PositionEntity n\Collider, CurveValue(EntityX(Collider),EntityX(n\Collider),20.0),EntityY(n\Collider),CurveValue(EntityZ(Collider),EntityZ(n\Collider),20.0)
 							RotateEntity n\Collider, 0, CurveAngle(EntityYaw(Collider)-180.0,EntityYaw(n\Collider),40), 0
+
+							If KillTimer >= 0 Then n\State = 1
 							;[End Block]
 						Case 4 ;Standing on catwalk in room4
 							;[Block]
@@ -5351,8 +5353,25 @@ Function MeNPCSeesPlayer%(me.NPCs,disablesoundoncrouch%=False)
 	
 End Function
 
-Function Sees096Face%(n.NPCs)
+Function Sees096Face%(n.NPCs, isSitting%=False)
 	Local angle# = WrapAngle(DeltaYaw(n\Collider, Collider));-EntityYaw(n\Collider,True))
+	Local triggerAngle% = 55
+	If isSitting Then triggerAngle% = 90
+	If (Not NoTarget) And (angle < triggerAngle% Lor angle > 360-triggerAngle) And (BlinkTimer < - 16 Lor BlinkTimer > - 6) And (Not IsNVGBlinking) Then
+		If n\obj2 <> 0 Then
+			Return EntityInView(n\obj2, Camera) And EntityVisible(Camera, n\obj2)
+		Else
+			Local y# = EntityY(n\Collider)+0.96
+			If isSitting Then y = y - 0.71
+			Local pvt% = CreatePivot()
+			PositionEntity pvt, EntityX(n\Collider), y, EntityZ(n\Collider)
+			Local ret% = EntityInView(pvt, Camera) And EntityVisible(Camera, pvt)
+			FreeEntity(pvt)
+			Return ret%
+		EndIf
+	Else
+		Return False
+	EndIf
 	Return (Not NoTarget) And (angle < 55 Lor angle > 360-55) And EntityVisible(Camera, n\obj2) And EntityInView(n\obj2, Camera) And (BlinkTimer < - 16 Lor BlinkTimer > - 6) And (Not IsNVGBlinking)
 End Function
 

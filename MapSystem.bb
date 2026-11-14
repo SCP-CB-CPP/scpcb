@@ -2751,10 +2751,12 @@ Function FillRoom(r.Rooms)
 			it = CreateItem("snav300", r\x - 312.0 * RoomScale, r\y + 264.0 * RoomScale, r\z + 176.0 * RoomScale)
 			it\state = 20 : EntityParent(it\collider, r\obj)
 
-			it = CreateItem("scp330", r\x - 3.6, r\y + 0.5, r\z + 0.6)
-			RotateEntity(it\collider, 0, 100, 0)
-			EntityParent(it\collider, r\obj)
-			r\Objects[3] = Handle(it)
+			If IsHalloween Then
+				it = CreateItem("scp330", r\x - 3.6, r\y + 0.5, r\z + 0.6)
+				RotateEntity(it\collider, 0, 100, 0)
+				EntityParent(it\collider, r\obj)
+				r\Objects[3] = Handle(it)
+			EndIf
 			;[End Block]
 		Case "room3tunnel"
 			;[Block]
@@ -5517,9 +5519,11 @@ Function FillRoom(r.Rooms)
 			EntityParent r\Levers[0],r\obj
 			;[End Block]
 		Case "room4info"
-			it = CreateItem("scp330", r\x + 1.3, r\y + 0.56, r\z - 2.75)
-			RotateEntity(it\collider, 0, -100, 0)
-			EntityParent(it\collider, r\obj)
+			If IsHalloween Then
+				it = CreateItem("scp330", r\x + 1.3, r\y + 0.56, r\z - 2.75)
+				RotateEntity(it\collider, 0, -100, 0)
+				EntityParent(it\collider, r\obj)
+			EndIf
 		Case "halloweenfields"
 			Local hmap% = LoadTexture_Strict("GFX\map\halloween\fields.png", hmapFlags)
 			Local mask% = LoadTexture_Strict("GFX\map\halloween\fields_mask.png", maskFlags)

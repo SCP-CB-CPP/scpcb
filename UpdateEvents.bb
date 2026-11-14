@@ -325,7 +325,7 @@ Function UpdateEvents()
 						If i = 0 Then PlaySound_Strict(LoadTempSound("SFX\Room\Intro\PA\scripted\scripted6.ogg"))
 						
 						If (i>0 And i<26) Then
-							If Not CommotionState(i) Then ;Prevents the same commotion file from playing more then once.
+							If Not CommotionState(i) Then ;Prevents the same commotion file from playing more than once.
 								CommotionState(i) = PlaySound_Strict(LoadTempSound("SFX\Room\Intro\Commotion\Commotion"+i+".ogg"))
 							EndIf
 						EndIf
@@ -2651,7 +2651,6 @@ Function UpdateEvents()
 									it2.Items = CreateItem("25ct",1,1,1)
 									it2\Picked = True
 									it2\Dropped = -1
-									it2\itemtemplate\found=True
 									it\Inventory\Items[i] = it2
 									HideEntity(it2\collider)
 								Next
@@ -4820,13 +4819,7 @@ Function UpdateEvents()
 							EndIf
 							
 							If e\room\RoomDoors[4]\open = False
-								If UpdateLever(e\room\Levers[0])
-									e\room\RoomDoors[4]\open = True
-									If e\Sound2 <> 0 Then FreeSound_Strict e\Sound2 : e\Sound2=0
-									e\Sound2 = LoadSound_Strict("SFX\Door\Door2Open1_dist.ogg")
-									e\SoundCHN2 = PlaySound2(e\Sound2,Camera,e\room\RoomDoors[4]\obj,400)
-								EndIf
-								If UpdateLever(e\room\Levers[1])
+								If UpdateLever(e\room\Levers[0]) Or UpdateLever(e\room\Levers[1])
 									e\room\RoomDoors[4]\open = True
 									If e\Sound2 <> 0 Then FreeSound_Strict e\Sound2 : e\Sound2=0
 									e\Sound2 = LoadSound_Strict("SFX\Door\Door2Open1_dist.ogg")
@@ -6728,53 +6721,51 @@ Function UpdateEvents()
 				
 			Case "testroom"
 				;[Block]
-				If e <> Null Then
-					If PlayerRoom = e\room Then
-						If e\EventState = 0 Then
-							If e\room\Objects[7]<>0 Then FreeEntity(e\room\Objects[7]) : e\room\Objects[7]=0
+				If PlayerRoom = e\room Then
+					If e\EventState = 0 Then
+						If e\room\Objects[7]<>0 Then FreeEntity(e\room\Objects[7]) : e\room\Objects[7]=0
 
-							e\room\Objects[7]=LoadAnimMesh_Strict("GFX\npcs\scp-1048.b3d")
-							ScaleEntity e\room\Objects[7], 0.05,0.05,0.05
-							
-							TFormPoint EntityX(Collider),EntityY(Collider),EntityZ(Collider),0,e\room\obj
-							If TFormedZ()=0 Then temp = -1 Else temp = -Sgn(TFormedZ())
-							TFormPoint -720,0,816*temp,e\room\obj,0
-							PositionEntity(e\room\Objects[7],TFormedX(),0,TFormedZ())
-							
-							RotateEntity e\room\Objects[7],-90,e\room\angle-90,0
-							SetAnimTime e\room\Objects[7],297
-							e\EventState = 1
+						e\room\Objects[7]=LoadAnimMesh_Strict("GFX\npcs\scp-1048.b3d")
+						ScaleEntity e\room\Objects[7], 0.05,0.05,0.05
+						
+						TFormPoint EntityX(Collider),EntityY(Collider),EntityZ(Collider),0,e\room\obj
+						If TFormedZ()=0 Then temp = -1 Else temp = -Sgn(TFormedZ())
+						TFormPoint -720,0,816*temp,e\room\obj,0
+						PositionEntity(e\room\Objects[7],TFormedX(),0,TFormedZ())
+						
+						RotateEntity e\room\Objects[7],-90,e\room\angle-90,0
+						SetAnimTime e\room\Objects[7],297
+						e\EventState = 1
+					EndIf
+				EndIf
+				
+				If e\EventState <> 0 Then
+					If EntityDistance(Collider, e\room\Objects[6]) < 2.5 And e\EventState > 0 Then
+						PlaySound_Strict(LoadTempSound("SFX\SCP\079\TestroomWarning.ogg"))
+						For i = 0 To 5
+							em.Emitters = CreateEmitter(EntityX(e\room\Objects[i], True), EntityY(e\room\Objects[i], True), EntityZ(e\room\Objects[i], True), 0)
+							TurnEntity(em\Obj, 90, 0, 0, True)
+							;entityParent(em\obj, e\room\obj)
+							em\RandAngle = 5
+							em\Speed = 0.042
+							em\SizeChange = 0.0025									
+						Next
+						;Delete e
+						e\EventState = e\EventState * -1
+					EndIf
+					If e\room\Objects[7]<>0 Then
+						Animate2(e\room\Objects[7],AnimTime(e\room\Objects[7]),284,295,0.3)
+						MoveEntity e\room\Objects[7],0,-0.008*FPSfactor,0
+						TFormPoint EntityX(e\room\Objects[7]),EntityY(e\room\Objects[7]),EntityZ(e\room\Objects[7]),0,e\room\obj
+						
+						If Abs(TFormedX())>725 Lor e\room\RoomDoors[0]\open Then
+							FreeEntity(e\room\Objects[7])
+							e\room\Objects[7]=0
+							e\EventState = e\EventState *2
 						EndIf
 					EndIf
-					
-					If e\EventState > 0 Then
-						If EntityDistance(Collider, e\room\Objects[6]) < 2.5 And e\EventState > 0 Then
-							PlaySound_Strict(LoadTempSound("SFX\SCP\079\TestroomWarning.ogg"))
-							For i = 0 To 5
-								em.Emitters = CreateEmitter(EntityX(e\room\Objects[i], True), EntityY(e\room\Objects[i], True), EntityZ(e\room\Objects[i], True), 0)
-								TurnEntity(em\Obj, 90, 0, 0, True)
-								;entityParent(em\obj, e\room\obj)
-								em\RandAngle = 5
-								em\Speed = 0.042
-								em\SizeChange = 0.0025									
-							Next
-							;Delete e
-							e\EventState = e\EventState * -1
-						EndIf
-						If e\room\Objects[7]<>0 Then
-							Animate2(e\room\Objects[7],AnimTime(e\room\Objects[7]),284,295,0.3)
-							MoveEntity e\room\Objects[7],0,-0.008*FPSfactor,0
-							TFormPoint EntityX(e\room\Objects[7]),EntityY(e\room\Objects[7]),EntityZ(e\room\Objects[7]),0,e\room\obj
-							
-							If Abs(TFormedX())>725 Lor e\room\RoomDoors[0]\open Then
-								FreeEntity(e\room\Objects[7])
-								e\room\Objects[7]=0
-								e\EventState = e\EventState *2
-							EndIf
-						EndIf
-						If e\EventState = -2 Then RemoveEvent(e)
-					EndIf
-				End If
+					If e\EventState = -2 Then RemoveEvent(e)
+				EndIf
 				;[End Block]
 			Case "tunnel2smoke"
 				;[Block]
@@ -6920,7 +6911,7 @@ Function UpdateEvents()
 				
 			Case "testroom173"
 				;[Block]
-				If e\EventState2 = 0 And e\room\Objects[3] <> 0 Then
+				If IsHalloween And e\EventState2 = 0 And e\room\Objects[3] <> 0 Then
 					For r2.Rooms = Each Rooms
 						If r2\RoomTemplate\Name = "room4info" Then
 							it.Items = Object.Items(e\room\Objects[3])
@@ -8653,7 +8644,7 @@ Function UpdateEvents()
 		End Select
 	Next
 	
-	;This here is necessary because the 294 drinks with explosion effect didn't worked anymore - ENDSHN
+	;This here is necessary because the 294 drinks with explosion effect didn't work anymore - ENDSHN
 	If ExplosionTimer > 0 Then
 		ExplosionTimer = ExplosionTimer+FPSfactor
 		

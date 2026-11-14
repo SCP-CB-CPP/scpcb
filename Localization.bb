@@ -371,10 +371,13 @@ Type LocalizationTable
     Field MessageItem_Bonefragment$
     Field MessageItem_EyecandyUse$
     Field MessageItem_EyecandyUseShock$
+    Field MessageItem_EyecandyUseStale$
     Field MessageItem_LollipopUse$
     Field MessageItem_LollipopUseNumb$
+    Field MessageItem_LollipopUseStale$
     Field MessageItem_ChocolateUse$
     Field MessageItem_ChocolateUseNumb$
+    Field MessageItem_ChocolateUseStale$
     Field MessageItem_CandyNouse$
     Field MessageItem_Scp330Nouse$
     Field MessageHelp_Paper$
@@ -932,10 +935,13 @@ Function LoadLocalization(loc.LocalizationTable, file$)
                             Case "bonefragment" If loc\MessageItem_Bonefragment = "" Then loc\MessageItem_Bonefragment = value
                             Case "eyecandy.use" If loc\MessageItem_EyecandyUse = "" Then loc\MessageItem_EyecandyUse = value
                             Case "eyecandy.use.shock" If loc\MessageItem_EyecandyUseShock = "" Then loc\MessageItem_EyecandyUseShock = value
+                            Case "eyecandy.use.stale" If loc\MessageItem_EyecandyUseStale = "" Then loc\MessageItem_EyecandyUseStale = value
                             Case "lollipop.use" If loc\MessageItem_LollipopUse = "" Then loc\MessageItem_LollipopUse = value
                             Case "lollipop.use.numb" If loc\MessageItem_LollipopUseNumb = "" Then loc\MessageItem_LollipopUseNumb = value
+                            Case "lollipop.use.stale" If loc\MessageItem_LollipopUseStale = "" Then loc\MessageItem_LollipopUseStale = value
                             Case "chocolate.use" If loc\MessageItem_ChocolateUse = "" Then loc\MessageItem_ChocolateUse = value
                             Case "chocolate.use.numb" If loc\MessageItem_ChocolateUseNumb = "" Then loc\MessageItem_ChocolateUseNumb = value
+                            Case "chocolate.use.stale" If loc\MessageItem_ChocolateUseStale = "" Then loc\MessageItem_ChocolateUseStale = value
                             Case "candy.nouse" If loc\MessageItem_CandyNouse = "" Then loc\MessageItem_CandyNouse = value
                             Case "scp330.nouse" If loc\MessageItem_Scp330Nouse = "" Then loc\MessageItem_Scp330Nouse = value
                         End Select
