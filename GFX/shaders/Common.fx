@@ -12,9 +12,4 @@ inline float2 GetScreenTexCoords(float4 ScreenCoords)
 
 float4 ViewportSize		: VIEWPORT_SIZE;
 static const float2 ScreenSize = ViewportSize.zw;
-
-#ifdef D3D11
-static const float2 halfPixel = float2(0.0, 0.0);
-#else
 static const float2 halfPixel = 0.5 / ScreenSize;
-#endif

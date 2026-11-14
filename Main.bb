@@ -2,6 +2,8 @@ Const VersionNumber$ = "1.3.12.7.1"
 ;Only change this if the version given isn't working with the current build version - ENDSHN
 Const CompatibleNumber$ = "1.3.12.7.1"
 
+SetDarkMode(True)
+
 InitErrorMsgs(11, True)
 SetErrorMsg(0, "An error occured in SCP - Containment Breach v" + VersionNumber)
 SetErrorMsg(1, "Please send us the generated minidump along with a screenshot of this window!")
@@ -17,7 +19,7 @@ End Function
 
 Function RuntimeErrorExt%(Message$)
 	SetErrorMsg(8, "Caught exception: " + Message)
-	MemoryAccessViolation()
+	RuntimeError(Message)
 End Function
 
 Include "StrictLoads.bb"
@@ -250,6 +252,7 @@ Else
 	End If
 EndIf
 
+Global GrayScaleFX% = LoadEffect_Strict("GFX\shaders\Grayscale.fx")
 Global MenuScale# = CalculateMenuScale()
 Global HUDScaleScalar# = Max(1.0, MenuScale)
 Global MinHUDScaleFactor#
@@ -276,13 +279,13 @@ Function LoadImageHUDScaled(file$, fixedSizeX% = 0, fixedSizeY% = 0)
 	Local img%
 	Local h.HUDScaledImage = New HUDScaledImage
 	If fixedSizeX = 0 Then
-		img = LoadImage_Strict(file, HUDScale)
+		img = LoadImage_Strict(file, HUDScale, 8)
 		h\BaseWidth = ImageWidthUnscaled(img) * LoadImageScaleResult
 		h\BaseHeight = ImageHeightUnscaled(img) * LoadImageScaleResult
 	Else
 		If fixedSizeY = 0 Then fixedSizeY = fixedSizeX
-		img = LoadImage_Strict(file)
-		ResizeImage(img, fixedSizeX * HUDScale, fixedSizeY * HUDScale)
+		img = LoadImage_Strict(file, 0, 8)
+		ResizeImageFast(img, fixedSizeX * HUDScale, fixedSizeY * HUDScale)
 		h\BaseWidth = fixedSizeX
 		h\BaseHeight = fixedSizeY
 	EndIf
@@ -306,7 +309,7 @@ Function UpdateHUDScaleFactor(newFactor#)
 	HUDScaleFactor = newFactor
 	HUDScale = HUDScaleScalar * HUDScaleFactor
 	For h.HUDScaledImage = Each HUDScaledImage
-		ResizeImage(h\Img, h\BaseWidth * HUDScale, h\BaseHeight * HUDScale)
+		ResizeImageFast(h\Img, h\BaseWidth * HUDScale, h\BaseHeight * HUDScale)
 	Next
 
 	; Hardcoding because I'm LAME!
@@ -7783,7 +7786,6 @@ Function LoadEntities()
 	CameraRange(Camera, 0.05, CameraFogFar)
 	CameraFogMode (Camera, 1)
 	CameraFogRange (Camera, CameraFogNear, CameraFogFar)
-	CameraReverseZ(Camera, True)
 	AmbientLight Brightness, Brightness, Brightness
 	
 	ScreenTexs[0] = CreateTexture(512, 512, 1+256+1024)

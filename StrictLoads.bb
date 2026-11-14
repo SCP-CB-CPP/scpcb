@@ -49,7 +49,7 @@ Function LoadImage_Strict%(file$, scale#=0, flags%=0)
 			EndIf
 			Local modPath$ = m\Path + fileNoExt + usedExtension
 			If FileType(modPath) = 1 Then
-				tmp = LoadImage(modPath, flags)
+				tmp = LoadImageFlag(modPath, flags)
 				If tmp <> 0 Then
 					If scale <> 0 Then ScaleImageFromFile(tmp, m\Path + fileNoExt, scale)
 					Return tmp
@@ -61,7 +61,7 @@ Function LoadImage_Strict%(file$, scale#=0, flags%=0)
 	Next
 
 	If FileType(file$) = 1 Then
-		tmp = LoadImage(file$, flags)
+		tmp = LoadImageFlag(file$, flags)
 		If scale <> 0 Then ScaleImageFromFile(tmp, fileNoExt, scale)
 		Return tmp
 	Else
@@ -69,7 +69,7 @@ Function LoadImage_Strict%(file$, scale#=0, flags%=0)
 			usedExtension$ = ImageExtensions[i]
 			Local path$ = fileNoExt + usedExtension
 			If FileType(path) = 1 Then
-				tmp = LoadImage(path, flags)
+				tmp = LoadImageFlag(path, flags)
 				If scale <> 0 Then ScaleImageFromFile(tmp, fileNoExt, scale)
 				Return tmp
 			EndIf
