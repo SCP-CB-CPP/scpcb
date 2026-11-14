@@ -9756,7 +9756,6 @@ Function Use914(item.Items, setting$, x#, y#, z#)
 					it2\state = 100
 				Case "very fine"
 					it2 = CreateItem("snavulti", x, y, z)
-					it2\state = 101
 			End Select
 			
 			RemoveItem(item)
@@ -9769,10 +9768,8 @@ Function Use914(item.Items, setting$, x#, y#, z#)
 					it2\state = 100
 				Case "fine"
 					it2 = CreateItem("fineradio", x, y, z)
-					it2\state = 101
 				Case "very fine"
 					it2 = CreateItem("veryfineradio", x, y, z)
-					it2\state = 101
 			End Select
 			
 			RemoveItem(item)

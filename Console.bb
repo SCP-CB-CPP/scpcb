@@ -456,10 +456,6 @@ Function ExecuteConsoleCommand(cmd$, quiet% = False)
             Else
                 CreateConsoleMsg(itt\displayname + " spawned.")
                 it.Items = CreateItem(itt\name, EntityX(Collider), EntityY(Camera,True), EntityZ(Collider))
-
-                If itt\name = "snavulti" Lor itt\name = "fineradio" Lor itt\name = "veryfineradio" Then
-                    it\state = 101
-                EndIf
             End If
             ;[End Block]
         Case "giveitem"
@@ -984,7 +980,6 @@ Function ExecuteConsoleCommand(cmd$, quiet% = False)
         Case "spawnradio"
             ;[Block]
             it.Items = CreateItem("fineradio", EntityX(Collider), EntityY(Camera,True), EntityZ(Collider))
-            it\state = 101
             ;[End Block]
         Case "spawnnvg"
             ;[Block]
@@ -998,7 +993,6 @@ Function ExecuteConsoleCommand(cmd$, quiet% = False)
         Case "spawnnav"
             ;[Block]
             it.Items = CreateItem("snavulti", EntityX(Collider), EntityY(Camera,True), EntityZ(Collider))
-            it\state = 101
             ;[End Block]
         Case "teleport173"
             ;[Block]

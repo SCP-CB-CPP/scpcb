@@ -322,6 +322,8 @@ Function CreateItem.Items(name$, x#, y#, z#)
 	ElseIf name="scp330" then
 		i\state = 1 Shl Rand(0, 2)
 		SetAnimTime i\model, i\state + 1
+	ElseIf name = "snavulti" Lor name = "fineradio" Lor name = "veryfineradio" Then
+		i\state = 101
 	EndIf
 	
 	i\ID=LastItemID+1
