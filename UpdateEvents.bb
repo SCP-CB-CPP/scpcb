@@ -8581,7 +8581,9 @@ Function UpdateEvents()
 			Case "halloweenpd"
 				;[Block]
 				If PlayerRoom=e\room Then
-					If e\EventState = 0 Then
+					; The <= and the set to 0 here are intended to fix already broken saves for v1.3.12.7.1.
+					If e\EventState <= 0 Then
+						e\EventState = 0
 						While e\room\Objects[e\EventState] <> 0
 							e\EventState = e\EventState + 1
 						Wend
