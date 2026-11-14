@@ -6802,6 +6802,9 @@ Function DrawHUD()
 	EndIf
 
 	If DebugHUD Then
+		x% = HUDStartX + 80
+		y% = HUDEndY - 95
+
 		Color 255, 255, 255
 		SetFont ConsoleFont
 		
