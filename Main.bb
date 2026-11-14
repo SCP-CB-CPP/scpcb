@@ -10912,6 +10912,14 @@ Function Unlerp#(a#, b#, f#)
 	Return (f - a) / (b - a)
 End Function
 
+Function PositionInView%(x#, y#, z#)
+	Local pvt% = CreatePivot()
+	PositionEntity(pvt, x, y, z)
+	Local ret% = EntityInView(pvt, Camera)
+	FreeEntity(pvt)
+	Return ret
+End Function
+
 ;--------------------------------------- decals -------------------------------------------------------
 
 Type Decals

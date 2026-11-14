@@ -1287,7 +1287,7 @@ Function UpdateNPCs()
 								If angle<90 Or angle>270 Then
 									CameraProject Camera,EntityX(n\Collider), EntityY(n\Collider)+0.25, EntityZ(n\Collider)
 									
-									If PointInView(EntityX(n\Collider), EntityY(n\Collider)+0.25, EntityZ(n\Collider), Camera)
+									If PositionInView(EntityX(n\Collider), EntityY(n\Collider)+0.25, EntityZ(n\Collider))
 										If EntityVisible(Collider, n\Collider) Then
 											If (BlinkTimer < - 16 Or BlinkTimer > - 6)
 												PlaySound_Strict LoadTempSound("SFX\SCP\096\Triggered.ogg")
@@ -1624,7 +1624,7 @@ Function UpdateNPCs()
 							angle = WrapAngle(DeltaYaw(n\Collider, Camera));-EntityYaw(n\Collider))
 							If (Not NoTarget)
 								If angle<55 Or angle>360-55 Then
-									If PointInView(EntityX(n\Collider), EntityY(Collider)+5.8*0.2-0.25, EntityZ(n\Collider), Camera)
+									If PositionInView(EntityX(n\Collider), EntityY(Collider)+5.8*0.2-0.25, EntityZ(n\Collider))
 										If EntityVisible(Collider, n\Collider) Then
 											If (BlinkTimer < - 16 Or BlinkTimer > - 6)
 												PlaySound_Strict LoadTempSound("SFX\SCP\096\Triggered.ogg")
