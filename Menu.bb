@@ -961,7 +961,7 @@ Function UpdateMainMenu()
 						DrawOptionsTooltip(tx,ty,tw,th,"achvviewer")
 					EndIf
 
-					y = y + 40*MenuScale
+					y = y + 50*MenuScale
 					
 					Color 255,255,255
 					Text(x + 20 * MenuScale, y, "Achievement popups:")
@@ -970,7 +970,7 @@ Function UpdateMainMenu()
 						DrawOptionsTooltip(tx,ty,tw,th,"achpopup")
 					EndIf
 
-					y = y + 40*MenuScale
+					y = y + 50*MenuScale
 
 					Color 255,255,255
 					Text(x + 20 * MenuScale, y, "Use launcher:")
@@ -979,7 +979,7 @@ Function UpdateMainMenu()
 						DrawOptionsTooltip(tx,ty,tw,th,"launcher")
 					EndIf
 					
-					y = y + 40*MenuScale
+					y = y + 50*MenuScale
 					
 					Color 255,255,255
 					Text(x + 20 * MenuScale, y, "Framelimit:")
