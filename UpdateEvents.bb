@@ -4563,14 +4563,16 @@ Function UpdateEvents()
 								
 								TFormPoint EntityX(it\collider),EntityY(it\collider),EntityZ(it\collider),0,e\room\obj
 								x = TFormedX() : y = TFormedY() : z = TFormedZ()
-								If TFormedX()>264 Then
-									TFormPoint x-1024,y,z,e\room\obj,0
-									PositionEntity it\collider, TFormedX(), TFormedY(), TFormedZ()
-									ResetEntity it\collider
-								ElseIf TFormedX()<-264
-									TFormPoint x+1024,y,z,e\room\obj,0
-									PositionEntity it\collider, TFormedX(), TFormedY(), TFormedZ()
-									ResetEntity it\collider
+								If z>=-290 And z<=560 Then
+									If x>=264 And x<=760 Then
+										TFormPoint x-1024,y,z,e\room\obj,0
+										PositionEntity it\collider, TFormedX(), TFormedY(), TFormedZ()
+										ResetEntity it\collider
+									ElseIf x<=-264 And x>=-760
+										TFormPoint x+1024,y,z,e\room\obj,0
+										PositionEntity it\collider, TFormedX(), TFormedY(), TFormedZ()
+										ResetEntity it\collider
+									EndIf
 								EndIf
 								
 							EndIf
