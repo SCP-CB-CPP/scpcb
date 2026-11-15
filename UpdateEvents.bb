@@ -4436,7 +4436,7 @@ Function UpdateEvents()
 							If e\Sound2=0 Then LoadEventSound(e,"SFX\General\GeneratorOn.ogg",1)
 							e\EventState3 = Min(1.0, e\EventState3+FPSfactor/450)
 						Else
-							e\EventState3 = Min(0.0, e\EventState3-FPSfactor/450)
+							e\EventState3 = Max(0.0, e\EventState3-FPSfactor/450)
 						EndIf
 					Else
 						e\EventState2 = Max(0, e\EventState2-FPSfactor/350)
