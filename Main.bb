@@ -4521,17 +4521,15 @@ Function DrawGUI()
 					
 					isEmpty=True
 					If OtherOpen\itemtemplate\name = "wallet" Then
-						If (Not isEmpty) Then
-							For z% = 0 To OtherSize - 1
-								If OtherOpen\Inventory\Items[z]<>Null
-									Local name$=OtherOpen\Inventory\Items[z]\itemtemplate\name
-									If name$<>"25ct" And name$<>"coin" And name$<>"key" And name$<>"scp860" Then
-										isEmpty=False
-										Exit
-									EndIf
+						For z% = 0 To OtherSize - 1
+							If OtherOpen\Inventory\Items[z]<>Null
+								Local name$=OtherOpen\Inventory\Items[z]\itemtemplate\name
+								If name$<>"25ct" And name$<>"coin" And name$<>"key" And name$<>"scp860" Then
+									isEmpty=False
+									Exit
 								EndIf
-							Next
-						EndIf
+							EndIf
+						Next
 					Else
 						For z% = 0 To OtherSize - 1
 							If OtherOpen\Inventory\Items[z]<>Null
