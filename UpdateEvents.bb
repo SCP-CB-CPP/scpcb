@@ -4684,9 +4684,9 @@ Function UpdateEvents()
 											For j = 0 To it2\Inventory\Size-1
 												it2\Inventory\Items[j] = it\Inventory\Items[j]
 											Next
-											SetAnimTime it2\model, AnimTime(it\model)
-											it2\invimg = it\invimg
 										EndIf
+										If AnimTime(it\model) <> -1 Then SetAnimTime it2\model, AnimTime(it\model)
+										it2\invimg = it\invimg
 										RotateEntity(it2\collider, EntityPitch(it\collider),EntityYaw(it\collider),0)
 									Next
 								ElseIf it\Dropped=-1
