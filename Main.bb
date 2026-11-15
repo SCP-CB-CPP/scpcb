@@ -11265,7 +11265,7 @@ Function Graphics3DExt%(width%,height%,depth%=32,mode%=2)
 		SMALLEST_POWER_TWO = SMALLEST_POWER_TWO * 2.0
 	Wend
 	InitFastResize()
-	TextureFilter("", 1 Or 8 Or $80000)
+	TextureFilter("", 1 Or 8)
 End Function
 
 Function ApplyBorderlessResizing()
