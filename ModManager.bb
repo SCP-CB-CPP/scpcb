@@ -9,7 +9,7 @@ Type Mods
     Field Name$
     Field Description$
     Field Author$
-    Field IconPath$, Icon%, DisabledIcon%
+    Field IconPath$, Icon%
     Field RequiresReload%
     Field IsNew%, IsActive%
     Field SteamWorkshopId$
