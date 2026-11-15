@@ -5549,8 +5549,6 @@ Function FillRoom(r.Rooms)
 			Else
 				tree = LoadMesh_Strict("GFX\map\forest\detail\treetest4.b3d")
 				leaves = LoadMesh_Strict("GFX\map\forest\detail\treetest5.b3d")
-				EntityEffect tree, InstanceEffect
-				EntityEffect leaves, InstanceEffect
 			EndIf
 			PlaceForestProps(terr, hmap, MeshWidth(terr), 0.05, tree, leaves, pumpkin, 100, 800, 186, 5, 0.8, 1.2)
 			If fr = Null Then
