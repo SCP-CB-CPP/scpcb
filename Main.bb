@@ -4517,40 +4517,7 @@ Function DrawGUI()
 				EndIf
 			Else
 				If MouseSlot = 66 Then
-					If SelectedItem\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX(SelectedItem\itemtemplate\sound))
-					
-					ShowEntity(SelectedItem\collider)
-					PositionEntity(SelectedItem\collider, EntityX(Camera), EntityY(Camera), EntityZ(Camera))
-					RotateEntity(SelectedItem\collider, EntityPitch(Camera), EntityYaw(Camera), 0)
-					MoveEntity(SelectedItem\collider, 0, -0.1, 0.1)
-					RotateEntity(SelectedItem\collider, 0, Rand(360), 0)
-					ResetEntity (SelectedItem\collider)
-					;move the item so that it doesn't overlap with other items
-					;For it.Items = Each Items
-					;	If it <> SelectedItem And it\Picked = False Then
-					;		x = Abs(EntityX(SelectedItem\collider, True)-EntityX(it\collider, True))
-					;		If x < 0.2 Then 
-					;			z = Abs(EntityZ(SelectedItem\collider, True)-EntityZ(it\collider, True))
-					;			If z < 0.2 Then
-					;				While (x+z)<0.25
-					;					MoveEntity(SelectedItem\collider, 0, 0, 0.025)
-					;					x = Abs(EntityX(SelectedItem\collider, True)-EntityX(it\collider, True))
-					;					z = Abs(EntityZ(SelectedItem\collider, True)-EntityZ(it\collider, True))
-					;				Wend
-					;			EndIf
-					;		EndIf
-					;	EndIf
-					;Next
-					
-					SelectedItem\DropSpeed = 0.0
-					
-					SelectedItem\Picked = False
-					For z% = 0 To OtherSize - 1
-						If OtherOpen\Inventory\Items[z] = SelectedItem Then
-							OtherOpen\Inventory\Items[z] = Null
-							Exit
-						EndIf
-					Next
+					DropItem(SelectedItem)
 					
 					isEmpty=True
 					If OtherOpen\itemtemplate\name = "wallet" Then
@@ -4829,7 +4796,7 @@ Function DrawGUI()
 										MsgTimer = 70 * 5
 									EndIf
 								ElseIf Inventory(MouseSlot)\itemtemplate\name = "wallet" Then
-									;Add an item to clipboard
+									;Add an item to wallet
 									added.Items = Null
 									b$ = SelectedItem\itemtemplate\group
 									b2$ = SelectedItem\itemtemplate\name

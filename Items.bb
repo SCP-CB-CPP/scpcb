@@ -1076,12 +1076,21 @@ Function DropItem(item.Items,playdropsound%=True)
 	ResetEntity (item\collider)
 	
 	item\Picked = False
-	For z% = 0 To MaxItemAmount - 1
-		If Inventory(z) = item Then
-			Inventory(z) = Null
-			Exit
-		EndIf
-	Next
+	If OtherOpen <> Null Then
+		For z% = 0 To OtherOpen\Inventory\Size - 1
+			If OtherOpen\Inventory\Items[z] = item Then
+				OtherOpen\Inventory\Items[z] = Null
+				Exit
+			EndIf
+		Next
+	Else
+		For z% = 0 To MaxItemAmount - 1
+			If Inventory(z) = item Then
+				Inventory(z) = Null
+				Exit
+			EndIf
+		Next
+	EndIf
 	Select item\itemtemplate\name
 		Case "gasmask", "supergasmask", "gasmask3"
 			WearingGasMask = False
