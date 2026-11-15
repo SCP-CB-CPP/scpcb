@@ -6910,14 +6910,12 @@ Function DrawMap()
 
 			If action = 0 Then
 				Local lineWidth% = StringWidth(line)
-				If strNo = 0 Then lineWidth = lineWidth + ImageWidth(MenuArrowIMG) + 5*MenuScale
+				If strNo = 0 Then lineWidth = lineWidth + ImageWidth(MenuArrowIMG[hoveredRoom\angle / 90]) + 5*MenuScale
 				totalWidth = Max(totalWidth, lineWidth)
 			Else
 				Text(mx+10*MenuScale, my+10*MenuScale + strNo*height, line)
 				If strNo = 0 Then
-					RotateImage(MenuArrowIMG, hoveredRoom\angle)
-					DrawImage(MenuArrowIMG, mx+10*MenuScale+StringWidth(line)+2.5*MenuScale, my+10*MenuScale + strNo*height - height * 1 / 3)
-					RotateImage(MenuArrowIMG, 90)
+					DrawImage(MenuArrowIMG[hoveredRoom\angle / 90], mx+10*MenuScale+StringWidth(line)+2.5*MenuScale, my+10*MenuScale + strNo*height - height * 1 / 3)
 				EndIf
 			EndIf
 		Next
