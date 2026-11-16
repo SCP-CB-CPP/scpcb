@@ -25,8 +25,14 @@ Function ExecuteConsoleCommand(cmd$, quiet% = False)
     Else
         StrTemp$ = Lower(cmd)
     End If
+
+    If ExecuteConsoleCommand\Subscribers > 0 Then
+        PrepareFunction(1)
+        SetArgString(0, StrTemp)
+        If CallHook(ExecuteConsoleCommand) Then Return
+    End If
     
-    Select Lower(StrTemp)
+    Select StrTemp
         Case "help"
             ;[Block]
             If Instr(cmd, " ")<>0 Then
@@ -36,7 +42,7 @@ Function ExecuteConsoleCommand(cmd$, quiet% = False)
             EndIf
             ConsoleR = 0 : ConsoleG = 255 : ConsoleB = 255
             
-            Select Lower(StrTemp)
+            Select StrTemp
                 Case "1",""
                     CreateConsoleMsg("LIST OF COMMANDS - PAGE 1/3")
                     CreateConsoleMsg("******************************")
@@ -516,7 +522,7 @@ Function ExecuteConsoleCommand(cmd$, quiet% = False)
             StrTemp$ = Piece$(args$, 1)
             StrTemp2$ = Piece$(args$, 2)
 
-            Console_ChangeNPCSpeed(StrTemp$, Float(StrTemp2))
+            Console_ChangeNPCSpeed(Console_NPCNameToType(StrTemp), Float(StrTemp2$))
             ;[End Block]
         Case "173speed"
             ;[Block]
@@ -533,17 +539,17 @@ Function ExecuteConsoleCommand(cmd$, quiet% = False)
         Case "npcstate"
             ;[Block]
             StrTemp$ = Lower(Right(cmd, Len(cmd) - Instr(cmd, " ")))
-            Console_PrintNPCState(StrTemp)
+            Console_PrintNPCState(Console_NPCNameToType(StrTemp))
             ;[End Block]
         Case "enable"
             ;[Block]
             StrTemp$ = Lower(Right(cmd, Len(cmd) - Instr(cmd, " ")))
-            Console_EnableNPC(StrTemp)
+            Console_EnableNPC(Console_NPCNameToType(StrTemp))
             ;[End Block]
         Case "disable"
             ;[Block]
             StrTemp$ = Lower(Right(cmd, Len(cmd) - Instr(cmd, " ")))
-            Console_DisableNPC(StrTemp)
+            Console_DisableNPC(Console_NPCNameToType(StrTemp))
             ;[End Block]
         Case "173state"
             ;[Block]
@@ -790,9 +796,9 @@ Function ExecuteConsoleCommand(cmd$, quiet% = False)
             
             ;Hacky fix for when the user doesn't input a second parameter.
             If (StrTemp <> StrTemp2) Then
-                Console_SpawnNPC(StrTemp, StrTemp2)
+                Console_SpawnNPC(Console_NPCNameToType(StrTemp), StrTemp2)
             Else
-                Console_SpawnNPC(StrTemp)
+                Console_SpawnNPC(Console_NPCNameToType(StrTemp))
             EndIf
             ;[End Block]
         ;new Console Commands in SCP:CB 1.3 - ENDSHN
@@ -1179,13 +1185,21 @@ Function ExecuteConsoleCommand(cmd$, quiet% = False)
             CreateConsoleMsg("Unbound all bindings.")
         
             UsedConsole = prevUsedConsole
-        Case "exec"
+        Case "execcfg"
             Local file$ = Right(cmd, Len(cmd) - Instr(cmd, " "))
             If ExecuteCfg(file) Lor ExecuteCfg(DataDir + file) Lor ExecuteCfg(DataDir + "cfg\" + file) Lor ExecuteCfg(file + ".cfg") Lor ExecuteCfg(DataDir +  file + ".cfg") Lor ExecuteCfg(DataDir + "cfg\" + file + ".cfg") Then
                 CreateConsoleMsg("Executed configuration file.")
             Else
                 CreateConsoleMsg("Configuration file not found.",255,150,0)
             EndIf
+        Case "reload"
+            CreateConsoleMsg("Reloading all scripts...")
+            LoadScripts()
+            If Initialize\Subscribers > 0 Then PrepareFunction(0) : CallHook(Initialize)
+            CreateConsoleMsg("Reloaded all scripts.")
+        Case "exec"
+            StrTemp$ = Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " "))
+            ExecuteString(StrTemp$)
         Case "clear", "cls"
             Delete Each ConsoleMsg
         Case "mav"
