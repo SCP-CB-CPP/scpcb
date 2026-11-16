@@ -9,7 +9,6 @@ UpdateEvents.bb.rej
 *.bb_bak*
 Saves/*
 error_log_*
-.vscode
 updates/
 *.SI
 *.dmp
