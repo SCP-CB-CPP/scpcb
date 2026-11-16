@@ -1205,14 +1205,14 @@ Function LoadRMesh(file$,rt.RoomTemplates)
 		EndIf
 	Next
 	If f=0 Then RuntimeError "Error reading file "+Chr(34)+file+Chr(34)
+	Local version% = -1
 	Local isRMesh$ = ReadString(f)
-	If isRMesh$="RoomMesh"
-		;Continue
-	ElseIf isRMesh$="RoomMesh.HasTriggerBox"
-		hasTriggerBox% = True
-	Else
-		RuntimeError Chr(34)+file+Chr(34)+" is Not RMESH ("+isRMesh+")"
-	EndIf
+	Select isRMesh
+		Case "RoomMesh" ;Continue
+		Case "RoomMesh.HasTriggerBox" hasTriggerBox% = True
+		Case "RM" version = ReadByte(f) : hasTriggerBox = True
+		Default RuntimeError Chr(34)+file+Chr(34)+" is Not RMESH ("+isRMesh+")"
+	End Select
 	
 	file=StripFilename(file)
 	
@@ -1350,7 +1350,12 @@ Function LoadRMesh(file$,rt.RoomTemplates)
 		
 		
 	Next
-	
+
+	If version >= 0 Then
+		Local noCollCount% = ReadInt(f)
+		If noCollCount <> 0 Then RuntimeError "No collision meshes are currently not supported!"
+	EndIf
+
 	Local hiddenMesh%
 	hiddenMesh=CreateMesh()
 	
@@ -1462,7 +1467,8 @@ Function LoadRMesh(file$,rt.RoomTemplates)
 
 			Case "item"
 				ReadFloat(f) : ReadFloat(f) : ReadFloat(f)
-				ReadString(f) : ReadString(f)
+				ReadString(f)
+				If version < 0 Then ReadString(f)
 				ReadByte(f) : ReadFloat(f) : ReadFloat(f) : ReadFloat(f)
 				ReadFloat(f) : ReadFloat(f)
 				ReadFloat(f)
@@ -1474,7 +1480,25 @@ Function LoadRMesh(file$,rt.RoomTemplates)
 				ReadString(f)
 				ReadFloat(f)
 				ReadByte(f)
+				If version >= 0 Then
+					ReadByte(f)
+					ReadByte(f)
+				EndIf
 				ReadByte(f)
+				If version >= 0 Then
+					ReadFloat(f)
+					ReadFloat(f)
+					ReadFloat(f)
+					ReadFloat(f)
+					ReadFloat(f)
+					ReadFloat(f)
+					ReadFloat(f)
+					ReadFloat(f)
+					ReadFloat(f)
+					ReadFloat(f)
+					ReadFloat(f)
+					ReadFloat(f)
+				EndIf
 		End Select
 	Next
 	

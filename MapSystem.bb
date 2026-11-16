@@ -161,6 +161,8 @@ Function FreeTextureCache()
 	Next
 End Function
 
+Const RMESH_MAX_VERSION% = 2
+
 Function LoadRMesh(file$,rt.RoomTemplates)
 	Local path$ = StripFilename(file)
 	file = DetermineModdedPath(file)
@@ -204,6 +206,8 @@ Function LoadRMesh(file$,rt.RoomTemplates)
 		Case "RM" version = ReadByte(f) : hasTriggerBox = True
 		Default RuntimeErrorExt Chr(34)+file+Chr(34)+" is Not RMESH ("+isRMesh+")"
 	End Select
+
+	If version > RMESH_MAX_VERSION Then RuntimeErrorExt "RMESH version of " + Chr(34)+file+Chr(34) + " (" + version + ") + is too new for this version of the game ("+RMESH_MAX_VERSION+")"
 	
 	Local count%,count2%
 	
@@ -341,6 +345,10 @@ Function LoadRMesh(file$,rt.RoomTemplates)
 				w\z = temp3
 				
 			Case "light"
+
+				; TODO
+				Local hasSprite% = True
+				If version >= 2 Then hasSprite = ReadByte(f)
 				
 				temp1=ReadFloat(f)*RoomScale
 				temp2=ReadFloat(f)*RoomScale
@@ -361,6 +369,10 @@ Function LoadRMesh(file$,rt.RoomTemplates)
 				
 			Case "spotlight"
 				
+				; TODO
+				hasSprite% = True
+				If version >= 2 Then hasSprite = ReadByte(f)
+
 				temp1=ReadFloat(f)*RoomScale
 				temp2=ReadFloat(f)*RoomScale
 				temp3=ReadFloat(f)*RoomScale
@@ -437,12 +449,30 @@ Function LoadRMesh(file$,rt.RoomTemplates)
 					temp1=ReadFloat(f) : temp2=ReadFloat(f) : temp3=ReadFloat(f)
 					ScaleEntity model,temp1,temp2,temp3
 					
+					Local collType% = HIT_MAP
+					If version >= 2 Then
+						collType = ReadByte(f)
+						EntityFX(model, ReadInt(f))
+						Local texOverride$ = ReadString(f)
+						If texOverride <> "" Then
+							Local t% = GetTextureFromCache(texOverride)
+							If t = 0 Then
+								t = LoadTexture(file+texOverride)
+								If t = 0 Then t = LoadTexture("GFX\map\"+texOverride)
+								If t = 0 Then t = LoadTexture("GFX\map\Props\"+texOverride)
+								If t <> 0 Then AddTextureToCache(t)
+							EndIf
+							If t <> 0 Then EntityTexture model, t
+						EndIf
+					EndIf
+
 					EntityParent model,Opaque
-					EntityType model,HIT_MAP
+					EntityType model,collType
 					EntityPickMode model,2
 				Else
 					DebugLog "file = 0"
 					temp1=ReadFloat(f) : temp2=ReadFloat(f) : temp3=ReadFloat(f)
+					If version >= 2 Then ReadByte(f) : ReadInt(f) : ReadString(f)
 					DebugLog temp1+", "+temp2+", "+temp3
 					
 					;Stop
@@ -2209,13 +2239,14 @@ Function FillRoom(r.Rooms)
 			PositionEntity r\Objects[2],r\x + 184.0 * RoomScale,0,r\z,True
 			ScaleEntity r\Objects[2],45.0*RoomScale,45.0*RoomScale,80.0*RoomScale,True
 			EntityParent r\Objects[2],r\obj
+			EntityPickMode r\Objects[2],2
 			
 			r\Objects[3] =  LoadMesh_Strict("GFX\map\forest\door.b3d")
 			PositionEntity r\Objects[3],r\x + 112.0 * RoomScale,0,r\z+0.05,True
 			EntityType r\Objects[3], HIT_MAP
-			
 			ScaleEntity r\Objects[3],46.0*RoomScale,45.0*RoomScale,46.0*RoomScale,True
 			EntityParent r\Objects[3],r\obj
+			EntityPickMode r\Objects[3],2
 			
 			r\Objects[4] = CopyEntity(r\Objects[3])
 			PositionEntity r\Objects[4],r\x + 256.0 * RoomScale,0,r\z-0.05,True
@@ -2820,10 +2851,12 @@ Function FillRoom(r.Rooms)
 			it = CreateItem("snav300", r\x - 312.0 * RoomScale, r\y + 264.0 * RoomScale, r\z + 176.0 * RoomScale)
 			it\state = 20 : EntityParent(it\collider, r\obj)
 
-			it = CreateItem("scp330", r\x - 3.6, r\y + 0.5, r\z + 0.6)
-			RotateEntity(it\collider, 0, 100, 0)
-			EntityParent(it\collider, r\obj)
-			r\Objects[3] = Handle(it)
+			If IsHalloween Then
+				it = CreateItem("scp330", r\x - 3.6, r\y + 0.5, r\z + 0.6)
+				RotateEntity(it\collider, 0, 100, 0)
+				EntityParent(it\collider, r\obj)
+				r\Objects[3] = Handle(it)
+			EndIf
 			;[End Block]
 		Case "room3tunnel"
 			;[Block]
@@ -4897,6 +4930,7 @@ Function FillRoom(r.Rooms)
 			RotateEntity r\Objects[8],0,90,0,True
 			ScaleEntity r\Objects[8],45.0*RoomScale,45.0*RoomScale,80.0*RoomScale,True
 			EntityParent r\Objects[8],r\obj
+			EntityPickMode r\Objects[8],2
 			
 			r\Objects[9] =  LoadMesh_Strict("GFX\map\forest\door.b3d")
 			PositionEntity r\Objects[9],r\x - 272.0 * RoomScale, 512.0 * RoomScale, r\z + (288.0-70) * RoomScale,True
@@ -4904,12 +4938,14 @@ Function FillRoom(r.Rooms)
 			EntityType r\Objects[9], HIT_MAP
 			ScaleEntity r\Objects[9],46.0*RoomScale,45.0*RoomScale,46.0*RoomScale,True
 			EntityParent r\Objects[9],r\obj
+			EntityPickMode r\Objects[9],2
 			
 			r\Objects[10] = CopyEntity(r\Objects[8])
 			PositionEntity r\Objects[10], r\x - 272.0 * RoomScale, 512.0 * RoomScale, r\z + 736.0 * RoomScale,True
 			RotateEntity r\Objects[10],0,90,0,True
 			ScaleEntity r\Objects[10],45.0*RoomScale,45.0*RoomScale,80.0*RoomScale,True
 			EntityParent r\Objects[10],r\obj
+			EntityPickMode r\Objects[10],2
 			
 			r\Objects[11] =  CopyEntity(r\Objects[9])
 			PositionEntity r\Objects[11],r\x - 272.0 * RoomScale, 512.0 * RoomScale, r\z + (736.0-70) * RoomScale,True
@@ -4917,12 +4953,14 @@ Function FillRoom(r.Rooms)
 			EntityType r\Objects[11], HIT_MAP
 			ScaleEntity r\Objects[11],46.0*RoomScale,45.0*RoomScale,46.0*RoomScale,True
 			EntityParent r\Objects[11],r\obj
+			EntityPickMode r\Objects[11],2
 			
 			r\Objects[12] = CopyEntity(r\Objects[8])
 			PositionEntity r\Objects[12], r\x - 592.0 * RoomScale, 512.0 * RoomScale, r\z - 704.0 * RoomScale,True
 			RotateEntity r\Objects[12],0,0,0,True
 			ScaleEntity r\Objects[12],45.0*RoomScale,45.0*RoomScale,80.0*RoomScale,True
 			EntityParent r\Objects[12],r\obj
+			EntityPickMode r\Objects[12],2
 			
 			r\Objects[13] =  CopyEntity(r\Objects[9])
 			PositionEntity r\Objects[13],r\x - (592.0+70.0) * RoomScale, 512.0 * RoomScale, r\z - 704.0 * RoomScale,True
@@ -4930,6 +4968,7 @@ Function FillRoom(r.Rooms)
 			EntityType r\Objects[13], HIT_MAP
 			ScaleEntity r\Objects[13],46.0*RoomScale,45.0*RoomScale,46.0*RoomScale,True
 			EntityParent r\Objects[13],r\obj	
+			EntityPickMode r\Objects[13],2
 			
 			r\Objects[14] = LoadMesh_Strict("GFX\map\1123_hb.b3d",r\obj)
 			EntityPickMode r\Objects[14],2
@@ -5586,9 +5625,11 @@ Function FillRoom(r.Rooms)
 			EntityParent r\Levers[0],r\obj
 			;[End Block]
 		Case "room4info"
-			it = CreateItem("scp330", r\x + 1.3, r\y + 0.56, r\z - 2.75)
-			RotateEntity(it\collider, 0, -100, 0)
-			EntityParent(it\collider, r\obj)
+			If IsHalloween Then
+				it = CreateItem("scp330", r\x + 1.3, r\y + 0.56, r\z - 2.75)
+				RotateEntity(it\collider, 0, -100, 0)
+				EntityParent(it\collider, r\obj)
+			EndIf
 		Case "halloweenfields"
 			Local hmap% = LoadTexture_Strict("GFX\map\halloween\fields.png", hmapFlags)
 			Local mask% = LoadTexture_Strict("GFX\map\halloween\fields_mask.png", maskFlags)
@@ -5609,6 +5650,8 @@ Function FillRoom(r.Rooms)
 			Else
 				tree = LoadMesh_Strict("GFX\map\forest\detail\treetest4.b3d")
 				leaves = LoadMesh_Strict("GFX\map\forest\detail\treetest5.b3d")
+				EntityEffect tree, InstanceEffect
+				EntityEffect leaves, InstanceEffect
 			EndIf
 			PlaceForestProps(terr, hmap, MeshWidth(terr), 0.05, tree, leaves, pumpkin, 100, 800, 186, 5, 0.8, 1.2)
 			If fr = Null Then
@@ -7110,7 +7153,8 @@ Function CreatePropObj(file$)
 	p\obj = LoadModdedMeshNonStrict("GFX\Map\Props\"+file)
 	If p\obj = 0 Then p\obj = LoadModdedMeshNonStrict("GFX\Map\"+file)
 	If p\obj = 0 Then RuntimeErrorExt("Failed to load prop " + file + ".")
-	Return p\obj
+	HideEntity p\obj
+	Return CopyEntity(p\obj)
 End Function
 
 ;-------------------------------------------------------------------------------------------------------

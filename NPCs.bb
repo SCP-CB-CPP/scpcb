@@ -258,7 +258,7 @@ Function CreateNPC.NPCs(NPCtype%, x#, y#, z#)
 			EntityRadius n\Collider, 0.26
 			EntityType n\Collider, HIT_PLAYER
 			n\obj = LoadAnimMesh_Strict("GFX\npcs\scp096.b3d")
-			n\obj2 = CreatePivot(FindChild(n\obj, GetModdedINIString(NPCBones, "SCP-096", "face_bonename")))
+			n\obj2 = FindChild(n\obj, GetModdedINIString(NPCBones, "SCP-096", "face_bonename"))
 			
 			n\Speed = (GetModdedINIFloat("DATA\NPCs.ini", "SCP-096", "speed") / 100.0)
 			
@@ -591,10 +591,10 @@ Function CreateNPC.NPCs(NPCtype%, x#, y#, z#)
 			
 			n\obj = LoadAnimMesh_Strict("GFX\npcs\zombiesurgeon.b3d")
 			
-			temp# = 0.5 / MeshWidth(n\obj)
+			temp# = GetModdedINIFloat("DATA\NPCs.ini", "SCP-008 Zombie", "scale")
 			ScaleEntity n\obj, temp, temp, temp
 			
-			n\Speed = 2.0 / 100
+			n\Speed = GetModdedINIFloat("DATA\NPCs.ini", "SCP-008 Zombie", "speed") / 100
 			
 			MeshCullBox (n\obj, -MeshWidth(n\obj), -MeshHeight(n\obj), -MeshDepth(n\obj)*4, MeshWidth(n\obj)*2, MeshHeight(n\obj)*2, MeshDepth(n\obj)*8)
 			
@@ -979,7 +979,7 @@ Function UpdateNPCs()
 					n\Idle = True
 					HideEntity n\obj
 					HideEntity n\obj2
-					PositionEntity n\obj, 0,500.0,0, True
+					PositionEntity n\Collider, 0,500.0,0, True
 				ElseIf n\State3 <> 0 And PlayerRoom\RoomTemplate\Name <> "gatea" Then
 					If n\Frame < 111 Lor n\Frame > 259 Then SetNPCFrame(n, 259)
 					AnimateNPC(n, 259, 111, -0.3, False)
@@ -1350,7 +1350,7 @@ Function UpdateNPCs()
 							EndIf
 							;AnimateNPC(n, 1085,1412, 0.1) ;sitting
 							
-							If dist < (CameraFogFar * LightVolume) And Sees096Face(n) Then
+							If dist < (CameraFogFar * LightVolume) And Sees096Face(n, True) Then
 								PlaySound_Strict LoadTempSound("SFX\SCP\096\Triggered.ogg")
 								
 								CurrCameraZoom = 10
@@ -2068,6 +2068,8 @@ Function UpdateNPCs()
 							;Animate2(n\obj, AnimTime(n\obj), 537, 660, 0.7, False)
 							PositionEntity n\Collider, CurveValue(EntityX(Collider),EntityX(n\Collider),20.0),EntityY(n\Collider),CurveValue(EntityZ(Collider),EntityZ(n\Collider),20.0)
 							RotateEntity n\Collider, 0, CurveAngle(EntityYaw(Collider)-180.0,EntityYaw(n\Collider),40), 0
+
+							If KillTimer >= 0 Then n\State = 1
 							;[End Block]
 						Case 4 ;Standing on catwalk in room4
 							;[Block]
@@ -5377,8 +5379,25 @@ Function MeNPCSeesPlayer%(me.NPCs,disablesoundoncrouch%=False)
 	
 End Function
 
-Function Sees096Face%(n.NPCs)
+Function Sees096Face%(n.NPCs, isSitting%=False)
 	Local angle# = WrapAngle(DeltaYaw(n\Collider, Collider));-EntityYaw(n\Collider,True))
+	Local triggerAngle% = 55
+	If isSitting Then triggerAngle% = 90
+	If (Not NoTarget) And (angle < triggerAngle% Lor angle > 360-triggerAngle) And (BlinkTimer < - 16 Lor BlinkTimer > - 6) And (Not IsNVGBlinking) Then
+		If n\obj2 <> 0 Then
+			Return EntityInView(n\obj2, Camera) And EntityVisible(Camera, n\obj2)
+		Else
+			Local y# = EntityY(n\Collider)+0.96
+			If isSitting Then y = y - 0.71
+			Local pvt% = CreatePivot()
+			PositionEntity pvt, EntityX(n\Collider), y, EntityZ(n\Collider)
+			Local ret% = EntityInView(pvt, Camera) And EntityVisible(Camera, pvt)
+			FreeEntity(pvt)
+			Return ret%
+		EndIf
+	Else
+		Return False
+	EndIf
 	Return (Not NoTarget) And (angle < 55 Lor angle > 360-55) And EntityVisible(Camera, n\obj2) And EntityInView(n\obj2, Camera) And (BlinkTimer < - 16 Lor BlinkTimer > - 6) And (Not IsNVGBlinking)
 End Function
 
@@ -7158,6 +7177,9 @@ Function MoveToPocketDimension()
 			PositionEntity(Collider, EntityX(r\obj),0.8,EntityZ(r\obj))
 			DropSpeed = 0
 			ResetEntity Collider
+
+			PositionEntity(Head, 0, 0, 0)
+			ResetEntity Head
 			
 			BlinkTimer = -10
 			
@@ -7888,7 +7910,7 @@ Function CopyExistingNPCObj%(n.NPCs)
 	Return False
 End Function
 
-Function UpgradeNPC914(n.NPCs, x#, y#, z#)
+Function UpgradeNPC914(n.NPCs, setting$, x#, y#, z#)
 	Select n\NPCtype
 		Case NPCtype066
 			Select setting
@@ -7896,27 +7918,24 @@ Function UpgradeNPC914(n.NPCs, x#, y#, z#)
 					; yeah, he bleeds blood, what about it?
 					de.Decals = CreateDecal(2, x, 8 * RoomScale + 0.005, z, 90, Rand(360), 0)
 					de\Size = 0.4 : ScaleSprite(de\obj, de\Size, de\Size)
+					RemoveNPC(n) : n = Null
 				Case "coarse"
-					PositionEntity(n\Collider, x, y + 1.0, z)
-					ResetEntity(n\Collider)
 					n\Speed = n\Speed * 0.5
 				Case "1:1"
-					PositionEntity(n\Collider, x, y + 1.0, z)
-					ResetEntity(n\Collider)
 					ChangeNPCTextureID(n, Not n\TextureID)
 					If n\TextureID = 1 Then
 						n\State = 66
 						SetNPCFrame(n, 710)
 					EndIf
 				Case "fine"
-					PositionEntity(n\Collider, x, y + 1.0, z)
-					ResetEntity(n\Collider)
 					n\Speed = n\Speed * 2
 				Case "very fine"
-					PositionEntity(n\Collider, x, y + 1.0, z)
-					ResetEntity(n\Collider)
 					n\Speed = n\Speed * 5
 			End Select
+			If n <> Null Then
+				PositionEntity(n\Collider, x, y + 1.0, z)
+				ResetEntity(n\Collider)
+			EndIf
 	End Select
 End Function
 
