@@ -10894,7 +10894,7 @@ Function ReadINILine$(file.INIFile)
 		rdbyte = PeekByte(bank,offset)
 		If ((rdbyte<>13) And (rdbyte<>10)) Then
 			firstbyte = False
-			retStr=retStr+Chr(rdbyte)
+			retStr=retStr+ChrRaw(rdbyte)
 		EndIf
 		offset=offset+1
 	Wend
