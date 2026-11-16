@@ -564,6 +564,7 @@ void UpdateAll();
 }
 
 namespace CB::Player {
+void SliceOffHands();
 void MoveToPocketDimension();
 bool IsInReachableRoom(bool is049ChamberReachable = false);
 }
@@ -584,6 +585,7 @@ CB::Console::Msg@ get_Last() property;
 }
 
 namespace CB::Console {
+void ExecuteCommand(string cmd, bool quiet = false);
 void CreateMessage(string txt, int r = -1, int g = -1, int b = -1, bool isCommand = false);
 CB::NPC::Type NPCNameToType(string name);
 string NPCTypeToName(CB::NPC::Type, bool plural = false);
@@ -601,6 +603,7 @@ CB::Event@ get_First() property;
 CB::Event@ get_Last() property;
 CB::Sound@ LoadSound(CB::Event@ event, string file, int num = 0);
 CB::Event@ Create(string eventName, string roomName, int id, float probability = 0);
+CB::Event@ Find(string name);
 float UpdateElevator(float state, CB::Door@ door1, CB::Door@ door2, B3D::Entity@ room1, B3D::Entity@ room2, CB::Event@ event, bool ignoreRotation = true);
 void UpdateAll();
 void UpdateDimension1499();
@@ -2428,7 +2431,7 @@ class NPC {
     void GoToElevator();
     bool SeesNPC(CB::NPC@ other);
     bool SeesPlayer(bool disableSoundOnCrouch = false);
-    bool PlayerSees096Face();
+    bool PlayerSees096Face(bool isSitting = false);
     void PlayMTFSound(CB::Sound@);
     void Animate(float startFrame, float endFrame, float speed, bool loop = true);
     void SetNPCFrame(float frame);
@@ -3359,6 +3362,7 @@ CB::Console::Msg@ Reissue;
 int R;
 int G;
 int B;
+bool IsQuiet;
 }
 
 namespace CB::Subtitles {

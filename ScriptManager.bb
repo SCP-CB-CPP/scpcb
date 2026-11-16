@@ -69,6 +69,7 @@ Global ConsoleCheckCanChangeNPCSpeed.Hooks = CreateHook("Hook_ConsoleCheckCanCha
 Global ConsoleCheckCanToggleNPC.Hooks = CreateHook("Hook_ConsoleCheckCanToggleNPC", HOOK_TYPE_RETURN_INT)
 Global EnableNPC.Hooks = CreateHook("Hook_EnableNPC", HOOK_TYPE_OVERRIDABLE)
 Global DisableNPC.Hooks = CreateHook("Hook_DisableNPC", HOOK_TYPE_OVERRIDABLE)
+Global UpgradeNPC914.Hooks = CreateHook("Hook_UpgradeNPC914", HOOK_TYPE_OVERRIDABLE)
 
 Global CreateDoor.Hooks = CreateHook("Hook_CreateDoor", HOOK_TYPE_OVERRIDABLE)
 Global PostCreateDoor.Hooks = CreateHook("Hook_PostCreateDoor")

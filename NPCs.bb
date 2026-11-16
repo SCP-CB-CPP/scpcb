@@ -7910,7 +7910,27 @@ Function CopyExistingNPCObj%(n.NPCs)
 	Return False
 End Function
 
+; TODO: Expose function
 Function UpgradeNPC914(n.NPCs, setting$, x#, y#, z#)
+	If UpgradeNPC914\Subscribers > 0 Then
+		Local settingEnum%
+		Select setting
+			Case "rough" settingEnum = SCP914_ROUGH
+			Case "coarse" settingEnum = SCP914_COARSE
+			Case "1:1" settingEnum = SCP914_ONE_TO_ONE
+			Case "fine" settingEnum = SCP914_FINE
+			Case "very fine" settingEnum = SCP914_VERY_FINE
+		End Select
+		Local nn.NPCs = n
+		PrepareFunction(5)
+		SetArgObj(0, &nn)
+		SetArgInt(1, settingEnum)
+		SetArgFloat(2, x)
+		SetArgFloat(3, y)
+		SetArgFloat(4, z)
+		If CallHook(UpgradeNPC914) Then Return
+	EndIf
+
 	Select n\NPCtype
 		Case NPCtype066
 			Select setting

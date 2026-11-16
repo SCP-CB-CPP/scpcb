@@ -902,7 +902,7 @@ Function RegisterNPC()
     
     RegisterObjectMethod("NPC", "bool SeesNPC(NPC@ other)", @OtherNPCSeesMeNPC)
     RegisterObjectMethod("NPC", "bool SeesPlayer(bool disableSoundOnCrouch=false)", @MeNPCSeesPlayer)
-    RegisterObjectMethod("NPC", "bool PlayerSees096Face()", @Sees096Face)
+    RegisterObjectMethod("NPC", "bool PlayerSees096Face(bool isSitting=false)", @Sees096Face)
 
     RegisterObjectMethod("NPC", "void PlayMTFSound(CB::Sound@)", @PlayMTFSound, True)
     ;RegisterObjectMethod("NPC", "void UpdateMTFUnit()", @UpdateMTFUnit)
@@ -1121,6 +1121,7 @@ Function RegisterItem()
     ns$ = GetDefaultNamespace()
     If ns <> "" Then SetDefaultNamespace(ns + "::Item") Else SetDefaultNamespace("Item")
     RegisterGlobalFunction("Item@+ Create(string name, float x, float y, float z)", @CreateItem)
+    ; TODO: Overload
     RegisterGlobalFunction("Item@+ CreateCup(string drinkName, float x, float y, float z, int r, int g, int b, float a=1)", @CreateCup)
     RegisterGlobalFunction("void UpdateAll()", @UpdateItems)
     RegisterGlobalProperty("int LastItemID", &LastItemID)
@@ -1181,6 +1182,7 @@ Function RegisterPlayer()
     RegisterGlobalProperty("float SuperManTimer", &SuperManTimer)
 
     RegisterGlobalProperty("bool LostHands", &LostHands)
+    RegisterGlobalFunction("void SliceOffHands()", @SliceOffHands)
 
     RegisterGlobalProperty("float Injuries", &Injuries)
     RegisterGlobalProperty("float Bloodloss", &Bloodloss)
@@ -1315,6 +1317,10 @@ Function RegisterConsole()
     RegisterGlobalProperty("int G", &ConsoleG)
     RegisterGlobalProperty("int B", &ConsoleB)
 
+    RegisterGlobalProperty("bool IsQuiet", &ConsoleQuiet)
+
+    RegisterGlobalFunction("void ExecuteCommand(string cmd, bool quiet = false)", @ExecuteConsoleCommand)
+
     RegisterGlobalFunction("void CreateMessage(string txt, int r=-1, int g=-1, int b=-1, bool isCommand=false)", @CreateConsoleMsg)
 
     RegisterGlobalFunction("CB::NPC::Type NPCNameToType(string name)", @Console_NPCNameToType)
@@ -1398,6 +1404,8 @@ Function RegisterEvent()
     RegisterGlobalFunction("Sound@ LoadSound(Event@ event, string file, int num=0)", @LoadEventSound)
 
     RegisterGlobalFunction("Event@+ Create(string eventName, string roomName, int id, float probability=0)", @CreateEvent)
+
+    RegisterGlobalFunction("Event@+ Find(string name)", @FindEvent)
 
     RegisterGlobalFunction("float UpdateElevator(float state, Door@ door1, Door@ door2, B3D::Entity@ room1, B3D::Entity@ room2, Event@ event, bool ignoreRotation = true)", @UpdateElevators)
 
