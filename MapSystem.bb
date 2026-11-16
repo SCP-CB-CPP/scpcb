@@ -3770,6 +3770,14 @@ Function FillRoom(r.Rooms)
 			
 			r\Objects[9]=CreatePivot(r\obj)
 			PositionEntity(r\Objects[9], r\x - 848*RoomScale, 0.5, r\z+576*RoomScale, True)
+
+			r\Objects[10]=CreateCube(r\obj)
+			PositionEntity(r\Objects[10], r\x - 205*RoomScale, 0.5, r\z, True)
+			ScaleEntity(r\Objects[10], 1.0, 1.0 / RoomScale, 2.0 / RoomScale)
+			EntityType(r\Objects[10], HIT_MAP)
+			EntityPickMode(r\Objects[10], 2)
+			EntityAlpha(r\Objects[10], 0)
+			HideEntity(r\Objects[10])
 			;[End Block]
 		Case "room3servers"
 			;[Block]

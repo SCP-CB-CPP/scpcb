@@ -4379,6 +4379,8 @@ Function UpdateEvents()
 							de\Size = Rnd(0.5,0.7)
 							ScaleSprite(de\obj, de\Size,de\Size)
 							
+							ShowEntity(e\room\Objects[10])
+
 							Curr096\State=5
 							If Curr096\SoundChn <> 0 Then
 								StopStream_Strict(Curr096\SoundChn) : Curr096\SoundChn=0 : Curr096\SoundChn_isStream = False
@@ -4400,6 +4402,8 @@ Function UpdateEvents()
 						EndIf
 						
 						If PlayerRoom = e\room Then
+							ShowEntity(e\room\Objects[10])
+							
 							If e\SoundCHN<>0 Then
 								If	ChannelPlaying(e\SoundCHN) Then 
 									LightBlink = Rnd(0.5,6.0)
