@@ -1519,6 +1519,8 @@ Function UpdateNPCs()
 							EndIf
 						Else ;play the eating animation if killtimer < 0 
 							AnimateNPC(n, Min(27,AnimTime(n\obj)), 193, 0.5)
+							PositionEntity n\Collider, CurveValue(EntityX(Head)-0.5*Sin(EntityYaw(Head)),EntityX(n\Collider),10.0),EntityY(n\Collider),CurveValue(EntityZ(Head)+0.5*Cos(EntityYaw(Head)),EntityZ(n\Collider),10.0)
+							RotateEntity n\Collider, 0, CurveAngle(EntityYaw(Head)-180.0,EntityYaw(n\Collider),20.0), 0
 							
 							;Animate2(n\obj, AnimTime(n\obj), Min(27,AnimTime(n\obj)), 193, 0.5)
 						EndIf
@@ -2039,8 +2041,8 @@ Function UpdateNPCs()
 							AnimateNPC(n, 537, 660, 0.7, False)
 							
 							;Animate2(n\obj, AnimTime(n\obj), 537, 660, 0.7, False)
-							PositionEntity n\Collider, CurveValue(EntityX(Collider),EntityX(n\Collider),20.0),EntityY(n\Collider),CurveValue(EntityZ(Collider),EntityZ(n\Collider),20.0)
-							RotateEntity n\Collider, 0, CurveAngle(EntityYaw(Collider)-180.0,EntityYaw(n\Collider),40), 0
+							PositionEntity n\Collider, CurveValue(EntityX(Head)-0.4*Sin(EntityYaw(Head)),EntityX(n\Collider),20.0),EntityY(n\Collider),CurveValue(EntityZ(Head)+0.4*Cos(EntityYaw(Head)),EntityZ(n\Collider),20.0)
+							RotateEntity n\Collider, 0, CurveAngle(EntityYaw(Head)-180.0,EntityYaw(n\Collider),40.0), 0
 
 							If KillTimer >= 0 Then n\State = 1
 							;[End Block]
