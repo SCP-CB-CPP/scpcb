@@ -1175,7 +1175,7 @@ Function UpdateNPCs()
 											PlaySound_Strict(HorrorSFX(5))											
 											If isInPd Then
 												DeathMSG = I_Loc\DeathMessage_106Pd
-												Kill()
+												Kill() : If Abs(DeltaYaw(Camera, n\Collider)) <= 90.0 Then KillAnim = 0 Else KillAnim = 1
 											Else
 												PlaySound_Strict(OldManSFX(3))
 												FallTimer = Min(-1, FallTimer)
@@ -1415,8 +1415,7 @@ Function UpdateNPCs()
 												CameraShake = 30
 												BlurTimer = 2000
 												DeathMSG = I_Loc\DeathMessage_096
-												Kill()
-												KillAnim = 1
+												Kill() : KillAnim = 0
 												For i = 0 To 6
 													PositionEntity pvt, EntityX(Collider)+Rnd(-0.1,0.1),EntityY(Collider)-0.05,EntityZ(Collider)+Rnd(-0.1,0.1)
 													TurnEntity pvt, 90, 0, 0
@@ -3634,7 +3633,7 @@ Function UpdateNPCs()
 								
 								;Animate2(n\obj, AnimTime(n\obj), 451,493, 0.5, False)
 								If (prevFrame < 461 And n\Frame=>461) Then 
-									If KillTimer => 0 Then Kill() : KillAnim = 0
+									If KillTimer => 0 Then Kill() : If Abs(DeltaYaw(Camera, n\Collider)) <= 90.0 Then KillAnim = 0 Else KillAnim = 1
 									PlaySound_Strict(n\Sound)
 								EndIf
 								If (prevFrame < 476 And n\Frame=>476) Then PlaySound_Strict(n\Sound2)
@@ -3812,7 +3811,7 @@ Function UpdateNPCs()
 										Else
 											DeathMSG=I_Loc\DeathMessage_939
 										EndIf 
-										Kill()
+										Kill() : If Abs(DeltaYaw(Camera, n\Collider)) <= 90.0 Then KillAnim = 0 Else KillAnim = 1
 										If (Not GodMode) Then n\State = 5
 									EndIf								
 								Else
@@ -4887,7 +4886,7 @@ Function UpdateNPCs()
 										Injuries = Injuries + Rnd(0.75,1.5)
 										PlaySound2(LoadTempSound("SFX\General\Slash"+Rand(1,2)+".ogg"), Camera, n\Collider)
 										If Injuries > 10.0
-											Kill()
+											Kill() : If Abs(DeltaYaw(Camera, n\Collider)) <= 90.0 Then KillAnim = 0 Else KillAnim = 1
 											If PlayerRoom\RoomTemplate\Name$ = "dimension1499"
 												DeathMSG = I_Loc\DeathMessage_14991Dimension
 											Else
@@ -4908,7 +4907,7 @@ Function UpdateNPCs()
 										Injuries = Injuries + Rnd(0.75,1.5)
 										PlaySound2(LoadTempSound("SFX\General\Slash"+Rand(1,2)+".ogg"), Camera, n\Collider)
 										If Injuries > 10.0
-											Kill()
+											Kill() : If Abs(DeltaYaw(Camera, n\Collider)) <= 90.0 Then KillAnim = 0 Else KillAnim = 1
 											If PlayerRoom\RoomTemplate\Name$ = "dimension1499"
 												DeathMSG = I_Loc\DeathMessage_14991Dimension
 											Else
