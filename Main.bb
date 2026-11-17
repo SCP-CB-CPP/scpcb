@@ -7902,7 +7902,7 @@ Function LoadEntities()
 	
 	Head = CreatePivot()
 	EntityRadius Head, 0.15
-	EntityType Head, HIT_PLAYER
+	EntityType Head, HIT_DEAD
 	
 	
 	LiquidObj = LoadMesh_Strict("GFX\items\cupliquid.x") ;optimized the cups dispensed by 294
