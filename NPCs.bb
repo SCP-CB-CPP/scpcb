@@ -6955,7 +6955,7 @@ Function UpdateMTFUnit(n.NPCs)
 				EndIf
 			Else
 				For n2.NPCs = Each NPCs
-					If n2<>n And n2\IsDead=False Then
+					If n2<>n And n2\IsDead=False And n2\NPCtype<>NPCtypeTentacle Then
 						If Abs(DeltaYaw(n\Collider,n2\Collider))<80.0 Then
 							If EntityDistance(n\Collider,n2\Collider)<0.7 Then							
 								TranslateEntity n2\Collider, Cos(EntityYaw(n\Collider,True)+90)* 0.01 * FPSfactor, 0, Sin(EntityYaw(n\Collider,True)+90)* 0.01 * FPSfactor, True
