@@ -9,6 +9,8 @@ Global ClosestItem.Items
 
 Global LastItemID%
 
+Include "EquipRegions.bb"
+
 Type ItemTemplates
 	Field displayname$
 	Field name$
@@ -18,7 +20,7 @@ Type ItemTemplates
 	
 	Field found%
 	
-	Field obj%, objpath$, parentobjpath$
+	Field obj%, objpath$
 	Field invimg%,invimg2%,invimgpath$
 	Field imgpath$, img%
 	
@@ -27,6 +29,8 @@ Type ItemTemplates
 	Field scale#
 	;Field bumptex%
 	Field tex%, texpath$
+
+	Field equipRegion.EquipRegions
 End Type 
 
 Function CreateItemTemplate.ItemTemplates(name$, group$, displayname$, objpath$, invimgpath$, imgpath$, scale#, texturepath$ = "",invimgpath2$="",Anim%=0, texflags%=9)
@@ -35,7 +39,7 @@ Function CreateItemTemplate.ItemTemplates(name$, group$, displayname$, objpath$,
 	
 	;if another item shares the same object, copy it
 	For it2.itemtemplates = Each ItemTemplates
-		If it2\objpath = objpath And it2\obj <> 0 Then it\obj = CopyEntity(it2\obj) : it\parentobjpath=it2\objpath : Exit
+		If it2\objpath = objpath And it2\obj <> 0 Then it\obj = CopyEntity(it2\obj) : Exit
 	Next
 	
 	If it\obj = 0 Then
@@ -127,6 +131,7 @@ Function InitItemTemplatesFromFile(file$)
 	Local document$
 	Local sound%, scale#
 	Local hasCustomColor%, r%, g%, b%
+	Local equipRegion.EquipRegions
 
 	Local f% = OpenFile(file)
 	While Not Eof(f)
@@ -140,6 +145,7 @@ Function InitItemTemplatesFromFile(file$)
 						EntityColor(itt\obj, r, g, b)
 					EndIf
 					itt\sound = sound
+					itt\equipRegion = equipRegion
 				EndIf
 
 				name = Trim(Mid(l, 2, Len(l) - 2))
@@ -158,6 +164,7 @@ Function InitItemTemplatesFromFile(file$)
 				sound = 1
 				scale = 1.0
 				hasCustomColor = False
+				equipRegion = Null
 			Else
 				If splitterPos = 0 Then Continue
 				Local key$ = Trim(Left(l, splitterPos - 1))
@@ -190,6 +197,8 @@ Function InitItemTemplatesFromFile(file$)
 						r = Int(Piece(value,1,","))
 						g = Int(Piece(value,2,","))
 						b = Int(Piece(value,3,","))
+					Case "equip region"
+						equipRegion = FindEquipRegion(value)
 					Default
 						RuntimeErrorExt("Unknown key "+Chr(34)+key+Chr(34)+" in item "+Chr(34)+name+Chr(34)+".")
 				End Select
@@ -204,6 +213,7 @@ Function InitItemTemplatesFromFile(file$)
 			EntityColor(itt\obj, r, g, b)
 		EndIf
 		itt\sound = sound
+		itt\equipRegion = equipRegion
 	EndIf
 
 End Function
@@ -211,6 +221,8 @@ End Function
 Const ITEMS_DATA_PATH$ = "Data\items.ini"
 
 Function InitItemTemplates()
+	InitEquipRegions()
+
 	Local hasOverride%
 	For m.ActiveMods = Each ActiveMods
 		Local modPath$ = m\Path + ITEMS_DATA_PATH
@@ -460,24 +472,28 @@ Function RemoveItem(i.Items, inGame%=True)
 			EndIf
 		Next
 		
-		Select i\itemtemplate\name 
-			Case "nvgoggles", "finenvgoggles", "supernv"
-				WearingNightVision = False
-			Case "gasmask", "supergasmask", "gasmask2", "gasmask3"
-				WearingGasMask = False
-			Case "vest", "finevest", "veryfinevest"
-				WearingVest = False
-			Case "hazmatsuit","hazmatsuit2","hazmatsuit3"
-				WearingHazmat = False	
-			Case "scp714"
-				Wearing714 = False
-			Case "scp1499","super1499"
-				Wearing1499 = False
-			Case "scp427"
-				I_427\Using = False
-			Case "pumpkin"
-				TakeOffPumpkin()
-		End Select
+		If i\Picked = 2 Then
+			Select i\itemtemplate\name 
+				Case "nvgoggles", "finenvgoggles", "supernv"
+					WearingNightVision = False
+				Case "gasmask", "supergasmask", "gasmask2", "gasmask3"
+					WearingGasMask = False
+				Case "vest", "finevest", "veryfinevest"
+					WearingVest = False
+				Case "hazmatsuit","hazmatsuit2","hazmatsuit3"
+					WearingHazmat = False	
+				Case "scp714"
+					Wearing714 = False
+				Case "scp1499","super1499"
+					Wearing1499 = False
+				Case "scp427"
+					I_427\Using = False
+				Case "pumpkin"
+					WearingPumpkin = False
+					NoTarget = False
+			End Select
+			UnequipItem(i)
+		EndIf
 	EndIf
 	If i\itemtemplate\img <> 0
 		FreeImageHUDScaled i\itemtemplate\img
@@ -876,57 +892,12 @@ Function PickItem(item.Items)
 						item\state = 0
 					Case "snavulti"
 						GiveAchievement(AchvSNAV)
-					Case "hazmatsuit", "hazmatsuit2", "hazmatsuit3"
-						canpickitem = True
-						For z% = 0 To MaxItemAmount - 1
-							If Inventory(z) <> Null Then
-								If Inventory(z)\itemtemplate\group="hazmat" Then
-									canpickitem% = False
-									Exit
-								ElseIf Inventory(z)\itemtemplate\group="vest" Then
-									canpickitem% = 2
-									Exit
-								EndIf
-							EndIf
-						Next
-						
-						If canpickitem=False Then
-							Msg = I_Loc\MessageItem_HazmatConflictHazmat
-							MsgTimer = 70 * 5
-							Return
-						ElseIf canpickitem=2 Then
-							Msg = I_Loc\MessageItem_VestConflictHazmat
-							MsgTimer = 70 * 5
-							Return
-						Else
-							;TakeOffStuff(1+16)
+					Case "hazmatsuit", "hazmatsuit2", "hazmatsuit3", "vest","finevest"
+						If CanUseItem(item) Then
 							SelectedItem = item
-						EndIf
-					Case "vest","finevest"
-						canpickitem = True
-						For z% = 0 To MaxItemAmount - 1
-							If Inventory(z) <> Null Then
-								If Inventory(z)\itemtemplate\group="vest" Then
-									canpickitem% = False
-									Exit
-								ElseIf Inventory(z)\itemtemplate\group="hazmat" Then
-									canpickitem% = 2
-									Exit
-								EndIf
-							EndIf
-						Next
-						
-						If canpickitem=False Then
-							Msg = I_Loc\MessageItem_VestConflictVest
-							MsgTimer = 70 * 5
-							Return
-						ElseIf canpickitem=2 Then
-							Msg = I_Loc\MessageItem_VestConflictHazmat
-							MsgTimer = 70 * 5
-							Return
 						Else
-							;TakeOffStuff(2)
-							SelectedItem = item
+							MsgTimer = 70 * 5
+							Return
 						EndIf
 					Case "scp330"
 						If IsHalloween And SteamActive And (Not UsedConsole) Then Steam_SetStatInt("has_grabbed_candy", 1)
@@ -1075,7 +1046,6 @@ Function DropItem(item.Items,playdropsound%=True)
 	
 	ResetEntity (item\collider)
 	
-	item\Picked = False
 	If OtherOpen <> Null Then
 		For z% = 0 To OtherOpen\Inventory\Size - 1
 			If OtherOpen\Inventory\Items[z] = item Then
@@ -1091,28 +1061,29 @@ Function DropItem(item.Items,playdropsound%=True)
 			EndIf
 		Next
 	EndIf
-	Select item\itemtemplate\name
-		Case "gasmask", "supergasmask", "gasmask3"
-			WearingGasMask = False
-		Case "hazmatsuit",  "hazmatsuit2", "hazmatsuit3"
-			WearingHazmat = False
-		Case "vest", "finevest"
-			WearingVest = False
-		Case "nvgoggles"
-			If WearingNightVision = 1 Then CameraFogFar = StoredCameraFogFar : WearingNightVision = False
-		Case "supernv"
-			If WearingNightVision = 2 Then CameraFogFar = StoredCameraFogFar : WearingNightVision = False
-		Case "finenvgoggles"
-			If WearingNightVision = 3 Then CameraFogFar = StoredCameraFogFar : WearingNightVision = False
-		Case "scp714"
-			Wearing714 = False
-		Case "scp1499","super1499"
-			Wearing1499 = False
-		Case "scp427"
-			I_427\Using = False
-		Case "pumpkin"
-			TakeOffPumpkin()
-	End Select
+	If item\Picked = 2 Then
+		Select item\itemtemplate\name
+			Case "gasmask", "supergasmask", "gasmask3"
+				WearingGasMask = False
+			Case "hazmatsuit",  "hazmatsuit2", "hazmatsuit3"
+				WearingHazmat = False
+			Case "vest", "finevest"
+				WearingVest = False
+			Case "nvgoggles", "supernv", "finenvgoggles"
+				CameraFogFar = StoredCameraFogFar : WearingNightVision = False
+			Case "scp714"
+				Wearing714 = False
+			Case "scp1499","super1499"
+				Wearing1499 = False
+			Case "scp427"
+				I_427\Using = False
+			Case "pumpkin"
+				WearingPumpkin = False
+				NoTarget = False
+		End Select
+		UnequipItem(item)
+	EndIf
+	item\Picked = False
 	
 	CatchErrors("DropItem")
 	
