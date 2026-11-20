@@ -8644,6 +8644,8 @@ Function NullGame(playbuttonsfx%=True)
 	Msg = ""
 	MsgTimer = 0
 	
+	EquippedSlots = 0
+
 	SelectedItem = Null
 	
 	For i = 0 To MaxItemAmount - 1
