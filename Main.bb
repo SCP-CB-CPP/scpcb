@@ -4603,41 +4603,7 @@ Function DrawGUI()
 			
 			If Inventory(n) <> Null Then
 				Color 200, 200, 200
-				Select Inventory(n)\itemtemplate\name 
-					Case "gasmask"
-						If WearingGasMask=1 Then Rect(x - 3, y - 3, width + 6, height + 6)
-					Case "supergasmask"
-						If WearingGasMask=2 Then Rect(x - 3, y - 3, width + 6, height + 6)
-					Case "gasmask3"
-						If WearingGasMask=3 Then Rect(x - 3, y - 3, width + 6, height + 6)
-					Case "hazmatsuit"
-						If WearingHazmat=1 Then Rect(x - 3, y - 3, width + 6, height + 6)
-					Case "hazmatsuit2"
-						If WearingHazmat=2 Then Rect(x - 3, y - 3, width + 6, height + 6)
-					Case "hazmatsuit3"
-						If WearingHazmat=3 Then Rect(x - 3, y - 3, width + 6, height + 6)	
-					Case "vest"
-						If WearingVest=1 Then Rect(x - 3, y - 3, width + 6, height + 6)
-					Case "finevest"
-						If WearingVest=2 Then Rect(x - 3, y - 3, width + 6, height + 6)
-					Case "scp714"
-						If Wearing714=1 Then Rect(x - 3, y - 3, width + 6, height + 6)
-					;BoH items
-					Case "nvgoggles"
-						If WearingNightVision=1 Then Rect(x - 3, y - 3, width + 6, height + 6)
-					Case "supernv"
-						If WearingNightVision=2 Then Rect(x - 3, y - 3, width + 6, height + 6)
-					Case "scp1499"
-						If Wearing1499=1 Then Rect(x - 3, y - 3, width + 6, height + 6)
-					Case "super1499"
-						If Wearing1499=2 Then Rect(x - 3, y - 3, width + 6, height + 6)
-					Case "finenvgoggles"
-						If WearingNightVision=3 Then Rect(x - 3, y - 3, width + 6, height + 6)
-					Case "scp427"
-						If I_427\Using=1 Then Rect(x - 3, y - 3, width + 6, height + 6)
-					Case "pumpkin"
-						If WearingPumpkin<>0 Then Rect(x - 3, y - 3, width + 6, height + 6)
-				End Select
+				If Inventory(n)\Picked = 2 Then Rect(x - 3, y - 3, width + 6, height + 6)
 			EndIf
 			
 			If isMouseOn Then
@@ -4974,77 +4940,27 @@ Function DrawGUI()
 		
 		If SelectedItem <> Null Then
 			Select SelectedItem\itemtemplate\name
-				Case "nvgoggles"
+				Case "nvgoggles", "supernv", "finenvgoggles"
 					;[Block]
-					If Wearing1499 = 0 And WearingHazmat=0 Then
-						If WearingNightVision = 1 Then
-							Msg = I_Loc\MessageItem_NvgOff
-							CameraFogFar = StoredCameraFogFar
+					If SelectedItem\Picked = 2 Then
+						Msg = I_Loc\MessageItem_NvgOff
+						CameraFogFar = StoredCameraFogFar
+						WearingNightVision = False
+						UnequipItem(SelectedItem)
+					Else If TryEquipItem(SelectedItem) Then
+						Msg = I_Loc\MessageItem_NvgOn
+						StoredCameraFogFar = CameraFogFar
+						CameraFogFar = 30
+						If SelectedItem\itemtemplate\name="supernv" Then
+							WearingNightVision = 3
+						ElseIf SelectedItem\itemtemplate\name="finenvgoggles"
+							WearingNightVision = 2
 						Else
-							Msg = I_Loc\MessageItem_NvgOn
-							WearingGasMask = 0
-							WearingNightVision = 0
-							StoredCameraFogFar = CameraFogFar
-							CameraFogFar = 30
-							TakeOffPumpkin()
+							WearingNightVision = 1
 						EndIf
-						
-						WearingNightVision = (Not WearingNightVision)
-					ElseIf Wearing1499 > 0 Then
-						Msg = I_Loc\MessageItem_NvgConflictScp1499
-					Else
-						Msg = I_Loc\MessageItem_NvgConflictHazmat
 					EndIf
-					SelectedItem = Null
 					MsgTimer = 70 * 5
-					;[End Block]
-				Case "supernv"
-					;[Block]
-					If Wearing1499 = 0 And WearingHazmat=0 Then
-						If WearingNightVision = 2 Then
-							Msg = I_Loc\MessageItem_NvgOff
-							CameraFogFar = StoredCameraFogFar
-						Else
-							Msg = I_Loc\MessageItem_NvgOn
-							WearingGasMask = 0
-							WearingNightVision = 0
-							StoredCameraFogFar = CameraFogFar
-							CameraFogFar = 30
-							TakeOffPumpkin()
-						EndIf
-						
-						WearingNightVision = (Not WearingNightVision) * 2
-					ElseIf Wearing1499 > 0 Then
-						Msg = I_Loc\MessageItem_NvgConflictScp1499
-					Else
-						Msg = I_Loc\MessageItem_NvgConflictHazmat
-					EndIf
 					SelectedItem = Null
-					MsgTimer = 70 * 5
-					;[End Block]
-				Case "finenvgoggles"
-					;[Block]
-					If Wearing1499 = 0 And WearingHazmat = 0 Then
-						If WearingNightVision = 3 Then
-							Msg = I_Loc\MessageItem_NvgOff
-							CameraFogFar = StoredCameraFogFar
-						Else
-							Msg = I_Loc\MessageItem_NvgOn
-							WearingGasMask = 0
-							WearingNightVision = 0
-							StoredCameraFogFar = CameraFogFar
-							CameraFogFar = 30
-							TakeOffPumpkin()
-						EndIf
-						
-						WearingNightVision = (Not WearingNightVision) * 3
-					ElseIf Wearing1499 > 0 Then
-						Msg = I_Loc\MessageItem_NvgConflictScp1499
-					Else
-						Msg = I_Loc\MessageItem_NvgConflictHazmat
-					EndIf
-					SelectedItem = Null
-					MsgTimer = 70 * 5
 					;[End Block]
 				Case "scp1123"
 					;[Block]
@@ -5085,7 +5001,7 @@ Function DrawGUI()
 					;[End Block]
 				Case "bdc"
 					;[Block]
-					If CanUseItem(False, False, True) Then
+					If CanUseItem(SelectedItem) Then
 						If Wearing714 = 0 And IsBirthday Then
 							Injuries = 0
 							BloodLoss = 0
@@ -5123,7 +5039,7 @@ Function DrawGUI()
 					;[End Block]
 				Case "scp500"
 					;[Block]
-					If CanUseItem(False, False, True)
+					If CanUseItem(SelectedItem)
 						GiveAchievement(Achv500)
 						
 						If Infect > 0 Then
@@ -5141,7 +5057,7 @@ Function DrawGUI()
 					;[End Block]
 				Case "veryfinefirstaid"
 					;[Block]
-					If CanUseItem(False, False, True)
+					If CanUseItem(SelectedItem)
 						Select Rand(5)
 							Case 1
 								Injuries = 3.5
@@ -5199,85 +5115,83 @@ Function DrawGUI()
 						MsgTimer = 70*5
 						SelectedItem = Null
 					Else
-						If CanUseItem(False, True, True)
-							CurrSpeed = CurveValue(0, CurrSpeed, 5.0)
-							Crouch = True
-							
-							DrawItemImg(SelectedItem)
-							
-							DrawItemUseProgress(SelectedItem)
-							
-							SelectedItem\state = Min(SelectedItem\state+(FPSfactor/5.0),100)			
-							
-							If SelectedItem\state = 100 Then
-								If SelectedItem\itemtemplate\name = "finefirstaid" Then
-									Bloodloss = 0
-									Injuries = Max(0, Injuries - 2.0)
-									If Injuries = 0 Then
-										Msg = I_Loc\MessageItem_FinefirstaidUse1
-									ElseIf Injuries > 1.0
-										Msg = I_Loc\MessageItem_FinefirstaidUse2
-									Else
-										Msg = I_Loc\MessageItem_FinefirstaidUse3
-									EndIf
-									MsgTimer = 70*5
-									RemoveItem(SelectedItem)
+						CurrSpeed = CurveValue(0, CurrSpeed, 5.0)
+						Crouch = True
+						
+						DrawItemImg(SelectedItem)
+						
+						DrawItemUseProgress(SelectedItem)
+						
+						SelectedItem\state = Min(SelectedItem\state+(FPSfactor/5.0),100)			
+						
+						If SelectedItem\state = 100 Then
+							If SelectedItem\itemtemplate\name = "finefirstaid" Then
+								Bloodloss = 0
+								Injuries = Max(0, Injuries - 2.0)
+								If Injuries = 0 Then
+									Msg = I_Loc\MessageItem_FinefirstaidUse1
+								ElseIf Injuries > 1.0
+									Msg = I_Loc\MessageItem_FinefirstaidUse2
 								Else
-									Bloodloss = Max(0, Bloodloss - Rand(10,20))
-									If Injuries => 2.5 Then
-										Msg = I_Loc\MessageItem_FirstaidUse5
-										Injuries = Max(2.5, Injuries-Rnd(0.3,0.7))
-									ElseIf Injuries > 1.0
-										Injuries = Max(0.5, Injuries-Rnd(0.5,1.0))
-										If Injuries > 1.0 Then
-											Msg = I_Loc\MessageItem_FirstaidUse4
-										Else
-											Msg = I_Loc\MessageItem_FirstaidUse3
-										EndIf
+									Msg = I_Loc\MessageItem_FinefirstaidUse3
+								EndIf
+								MsgTimer = 70*5
+								RemoveItem(SelectedItem)
+							Else
+								Bloodloss = Max(0, Bloodloss - Rand(10,20))
+								If Injuries => 2.5 Then
+									Msg = I_Loc\MessageItem_FirstaidUse5
+									Injuries = Max(2.5, Injuries-Rnd(0.3,0.7))
+								ElseIf Injuries > 1.0
+									Injuries = Max(0.5, Injuries-Rnd(0.5,1.0))
+									If Injuries > 1.0 Then
+										Msg = I_Loc\MessageItem_FirstaidUse4
 									Else
-										If Injuries > 0.5 Then
-											Injuries = 0.5
-											Msg = I_Loc\MessageItem_FirstaidUse2
-										Else
-											Injuries = 0.5
-											Msg = I_Loc\MessageItem_FirstaidUse1
-										EndIf
+										Msg = I_Loc\MessageItem_FirstaidUse3
 									EndIf
-									
-									If SelectedItem\itemtemplate\name = "firstaid2" Then 
-										Select Rand(6)
-											Case 1
-												SuperMan = True
-												Msg = I_Loc\MessageItem_BluefirstaidUseSuperman
-											Case 2
-												InvertMouse = (Not InvertMouse)
-												Msg = I_Loc\MessageItem_BluefirstaidUseInvert
-											Case 3
-												BlurTimer = 5000
-												Msg = I_Loc\MessageItem_BluefirstaidUseNausea
-											Case 4
-												BlinkEffect = 0.6
-												BlinkEffectTimer = Rand(20,30)
-											Case 5
-												Bloodloss = 0
-												Injuries = 0
-												Msg = I_Loc\MessageItem_BluefirstaidUseHeal
-											Case 6
-												Msg = I_Loc\MessageItem_BluefirstaidUseHurt
-												Injuries = 3.5
-										End Select
+								Else
+									If Injuries > 0.5 Then
+										Injuries = 0.5
+										Msg = I_Loc\MessageItem_FirstaidUse2
+									Else
+										Injuries = 0.5
+										Msg = I_Loc\MessageItem_FirstaidUse1
 									EndIf
-									
-									MsgTimer = 70*5
-									RemoveItem(SelectedItem)
-								EndIf							
-							EndIf
+								EndIf
+								
+								If SelectedItem\itemtemplate\name = "firstaid2" Then 
+									Select Rand(6)
+										Case 1
+											SuperMan = True
+											Msg = I_Loc\MessageItem_BluefirstaidUseSuperman
+										Case 2
+											InvertMouse = (Not InvertMouse)
+											Msg = I_Loc\MessageItem_BluefirstaidUseInvert
+										Case 3
+											BlurTimer = 5000
+											Msg = I_Loc\MessageItem_BluefirstaidUseNausea
+										Case 4
+											BlinkEffect = 0.6
+											BlinkEffectTimer = Rand(20,30)
+										Case 5
+											Bloodloss = 0
+											Injuries = 0
+											Msg = I_Loc\MessageItem_BluefirstaidUseHeal
+										Case 6
+											Msg = I_Loc\MessageItem_BluefirstaidUseHurt
+											Injuries = 3.5
+									End Select
+								EndIf
+								
+								MsgTimer = 70*5
+								RemoveItem(SelectedItem)
+							EndIf							
 						EndIf
 					EndIf
 					;[End Block]
 				Case "eyedrops","redeyedrops"
 					;[Block]
-					If CanUseItem(False,False,False)
+					If CanUseItem(SelectedItem)
 						If (Not (Wearing714=1)) Then ;wtf is this
 							BlinkEffect = 0.6
 							BlinkEffectTimer = Rand(20,30)
@@ -5288,7 +5202,7 @@ Function DrawGUI()
 					;[End Block]
 				Case "fineeyedrops"
 					;[Block]
-					If CanUseItem(False,False,False)
+					If CanUseItem(SelectedItem)
 						If (Not (Wearing714=1)) Then 
 							BlinkEffect = 0.4
 							BlinkEffectTimer = Rand(30,40)
@@ -5300,7 +5214,7 @@ Function DrawGUI()
 					;[End Block]
 				Case "supereyedrops"
 					;[Block]
-					If CanUseItem(False,False,False)
+					If CanUseItem(SelectedItem)
 						If (Not (Wearing714 = 1)) Then
 							BlinkEffect = 0.0
 							BlinkEffectTimer = 60
@@ -5325,7 +5239,7 @@ Function DrawGUI()
 					;[End Block]
 				Case "cup"
 					;[Block]
-					If CanUseItem(False,False,True)
+					If CanUseItem(SelectedItem)
 						strtemp = SelectedItem\drinkName
 
 						Local iniStr$ = "DATA\SCP-294.ini"
@@ -5419,50 +5333,44 @@ Function DrawGUI()
 					;[End Block]
 				Case "syringe"
 					;[Block]
-					If CanUseItem(False,True,True)
-						HealTimer = 30
-						StaminaEffect = 0.5
-						StaminaEffectTimer = 20
-						
-						Msg = I_Loc\MessageItem_SyringeUse
-						MsgTimer = 70 * 8
-						
-						RemoveItem(SelectedItem)
-					EndIf
+					HealTimer = 30
+					StaminaEffect = 0.5
+					StaminaEffectTimer = 20
+					
+					Msg = I_Loc\MessageItem_SyringeUse
+					MsgTimer = 70 * 8
+					
+					RemoveItem(SelectedItem)
 					;[End Block]
 				Case "finesyringe"
 					;[Block]
-					If CanUseItem(False,True,True)
-						HealTimer = Rnd(20, 40)
-						StaminaEffect = Rnd(0.5, 0.8)
-						StaminaEffectTimer = Rnd(20, 30)
-						
-						Msg = I_Loc\MessageItem_FinesyringeUse
-						MsgTimer = 70 * 8
-						
-						RemoveItem(SelectedItem)
-					EndIf
+					HealTimer = Rnd(20, 40)
+					StaminaEffect = Rnd(0.5, 0.8)
+					StaminaEffectTimer = Rnd(20, 30)
+					
+					Msg = I_Loc\MessageItem_FinesyringeUse
+					MsgTimer = 70 * 8
+					
+					RemoveItem(SelectedItem)
 					;[End Block]
 				Case "veryfinesyringe"
 					;[Block]
-					If CanUseItem(False,True,True)
-						Select Rand(3)
-							Case 1
-								HealTimer = Rnd(40, 60)
-								StaminaEffect = 0.1
-								StaminaEffectTimer = 30
-								Msg = I_Loc\MessageItem_VeryfinesyringeUseHuge
-							Case 2
-								SuperMan = True
-								Msg = I_Loc\MessageItem_VeryfinesyringeUseVeryhuge
-							Case 3
-								VomitTimer = 30
-								Msg = I_Loc\MessageItem_VeryfinesyringeUseStomacheache
-						End Select
-						
-						MsgTimer = 70 * 8
-						RemoveItem(SelectedItem)
-					EndIf
+					Select Rand(3)
+						Case 1
+							HealTimer = Rnd(40, 60)
+							StaminaEffect = 0.1
+							StaminaEffectTimer = 30
+							Msg = I_Loc\MessageItem_VeryfinesyringeUseHuge
+						Case 2
+							SuperMan = True
+							Msg = I_Loc\MessageItem_VeryfinesyringeUseVeryhuge
+						Case 3
+							VomitTimer = 30
+							Msg = I_Loc\MessageItem_VeryfinesyringeUseStomacheache
+					End Select
+					
+					MsgTimer = 70 * 8
+					RemoveItem(SelectedItem)
 					;[End Block]
 				Case "radio","18vradio","fineradio","veryfineradio"
 					;[Block]
@@ -5796,7 +5704,7 @@ Function DrawGUI()
 					;[End Block]
 				Case "cigarette"
 					;[Block]
-					If CanUseItem(False,False,True)
+					If CanUseItem(SelectedItem)
 						If SelectedItem\state = 0 Then
 							SelectedItem\state = 1
 							Select Rand(6)
@@ -5824,7 +5732,7 @@ Function DrawGUI()
 					;[End Block]
 				Case "scp420j"
 					;[Block]
-					If CanUseItem(False,False,True)
+					If CanUseItem(SelectedItem)
 						If Wearing714=1 Then
 							Msg = I_Loc\MessageItem_420jUse714
 						Else
@@ -5840,7 +5748,7 @@ Function DrawGUI()
 					;[End Block]
 				Case "smellyjoint", "joint"
 					;[Block]
-					If CanUseItem(False,False,True)
+					If CanUseItem(SelectedItem)
 						If Wearing714=1 Then
 							Msg = I_Loc\MessageItem_420jUse714
 						Else
@@ -5854,54 +5762,48 @@ Function DrawGUI()
 					;[End Block]
 				Case "scp714"
 					;[Block]
-					If Wearing714=1 Then
+					If SelectedItem\Picked = 2 Then
 						Msg = I_Loc\MessageItem_Scp714Off
 						Wearing714 = False
-					Else If Not LostHands
+						UnequipItem(SelectedItem)
+					Else If TryEquipItem(SelectedItem)
 						GiveAchievement(Achv714)
 						Msg = I_Loc\MessageItem_Scp714On
 						Wearing714 = True
-					Else
-						Msg = I_Loc\MessageItem_Scp714Nohands
 					EndIf
 					MsgTimer = 70 * 5
 					SelectedItem = Null	
 					;[End Block]
 				Case "hazmatsuit", "hazmatsuit2", "hazmatsuit3"
 					;[Block]
-					If WearingVest = 0 Then
-						CurrSpeed = CurveValue(0, CurrSpeed, 5.0)
-						
-						DrawItemImg(SelectedItem)
-						
-						DrawItemUseProgress(SelectedItem)
-						
-						SelectedItem\state = Min(SelectedItem\state+(FPSfactor/4.0),100)
-						
-						If SelectedItem\state=100 Then
-							If WearingHazmat>0 Then
-								Msg = I_Loc\MessageItem_HazmatOff
-								WearingHazmat = False
-								DropItem(SelectedItem)
+					CurrSpeed = CurveValue(0, CurrSpeed, 5.0)
+					
+					DrawItemImg(SelectedItem)
+					
+					DrawItemUseProgress(SelectedItem)
+					
+					SelectedItem\state = Min(SelectedItem\state+(FPSfactor/4.0),100)
+					
+					If SelectedItem\state=100 Then
+						If SelectedItem\Picked=2 Then
+							Msg = I_Loc\MessageItem_HazmatOff
+							WearingHazmat = False
+							DropItem(SelectedItem)
+						Else
+							If SelectedItem\itemtemplate\name="hazmatsuit" Then
+								WearingHazmat = 1
+							ElseIf SelectedItem\itemtemplate\name="hazmatsuit2" Then
+								WearingHazmat = 2
 							Else
-								If SelectedItem\itemtemplate\name="hazmatsuit" Then
-									WearingHazmat = 1
-								ElseIf SelectedItem\itemtemplate\name="hazmatsuit2" Then
-									WearingHazmat = 2
-								Else
-									WearingHazmat = 3
-								EndIf
-								If SelectedItem\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX(SelectedItem\itemtemplate\sound))
-								Msg = I_Loc\MessageItem_HazmatOn
-								If WearingNightVision Then CameraFogFar = StoredCameraFogFar
-								WearingGasMask = 0
-								WearingNightVision = 0
-								TakeOffPumpkin()
+								WearingHazmat = 3
 							EndIf
-							SelectedItem\state=0
-							MsgTimer = 70 * 5
-							SelectedItem = Null
+							If SelectedItem\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX(SelectedItem\itemtemplate\sound))
+							Msg = I_Loc\MessageItem_HazmatOn
+							EquipItem(SelectedItem)
 						EndIf
+						SelectedItem\state=0
+						MsgTimer = 70 * 5
+						SelectedItem = Null
 					EndIf
 					;[End Block]
 				Case "vest","finevest"
@@ -5913,7 +5815,7 @@ Function DrawGUI()
 					SelectedItem\state = Min(SelectedItem\state+(FPSfactor/(2.0+(0.5*(SelectedItem\itemtemplate\name="finevest")))),100)
 					
 					If SelectedItem\state=100 Then
-						If WearingVest>0 Then
+						If SelectedItem\Picked = 2 Then
 							Msg = I_Loc\MessageItem_VestOff
 							WearingVest = False
 							DropItem(SelectedItem)
@@ -5926,6 +5828,7 @@ Function DrawGUI()
 								WearingVest = 2
 							EndIf
 							If SelectedItem\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX(SelectedItem\itemtemplate\sound))
+							EquipItem(SelectedItem)
 						EndIf
 						SelectedItem\state=0
 						MsgTimer = 70 * 5
@@ -5934,34 +5837,22 @@ Function DrawGUI()
 					;[End Block]
 				Case "gasmask", "supergasmask", "gasmask3"
 					;[Block]
-					If Wearing1499 = 0 And WearingHazmat = 0 Then
-						If WearingGasMask Then
-							Msg = I_Loc\MessageItem_GasmaskOff
-						Else
-							If SelectedItem\itemtemplate\name = "supergasmask"
-								Msg = I_Loc\MessageItem_GasmaskOnEasy
-							Else
-								Msg = I_Loc\MessageItem_GasmaskOn
-							EndIf
-							If WearingNightVision Then CameraFogFar = StoredCameraFogFar
-							WearingNightVision = 0
-							WearingGasMask = 0
-							TakeOffPumpkin()
-						EndIf
+					If SelectedItem\Picked = 2 Then
+						Msg = I_Loc\MessageItem_GasmaskOff
+						WearingGasMask = False
+						UnequipItem(SelectedItem)
+					Else If TryEquipItem(SelectedItem) Then
+						Msg = I_Loc\MessageItem_GasmaskOn
 						If SelectedItem\itemtemplate\name="gasmask3" Then
-							If WearingGasMask = 0 Then WearingGasMask = 3 Else WearingGasMask=0
+							WearingGasMask = 3
 						ElseIf SelectedItem\itemtemplate\name="supergasmask"
-							If WearingGasMask = 0 Then WearingGasMask = 2 Else WearingGasMask=0
+							WearingGasMask = 2
 						Else
-							WearingGasMask = (Not WearingGasMask)
+							WearingGasMask = 1
 						EndIf
-					ElseIf Wearing1499 > 0 Then
-						Msg = I_Loc\MessageItem_GasmaskConflictScp1499
-					Else
-						Msg = I_Loc\MessageItem_GasmaskConflictHazmat
 					EndIf
-					SelectedItem = Null
 					MsgTimer = 70 * 5
+					SelectedItem = Null
 					;[End Block]
 				Case "snav", "snav300", "snav310", "snavulti"
 					;[Block]
@@ -6183,8 +6074,7 @@ Function DrawGUI()
 				;new Items in SCP:CB 1.3
 				Case "scp1499","super1499"
 					;[Block]
-					If WearingHazmat>0
-						Msg = I_Loc\MessageItem_Scp1499ConflictHazmat
+					If Not CanUseItem(SelectedItem)
 						MsgTimer = 70 * 5
 						SelectedItem=Null
 						Return
@@ -6197,11 +6087,12 @@ Function DrawGUI()
 					SelectedItem\state = Min(SelectedItem\state+(FPSfactor),100)
 					
 					If SelectedItem\state=100 Then
-						If Wearing1499>0 Then
+						If SelectedItem\Picked = 2 Then
 							SecondaryLightOn = PrevSecondaryLightOn
 							Wearing1499 = False
 							;DropItem(SelectedItem)
 							If SelectedItem\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX(SelectedItem\itemtemplate\sound))
+							UnequipItem(SelectedItem)
 						Else
 							If SelectedItem\itemtemplate\name="scp1499" Then
 								Wearing1499 = 1
@@ -6212,10 +6103,7 @@ Function DrawGUI()
 							GiveAchievement(Achv1499)
 							PrevSecondaryLightOn = SecondaryLightOn
 							SecondaryLightOn = True
-							If WearingNightVision Then CameraFogFar = StoredCameraFogFar
-							WearingGasMask = 0
-							WearingNightVision = 0
-							TakeOffPumpkin()
+							EquipItem(SelectedItem)
 							For r.Rooms = Each Rooms
 								If r\RoomTemplate\Name = "dimension1499" Then
 									BlinkTimer = -1
@@ -6339,7 +6227,7 @@ Function DrawGUI()
 					;[End Block]
 				Case "pill"
 					;[Block]
-					If CanUseItem(False, False, True)
+					If CanUseItem(SelectedItem)
 						Msg = I_Loc\MessageItem_PillUse
 						MsgTimer = 70*7
 						
@@ -6349,7 +6237,7 @@ Function DrawGUI()
 					;[End Block]
 				Case "scp500death"
 					;[Block]
-					If CanUseItem(False, False, True)
+					If CanUseItem(SelectedItem)
 						Msg = I_Loc\MessageItem_PillUse
 						MsgTimer = 70*7
 						
@@ -6363,7 +6251,7 @@ Function DrawGUI()
 					;[End Block]
 				Case "eyecandy"
 					;[Block]
-					If CanUseItem(False, False, True)
+					If CanUseItem(SelectedItem)
 						If (Not IsHalloween) Then
 							MsgTimer = 70*10
 							Msg = I_Loc\MessageItem_EyecandyUseStale
@@ -6410,7 +6298,7 @@ Function DrawGUI()
 					;[End Block]
 				Case "lollipop"
 					;[Block]
-					If CanUseItem(False, False, True)
+					If CanUseItem(SelectedItem)
 						If IsHalloween And SteamActive And (Not UsedConsole) Then Steam_SetStatInt("candies_eaten", Steam_GetStatInt("candies_eaten") + 1)
 
 						MsgTimer = 70*10
@@ -6439,7 +6327,7 @@ Function DrawGUI()
 					;[End Block]
 				Case "chocolate"
 					;[Block]
-					If CanUseItem(False, False, True)
+					If CanUseItem(SelectedItem)
 						If IsHalloween And SteamActive And (Not UsedConsole) Then Steam_SetStatInt("candies_eaten", Steam_GetStatInt("candies_eaten") + 1)
 
 						MsgTimer = 70*10
@@ -6471,38 +6359,39 @@ Function DrawGUI()
 					;[End Block]
 				Case "pumpkin"
 					;[Block]
-					If Wearing1499 = 0 And WearingHazmat = 0 And WearingGasMask = 0 Then
-						If WearingPumpkin Then
-							Msg = I_Loc\MessageItem_PumpkinmaskOff
-							WearingPumpkin = 0
-						Else
-							If SelectedItem\state < 0 Then
-								SelectedItem\state = 0
-								If PlayerRoom\RoomTemplate\Name = "halloweenfields" Then
-									If TeleportFromHalloweenRoom() Then
-										PlaySound_Strict(HorrorSFX(11))
-										If SteamActive And (Not UsedConsole) Then Steam_Achieve("AchvHlwnLolly")
-									EndIf
+					If SelectedItem\Picked = 2 Then
+						Msg = I_Loc\MessageItem_PumpkinmaskOff
+						WearingPumpkin = False
+						NoTarget = False
+					ElseIf TryEquipItem(SelectedItem)
+						If SelectedItem\state < 0 Then
+							SelectedItem\state = 0
+							If PlayerRoom\RoomTemplate\Name = "halloweenfields" Then
+								If TeleportFromHalloweenRoom() Then
+									PlaySound_Strict(HorrorSFX(11))
+									If SteamActive And (Not UsedConsole) Then Steam_Achieve("AchvHlwnLolly")
 								EndIf
 							EndIf
-							Msg = I_Loc\MessageItem_PumpkinmaskOn
-							If WearingNightVision Then CameraFogFar = StoredCameraFogFar
-							WearingNightVision = 0
-							If AnimTime(SelectedItem\model) = 0 Then
-								WearingPumpkin = 1
-							Else
-								WearingPumpkin = 2
-							EndIf
 						EndIf
-						NoTarget = WearingPumpkin
-					Else
-						Msg = I_Loc\MessageItem_PumpkinmaskConflict
+						Msg = I_Loc\MessageItem_PumpkinmaskOn
+						If AnimTime(SelectedItem\model) = 0 Then
+							WearingPumpkin = 1
+						Else
+							WearingPumpkin = 2
+						EndIf
+						NoTarget = True
 					EndIf
 					SelectedItem = Null
 					MsgTimer = 70 * 5
 					;[End Block]
 				Case "boneflute"
 					;[Block]
+					If (Not CanUseItem(SelectedItem)) Then
+						MsgTimer = 70 * 5
+						SelectedItem = Null
+						Return
+					EndIf
+
 					PlaySound_Strict(LoadTempSound("SFX\Halloween\deathwhistle.ogg"))
 					If PlayerRoom\RoomTemplate\Name = "pocketdimension" Lor PlayerRoom\RoomTemplate\Name = "halloweenpd" Then
 						PlaySound_Strict(OldManSFX(3))
@@ -11768,29 +11657,6 @@ Function PlayStartupVideos()
 
 	PlayMovie("GFX\menu\startup_Undertow")
 	PlayMovie("GFX\menu\startup_TSS")
-End Function
-
-Function CanUseItem(canUseWithHazmat%, canUseWithGasMask%, canUseWithEyewear%)
-	If (canUseWithHazmat = False And WearingHazmat<>0) Then
-		Msg = I_Loc\MessageItem_HazmatNouse
-		MsgTimer = 70*5
-		Return False
-	ElseIf (canUseWithGasMask = False And (WearingGasMask<>0 Or Wearing1499<>0))
-		Msg = I_Loc\MessageItem_GasmaskNouse
-		MsgTimer = 70*5
-		Return False
-	ElseIf (canUseWithEyewear = False And (WearingNightVision<>0 Or WearingPumpkin<>0))
-		Msg = I_Loc\MessageItem_NvgNouse
-		MsgTimer = 70*5
-		Return False
-	EndIf
-	
-	Return True
-End Function
-
-Function TakeOffPumpkin()
-	If WearingPumpkin Then NoTarget = False
-	WearingPumpkin = False
 End Function
 
 Function ResetInput()
