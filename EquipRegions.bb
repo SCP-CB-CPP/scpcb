@@ -19,7 +19,8 @@ Function InitEquipRegionsFromFile(file$)
 			Local splitterPos = Instr(l, "=")
 			If splitterPos = 0 And Instr(l, "[") = 1 Then
 				If name <> "" Then
-					Local eqr.EquipRegions = New EquipRegions
+					Local eqr.EquipRegions = FindEquipRegion(name)
+                    If eqr = Null Then eqr = New EquipRegions
 					eqr\Name = name
                     If slots = 0 Then
                         slots = 1 Shl LastEquipSlot
