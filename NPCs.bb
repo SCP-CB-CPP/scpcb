@@ -1175,7 +1175,7 @@ Function UpdateNPCs()
 											PlaySound_Strict(HorrorSFX(5))											
 											If isInPd Then
 												DeathMSG = I_Loc\DeathMessage_106Pd
-												Kill()
+												Kill() : If Abs(DeltaYaw(Camera, n\Collider)) <= 90.0 Then KillAnim = 0 Else KillAnim = 1
 											Else
 												PlaySound_Strict(OldManSFX(3))
 												FallTimer = Min(-1, FallTimer)
@@ -1415,8 +1415,7 @@ Function UpdateNPCs()
 												CameraShake = 30
 												BlurTimer = 2000
 												DeathMSG = I_Loc\DeathMessage_096
-												Kill()
-												KillAnim = 1
+												Kill() : KillAnim = 0
 												For i = 0 To 6
 													PositionEntity pvt, EntityX(Collider)+Rnd(-0.1,0.1),EntityY(Collider)-0.05,EntityZ(Collider)+Rnd(-0.1,0.1)
 													TurnEntity pvt, 90, 0, 0
@@ -1520,6 +1519,8 @@ Function UpdateNPCs()
 							EndIf
 						Else ;play the eating animation if killtimer < 0 
 							AnimateNPC(n, Min(27,AnimTime(n\obj)), 193, 0.5)
+							PositionEntity n\Collider, CurveValue(EntityX(Head)-0.5*Sin(EntityYaw(Head)),EntityX(n\Collider),10.0),EntityY(n\Collider),CurveValue(EntityZ(Head)+0.5*Cos(EntityYaw(Head)),EntityZ(n\Collider),10.0)
+							RotateEntity n\Collider, 0, CurveAngle(EntityYaw(Head)-180.0,EntityYaw(n\Collider),20.0), 0
 							
 							;Animate2(n\obj, AnimTime(n\obj), Min(27,AnimTime(n\obj)), 193, 0.5)
 						EndIf
@@ -2040,8 +2041,8 @@ Function UpdateNPCs()
 							AnimateNPC(n, 537, 660, 0.7, False)
 							
 							;Animate2(n\obj, AnimTime(n\obj), 537, 660, 0.7, False)
-							PositionEntity n\Collider, CurveValue(EntityX(Collider),EntityX(n\Collider),20.0),EntityY(n\Collider),CurveValue(EntityZ(Collider),EntityZ(n\Collider),20.0)
-							RotateEntity n\Collider, 0, CurveAngle(EntityYaw(Collider)-180.0,EntityYaw(n\Collider),40), 0
+							PositionEntity n\Collider, CurveValue(EntityX(Head)-0.4*Sin(EntityYaw(Head)),EntityX(n\Collider),20.0),EntityY(n\Collider),CurveValue(EntityZ(Head)+0.4*Cos(EntityYaw(Head)),EntityZ(n\Collider),20.0)
+							RotateEntity n\Collider, 0, CurveAngle(EntityYaw(Head)-180.0,EntityYaw(n\Collider),40.0), 0
 
 							If KillTimer >= 0 Then n\State = 1
 							;[End Block]
@@ -3634,7 +3635,7 @@ Function UpdateNPCs()
 								
 								;Animate2(n\obj, AnimTime(n\obj), 451,493, 0.5, False)
 								If (prevFrame < 461 And n\Frame=>461) Then 
-									If KillTimer => 0 Then Kill() : KillAnim = 0
+									If KillTimer => 0 Then Kill() : If Abs(DeltaYaw(Camera, n\Collider)) <= 90.0 Then KillAnim = 0 Else KillAnim = 1
 									PlaySound_Strict(n\Sound)
 								EndIf
 								If (prevFrame < 476 And n\Frame=>476) Then PlaySound_Strict(n\Sound2)
@@ -3812,7 +3813,7 @@ Function UpdateNPCs()
 										Else
 											DeathMSG=I_Loc\DeathMessage_939
 										EndIf 
-										Kill()
+										Kill() : If Abs(DeltaYaw(Camera, n\Collider)) <= 90.0 Then KillAnim = 0 Else KillAnim = 1
 										If (Not GodMode) Then n\State = 5
 									EndIf								
 								Else
@@ -4887,7 +4888,7 @@ Function UpdateNPCs()
 										Injuries = Injuries + Rnd(0.75,1.5)
 										PlaySound2(LoadTempSound("SFX\General\Slash"+Rand(1,2)+".ogg"), Camera, n\Collider)
 										If Injuries > 10.0
-											Kill()
+											Kill() : If Abs(DeltaYaw(Camera, n\Collider)) <= 90.0 Then KillAnim = 0 Else KillAnim = 1
 											If PlayerRoom\RoomTemplate\Name$ = "dimension1499"
 												DeathMSG = I_Loc\DeathMessage_14991Dimension
 											Else
@@ -4908,7 +4909,7 @@ Function UpdateNPCs()
 										Injuries = Injuries + Rnd(0.75,1.5)
 										PlaySound2(LoadTempSound("SFX\General\Slash"+Rand(1,2)+".ogg"), Camera, n\Collider)
 										If Injuries > 10.0
-											Kill()
+											Kill() : If Abs(DeltaYaw(Camera, n\Collider)) <= 90.0 Then KillAnim = 0 Else KillAnim = 1
 											If PlayerRoom\RoomTemplate\Name$ = "dimension1499"
 												DeathMSG = I_Loc\DeathMessage_14991Dimension
 											Else
