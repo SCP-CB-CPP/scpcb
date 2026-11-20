@@ -447,11 +447,11 @@ End Function
 
 Function RemoveItem(i.Items, inGame%=True)
 	CatchErrors("Uncaught (RemoveItem)")
-	Local n
+	Local n%
 	FreeEntity(i\model) : FreeEntity(i\collider) : i\collider = 0
 	
 	If i\Picked And inGame Then
-		For n% = 0 To MaxItemAmount - 1
+		For n = 0 To MaxItemAmount - 1
 			If Inventory(n) = i
 				DebugLog "Removed "+i\itemtemplate\name+" from slot "+n
 				Inventory(n) = Null
@@ -483,7 +483,12 @@ Function RemoveItem(i.Items, inGame%=True)
 		FreeImageHUDScaled i\itemtemplate\img
 		i\itemtemplate\img = 0
 	EndIf
-	If i\Inventory <> Null Then Delete i\Inventory
+	If i\Inventory <> Null Then
+		For n = 0 To i\Inventory\Size - 1
+			If i\Inventory\Items[n] <> Null Then RemoveItem(i\Inventory\Items[n])
+		Next
+		Delete i\Inventory
+	EndIf
 	Delete i
 	
 	CatchErrors("RemoveItem")
