@@ -70,6 +70,7 @@ Type NPCs
 	Field IdleTimer#
 	Field SoundChn_IsStream%,SoundChn2_IsStream%
 	Field FallingPickDistance#
+	Field Unpushable%
 End Type
 
 Function CreateNPC.NPCs(NPCtype%, x#, y#, z#)
@@ -219,6 +220,8 @@ Function CreateNPC.NPCs(NPCtype%, x#, y#, z#)
 			MeshCullBox (n\obj, -MeshWidth(ClassDObj), -MeshHeight(ClassDObj), -MeshDepth(ClassDObj)*4, MeshWidth(ClassDObj)*2, MeshHeight(ClassDObj)*2, MeshDepth(ClassDObj)*8)
 			
 			n\CollRadius = 0.32
+			
+			n\Unpushable = True
 			;[End Block]
 		Case NPCtype372
 			;[Block]
@@ -229,6 +232,8 @@ Function CreateNPC.NPCs(NPCtype%, x#, y#, z#)
 			
 			temp# = 0.35 / MeshWidth(n\obj)
 			ScaleEntity n\obj, temp, temp, temp
+			
+			n\Unpushable = True
 			;[End Block]
 		Case NPCtype5131
 			;[Block]
@@ -243,6 +248,8 @@ Function CreateNPC.NPCs(NPCtype%, x#, y#, z#)
 			temp# = 1.8 / MeshWidth(n\obj)
 			ScaleEntity n\obj, temp, temp, temp
 			ScaleEntity n\obj2, temp, temp, temp
+			
+			n\Unpushable = True
 			;[End Block]
 		Case NPCtype096
 			;[Block]
@@ -355,6 +362,8 @@ Function CreateNPC.NPCs(NPCtype%, x#, y#, z#)
 			
 			temp# = 0.6
 			ScaleEntity n\obj, temp, temp, temp
+			
+			n\Unpushable = True
 			;[End Block]
 		Case NPCtypeTentacle
 			;[Block]
@@ -375,6 +384,8 @@ Function CreateNPC.NPCs(NPCtype%, x#, y#, z#)
 			EndIf
 			
 			SetAnimTime n\obj, 283
+			
+			n\Unpushable = True
 			;[End Block]
 		Case NPCtype860
 			;[Block]
@@ -406,6 +417,8 @@ Function CreateNPC.NPCs(NPCtype%, x#, y#, z#)
 			MeshCullBox (n\obj, -MeshWidth(n\obj)*2, -MeshHeight(n\obj)*2, -MeshDepth(n\obj)*2, MeshWidth(n\obj)*2, MeshHeight(n\obj)*4, MeshDepth(n\obj)*4)
 			
 			n\CollRadius = 0.25
+			
+			n\Unpushable = True
 			;[End Block]
 		Case NPCtype939
 			;[Block]
@@ -476,6 +489,8 @@ Function CreateNPC.NPCs(NPCtype%, x#, y#, z#)
 
 			; Waypoint count			
 			n\LastDist = 4
+			
+			n\Unpushable = True
 			;[End Block]
 		Case NPCtype066
 			;[Block]
@@ -548,6 +563,8 @@ Function CreateNPC.NPCs(NPCtype%, x#, y#, z#)
 			
 			n\Sound = LoadSound_Strict("SFX\SCP\1048A\Shriek.ogg")
 			n\Sound2 = LoadSound_Strict("SFX\SCP\1048A\Growth.ogg")
+			
+			n\Unpushable = True
 			;[End Block]
 		Case NPCtype1499
 			;[Block]
@@ -614,6 +631,8 @@ Function CreateNPC.NPCs(NPCtype%, x#, y#, z#)
 			MeshCullBox (n\obj, -MeshWidth(ClerkOBJ), -MeshHeight(ClerkOBJ), -MeshDepth(ClerkOBJ)*4.5, MeshWidth(ClerkOBJ)*2, MeshHeight(ClerkOBJ)*2, MeshDepth(ClerkOBJ)*9)
 			
 			n\CollRadius = 0.32
+			
+			n\Unpushable = True
 			;[End Block]
 	End Select
 	
@@ -6955,7 +6974,7 @@ Function UpdateMTFUnit(n.NPCs)
 				EndIf
 			Else
 				For n2.NPCs = Each NPCs
-					If n2<>n And n2\IsDead=False Then
+					If n2<>n And n2\IsDead=False And n2\Unpushable=False Then
 						If Abs(DeltaYaw(n\Collider,n2\Collider))<80.0 Then
 							If EntityDistance(n\Collider,n2\Collider)<0.7 Then							
 								TranslateEntity n2\Collider, Cos(EntityYaw(n\Collider,True)+90)* 0.01 * FPSfactor, 0, Sin(EntityYaw(n\Collider,True)+90)* 0.01 * FPSfactor, True
