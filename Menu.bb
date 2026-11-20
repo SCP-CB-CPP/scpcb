@@ -11,9 +11,14 @@ ScaleImage(Menu173, MenuScale, MenuScale)
 For i = 0 To 3
 	ArrowIMG(i) = LoadImageHUDScaled("GFX\menu\arrow.png")
 	RotateImage(ArrowIMG(i), 90 * i)
+	HandleImage(ArrowIMG(i), 0, 0)
 Next
-Global MenuArrowIMG% = LoadImage_Strict("GFX\menu\arrow.png", MenuScale)
-RotateImage(MenuArrowIMG, 90)
+Global MenuArrowIMG%[4]
+For i = 0 To 3
+	MenuArrowIMG[i] = LoadImage_Strict("GFX\menu\arrow.png", MenuScale)
+	RotateImage(MenuArrowIMG[i], 90 * i)
+	HandleImage(MenuArrowIMG[i], 0, 0)
+Next
 
 Global RandomSeed$, RandomSeedNumeric%, HasNumericSeed%
 Function GetRandomSeed%()
@@ -81,7 +86,7 @@ Global ShouldKeepModDescription% = True
 Global ModsDirty% = False
 Global SelectedMod.Mods
 Global NewModBlink% = LoadImage_Strict("GFX\newmod.png")
-ResizeImage(NewModBlink, 24 * MenuScale, 24 * MenuScale)
+ResizeImageFast(NewModBlink, 24 * MenuScale, 24 * MenuScale)
 
 Function EllipsisLeft$(txt$, maxLen%)
 	If Len(txt) > maxLen Then Return Left(txt, maxLen-3) + "…"
@@ -398,9 +403,9 @@ Function UpdateMainMenu()
 					
 					;Other factor's difficulty
 					Color 255,255,255
-					DrawImage MenuArrowIMG,x + 155 * MenuScale, y+251*MenuScale
+					DrawImage MenuArrowIMG[1],x + 155 * MenuScale, y+251*MenuScale
 					If MouseHit1
-						If ImageRectOverlap(MenuArrowIMG,x + 155 * MenuScale, y+251*MenuScale, ScaledMouseX(),ScaledMouseY(),0,0)
+						If ImageRectOverlap(MenuArrowIMG[1],x + 155 * MenuScale, y+251*MenuScale, ScaledMouseX(),ScaledMouseY(),0,0)
 							If SelectedDifficulty\otherFactors < HARD
 								SelectedDifficulty\otherFactors = SelectedDifficulty\otherFactors + 1
 							Else
@@ -1270,16 +1275,16 @@ Function UpdateMainMenu()
 
 								DrawFrame(x,y,490* MenuScale, 70 * MenuScale)
 								If m\Icon = 0 And m\Iconpath <> "" Then
-									m\Icon = LoadImage_Strict(m\IconPath, 0, 3)
-									m\DisabledIcon = CreateGrayScaleImage(m\Icon)
+									m\Icon = LoadImage_Strict(m\IconPath)
 									ResizeImage(m\Icon, 64 * MenuScale, 64 * MenuScale)
-									ResizeImage(m\DisabledIcon, 64 * MenuScale, 64 * MenuScale)
 								EndIf
 
 								If m\Icon <> 0 Then
-									Local ico%
-									If m\IsActive Then ico = m\Icon Else ico = m\DisabledIcon
-									DrawImage(ico, x + 3 * MenuScale, y + 3 * MenuScale)
+									If m\IsActive
+										DrawImageGrayscale(m\Icon, x + 3 * MenuScale, y + 3 * MenuScale, False)
+									Else
+										DrawImageGrayscale(m\Icon, x + 3 * MenuScale, y + 3 * MenuScale, True)
+									EndIf
 								EndIf
 
 								If m\IsNew And milis Mod 1200 >= 600 Then DrawImage(NewModBlink, x + 2 * MenuScale, y + 2 * MenuScale)
@@ -1541,22 +1546,12 @@ Function DrawTagSelection(x%, y%, width%)
 	Next
 End Function
 
-Function CreateGrayScaleImage%(img%)
-	Local ret% = CreateImage(ImageWidth(img), ImageHeight(img), 1, 3)
-	Local rbuf% = ImageBuffer(img)
-	Local buf% = ImageBuffer(ret)
-	LockBuffer(rbuf)
-	LockBuffer(buf)
-	For x = 0 To BufferWidth(rbuf)-1
-		For y = 0 To BufferHeight(rbuf)-1
-			Local color% = ReadPixelFast(x, y, rbuf)
-			Local g% = ((color Shr 16) And 255) * 0.21 + ((color Shr 8) And 255) * 0.72 + (color And 255) * 0.07
-			WritePixelFast(x, y, (color And $FF000000) + (g Shl 16) + (g Shl 8) + g, buf)
-		Next
-	Next
-	UnlockBuffer(rbuf)
-	UnlockBuffer(buf)
-	Return ret
+Function DrawImageGrayscale(img%, x%, y%, grayscale%, frame% = 0)
+    If img = 0 Or GrayScaleFX = 0 Then Return
+    SetEffectFloat(GrayScaleFX, "GrayscaleEnable", Float(grayscale))
+    Set2DEffect(GrayScaleFX)
+    DrawImage(img, x, y, frame)
+    Clear2DEffect()
 End Function
 
 Dim AspectRatioWidths%(0), AspectRatioHeights%(0)
