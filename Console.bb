@@ -462,20 +462,16 @@ Function ExecuteConsoleCommand(cmd$, quiet% = False)
             ;[End Block]
         Case "giveitem"
             ;[Block]
-            If ItemAmount >= MaxItemAmount Then
-                CreateConsoleMsg("No free inventory slot.",255,150,0)
+            itt.ItemTemplates = FindItemTemplate(Right(cmd, Len(cmd) - Instr(cmd, " ")))
+            If itt = Null Then
+                CreateConsoleMsg("Item not found.",255,150,0)
+            Elseif itt\name = "cup"
+                CreateConsoleMsg("To spawn SCP-294 drinks, use the spawncup command.",255,150,0)
             Else
-                itt.ItemTemplates = FindItemTemplate(Right(cmd, Len(cmd) - Instr(cmd, " ")))
-                If itt = Null Then
-                    CreateConsoleMsg("Item not found.",255,150,0)
-                Elseif itt\name = "cup"
-                    CreateConsoleMsg("To spawn SCP-294 drinks, use the spawncup command.",255,150,0)
-                Else
-                    CreateConsoleMsg(itt\displayname + " given.")
-                    it.Items = CreateItem(itt\name, EntityX(Collider), EntityY(Camera,True), EntityZ(Collider))
-                    PickItem(it)
-                End If
-            EndIf
+                CreateConsoleMsg(itt\displayname + " given.")
+                it.Items = CreateItem(itt\name, EntityX(Collider), EntityY(Camera,True), EntityZ(Collider))
+                PickItem(it)
+            End If
             ;[End Block]
         Case "itemlist", "items"
             CreateConsoleMsg("Listing items:")
