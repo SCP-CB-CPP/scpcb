@@ -6616,10 +6616,6 @@ Function ResetDiseases()
 	EndIf
 End Function
 
-Function CanUseItem%(as%, A%, b%)
-	Return TRue
-End Function
-
 Function DrawHUD()
 	If SpeedRunMode Then DrawTimer()
 
