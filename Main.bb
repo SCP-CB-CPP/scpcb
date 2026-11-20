@@ -4952,9 +4952,9 @@ Function DrawGUI()
 						StoredCameraFogFar = CameraFogFar
 						CameraFogFar = 30
 						If SelectedItem\itemtemplate\name="supernv" Then
-							WearingNightVision = 3
-						ElseIf SelectedItem\itemtemplate\name="finenvgoggles"
 							WearingNightVision = 2
+						ElseIf SelectedItem\itemtemplate\name="finenvgoggles"
+							WearingNightVision = 3
 						Else
 							WearingNightVision = 1
 						EndIf
