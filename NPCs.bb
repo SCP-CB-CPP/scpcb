@@ -5372,7 +5372,6 @@ Function Sees096Face%(n.NPCs, isSitting%=False)
 	Else
 		Return False
 	EndIf
-	Return (Not NoTarget) And (angle < 55 Lor angle > 360-55) And EntityVisible(Camera, n\obj2) And EntityInView(n\obj2, Camera) And (BlinkTimer < - 16 Lor BlinkTimer > - 6) And (Not IsNVGBlinking)
 End Function
 
 Function TeleportMTFGroup(n.NPCs)

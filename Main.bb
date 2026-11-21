@@ -1,4 +1,4 @@
-Const VersionNumber$ = "1.3.12.7.1"
+Const VersionNumber$ = "1.3.12.8"
 ;Only change this if the version given isn't working with the current build version - ENDSHN
 Const CompatibleNumber$ = "1.3.12.7.1"
 
@@ -3490,7 +3490,7 @@ Function MovePlayer()
 	Local temp#
 	
 	If PlayerRoom\RoomTemplate\Name<>"pocketdimension" Then 
-		If KeyDown(KEY_SPRINT) Then
+		If KeyDown(KEY_SPRINT) And (Not Crouch) Then
 			If Stamina < 5 Then
 				temp = 0
 				If WearingGasMask>0 Or Wearing1499>0 Then temp=1
@@ -3871,7 +3871,7 @@ Function MouseLook(handleInput% = True)
 		
 		If PlayerRoom\RoomTemplate\Name = "pocketdimension" Lor PlayerRoom\RoomTemplate\Name = "halloweenpd" Then
 			If EntityY(Collider)<2000*RoomScale Or EntityY(Collider)>2608*RoomScale Then
-				RotateEntity Camera, WrapAngle(EntityPitch(Camera)),WrapAngle(EntityYaw(Camera)), roll+WrapAngle(Sin(MilliSecs()/150.0)*30.0)*ViewBobScale ; Pitch the user;s camera up And down.
+				RotateEntity Camera, WrapAngle(EntityPitch(Camera)),WrapAngle(EntityYaw(Camera)), roll+WrapAngle(Sin(MilliSecs()/150.0)*30.0*ViewBobScale) ; Pitch the user;s camera up And down.
 			EndIf
 		EndIf
 		
@@ -4474,7 +4474,7 @@ Function DrawGUI()
 							MouseHit1 = False
 							
 							If DoubleClick Then
-								If OtherOpen\Inventory\Items[n]\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX(OtherOpen\Inventory\Items[n]\itemtemplate\sound))
+								PlayPickSound(OtherOpen\Inventory\Items[n])
 								OtherOpen = Null
 								closedInv=True
 								InvOpen = False
@@ -4517,54 +4517,19 @@ Function DrawGUI()
 				EndIf
 			Else
 				If MouseSlot = 66 Then
-					If SelectedItem\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX(SelectedItem\itemtemplate\sound))
-					
-					ShowEntity(SelectedItem\collider)
-					PositionEntity(SelectedItem\collider, EntityX(Camera), EntityY(Camera), EntityZ(Camera))
-					RotateEntity(SelectedItem\collider, EntityPitch(Camera), EntityYaw(Camera), 0)
-					MoveEntity(SelectedItem\collider, 0, -0.1, 0.1)
-					RotateEntity(SelectedItem\collider, 0, Rand(360), 0)
-					ResetEntity (SelectedItem\collider)
-					;move the item so that it doesn't overlap with other items
-					;For it.Items = Each Items
-					;	If it <> SelectedItem And it\Picked = False Then
-					;		x = Abs(EntityX(SelectedItem\collider, True)-EntityX(it\collider, True))
-					;		If x < 0.2 Then 
-					;			z = Abs(EntityZ(SelectedItem\collider, True)-EntityZ(it\collider, True))
-					;			If z < 0.2 Then
-					;				While (x+z)<0.25
-					;					MoveEntity(SelectedItem\collider, 0, 0, 0.025)
-					;					x = Abs(EntityX(SelectedItem\collider, True)-EntityX(it\collider, True))
-					;					z = Abs(EntityZ(SelectedItem\collider, True)-EntityZ(it\collider, True))
-					;				Wend
-					;			EndIf
-					;		EndIf
-					;	EndIf
-					;Next
-					
-					SelectedItem\DropSpeed = 0.0
-					
-					SelectedItem\Picked = False
-					For z% = 0 To OtherSize - 1
-						If OtherOpen\Inventory\Items[z] = SelectedItem Then
-							OtherOpen\Inventory\Items[z] = Null
-							Exit
-						EndIf
-					Next
+					DropItem(SelectedItem)
 					
 					isEmpty=True
 					If OtherOpen\itemtemplate\name = "wallet" Then
-						If (Not isEmpty) Then
-							For z% = 0 To OtherSize - 1
-								If OtherOpen\Inventory\Items[z]<>Null
-									Local name$=OtherOpen\Inventory\Items[z]\itemtemplate\name
-									If name$<>"25ct" And name$<>"coin" And name$<>"key" And name$<>"scp860" Then
-										isEmpty=False
-										Exit
-									EndIf
+						For z% = 0 To OtherSize - 1
+							If OtherOpen\Inventory\Items[z]<>Null
+								Local name$=OtherOpen\Inventory\Items[z]\itemtemplate\name
+								If name$<>"25ct" And name$<>"coin" And name$<>"key" And name$<>"scp860" Then
+									isEmpty=False
+									Exit
 								EndIf
-							Next
-						EndIf
+							EndIf
+						Next
 					Else
 						For z% = 0 To OtherSize - 1
 							If OtherOpen\Inventory\Items[z]<>Null
@@ -4705,7 +4670,7 @@ Function DrawGUI()
 									SelectedItem = Null
 									Return
 								EndIf
-								If Inventory(n)\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX(Inventory(n)\itemtemplate\sound))
+								PlayPickSound(Inventory(n))
 								InvOpen = False
 								DoubleClick = False
 							EndIf
@@ -4802,7 +4767,7 @@ Function DrawGUI()
 													For ri% = 0 To MaxItemAmount - 1
 														If Inventory(ri) = SelectedItem Then
 															Inventory(ri) = Null
-															PlaySound_Strict(PickSFX(SelectedItem\itemtemplate\sound))
+															PlayPickSound(SelectedItem)
 															Exit
 														EndIf
 													Next
@@ -4829,7 +4794,7 @@ Function DrawGUI()
 										MsgTimer = 70 * 5
 									EndIf
 								ElseIf Inventory(MouseSlot)\itemtemplate\name = "wallet" Then
-									;Add an item to clipboard
+									;Add an item to wallet
 									added.Items = Null
 									b$ = SelectedItem\itemtemplate\group
 									b2$ = SelectedItem\itemtemplate\name
@@ -4847,7 +4812,7 @@ Function DrawGUI()
 													For ri% = 0 To MaxItemAmount - 1
 														If Inventory(ri) = SelectedItem Then
 															Inventory(ri) = Null
-															PlaySound_Strict(PickSFX(SelectedItem\itemtemplate\sound))
+															PlayPickSound(SelectedItem)
 															Exit
 														EndIf
 													Next
@@ -4878,7 +4843,7 @@ Function DrawGUI()
 								;[Block]
 								Select Inventory(MouseSlot)\itemtemplate\name
 									Case "snav", "snav300", "snav310"
-										If SelectedItem\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX(SelectedItem\itemtemplate\sound))	
+										PlayPickSound(SelectedItem)
 										RemoveItem (SelectedItem)
 										SelectedItem = Null
 										Inventory(MouseSlot)\state = 100.0
@@ -4888,7 +4853,7 @@ Function DrawGUI()
 										Msg = I_Loc\MessageItem_NavBatNoplace
 										MsgTimer = 70 * 5
 									Case "radio"
-										If SelectedItem\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX(SelectedItem\itemtemplate\sound))	
+										PlayPickSound(SelectedItem)
 										RemoveItem (SelectedItem)
 										SelectedItem = Null
 										Inventory(MouseSlot)\state = 100.0
@@ -4901,7 +4866,7 @@ Function DrawGUI()
 										Msg = I_Loc\MessageItem_RadioBatNofit
 										MsgTimer = 70 * 5
 									Case "supernv", "nvgoggles"
-										If SelectedItem\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX(SelectedItem\itemtemplate\sound))	
+										PlayPickSound(SelectedItem)
 										RemoveItem (SelectedItem)
 										SelectedItem = Null
 										Inventory(MouseSlot)\state = 1000.0
@@ -4931,7 +4896,7 @@ Function DrawGUI()
 										Msg = I_Loc\MessageItem_RadioBatNoplace
 										MsgTimer = 70 * 5
 									Case "18vradio"
-										If SelectedItem\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX(SelectedItem\itemtemplate\sound))	
+										PlayPickSound(SelectedItem)
 										RemoveItem (SelectedItem)
 										SelectedItem = Null
 										Inventory(MouseSlot)\state = 100.0
@@ -4946,7 +4911,7 @@ Function DrawGUI()
 								;[Block]
 								Select Inventory(MouseSlot)\itemtemplate\name
 									Case "snav", "snav300", "snav310"
-										If SelectedItem\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX(SelectedItem\itemtemplate\sound))	
+										PlayPickSound(SelectedItem)
 										RemoveItem (SelectedItem)
 										SelectedItem = Null
 										Inventory(MouseSlot)\state = INFINITY
@@ -4956,7 +4921,7 @@ Function DrawGUI()
 										Msg = I_Loc\MessageItem_NavBatNoplace
 										MsgTimer = 70 * 5
 									Case "radio"
-										If SelectedItem\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX(SelectedItem\itemtemplate\sound))	
+										PlayPickSound(SelectedItem)
 										RemoveItem (SelectedItem)
 										SelectedItem = Null
 										Inventory(MouseSlot)\state = INFINITY
@@ -4966,14 +4931,14 @@ Function DrawGUI()
 										Msg = I_Loc\MessageItem_RadioBatNoplace
 										MsgTimer = 70 * 5
 									Case "18vradio"
-										If SelectedItem\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX(SelectedItem\itemtemplate\sound))	
+										PlayPickSound(SelectedItem)
 										RemoveItem (SelectedItem)
 										SelectedItem = Null
 										Inventory(MouseSlot)\state = INFINITY
 										Msg = I_Loc\MessageItem_RadioBatReplace
 										MsgTimer = 70 * 5
 									Case "supernv", "nvgoggles"
-										If SelectedItem\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX(SelectedItem\itemtemplate\sound))	
+										PlayPickSound(SelectedItem)
 										RemoveItem (SelectedItem)
 										SelectedItem = Null
 										Inventory(MouseSlot)\state = INFINITY
@@ -5926,7 +5891,7 @@ Function DrawGUI()
 								Else
 									WearingHazmat = 3
 								EndIf
-								If SelectedItem\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX(SelectedItem\itemtemplate\sound))
+								PlayPickSound(SelectedItem)
 								Msg = I_Loc\MessageItem_HazmatOn
 								If WearingNightVision Then CameraFogFar = StoredCameraFogFar
 								WearingGasMask = 0
@@ -5960,7 +5925,7 @@ Function DrawGUI()
 								Msg = I_Loc\MessageItem_VestOnHeavy
 								WearingVest = 2
 							EndIf
-							If SelectedItem\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX(SelectedItem\itemtemplate\sound))
+							PlayPickSound(SelectedItem)
 						EndIf
 						SelectedItem\state=0
 						MsgTimer = 70 * 5
@@ -6236,14 +6201,14 @@ Function DrawGUI()
 							SecondaryLightOn = PrevSecondaryLightOn
 							Wearing1499 = False
 							;DropItem(SelectedItem)
-							If SelectedItem\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX(SelectedItem\itemtemplate\sound))
+							PlayPickSound(SelectedItem)
 						Else
 							If SelectedItem\itemtemplate\name="scp1499" Then
 								Wearing1499 = 1
 							Else
 								Wearing1499 = 2
 							EndIf
-							If SelectedItem\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX(SelectedItem\itemtemplate\sound))
+							PlayPickSound(SelectedItem)
 							GiveAchievement(Achv1499)
 							PrevSecondaryLightOn = SecondaryLightOn
 							SecondaryLightOn = True
@@ -6660,7 +6625,7 @@ Function DrawGUI()
 					;EndIf
 				EndIf
 				
-				If SelectedItem\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX(SelectedItem\itemtemplate\sound))
+				PlayPickSound(SelectedItem)
 				SelectedItem = Null
 			EndIf
 		End If		
@@ -6892,8 +6857,9 @@ Function DrawMap()
 	Local startX% = HUDEndX - (MapWidth + 1) * cellSize
 	Local startY% = HUDEndY - (MapHeight + 1) * cellSize
 
+	Local hoveredRoom.Rooms
 	For r.Rooms = Each Rooms					
-		If PlayerRoom\x = r\x And PlayerRoom\z = r\z Then
+		If PlayerRoom = r Then
 			Color 0, 255, 0
 		Else
 			Color r\RoomTemplate\r, r\RoomTemplate\g, r\RoomTemplate\b
@@ -6902,13 +6868,65 @@ Function DrawMap()
 		Local x% = startX + ((18 - (r\x / 8)) * cellSize)
 		Local y% = startY + ((r\z / 8) * cellSize)
 
-		If MouseOn(x, y, cellSize, cellSize) 
+		If MouseOn(x, y, cellSize+1, cellSize+1) 
+			hoveredRoom = r
 			Color 100, 255, 100
 			If MouseHit1
 				Teleport(r)
 			EndIf
 		EndIf
 		Rect(x, y, cellSize, cellSize, 1)
+	Next
+
+	If hoveredRoom = Null Then Return
+
+	Local isSelected% = KeyDown(29)
+	Local lines% = 1
+	For e.Events = Each Events
+		If e\room = hoveredRoom Then
+			lines = lines + 1
+			If isSelected Then lines = lines + 4
+			Exit
+		EndIf
+	Next
+	Local height% = StringHeight("T")
+	Local mx% = MouseX() + 5, my% = MouseY() + 21
+	Local totalWidth% = 0
+	For action% = 0 To 1
+		For strNo% = 0 To lines-1
+			Local line$
+			Select strNo
+				Case 0 line = hoveredRoom\RoomTemplate\Name
+				Case 1 line = "Event: " + e\EventName
+				Case 2 line = "State: " + e\EventState
+				Case 3 line = "State2: " + e\EventState2
+				Case 4 line = "State3: " + e\EventState3
+				Case 5 line = "String: " + e\EventStr
+			End Select
+
+			If action = 0 Then
+				Local lineWidth% = StringWidth(line)
+				If strNo = 0 Then lineWidth = lineWidth + ImageWidth(MenuArrowIMG) + 5*MenuScale
+				totalWidth = Max(totalWidth, lineWidth)
+			Else
+				Text(mx+10*MenuScale, my+10*MenuScale + strNo*height, line)
+				If strNo = 0 Then
+					RotateImage(MenuArrowIMG, hoveredRoom\angle)
+					DrawImage(MenuArrowIMG, mx+10*MenuScale+StringWidth(line)+2.5*MenuScale, my+10*MenuScale + strNo*height - height * 1 / 3)
+					RotateImage(MenuArrowIMG, 90)
+				EndIf
+			EndIf
+		Next
+		If action = 0 Then
+			totalWidth = totalWidth + 20 * MenuScale
+			Local totalHeight = (height*lines)+(15+lines)*MenuScale
+			; Center below cursor
+			mx = mx - totalWidth / 2
+			; Cap at screen edge
+			If mx + totalWidth > GraphicWidth Then mx = GraphicWidth - totalWidth
+			If my + totalHeight > GraphicHeight Then my = GraphicHeight - totalHeight
+			DrawFrame(mx,my,totalWidth,totalHeight, 0, 0, False)
+		EndIf
 	Next
 End Function
 
@@ -8766,6 +8784,7 @@ Function NullGame(playbuttonsfx%=True)
 		FreeImageHUDScaled(itt\invimg)
 		If itt\invimg2 <> 0 Then FreeImageHUDScaled(itt\invimg2)
 		If itt\img <> 0 Then FreeImageHUDScaled(itt\img)
+		If itt\customSoundPath <> "" Then FreeSound_Strict(itt\sound)
 		Delete itt
 	Next
 
@@ -9298,7 +9317,13 @@ End Function
 ;--------------------------------------- random -------------------------------------------------------
 
 Function f2s$(n#, count%)
-	Return Left(n, Len(Int(Str(n)))+count+1)
+	Local targetSize% = Len(Int(Str(n)))+count+1
+	Local ret$ = Left(n, targetSize)
+	If Len(ret) < targetSize Then
+		If Instr(ret, ".") = 0 Then ret = ret + "."
+		ret = ret + String("0", targetSize - Len(ret))
+	EndIf
+	Return ret
 End Function
 
 Function AnimateNPC(n.NPCs, start#, quit#, speed#, loop=True)
@@ -9750,7 +9775,6 @@ Function Use914(item.Items, setting$, x#, y#, z#)
 					it2\state = 100
 				Case "very fine"
 					it2 = CreateItem("snavulti", x, y, z)
-					it2\state = 101
 			End Select
 			
 			RemoveItem(item)
@@ -9763,10 +9787,8 @@ Function Use914(item.Items, setting$, x#, y#, z#)
 					it2\state = 100
 				Case "fine"
 					it2 = CreateItem("fineradio", x, y, z)
-					it2\state = 101
 				Case "very fine"
 					it2 = CreateItem("veryfineradio", x, y, z)
-					it2\state = 101
 			End Select
 			
 			RemoveItem(item)
@@ -11373,10 +11395,10 @@ Function RenderWorld2()
 			Local plusY% = 0
 			If hasBattery=1 Then plusY% = 40
 			
-			Text GraphicWidth/2,HUDStartY+(20+plusY)*HUDScale,I_Loc\HUD_NvgRefresh,True,False
+			Text GraphicWidth/2,HUDStartY+(16+plusY)*HUDScale,I_Loc\HUD_NvgRefresh,True,False
 			
-			Text GraphicWidth/2,HUDStartY+(60+plusY)*HUDScale,Max(f2s(NVTimer/60.0,1),0.0),True,False
-			Text GraphicWidth/2,HUDStartY+(100+plusY)*HUDScale,I_Loc\HUD_NvgRefreshSeconds,True,False
+			Text GraphicWidth/2,HUDStartY+(44+plusY)*HUDScale,f2s(Max(NVTimer/60.0,0.0),1),True,False
+			Text GraphicWidth/2,HUDStartY+(72+plusY)*HUDScale,I_Loc\HUD_NvgRefreshSeconds,True,False
 			
 			Local temp% = CreatePivot(), temp2% = CreatePivot()
 			PositionEntity temp, EntityX(Collider), EntityY(Collider), EntityZ(Collider)

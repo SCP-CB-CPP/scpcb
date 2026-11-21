@@ -2140,13 +2140,14 @@ Function FillRoom(r.Rooms)
 			PositionEntity r\Objects[2],r\x + 184.0 * RoomScale,0,r\z,True
 			ScaleEntity r\Objects[2],45.0*RoomScale,45.0*RoomScale,80.0*RoomScale,True
 			EntityParent r\Objects[2],r\obj
+			EntityPickMode r\Objects[2],2
 			
 			r\Objects[3] =  LoadMesh_Strict("GFX\map\forest\door.b3d")
 			PositionEntity r\Objects[3],r\x + 112.0 * RoomScale,0,r\z+0.05,True
 			EntityType r\Objects[3], HIT_MAP
-			
 			ScaleEntity r\Objects[3],46.0*RoomScale,45.0*RoomScale,46.0*RoomScale,True
 			EntityParent r\Objects[3],r\obj
+			EntityPickMode r\Objects[3],2
 			
 			r\Objects[4] = CopyEntity(r\Objects[3])
 			PositionEntity r\Objects[4],r\x + 256.0 * RoomScale,0,r\z-0.05,True
@@ -3769,6 +3770,14 @@ Function FillRoom(r.Rooms)
 			
 			r\Objects[9]=CreatePivot(r\obj)
 			PositionEntity(r\Objects[9], r\x - 848*RoomScale, 0.5, r\z+576*RoomScale, True)
+
+			r\Objects[10]=CreateCube(r\obj)
+			PositionEntity(r\Objects[10], r\x - 205*RoomScale, 0.5, r\z, True)
+			ScaleEntity(r\Objects[10], 1.0, 1.0 / RoomScale, 2.0 / RoomScale)
+			EntityType(r\Objects[10], HIT_MAP)
+			EntityPickMode(r\Objects[10], 2)
+			EntityAlpha(r\Objects[10], 0)
+			HideEntity(r\Objects[10])
 			;[End Block]
 		Case "room3servers"
 			;[Block]
@@ -4830,6 +4839,7 @@ Function FillRoom(r.Rooms)
 			RotateEntity r\Objects[8],0,90,0,True
 			ScaleEntity r\Objects[8],45.0*RoomScale,45.0*RoomScale,80.0*RoomScale,True
 			EntityParent r\Objects[8],r\obj
+			EntityPickMode r\Objects[8],2
 			
 			r\Objects[9] =  LoadMesh_Strict("GFX\map\forest\door.b3d")
 			PositionEntity r\Objects[9],r\x - 272.0 * RoomScale, 512.0 * RoomScale, r\z + (288.0-70) * RoomScale,True
@@ -4837,12 +4847,14 @@ Function FillRoom(r.Rooms)
 			EntityType r\Objects[9], HIT_MAP
 			ScaleEntity r\Objects[9],46.0*RoomScale,45.0*RoomScale,46.0*RoomScale,True
 			EntityParent r\Objects[9],r\obj
+			EntityPickMode r\Objects[9],2
 			
 			r\Objects[10] = CopyEntity(r\Objects[8])
 			PositionEntity r\Objects[10], r\x - 272.0 * RoomScale, 512.0 * RoomScale, r\z + 736.0 * RoomScale,True
 			RotateEntity r\Objects[10],0,90,0,True
 			ScaleEntity r\Objects[10],45.0*RoomScale,45.0*RoomScale,80.0*RoomScale,True
 			EntityParent r\Objects[10],r\obj
+			EntityPickMode r\Objects[10],2
 			
 			r\Objects[11] =  CopyEntity(r\Objects[9])
 			PositionEntity r\Objects[11],r\x - 272.0 * RoomScale, 512.0 * RoomScale, r\z + (736.0-70) * RoomScale,True
@@ -4850,12 +4862,14 @@ Function FillRoom(r.Rooms)
 			EntityType r\Objects[11], HIT_MAP
 			ScaleEntity r\Objects[11],46.0*RoomScale,45.0*RoomScale,46.0*RoomScale,True
 			EntityParent r\Objects[11],r\obj
+			EntityPickMode r\Objects[11],2
 			
 			r\Objects[12] = CopyEntity(r\Objects[8])
 			PositionEntity r\Objects[12], r\x - 592.0 * RoomScale, 512.0 * RoomScale, r\z - 704.0 * RoomScale,True
 			RotateEntity r\Objects[12],0,0,0,True
 			ScaleEntity r\Objects[12],45.0*RoomScale,45.0*RoomScale,80.0*RoomScale,True
 			EntityParent r\Objects[12],r\obj
+			EntityPickMode r\Objects[12],2
 			
 			r\Objects[13] =  CopyEntity(r\Objects[9])
 			PositionEntity r\Objects[13],r\x - (592.0+70.0) * RoomScale, 512.0 * RoomScale, r\z - 704.0 * RoomScale,True
@@ -4863,6 +4877,7 @@ Function FillRoom(r.Rooms)
 			EntityType r\Objects[13], HIT_MAP
 			ScaleEntity r\Objects[13],46.0*RoomScale,45.0*RoomScale,46.0*RoomScale,True
 			EntityParent r\Objects[13],r\obj	
+			EntityPickMode r\Objects[13],2
 			
 			r\Objects[14] = LoadMesh_Strict("GFX\map\1123_hb.b3d",r\obj)
 			EntityPickMode r\Objects[14],2
@@ -5544,6 +5559,8 @@ Function FillRoom(r.Rooms)
 			Else
 				tree = LoadMesh_Strict("GFX\map\forest\detail\treetest4.b3d")
 				leaves = LoadMesh_Strict("GFX\map\forest\detail\treetest5.b3d")
+				EntityEffect tree, InstanceEffect
+				EntityEffect leaves, InstanceEffect
 			EndIf
 			PlaceForestProps(terr, hmap, MeshWidth(terr), 0.05, tree, leaves, pumpkin, 100, 800, 186, 5, 0.8, 1.2)
 			If fr = Null Then
