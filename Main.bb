@@ -4474,7 +4474,7 @@ Function DrawGUI()
 							MouseHit1 = False
 							
 							If DoubleClick Then
-								If OtherOpen\Inventory\Items[n]\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX(OtherOpen\Inventory\Items[n]\itemtemplate\sound))
+								PlayPickSound(OtherOpen\Inventory\Items[n])
 								OtherOpen = Null
 								closedInv=True
 								InvOpen = False
@@ -4670,7 +4670,7 @@ Function DrawGUI()
 									SelectedItem = Null
 									Return
 								EndIf
-								If Inventory(n)\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX(Inventory(n)\itemtemplate\sound))
+								PlayPickSound(Inventory(n))
 								InvOpen = False
 								DoubleClick = False
 							EndIf
@@ -4767,7 +4767,7 @@ Function DrawGUI()
 													For ri% = 0 To MaxItemAmount - 1
 														If Inventory(ri) = SelectedItem Then
 															Inventory(ri) = Null
-															PlaySound_Strict(PickSFX(SelectedItem\itemtemplate\sound))
+															PlayPickSound(SelectedItem)
 															Exit
 														EndIf
 													Next
@@ -4812,7 +4812,7 @@ Function DrawGUI()
 													For ri% = 0 To MaxItemAmount - 1
 														If Inventory(ri) = SelectedItem Then
 															Inventory(ri) = Null
-															PlaySound_Strict(PickSFX(SelectedItem\itemtemplate\sound))
+															PlayPickSound(SelectedItem)
 															Exit
 														EndIf
 													Next
@@ -4843,7 +4843,7 @@ Function DrawGUI()
 								;[Block]
 								Select Inventory(MouseSlot)\itemtemplate\name
 									Case "snav", "snav300", "snav310"
-										If SelectedItem\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX(SelectedItem\itemtemplate\sound))	
+										PlayPickSound(SelectedItem)
 										RemoveItem (SelectedItem)
 										SelectedItem = Null
 										Inventory(MouseSlot)\state = 100.0
@@ -4853,7 +4853,7 @@ Function DrawGUI()
 										Msg = I_Loc\MessageItem_NavBatNoplace
 										MsgTimer = 70 * 5
 									Case "radio"
-										If SelectedItem\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX(SelectedItem\itemtemplate\sound))	
+										PlayPickSound(SelectedItem)
 										RemoveItem (SelectedItem)
 										SelectedItem = Null
 										Inventory(MouseSlot)\state = 100.0
@@ -4866,7 +4866,7 @@ Function DrawGUI()
 										Msg = I_Loc\MessageItem_RadioBatNofit
 										MsgTimer = 70 * 5
 									Case "supernv", "nvgoggles"
-										If SelectedItem\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX(SelectedItem\itemtemplate\sound))	
+										PlayPickSound(SelectedItem)
 										RemoveItem (SelectedItem)
 										SelectedItem = Null
 										Inventory(MouseSlot)\state = 1000.0
@@ -4896,7 +4896,7 @@ Function DrawGUI()
 										Msg = I_Loc\MessageItem_RadioBatNoplace
 										MsgTimer = 70 * 5
 									Case "18vradio"
-										If SelectedItem\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX(SelectedItem\itemtemplate\sound))	
+										PlayPickSound(SelectedItem)
 										RemoveItem (SelectedItem)
 										SelectedItem = Null
 										Inventory(MouseSlot)\state = 100.0
@@ -4911,7 +4911,7 @@ Function DrawGUI()
 								;[Block]
 								Select Inventory(MouseSlot)\itemtemplate\name
 									Case "snav", "snav300", "snav310"
-										If SelectedItem\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX(SelectedItem\itemtemplate\sound))	
+										PlayPickSound(SelectedItem)
 										RemoveItem (SelectedItem)
 										SelectedItem = Null
 										Inventory(MouseSlot)\state = INFINITY
@@ -4921,7 +4921,7 @@ Function DrawGUI()
 										Msg = I_Loc\MessageItem_NavBatNoplace
 										MsgTimer = 70 * 5
 									Case "radio"
-										If SelectedItem\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX(SelectedItem\itemtemplate\sound))	
+										PlayPickSound(SelectedItem)
 										RemoveItem (SelectedItem)
 										SelectedItem = Null
 										Inventory(MouseSlot)\state = INFINITY
@@ -4931,14 +4931,14 @@ Function DrawGUI()
 										Msg = I_Loc\MessageItem_RadioBatNoplace
 										MsgTimer = 70 * 5
 									Case "18vradio"
-										If SelectedItem\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX(SelectedItem\itemtemplate\sound))	
+										PlayPickSound(SelectedItem)
 										RemoveItem (SelectedItem)
 										SelectedItem = Null
 										Inventory(MouseSlot)\state = INFINITY
 										Msg = I_Loc\MessageItem_RadioBatReplace
 										MsgTimer = 70 * 5
 									Case "supernv", "nvgoggles"
-										If SelectedItem\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX(SelectedItem\itemtemplate\sound))	
+										PlayPickSound(SelectedItem)
 										RemoveItem (SelectedItem)
 										SelectedItem = Null
 										Inventory(MouseSlot)\state = INFINITY
@@ -5891,7 +5891,7 @@ Function DrawGUI()
 								Else
 									WearingHazmat = 3
 								EndIf
-								If SelectedItem\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX(SelectedItem\itemtemplate\sound))
+								PlayPickSound(SelectedItem)
 								Msg = I_Loc\MessageItem_HazmatOn
 								If WearingNightVision Then CameraFogFar = StoredCameraFogFar
 								WearingGasMask = 0
@@ -5925,7 +5925,7 @@ Function DrawGUI()
 								Msg = I_Loc\MessageItem_VestOnHeavy
 								WearingVest = 2
 							EndIf
-							If SelectedItem\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX(SelectedItem\itemtemplate\sound))
+							PlayPickSound(SelectedItem)
 						EndIf
 						SelectedItem\state=0
 						MsgTimer = 70 * 5
@@ -6201,14 +6201,14 @@ Function DrawGUI()
 							SecondaryLightOn = PrevSecondaryLightOn
 							Wearing1499 = False
 							;DropItem(SelectedItem)
-							If SelectedItem\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX(SelectedItem\itemtemplate\sound))
+							PlayPickSound(SelectedItem)
 						Else
 							If SelectedItem\itemtemplate\name="scp1499" Then
 								Wearing1499 = 1
 							Else
 								Wearing1499 = 2
 							EndIf
-							If SelectedItem\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX(SelectedItem\itemtemplate\sound))
+							PlayPickSound(SelectedItem)
 							GiveAchievement(Achv1499)
 							PrevSecondaryLightOn = SecondaryLightOn
 							SecondaryLightOn = True
@@ -6625,7 +6625,7 @@ Function DrawGUI()
 					;EndIf
 				EndIf
 				
-				If SelectedItem\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX(SelectedItem\itemtemplate\sound))
+				PlayPickSound(SelectedItem)
 				SelectedItem = Null
 			EndIf
 		End If		
@@ -8784,6 +8784,7 @@ Function NullGame(playbuttonsfx%=True)
 		FreeImageHUDScaled(itt\invimg)
 		If itt\invimg2 <> 0 Then FreeImageHUDScaled(itt\invimg2)
 		If itt\img <> 0 Then FreeImageHUDScaled(itt\img)
+		If itt\customSoundPath <> "" Then FreeSound_Strict(itt\sound)
 		Delete itt
 	Next
 
