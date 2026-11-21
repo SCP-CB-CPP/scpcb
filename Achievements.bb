@@ -166,9 +166,9 @@ Function UpdateAchievementMsg()
 			
 			target# = offset * height
 			If amsg\msgy < target Then
-				amsg\msgy = Min(amsg\msgy+2*FPSfactor2,target)
+				amsg\msgy = Min(amsg\msgy+4*FPSfactor2,target)
 			ElseIf amsg\msgy > target
-				amsg\msgy = Max(amsg\msgy-2*FPSfactor2,target)
+				amsg\msgy = Max(amsg\msgy-4*FPSfactor2,target)
 			EndIf
 			y = GraphicHeight - height - amsg\msgy
 			
