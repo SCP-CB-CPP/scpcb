@@ -128,10 +128,24 @@ Function CanUseItem%(item.Items)
     For n% = 0 To MaxItemAmount-1
         Local it.Items = Inventory(n)
         If it <> Null And it\Picked = 2 And it\itemtemplate\equipRegion <> Null And (it\itemtemplate\equipRegion\Slots And conflict) <> 0 Then
-            Msg = "Conflict with existing item " + it\displayname
+			If it\itemtemplate = item\itemtemplate Lor (it\itemtemplate\group <> "" And it\itemtemplate\group = item\itemtemplate\group) Then
+				Msg = Format(I_Loc\MessageItemConflictTemplates_Self, GetConflictString(it, ".self"))
+			Else
+            	Msg = Format(I_Loc\MessageItemConflictTemplates_Takeoff, GetConflictString(it, ".off"), GetConflictString(item, ".on"))
+			EndIf
             Return False
         EndIf
     Next
 
     Return False
+End Function
+
+Function GetConflictString$(item.Items, suffix$)
+	Local ret$ = GetModdedINIString(StringsFile, "Message Item Conflict", item\itemtemplate\name + suffix)
+	If ret <> "" Then Return ret
+	If item\itemtemplate\group <> "" Then
+		ret = GetModdedINIString(StringsFile, "Message Item Conflict", item\itemtemplate\group + suffix)
+		If ret <> "" Then Return ret
+	EndIf
+	Return GetModdedINIString(StringsFile, "Message Item Conflict", "fallback" + suffix)
 End Function

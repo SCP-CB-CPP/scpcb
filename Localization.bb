@@ -282,20 +282,9 @@ Type LocalizationTable
     Field MessageItem_ClipboardAdd$
     Field MessageItem_ClipboardAddPaper$
     Field MessageItem_ClipboardAddBadge$
-    Field MessageItem_HazmatNouse$
     Field MessageItem_HazmatNouseAny$
     Field MessageItem_HazmatNodrop$
     Field MessageItem_HazmatNopickup$
-    Field MessageItem_HazmatConflictHazmat$
-    Field MessageItem_GasmaskNouse$
-    Field MessageItem_NvgNouse$
-    Field MessageItem_NvgConflictHazmat$
-    Field MessageItem_NvgConflictScp1499$
-    Field MessageItem_GasmaskConflictScp1499$
-    Field MessageItem_GasmaskConflictHazmat$
-    Field MessageItem_Scp1499ConflictHazmat$
-    Field MessageItem_VestConflictHazmat$
-    Field MessageItem_VestConflictVest$
     Field MessageItem_GasmaskOn$
     Field MessageItem_GasmaskOnEasy$
     Field MessageItem_GasmaskOff$
@@ -380,6 +369,8 @@ Type LocalizationTable
     Field MessageItem_ChocolateUseStale$
     Field MessageItem_CandyNouse$
     Field MessageItem_Scp330Nouse$
+    Field MessageItemConflictTemplates_Takeoff$
+    Field MessageItemConflictTemplates_Self$
     Field MessageHelp_Paper$
     Field MessageHelp_Inventory$
     Field MessageHelp_View$
@@ -842,20 +833,9 @@ Function LoadLocalization(loc.LocalizationTable, file$)
                             Case "clipboard.add" If loc\MessageItem_ClipboardAdd = "" Then loc\MessageItem_ClipboardAdd = value
                             Case "clipboard.add.paper" If loc\MessageItem_ClipboardAddPaper = "" Then loc\MessageItem_ClipboardAddPaper = value
                             Case "clipboard.add.badge" If loc\MessageItem_ClipboardAddBadge = "" Then loc\MessageItem_ClipboardAddBadge = value
-                            Case "hazmat.nouse" If loc\MessageItem_HazmatNouse = "" Then loc\MessageItem_HazmatNouse = value
                             Case "hazmat.nouse.any" If loc\MessageItem_HazmatNouseAny = "" Then loc\MessageItem_HazmatNouseAny = value
                             Case "hazmat.nodrop" If loc\MessageItem_HazmatNodrop = "" Then loc\MessageItem_HazmatNodrop = value
                             Case "hazmat.nopickup" If loc\MessageItem_HazmatNopickup = "" Then loc\MessageItem_HazmatNopickup = value
-                            Case "hazmat.conflict.hazmat" If loc\MessageItem_HazmatConflictHazmat = "" Then loc\MessageItem_HazmatConflictHazmat = value
-                            Case "gasmask.nouse" If loc\MessageItem_GasmaskNouse = "" Then loc\MessageItem_GasmaskNouse = value
-                            Case "nvg.nouse" If loc\MessageItem_NvgNouse = "" Then loc\MessageItem_NvgNouse = value
-                            Case "nvg.conflict.hazmat" If loc\MessageItem_NvgConflictHazmat = "" Then loc\MessageItem_NvgConflictHazmat = value
-                            Case "nvg.conflict.scp1499" If loc\MessageItem_NvgConflictScp1499 = "" Then loc\MessageItem_NvgConflictScp1499 = value
-                            Case "gasmask.conflict.scp1499" If loc\MessageItem_GasmaskConflictScp1499 = "" Then loc\MessageItem_GasmaskConflictScp1499 = value
-                            Case "gasmask.conflict.hazmat" If loc\MessageItem_GasmaskConflictHazmat = "" Then loc\MessageItem_GasmaskConflictHazmat = value
-                            Case "scp1499.conflict.hazmat" If loc\MessageItem_Scp1499ConflictHazmat = "" Then loc\MessageItem_Scp1499ConflictHazmat = value
-                            Case "vest.conflict.hazmat" If loc\MessageItem_VestConflictHazmat = "" Then loc\MessageItem_VestConflictHazmat = value
-                            Case "vest.conflict.vest" If loc\MessageItem_VestConflictVest = "" Then loc\MessageItem_VestConflictVest = value
                             Case "gasmask.on" If loc\MessageItem_GasmaskOn = "" Then loc\MessageItem_GasmaskOn = value
                             Case "gasmask.on.easy" If loc\MessageItem_GasmaskOnEasy = "" Then loc\MessageItem_GasmaskOnEasy = value
                             Case "gasmask.off" If loc\MessageItem_GasmaskOff = "" Then loc\MessageItem_GasmaskOff = value
@@ -944,6 +924,11 @@ Function LoadLocalization(loc.LocalizationTable, file$)
                             Case "chocolate.use.stale" If loc\MessageItem_ChocolateUseStale = "" Then loc\MessageItem_ChocolateUseStale = value
                             Case "candy.nouse" If loc\MessageItem_CandyNouse = "" Then loc\MessageItem_CandyNouse = value
                             Case "scp330.nouse" If loc\MessageItem_Scp330Nouse = "" Then loc\MessageItem_Scp330Nouse = value
+                        End Select
+                    Case "Message Item Conflict Templates"
+                        Select key
+                            Case "takeoff" If loc\MessageItemConflictTemplates_Takeoff = "" Then loc\MessageItemConflictTemplates_Takeoff = value
+                            Case "self" If loc\MessageItemConflictTemplates_Self = "" Then loc\MessageItemConflictTemplates_Self = value
                         End Select
                     Case "Message Help"
                         Select key
