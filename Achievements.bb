@@ -134,12 +134,19 @@ Type AchievementMsg
 	Field msgID%
 End Type
 
+Global AchievementScale# = GraphicHeight / 768.0
+Global AchievementWidth% = AchievementScale * 264
+Global AchievementHeight% = AchievementScale * 84
+
 Function CreateAchievementMsg.AchievementMsg(achv.Achievements)
 	Local amsg.AchievementMsg = New AchievementMsg
 	
 	amsg\achv = achv
 	amsg\msgx = 0.0
 	amsg\msgy = 0.0
+	If amsg <> First AchievementMsg
+		amsg\msgy = -AchievementHeight
+	EndIf
 	amsg\msgtime = FPSfactor2
 	amsg\msgID = CurrAchvMSGID
 	CurrAchvMSGID = CurrAchvMSGID + 1
@@ -151,9 +158,9 @@ Function UpdateAchievementMsg()
 	If First AchievementMsg = Null Then Return
 
 	Local amsg.AchievementMsg,amsg2.AchievementMsg
-	Local scale# = GraphicHeight / 768.0
-	Local width% = 264 * scale
-	Local height% = 84 * scale
+	Local scale# = AchievementScale
+	Local width% = AchievementWidth
+	Local height% = AchievementHeight
 	Local x%,y%, offset% = 0
 	
 	SetFont Font1
@@ -166,9 +173,9 @@ Function UpdateAchievementMsg()
 			
 			target# = offset * height
 			If amsg\msgy < target Then
-				amsg\msgy = Min(amsg\msgy+4*FPSfactor2,target)
+				amsg\msgy = Min(amsg\msgy+2*FPSfactor2,target)
 			ElseIf amsg\msgy > target
-				amsg\msgy = Max(amsg\msgy-4*FPSfactor2,target)
+				amsg\msgy = Max(amsg\msgy-2*FPSfactor2,target)
 			EndIf
 			y = GraphicHeight - height - amsg\msgy
 			
