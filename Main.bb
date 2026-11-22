@@ -6872,7 +6872,7 @@ Function DrawMap()
 		Local x% = startX + ((MapWidth - (r\x / 8)) * cellSize)
 		Local y% = startY + ((r\z / 8) * cellSize)
 
-		If MouseOn(x, y, cellSize+1, cellSize+1) 
+		If (Not MenuOpen) And MouseOn(x, y, cellSize+1, cellSize+1) 
 			hoveredRoom = r
 			Color 100, 255, 100
 			If MouseHit1
