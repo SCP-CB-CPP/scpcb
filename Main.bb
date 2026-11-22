@@ -6865,7 +6865,7 @@ Function DrawMap()
 			Color r\RoomTemplate\r, r\RoomTemplate\g, r\RoomTemplate\b
 		EndIf
 		
-		Local x% = startX + ((18 - (r\x / 8)) * cellSize)
+		Local x% = startX + ((MapWidth - (r\x / 8)) * cellSize)
 		Local y% = startY + ((r\z / 8) * cellSize)
 
 		If MouseOn(x, y, cellSize+1, cellSize+1) 
