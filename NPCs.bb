@@ -5445,7 +5445,7 @@ Function UpdateMTFUnit(n.NPCs)
 	Local prevDist#,newDist#
 	Local n2.NPCs
 	
-	Local p.Particles, target, dist#, dist2#
+	Local p.Particles, target, dist# = EntityDistance(n\Collider,Collider), dist2#
 	
 	If n\IsDead Then
 		n\BlinkTimer = -1.0
