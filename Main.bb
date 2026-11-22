@@ -425,6 +425,8 @@ Global KEY_INV = GetOptionInt("binds", "Inventory key")
 Global KEY_CROUCH = GetOptionInt("binds", "Crouch key")
 Global KEY_SAVE = GetOptionInt("binds", "Save key")
 Global KEY_CONSOLE = GetOptionInt("binds", "Console key")
+Global KEY_SHOW_MOUSE = GetOptionInt("binds", "Show mouse key")
+Global IsShowMouseKeyDown = False
 
 Global MouseSmooth# = GetOptionFloat("controls", "mouse smoothing")
 
@@ -2271,6 +2273,12 @@ While IsRunning
 		UpdateCheckpoint1 = False
 		UpdateCheckpoint2 = False
 		
+		Local newShowMouseKeyDown% = KeyDown(KEY_SHOW_MOUSE)
+		If newShowMouseKeyDown <> IsShowMouseKeyDown Then
+			IsShowMouseKeyDown = newShowMouseKeyDown
+			MouseXSpeed() : MouseYSpeed() : mouse_x_speed_1#=0.0 : mouse_y_speed_1#=0.0
+		EndIf
+
 		If (Not IsPaused()) And EndingTimer=>0 Then
 			LightVolume = CurveValue(TempLightVolume, LightVolume, 50.0)
 			CameraFogRange(Camera, CameraFogNear*LightVolume,CameraFogFar*LightVolume)
@@ -3291,7 +3299,7 @@ Function IsAnyMenuOpen()
 End Function
 
 Function IsPaused()
-	Return IsAnyMenuOpen() Lor SelectedDoor <> Null Lor SelectedScreen <> Null
+	Return IsAnyMenuOpen() Lor SelectedDoor <> Null Lor SelectedScreen <> Null Lor KeyDown(KEY_SHOW_MOUSE)
 End Function
 
 Type CreditsLine
@@ -4099,7 +4107,7 @@ Function DrawGUI()
 	
 	Local e.Events, it.Items
 	
-	If IsAnyMenuOpen() Lor SelectedDoor <> Null Lor EndingTimer < 0 Then
+	If IsAnyMenuOpen() Lor SelectedDoor <> Null Lor EndingTimer < 0 Lor KeyDown(KEY_SHOW_MOUSE) Then
 		ShowPointer()
 	Else
 		HidePointer()
@@ -6872,7 +6880,7 @@ Function DrawMap()
 		Local x% = startX + ((MapWidth - (r\x / 8)) * cellSize)
 		Local y% = startY + ((r\z / 8) * cellSize)
 
-		If (Not MenuOpen) And MouseOn(x, y, cellSize+1, cellSize+1) 
+		If IsPaused() And MouseOn(x, y, cellSize+1, cellSize+1) 
 			hoveredRoom = r
 			Color 100, 255, 100
 			If MouseHit1
