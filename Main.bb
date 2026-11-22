@@ -1099,6 +1099,13 @@ Global ForestNPC,ForestNPCTex,ForestNPCData#[3]
 
 Global PauseMenuIMG% = 0
 
+Function InPauseMenu%(px%, py%)
+	If (Not MenuOpen) Then Return False
+	Local w% = ImageWidth(PauseMenuIMG), h% = ImageHeight(PauseMenuIMG)
+	Local x% = GraphicWidth / 2 - w / 2, y% = GraphicHeight / 2 - h / 2
+	Return px >= x And px <= x + w And py >= y And py <= y + h
+End Function
+
 Global SprintIcon% = 0
 Global BlinkIcon% = 0
 Global CrouchIcon% = 0
@@ -6880,7 +6887,7 @@ Function DrawMap()
 		Local x% = startX + ((MapWidth - (r\x / 8)) * cellSize)
 		Local y% = startY + ((r\z / 8) * cellSize)
 
-		If IsPaused() And MouseOn(x, y, cellSize+1, cellSize+1) 
+		If IsPaused() And MouseOn(x, y, cellSize+1, cellSize+1) And (Not InPauseMenu(MouseX(), MouseY()))
 			hoveredRoom = r
 			Color 100, 255, 100
 			If MouseHit1
