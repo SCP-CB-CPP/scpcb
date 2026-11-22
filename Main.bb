@@ -6853,7 +6853,10 @@ End Function
 Global ShowMap% = False
 
 Function DrawMap()
-	Local cellSize% = Max(HUDScale * Min(20.0, Min(Float(GraphicWidth) / (MapWidth + 1), Float(GraphicHeight) / (MapHeight + 1)) / (HUDScaleScalar * MaxHUDScaleFactor)), 1)
+	Local cellSize% = 20 * HUDScale
+	cellSize = Min(cellSize, GraphicWidth / (MapWidth + 1))
+	cellSize = Min(cellSize, GraphicHeight / (MapHeight + 1))
+	cellSize = Max(cellSize, 1)
 
 	Local startX% = Max(0, HUDEndX - (MapWidth + 1) * cellSize)
 	Local startY% = Max(0, HUDEndY - (MapHeight + 1) * cellSize)
