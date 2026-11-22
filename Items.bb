@@ -1223,6 +1223,7 @@ Function Update294()
 End Function
 
 Function PlayPickSound(item.Items)
+	DebugLog2("PlayPickSound: " + item\itemtemplate\name + " " + item\itemtemplate\sound + " " + item\itemtemplate\customSoundPath)
 	Local usedSound%
 	If item\itemtemplate\customSoundPath = "" Then
 		If item\itemtemplate\sound = 66 Then Return
