@@ -6853,14 +6853,13 @@ End Function
 Global ShowMap% = False
 
 Function DrawMap()
-
 	Local cellSize% = 20 * HUDScale
-	cellSize = Min(cellSize, (HUDEndX - HUDStartX) / (MapWidth + 1))
-	cellSize = Min(cellSize, (HUDEndY - HUDStartY) / (MapHeight + 1))
+	cellSize = Min(cellSize, GraphicWidth / (MapWidth + 1))
+	cellSize = Min(cellSize, GraphicHeight / (MapHeight + 1))
 	cellSize = Max(cellSize, 1)
 
-	Local startX% = HUDEndX - (MapWidth + 1) * cellSize
-	Local startY% = HUDEndY - (MapHeight + 1) * cellSize
+	Local startX% = Max(0, HUDEndX - (MapWidth + 1) * cellSize)
+	Local startY% = Max(0, HUDEndY - (MapHeight + 1) * cellSize)
 
 	Local hoveredRoom.Rooms
 	For r.Rooms = Each Rooms					
