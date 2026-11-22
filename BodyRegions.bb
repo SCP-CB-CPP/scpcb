@@ -1,14 +1,14 @@
-Type EquipRegions
+Type BodyRegions
 	Field Name$
 	Field Slots%
 End Type
 
-Global EquippedSlots%
-Global LastEquipSlot%
+Global OccupiedBodySlots%
+Global LastBodyRegionSlot%
 
-Const EQUIP_REGIONS_DATA_PATH$ = "Data/equip_regions.ini"
+Const BODY_REGIONS_DATA_PATH$ = "Data/body_regions.ini"
 
-Function InitEquipRegionsFromFile(file$)
+Function InitBodyRegionsFromFile(file$)
 	If FileType(file) <> 1 Then Return
 
 	Local name$, slots%
@@ -19,19 +19,19 @@ Function InitEquipRegionsFromFile(file$)
 			Local splitterPos = Instr(l, "=")
 			If splitterPos = 0 And Instr(l, "[") = 1 Then
 				If name <> "" Then
-					Local eqr.EquipRegions = FindEquipRegion(name)
-                    If eqr = Null Then eqr = New EquipRegions
+					Local eqr.BodyRegions = FindBodyRegion(name)
+                    If eqr = Null Then eqr = New BodyRegions
 					eqr\Name = name
                     If slots = 0 Then
-                        slots = 1 Shl LastEquipSlot
-                        LastEquipSlot = LastEquipSlot + 1
+                        slots = 1 Shl LastBodyRegionSlot
+                        LastBodyRegionSlot = LastBodyRegionSlot + 1
                     EndIf
 					eqr\Slots = slots
 				EndIf
 
 				name = Trim(Mid(l, 2, Len(l) - 2))
 				If name = "" then
-					RuntimeErrorExt("Empty equip region name.")
+					RuntimeErrorExt("Empty body region name.")
 				EndIf
 				slots = 0
 			Else
@@ -40,54 +40,54 @@ Function InitEquipRegionsFromFile(file$)
 				Local value$ = Trim(Right(l, Len(l) - splitterPos))
 				Select key
 					Case "includes"
-                        Local eqr2.EquipRegions = FindEquipRegion(value)
-                        If eqr2 = Null Then RuntimeErrorExt("Equip region "+Chr(34)+name+Chr(34)+" includes unknown equip region "+Chr(34)+value+Chr(34)+".")
+                        Local eqr2.BodyRegions = FindBodyRegion(value)
+                        If eqr2 = Null Then RuntimeErrorExt("Body region "+Chr(34)+name+Chr(34)+" includes unknown body region "+Chr(34)+value+Chr(34)+".")
                         slots = slots Or eqr2\Slots
 					Default
-						RuntimeErrorExt("Unknown key "+Chr(34)+key+Chr(34)+" in equip region "+Chr(34)+name+Chr(34)+".")
+						RuntimeErrorExt("Unknown key "+Chr(34)+key+Chr(34)+" in body region "+Chr(34)+name+Chr(34)+".")
 				End Select
 			EndIf
 		EndIf
 	Wend
 
     If name <> "" Then
-        eqr.EquipRegions = New EquipRegions
+        eqr.BodyRegions = New BodyRegions
         eqr\Name = name
         If slots = 0 Then
-            slots = 1 Shl LastEquipSlot
-            LastEquipSlot = LastEquipSlot + 1
+            slots = 1 Shl LastBodyRegionSlot
+            LastBodyRegionSlot = LastBodyRegionSlot + 1
         EndIf
         eqr\Slots = slots
     EndIf
 	CloseFile(f)
 End Function
 
-Function InitEquipRegions()
-	Delete Each EquipRegions
-    LastEquipSlot = 0
+Function InitBodyRegions()
+	Delete Each BodyRegions
+    LastBodyRegionSlot = 0
 
 	Local modRooms$
 	Local hasOverride%
 	Local lowest.ActiveMods = Last ActiveMods
 	For m.ActiveMods = Each ActiveMods
-		modRooms$ = m\Path + EQUIP_REGIONS_DATA_PATH
-		If FileType(m\Path + EQUIP_REGIONS_DATA_PATH) = 1 And FileType(m\Path + EQUIP_REGIONS_DATA_PATH + ".OVERRIDE") = 1 Then
+		modRooms$ = m\Path + BODY_REGIONS_DATA_PATH
+		If FileType(m\Path + BODY_REGIONS_DATA_PATH) = 1 And FileType(m\Path + BODY_REGIONS_DATA_PATH + ".OVERRIDE") = 1 Then
 			hasOverride = True
 			lowest = m
 			Exit
 		EndIf
 	Next
 	; We load the vanilla regions first, so that they will be able to be included by modded ones.
-	If Not hasOverride Then InitEquipRegionsFromFile(EQUIP_REGIONS_DATA_PATH)
+	If Not hasOverride Then InitBodyRegionsFromFile(BODY_REGIONS_DATA_PATH)
 	While lowest<>Null
-		modRooms$ = lowest\Path + EQUIP_REGIONS_DATA_PATH
-		InitEquipRegionsFromFile(modRooms)
+		modRooms$ = lowest\Path + BODY_REGIONS_DATA_PATH
+		InitBodyRegionsFromFile(modRooms)
 		lowest = Before lowest
 	Wend
 End Function
 
-Function FindEquipRegion.EquipRegions(name$)
-	For eqr.EquipRegions = Each EquipRegions
+Function FindBodyRegion.BodyRegions(name$)
+	For eqr.BodyRegions = Each BodyRegions
 		If eqr\Name = name Then Return eqr
 	Next
 	Return Null
@@ -99,35 +99,35 @@ Function TryEquipItem%(item.Items)
 End Function
 
 Function EquipItem%(item.Items)
-    If item\itemtemplate\equipRegion = Null Then RuntimeErrorExt("Item "+Chr(34)+item\itemtemplate\name+Chr(34)+" has no equip region set.")
+    If item\itemtemplate\bodyregion = Null Then RuntimeErrorExt("Item "+Chr(34)+item\itemtemplate\name+Chr(34)+" has no body region set.")
 
     item\Picked = 2
-    EquippedSlots = EquippedSlots Or item\itemtemplate\equipRegion\Slots
+    OccupiedBodySlots = OccupiedBodySlots Or item\itemtemplate\bodyregion\Slots
 End Function
 
 Function UnequipItem%(item.Items)
-    If item\itemtemplate\equipRegion = Null Then RuntimeErrorExt("Item "+Chr(34)+item\itemtemplate\name+Chr(34)+" has no equip region set.")
+    If item\itemtemplate\bodyregion = Null Then RuntimeErrorExt("Item "+Chr(34)+item\itemtemplate\name+Chr(34)+" has no body region set.")
 
     item\Picked = 1
-    EquippedSlots = EquippedSlots And (Not item\itemtemplate\equipRegion\Slots)
+    OccupiedBodySlots = OccupiedBodySlots And (Not item\itemtemplate\bodyregion\Slots)
 End Function
 
 Function CanUseItem%(item.Items)
-    If item\itemtemplate\equipRegion = Null Then RuntimeErrorExt("Item "+Chr(34)+item\itemtemplate\name+Chr(34)+" has no equip region set.")
+    If item\itemtemplate\bodyregion = Null Then RuntimeErrorExt("Item "+Chr(34)+item\itemtemplate\name+Chr(34)+" has no body region set.")
 
-    If item\itemtemplate\equipRegion\Name = "finger" And LostHands Then
+    If item\itemtemplate\bodyregion\Name = "finger" And LostHands Then
         Msg = I_Loc\MessageItem_Scp714Nohands
         Return False
     EndIf
 
-    Local conflict% = item\itemtemplate\equipRegion\Slots And EquippedSlots
+    Local conflict% = item\itemtemplate\bodyregion\Slots And OccupiedBodySlots
     If conflict = 0 Then
         Return True
     EndIf
 
     For n% = 0 To MaxItemAmount-1
         Local it.Items = Inventory(n)
-        If it <> Null And it\Picked = 2 And it\itemtemplate\equipRegion <> Null And (it\itemtemplate\equipRegion\Slots And conflict) <> 0 Then
+        If it <> Null And it\Picked = 2 And it\itemtemplate\bodyregion <> Null And (it\itemtemplate\bodyregion\Slots And conflict) <> 0 Then
 			If it\itemtemplate = item\itemtemplate Lor (it\itemtemplate\group <> "" And it\itemtemplate\group = item\itemtemplate\group) Then
 				Msg = Format(I_Loc\MessageItemConflictTemplates_Self, GetConflictString(it, ".self"))
 			Else

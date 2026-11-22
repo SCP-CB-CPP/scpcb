@@ -8644,7 +8644,7 @@ Function NullGame(playbuttonsfx%=True)
 	Msg = ""
 	MsgTimer = 0
 	
-	EquippedSlots = 0
+	OccupiedBodySlots = 0
 
 	SelectedItem = Null
 	

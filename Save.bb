@@ -1126,7 +1126,7 @@ Function LoadGame(file$)
 		it\state = ReadFloat(f)
 		it\Picked = ReadByte(f)
 		If it\Picked Then HideEntity(it\collider)
-		If it\Picked = 2 Then EquippedSlots = EquippedSlots Or it\itemtemplate\equipRegion\Slots
+		If it\Picked = 2 Then OccupiedBodySlots = OccupiedBodySlots Or it\itemtemplate\bodyregion\Slots
 		
 		Local nt = ReadByte(f)
 		If nt = True Then SelectedItem = it
@@ -1811,7 +1811,7 @@ Function LoadGameQuick(file$)
 		RemoveItem(it, False)
 	Next
 	
-	EquippedSlots = 0
+	OccupiedBodySlots = 0
 	temp = ReadInt(f)
 	For i = 1 To temp
 		Local ittName$ = ReadString(f)
@@ -1840,7 +1840,7 @@ Function LoadGameQuick(file$)
 		it\state = ReadFloat(f)
 		it\Picked = ReadByte(f)
 		If it\Picked Then HideEntity(it\collider)
-		If it\Picked = 2 Then EquippedSlots = EquippedSlots Or it\itemtemplate\equipRegion\Slots
+		If it\Picked = 2 Then OccupiedBodySlots = OccupiedBodySlots Or it\itemtemplate\bodyregion\Slots
 		
 		Local nt = ReadByte(f)
 		If nt = True Then SelectedItem = it

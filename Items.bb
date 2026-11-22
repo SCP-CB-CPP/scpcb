@@ -9,7 +9,7 @@ Global ClosestItem.Items
 
 Global LastItemID%
 
-Include "EquipRegions.bb"
+Include "BodyRegions.bb"
 
 Type ItemTemplates
 	Field displayname$
@@ -30,7 +30,7 @@ Type ItemTemplates
 	;Field bumptex%
 	Field tex%, texpath$
 
-	Field equipRegion.EquipRegions
+	Field bodyregion.BodyRegions
 End Type 
 
 Function CreateItemTemplate.ItemTemplates(name$, group$, displayname$, objpath$, invimgpath$, imgpath$, scale#, texturepath$ = "",invimgpath2$="",Anim%=0, texflags%=9)
@@ -131,7 +131,7 @@ Function InitItemTemplatesFromFile(file$)
 	Local document$
 	Local sound%, scale#
 	Local hasCustomColor%, r%, g%, b%
-	Local equipRegion.EquipRegions
+	Local bodyregion.BodyRegions
 
 	Local f% = OpenFile(file)
 	While Not Eof(f)
@@ -145,7 +145,7 @@ Function InitItemTemplatesFromFile(file$)
 						EntityColor(itt\obj, r, g, b)
 					EndIf
 					itt\sound = sound
-					itt\equipRegion = equipRegion
+					itt\bodyregion = bodyregion
 				EndIf
 
 				name = Trim(Mid(l, 2, Len(l) - 2))
@@ -164,7 +164,7 @@ Function InitItemTemplatesFromFile(file$)
 				sound = 1
 				scale = 1.0
 				hasCustomColor = False
-				equipRegion = Null
+				bodyregion = Null
 			Else
 				If splitterPos = 0 Then Continue
 				Local key$ = Trim(Left(l, splitterPos - 1))
@@ -197,8 +197,8 @@ Function InitItemTemplatesFromFile(file$)
 						r = Int(Piece(value,1,","))
 						g = Int(Piece(value,2,","))
 						b = Int(Piece(value,3,","))
-					Case "equip region"
-						equipRegion = FindEquipRegion(value)
+					Case "body region"
+						bodyregion = FindBodyRegion(value)
 					Default
 						RuntimeErrorExt("Unknown key "+Chr(34)+key+Chr(34)+" in item "+Chr(34)+name+Chr(34)+".")
 				End Select
@@ -213,7 +213,7 @@ Function InitItemTemplatesFromFile(file$)
 			EntityColor(itt\obj, r, g, b)
 		EndIf
 		itt\sound = sound
-		itt\equipRegion = equipRegion
+		itt\bodyregion = bodyregion
 	EndIf
 
 End Function
@@ -221,7 +221,7 @@ End Function
 Const ITEMS_DATA_PATH$ = "Data\items.ini"
 
 Function InitItemTemplates()
-	InitEquipRegions()
+	InitBodyRegions()
 
 	Local hasOverride%
 	For m.ActiveMods = Each ActiveMods
