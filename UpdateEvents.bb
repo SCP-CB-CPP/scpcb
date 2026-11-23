@@ -1667,7 +1667,7 @@ Function UpdateEvents()
 								EndIf
 							EndIf
 						Next
-						If (inRoomCoffinDist < 4.0) And (hasBatteryFor895) And (Wearing714=0) Then
+						If (inRoomCoffinDist < 4.0) And (hasBatteryFor895) And (Not Wearing714) Then
 							Local tempF# = point_direction(EntityX(Collider,True),EntityZ(Collider,True),EntityX(e\room\Objects[0],True),EntityZ(e\room\Objects[0],True))
 							Local tempF2# = EntityYaw(Collider)
 							Local tempF3# = angleDist(tempF+90+Sin(WrapAngle(e\EventState3/10)),tempF2)
@@ -4153,7 +4153,7 @@ Function UpdateEvents()
 
 					If e\room\RoomDoors[1]\open And e\EventState2 = 0 Then
 						e\EventState2 = 1
-						If IsBirthday And (Wearing714=0) Then PlaySound2(LoadTempSound("SFX\Room\BD\keycard.ogg"), Camera, e\room\RoomDoors[1]\buttons[0])
+						If IsBirthday And (Not Wearing714) Then PlaySound2(LoadTempSound("SFX\Room\BD\keycard.ogg"), Camera, e\room\RoomDoors[1]\buttons[0])
 					EndIf
 				EndIf
 				;[End Block]
@@ -5482,7 +5482,7 @@ Function UpdateEvents()
 										e\EventState2 = Min(e\EventState2+(FPSfactor/6000),1.0)
 										e\EventState3 = CurveValue(e\EventState2, e\EventState3, 50)
 										
-										If (Wearing714=0) And WearingHazmat<3 And WearingGasMask<3 Then
+										If (Not Wearing714) And WearingHazmat<3 And WearingGasMask<3 Then
 											Sanity=Sanity-FPSfactor*1.1
 											BlurTimer = Sin(MilliSecs()/10)*Abs(Sanity)
 										EndIf
@@ -5519,7 +5519,7 @@ Function UpdateEvents()
 							e\EventState3 = Max(e\EventState3-(FPSfactor/100),0)
 						EndIf
 						
-						If e\EventState3 > 0 And (Wearing714=0) And WearingHazmat<3 And WearingGasMask<3 Then 
+						If e\EventState3 > 0 And (Not Wearing714) And WearingHazmat<3 And WearingGasMask<3 Then 
 							e\SoundCHN = LoopSound2(e\Sound, e\SoundCHN, Camera, e\room\obj, 10, e\EventState3)
 							e\SoundCHN2 = LoopSound2(e\Sound2, e\SoundCHN2, Camera, e\room\obj, 10, (e\EventState3-0.5)*2)
 						EndIf
@@ -7608,7 +7608,7 @@ Function UpdateEvents()
 					PositionEntity pp,976,128,-640,False
 					
 					For it.Items = Each Items
-						If (it\Picked=0) And EntityDistance(it\collider,e\room\Objects[0])<0.75 And EntityVisible(Collider, it\collider)
+						If (Not it\Picked) And EntityDistance(it\collider,e\room\Objects[0])<0.75 And EntityVisible(Collider, it\collider)
 							Pick1162% = False
 						EndIf
 					Next

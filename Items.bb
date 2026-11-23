@@ -591,7 +591,7 @@ Function UpdateItems()
 				
 				If i\dist<HideDist*0.2 Then
 					For i2.Items = Each Items
-						If i<>i2 And (i2\Picked=0) And i2\dist<HideDist*0.2 Then
+						If i<>i2 And (Not i2\Picked) And i2\dist<HideDist*0.2 Then
 							
 							xtemp# = (EntityX(i2\collider,True)-EntityX(i\collider,True))
 							ytemp# = (EntityY(i2\collider,True)-EntityY(i\collider,True))

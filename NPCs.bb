@@ -4143,7 +4143,7 @@ Function UpdateNPCs()
 					Next
 					If Not found Then
 						For it.Items = Each Items
-							If it\itemtemplate\group = "battery" And EntityDistance(it\collider, n\ManipulationType) < 0.6 And (it\Picked=0) And GetParent(it\collider) = 0 Then
+							If it\itemtemplate\group = "battery" And EntityDistance(it\collider, n\ManipulationType) < 0.6 And (Not it\Picked) And GetParent(it\collider) = 0 Then
 								If it\itemtemplate\name = "killbat" Then it\state = True
 								dist# = EntityDistance(it\collider, n\ManipulationType)
 								EntityParent(it\collider, n\ManipulationType)
@@ -4287,7 +4287,7 @@ Function UpdateNPCs()
 							If n\State3<900 Then
 								BlurTimer = ((Sin(MilliSecs()/50)+1.0)*200)/dist
 								
-								If (Wearing714=0) And (WearingGasMask<3) And (WearingHazmat<3) And dist<16 Then
+								If (Not Wearing714) And (WearingGasMask<3) And (WearingHazmat<3) And dist<16 Then
 									If WearingNightVision<> 0 Then GiveAchievement(Achv966)
 
 									If StaminaEffect<1.5 Then
