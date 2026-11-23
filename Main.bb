@@ -4972,7 +4972,7 @@ Function DrawGUI()
 					;[End Block]
 				Case "scp1123"
 					;[Block]
-					If Not (Wearing714 = 1) Then
+					If Not Wearing714 Then
 						If PlayerRoom\RoomTemplate\Name <> "room1123" Then
 							ShowEntity Light
 							LightFlash = 7
@@ -5200,7 +5200,7 @@ Function DrawGUI()
 				Case "eyedrops","redeyedrops"
 					;[Block]
 					If CanUseItem(SelectedItem)
-						If (Not (Wearing714=1)) Then ;wtf is this
+						If (Not Wearing714) Then ;wtf is this
 							BlinkEffect = 0.6
 							BlinkEffectTimer = Rand(20,30)
 							BlurTimer = 200
@@ -5211,7 +5211,7 @@ Function DrawGUI()
 				Case "fineeyedrops"
 					;[Block]
 					If CanUseItem(SelectedItem)
-						If (Not (Wearing714=1)) Then 
+						If (Not Wearing714) Then 
 							BlinkEffect = 0.4
 							BlinkEffectTimer = Rand(30,40)
 							Bloodloss = Max(Bloodloss-1.0, 0)
@@ -5223,7 +5223,7 @@ Function DrawGUI()
 				Case "supereyedrops"
 					;[Block]
 					If CanUseItem(SelectedItem)
-						If (Not (Wearing714 = 1)) Then
+						If (Not Wearing714) Then
 							BlinkEffect = 0.0
 							BlinkEffectTimer = 60
 							EyeStuck = 10000
@@ -5741,7 +5741,7 @@ Function DrawGUI()
 				Case "scp420j"
 					;[Block]
 					If CanUseItem(SelectedItem)
-						If Wearing714=1 Then
+						If Wearing714 Then
 							Msg = I_Loc\MessageItem_420jUse714
 						Else
 							Msg = I_Loc\MessageItem_420jUse
@@ -5757,7 +5757,7 @@ Function DrawGUI()
 				Case "smellyjoint", "joint"
 					;[Block]
 					If CanUseItem(SelectedItem)
-						If Wearing714=1 Then
+						If Wearing714 Then
 							Msg = I_Loc\MessageItem_420jUse714
 						Else
 							DeathMSG = I_Loc\DeathMessage_420js
@@ -5772,12 +5772,12 @@ Function DrawGUI()
 					;[Block]
 					If SelectedItem\Picked = 2 Then
 						Msg = I_Loc\MessageItem_Scp714Off
-						Wearing714 = False
+						Wearing714 = Wearing714 - 1
 						UnequipItem(SelectedItem)
 					Else If TryEquipItem(SelectedItem)
 						GiveAchievement(Achv714)
 						Msg = I_Loc\MessageItem_Scp714On
-						Wearing714 = True
+						Wearing714 = Wearing714 + 1
 					EndIf
 					MsgTimer = 70 * 5
 					SelectedItem = Null	

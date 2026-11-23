@@ -480,7 +480,7 @@ Function RemoveItem(i.Items, inGame%=True)
 	Local n
 	FreeEntity(i\model) : FreeEntity(i\collider) : i\collider = 0
 	
-	If i\Picked And inGame Then
+	If i\Picked<>0 And inGame Then
 		For n% = 0 To MaxItemAmount - 1
 			If Inventory(n) = i
 				DebugLog "Removed "+i\itemtemplate\name+" from slot "+n
@@ -501,7 +501,7 @@ Function RemoveItem(i.Items, inGame%=True)
 				Case "hazmatsuit","hazmatsuit2","hazmatsuit3"
 					WearingHazmat = False	
 				Case "scp714"
-					Wearing714 = False
+					Wearing714 = Wearing714 - 1
 				Case "scp1499","super1499"
 					Wearing1499 = False
 				Case "scp427"
@@ -591,7 +591,7 @@ Function UpdateItems()
 				
 				If i\dist<HideDist*0.2 Then
 					For i2.Items = Each Items
-						If i<>i2 And (Not i2\Picked) And i2\dist<HideDist*0.2 Then
+						If i<>i2 And (i2\Picked=0) And i2\dist<HideDist*0.2 Then
 							
 							xtemp# = (EntityX(i2\collider,True)-EntityX(i\collider,True))
 							ytemp# = (EntityY(i2\collider,True)-EntityY(i\collider,True))
@@ -855,7 +855,7 @@ Function PickItem(item.Items)
 			If Inventory(n) = Null Then
 				Select item\itemtemplate\name
 					Case "scp1123"
-						If Not (Wearing714 = 1) Then
+						If Wearing714 = 0 Then
 							If PlayerRoom\RoomTemplate\Name <> "room1123" Then
 								ShowEntity Light
 								LightFlash = 7
@@ -1027,14 +1027,12 @@ Function SliceOffHands()
 	LostHands = True
 	If Wearing714 Then
 		For n% = 0 To MaxItemAmount-1
-			If Inventory(n) <> Null And Inventory(n)\itemtemplate\name = "scp714" Then
+			If Inventory(n) <> Null And Inventory(n)\itemtemplate\name = "scp714" And Inventory(n)\Picked = 2 Then
 				Local it.Items = Inventory(n)
 				DropItem(it)
 				PositionEntity(it\collider, EntityX(item\collider, True), EntityY(item\collider, True), EntityZ(item\collider, True), True)
-				Exit
 			EndIf
 		Next
-		Wearing714 = False
 	EndIf
 	DeathMSG = I_Loc\DeathMessage_330
 	PlaySound_Strict(LoadTempSound("SFX\General\Slash1.ogg"))
@@ -1090,7 +1088,7 @@ Function DropItem(item.Items,playdropsound%=True)
 			Case "nvgoggles", "supernv", "finenvgoggles"
 				CameraFogFar = StoredCameraFogFar : WearingNightVision = False
 			Case "scp714"
-				Wearing714 = False
+				Wearing714 = Wearing714 - 1
 			Case "scp1499","super1499"
 				Wearing1499 = False
 			Case "scp427"

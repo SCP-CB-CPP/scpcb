@@ -1,6 +1,9 @@
 Type BodyRegions
 	Field Name$
 	Field Slots%
+	; When this flag is set, equipping an item with this specific region will not add its slot to the occupied slots.
+	; This does NOT extend to regions that include this region, those will set the occupied slot, and are thus the only way to do so.
+	Field AllowMultiple%
 End Type
 
 Global OccupiedBodySlots%
@@ -11,7 +14,7 @@ Const BODY_REGIONS_DATA_PATH$ = "Data/body_regions.ini"
 Function InitBodyRegionsFromFile(file$)
 	If FileType(file) <> 1 Then Return
 
-	Local name$, slots%
+	Local name$, slots%, allowMultiple%
 	Local f% = OpenFile(file)
 	While Not Eof(f)
 		Local l$ = Trim(ReadLine(f))
@@ -27,6 +30,7 @@ Function InitBodyRegionsFromFile(file$)
                         LastBodyRegionSlot = LastBodyRegionSlot + 1
                     EndIf
 					eqr\Slots = slots
+					eqr\AllowMultiple = allowMultiple
 				EndIf
 
 				name = Trim(Mid(l, 2, Len(l) - 2))
@@ -34,6 +38,7 @@ Function InitBodyRegionsFromFile(file$)
 					RuntimeErrorExt("Empty body region name.")
 				EndIf
 				slots = 0
+				allowMultiple = False
 			Else
 				If splitterPos = 0 Then Continue
 				Local key$ = Trim(Left(l, splitterPos - 1))
@@ -43,6 +48,8 @@ Function InitBodyRegionsFromFile(file$)
                         Local eqr2.BodyRegions = FindBodyRegion(value)
                         If eqr2 = Null Then RuntimeErrorExt("Body region "+Chr(34)+name+Chr(34)+" includes unknown body region "+Chr(34)+value+Chr(34)+".")
                         slots = slots Or eqr2\Slots
+					Case "allow multiple"
+						allowMultiple = ParseINIInt(value)
 					Default
 						RuntimeErrorExt("Unknown key "+Chr(34)+key+Chr(34)+" in body region "+Chr(34)+name+Chr(34)+".")
 				End Select
@@ -58,6 +65,7 @@ Function InitBodyRegionsFromFile(file$)
             LastBodyRegionSlot = LastBodyRegionSlot + 1
         EndIf
         eqr\Slots = slots
+        eqr\AllowMultiple = allowMultiple
     EndIf
 	CloseFile(f)
 End Function
@@ -98,29 +106,38 @@ Function TryEquipItem%(item.Items)
     Return False
 End Function
 
-Function EquipItem%(item.Items)
+Function EquipItem(item.Items)
     If item\itemtemplate\bodyregion = Null Then RuntimeErrorExt("Item "+Chr(34)+item\itemtemplate\name+Chr(34)+" has no body region set.")
 
     item\Picked = 2
+
+	If item\itemtemplate\bodyregion\AllowMultiple Then Return
+
     OccupiedBodySlots = OccupiedBodySlots Or item\itemtemplate\bodyregion\Slots
 End Function
 
-Function UnequipItem%(item.Items)
+Function UnequipItem(item.Items)
     If item\itemtemplate\bodyregion = Null Then RuntimeErrorExt("Item "+Chr(34)+item\itemtemplate\name+Chr(34)+" has no body region set.")
 
     item\Picked = 1
+
+	If item\itemtemplate\bodyregion\AllowMultiple Then Return
+
     OccupiedBodySlots = OccupiedBodySlots And (Not item\itemtemplate\bodyregion\Slots)
 End Function
 
-Function CanUseItem%(item.Items)
-    If item\itemtemplate\bodyregion = Null Then RuntimeErrorExt("Item "+Chr(34)+item\itemtemplate\name+Chr(34)+" has no body region set.")
+Function CanUseItem%(item.Items, brOverride.BodyRegions=Null)
+	Local br.BodyRegions = brOverride
+	If br = Null Then br = item\itemtemplate\bodyregion
 
-    If item\itemtemplate\bodyregion\Name = "finger" And LostHands Then
+    If br = Null Then RuntimeErrorExt("Item "+Chr(34)+item\itemtemplate\name+Chr(34)+" has no body region set.")
+
+    If br\Name = "finger" And LostHands Then
         Msg = I_Loc\MessageItem_Scp714Nohands
         Return False
     EndIf
 
-    Local conflict% = item\itemtemplate\bodyregion\Slots And OccupiedBodySlots
+    Local conflict% = br\Slots And OccupiedBodySlots
     If conflict = 0 Then
         Return True
     EndIf
