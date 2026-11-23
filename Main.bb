@@ -3739,7 +3739,7 @@ Function MovePlayer()
 	If Injuries > 1.0 Then
 		temp2 = Bloodloss
 		BlurTimer = Max(Max(Sin(MilliSecs()/100.0)*Bloodloss*30.0,Bloodloss*2*(2.0-CrouchState)),BlurTimer)
-		If (Not I_427\Using And I_427\Timer < 70*360) Then
+		If (Not (I_427\Using<>0) And I_427\Timer < 70*360) Then
 			Bloodloss = Min(Bloodloss + (Min(Injuries,3.5)/300.0)*FPSfactor,100)
 		EndIf
 		
@@ -4053,7 +4053,7 @@ Function MouseLook(handleInput% = True)
 					Stamina = Stamina - FPSfactor * 0.1
 				Case 3 ;appendicitis
 					;0.035/sec = 2.1/min
-					If (Not I_427\Using And I_427\Timer < 70*360) Then
+					If (Not (I_427\Using<>0) And I_427\Timer < 70*360) Then
 						SCP1025state[i]=SCP1025state[i]+FPSfactor*0.0005
 					EndIf
 					If SCP1025state[i]>20.0 Then
@@ -4074,7 +4074,7 @@ Function MouseLook(handleInput% = True)
 						CurrSpeed = CurveValue(0, CurrSpeed, 10+Stamina*15)
 					EndIf
 				Case 5;cardiac arrest
-					If (Not I_427\Using And I_427\Timer < 70*360) Then
+					If (Not (I_427\Using<>0) And I_427\Timer < 70*360) Then
 						SCP1025state[i]=SCP1025state[i]+FPSfactor*0.35
 					EndIf
 					;35/sec
@@ -6222,13 +6222,15 @@ Function DrawGUI()
 					;[End Block]
 				Case "scp427"
 					;[Block]
-					If I_427\Using=1 Then
+					If SelectedItem\Picked = 2 Then
 						Msg = I_Loc\MessageItem_427Off
-						I_427\Using = False
+						I_427\Using = I_427\Using - 1
+						SelectedItem\Picked = 1
 					Else
 						GiveAchievement(Achv427)
 						Msg = I_Loc\MessageItem_427On
-						I_427\Using = True
+						I_427\Using = I_427\Using + 1
+						SelectedItem\Picked = 2
 					EndIf
 					MsgTimer = 70 * 5
 					SelectedItem = Null
@@ -10227,20 +10229,21 @@ Function Use427()
 	Local prevI427Timer# = I_427\Timer
 	
 	If I_427\Timer < 70*360
-		If I_427\Using=True Then
-			I_427\Timer = I_427\Timer + FPSfactor
+		If I_427\Using Then
+			Local scp427Factor# = FPSfactor * I_427\Using
+			I_427\Timer = I_427\Timer + scp427Factor
 			If Injuries > 0.0 Then
-				Injuries = Max(Injuries - 0.0005 * FPSfactor,0.0)
+				Injuries = Max(Injuries - 0.0005 * scp427Factor,0.0)
 			EndIf
 			If Bloodloss > 0.0 And Injuries <= 1.0 Then
-				Bloodloss = Max(Bloodloss - 0.001 * FPSfactor,0.0)
+				Bloodloss = Max(Bloodloss - 0.001 * scp427Factor,0.0)
 			EndIf
 			If Infect > 0.0 Then
-				Infect = Max(Infect - 0.001 * FPSfactor,0.0)
+				Infect = Max(Infect - 0.001 * scp427Factor,0.0)
 			EndIf
 			For i = 0 To 5
 				If SCP1025state[i]>0.0 Then
-					SCP1025state[i] = Max(SCP1025state[i] - 0.001 * FPSfactor,0.0)
+					SCP1025state[i] = Max(SCP1025state[i] - 0.001 * scp427Factor,0.0)
 				EndIf
 			Next
 			If I_427\Sound[0]=0 Then
@@ -10430,7 +10433,7 @@ Function UpdateInfect()
 		
 		If Infect < 93.0 Then
 			temp=Infect
-			If (Not I_427\Using And I_427\Timer < 70*360) Then
+			If (Not (I_427\Using<>0) And I_427\Timer < 70*360) Then
 				Infect = Min(Infect+FPSfactor*0.002,100)
 			EndIf
 			

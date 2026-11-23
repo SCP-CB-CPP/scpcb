@@ -505,7 +505,7 @@ Function RemoveItem(i.Items, inGame%=True)
 				Case "scp1499","super1499"
 					Wearing1499 = False
 				Case "scp427"
-					I_427\Using = False
+					I_427\Using = I_427\Using - 1
 				Case "pumpkin"
 					WearingPumpkin = False
 					NoTarget = False
@@ -1092,7 +1092,7 @@ Function DropItem(item.Items,playdropsound%=True)
 			Case "scp1499","super1499"
 				Wearing1499 = False
 			Case "scp427"
-				I_427\Using = False
+				I_427\Using = I_427\Using - 1
 			Case "pumpkin"
 				WearingPumpkin = False
 				NoTarget = False
