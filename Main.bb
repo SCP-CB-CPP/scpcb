@@ -6897,6 +6897,14 @@ Function DrawMap()
 		Rect(x, y, cellSize, cellSize, 1)
 	Next
 
+	For n.NPCs = Each NPCs
+		If n\Icon <> 0 Then
+			Local npcX% = startX + ((MapWidth - (EntityX(n\Collider) / 8)) * cellSize) + cellSize / 2
+			Local npcY% = startY + ((EntityZ(n\Collider) / 8) * cellSize) + cellSize / 2
+			DrawImage(n\Icon, npcX - ImageWidth(n\Icon) / 2, npcY - ImageHeight(n\Icon) / 2)
+		EndIf
+	Next
+
 	If hoveredRoom = Null Then Return
 
 	Local isSelected% = KeyDown(29)

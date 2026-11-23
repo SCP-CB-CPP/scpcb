@@ -12,6 +12,7 @@ Const NPCBones$ = "Data\NPCBones.ini"
 Type NPCs
 	Field obj%, obj2%, obj3%, obj4%, Collider%
 	Field NPCtype%, ID%
+	Field Icon%
 	Field DropSpeed#, Gravity%
 	Field State#, State2#, State3#, PrevState%
 	Field MakingNoise%
@@ -111,6 +112,8 @@ Function CreateNPC.NPCs(NPCtype%, x#, y#, z#)
 			HideEntity n\obj2
 			
 			n\CollRadius = 0.32
+
+			n\Icon = LoadImageHUDScaled("GFX\npcs\Icons\SCP-173.png")
 			;[End Block]
 		Case NPCtypeOldMan
 			;[Block]
@@ -201,6 +204,8 @@ Function CreateNPC.NPCs(NPCtype%, x#, y#, z#)
 					End Select
 				Next			
 			EndIf
+
+			n\Icon = LoadImageHUDScaled("GFX\npcs\Icons\MTF.png")
 			;[End Block]
 		Case NPCtypeD
 			;[Block]
@@ -261,6 +266,8 @@ Function CreateNPC.NPCs(NPCtype%, x#, y#, z#)
 			MeshCullBox (n\obj, -MeshWidth(n\obj)*2, -MeshHeight(n\obj)*2, -MeshDepth(n\obj)*2, MeshWidth(n\obj)*2, MeshHeight(n\obj)*4, MeshDepth(n\obj)*4)
 			
 			n\CollRadius = 0.26
+
+			n\Icon = LoadImageHUDScaled("GFX\npcs\Icons\SCP-096.png")
 			;[End Block]
 		Case NPCtype049
 			;[Block]
