@@ -126,10 +126,8 @@ Function UnequipItem(item.Items)
     OccupiedBodySlots = OccupiedBodySlots And (Not item\itemtemplate\bodyregion\Slots)
 End Function
 
-Function CanUseItem%(item.Items, brOverride.BodyRegions=Null)
-	Local br.BodyRegions = brOverride
-	If br = Null Then br = item\itemtemplate\bodyregion
-
+Function CanUseItem%(item.Items)
+	Local br.BodyRegions = item\itemtemplate\bodyregion
     If br = Null Then RuntimeErrorExt("Item "+Chr(34)+item\itemtemplate\name+Chr(34)+" has no body region set.")
 
     If br\Name = "finger" And LostHands Then
@@ -144,7 +142,7 @@ Function CanUseItem%(item.Items, brOverride.BodyRegions=Null)
 
     For n% = 0 To MaxItemAmount-1
         Local it.Items = Inventory(n)
-        If it <> Null And it\Picked = 2 And it\itemtemplate\bodyregion <> Null And (it\itemtemplate\bodyregion\Slots And conflict) <> 0 Then
+        If it <> Null And it\Picked = 2 And it\itemtemplate\bodyregion <> Null And (it\itemtemplate\bodyregion\Slots And conflict) <> 0 And it\itemtemplate\bodyregion\AllowMultiple = False Then
 			If it\itemtemplate = item\itemtemplate Lor (it\itemtemplate\group <> "" And it\itemtemplate\group = item\itemtemplate\group) Then
 				Msg = Format(I_Loc\MessageItemConflictTemplates_Self, GetConflictString(it, ".self"))
 			Else
