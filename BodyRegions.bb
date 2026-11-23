@@ -124,7 +124,7 @@ Function UnequipItem(item.Items)
 
 	If item\itemtemplate\bodyregion\AllowMultiple Then Return
 
-    OccupiedBodySlots = OccupiedBodySlots And (Not item\itemtemplate\bodyregion\Slots)
+    OccupiedBodySlots = OccupiedBodySlots And (item\itemtemplate\bodyregion\Slots Xor -1)
 End Function
 
 Function CanUseItem%(item.Items)
