@@ -1781,7 +1781,6 @@ Function UpdateNPCs()
 																CameraShake = 2.0
 															Else
 																RemoveItem(Inventory(i))
-																WearingHazmat = False
 															EndIf
 															Exit
 														EndIf
@@ -1795,7 +1794,11 @@ Function UpdateNPCs()
 												n\SoundChn2 = PlaySound2(LoadTempSound("SFX\SCP\049\714Equipped.ogg"),Camera,n\obj)
 												n\PrevState=3
 											ElseIf BlurTimer => 500
-												Wearing714=False
+												For i = 0 To MaxItemAmount-1
+													If Inventory(i)<>Null And Inventory(i)\Picked = 2 And Inventory(i)\itemtemplate\name = "scp714" Then
+														RemoveItem(Inventory(i))
+													EndIf
+												Next
 											EndIf
 										Else
 											CurrCameraZoom = 20.0
@@ -4140,7 +4143,7 @@ Function UpdateNPCs()
 					Next
 					If Not found Then
 						For it.Items = Each Items
-							If it\itemtemplate\group = "battery" And EntityDistance(it\collider, n\ManipulationType) < 0.6 And (Not it\Picked) And GetParent(it\collider) = 0 Then
+							If it\itemtemplate\group = "battery" And EntityDistance(it\collider, n\ManipulationType) < 0.6 And (it\Picked=0) And GetParent(it\collider) = 0 Then
 								If it\itemtemplate\name = "killbat" Then it\state = True
 								dist# = EntityDistance(it\collider, n\ManipulationType)
 								EntityParent(it\collider, n\ManipulationType)
@@ -4284,7 +4287,7 @@ Function UpdateNPCs()
 							If n\State3<900 Then
 								BlurTimer = ((Sin(MilliSecs()/50)+1.0)*200)/dist
 								
-								If (Not Wearing714) And (WearingGasMask<3) And (WearingHazmat<3) And dist<16 Then
+								If (Wearing714=0) And (WearingGasMask<3) And (WearingHazmat<3) And dist<16 Then
 									If WearingNightVision<> 0 Then GiveAchievement(Achv966)
 
 									If StaminaEffect<1.5 Then

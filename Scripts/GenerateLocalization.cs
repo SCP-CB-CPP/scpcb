@@ -74,7 +74,7 @@ void GenerateStaticLocalizationCode() {
             continue;
         }
         
-        if (prefix is "Item" or "Achievement" or "Achievement Desc") { continue; }
+        if (prefix is "Item" or "Achievement" or "Achievement Desc" or "Message Item Conflict") { continue; }
         var parts = line.Split('=', 2);
         if (parts.Length != 2) { continue; }
         
