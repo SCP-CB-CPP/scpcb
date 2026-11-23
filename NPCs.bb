@@ -5526,10 +5526,6 @@ Function UpdateMTFUnit(n.NPCs)
 											DebugLog Distance(EntityX(pvt%),EntityZ(pvt%),EntityX(n\Collider),EntityZ(n\Collider))
 										EndIf
 										
-										If Curr173\Idle = 3 And Distance(EntityX(pvt%),EntityZ(pvt%),EntityX(n\Collider),EntityZ(n\Collider)) > 4.0
-											If r\RoomDoors[1]\open = True Then UseDoor(r\RoomDoors[1],False)
-										EndIf
-										
 										FreeEntity pvt%
 										
 										If Distance(EntityX(n\Collider),EntityZ(n\Collider),EntityX(r\obj,True)+4736*RoomScale,EntityZ(r\obj,True)+1692*RoomScale)>1.6 And (Not foundChamber)
@@ -5562,6 +5558,9 @@ Function UpdateMTFUnit(n.NPCs)
 								z = EntityZ(Curr173\Collider)
 								DebugLog "Going back to 173's cage"
 							EndIf
+						EndIf
+						If Curr173\Idle = 3 And Distance(EntityX(pvt%),EntityZ(pvt%),EntityX(n\Collider),EntityZ(n\Collider)) > 4.0
+							If r\RoomDoors[1]\open = True Then UseDoor(r\RoomDoors[1],False)
 						EndIf
 						If n\PathX=0 Then n\PathStatus = FindPath(n,x,y,z) ;we're going to this room for no particular reason
 					EndIf
