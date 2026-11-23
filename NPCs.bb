@@ -5498,7 +5498,7 @@ Function UpdateMTFUnit(n.NPCs)
 					Else ;i am the leader
 						If Curr173\Idle<>2
 							For r = Each Rooms
-								If ((Abs(r\x-EntityX(n\Collider,True))>12.0) Or (Abs(r\z-EntityZ(n\Collider,True))>12.0)) And (Rand(1,Max(4-Int(Abs(r\z-EntityZ(n\Collider,True)/8.0)),2))=1) Then
+								If ((Abs(r\x-EntityX(n\Collider,True))>12.0) Or (Abs(r\z-EntityZ(n\Collider,True))>12.0)) And (Rand(1,Max(4-Int(Abs(r\z-EntityZ(n\Collider,True))/8.0),2))=1) Then
 									x = r\x
 									y = 0.1
 									z = r\z
