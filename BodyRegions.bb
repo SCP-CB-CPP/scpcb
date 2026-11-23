@@ -132,6 +132,7 @@ Function CanUseItem%(item.Items)
 
     If br\Name = "finger" And LostHands Then
         Msg = I_Loc\MessageItem_Scp714Nohands
+		MsgTimer = 70 * 5
         Return False
     EndIf
 
@@ -148,6 +149,7 @@ Function CanUseItem%(item.Items)
 			Else
             	Msg = Format(I_Loc\MessageItemConflictTemplates_Takeoff, GetConflictString(it, ".off"), GetConflictString(item, ".on"))
 			EndIf
+			MsgTimer = 70 * 5
             Return False
         EndIf
     Next
