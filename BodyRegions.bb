@@ -1,6 +1,7 @@
 Type BodyRegions
 	Field Name$
 	Field Slots%
+	
 	; When this flag is set, equipping an item with this specific region will not add its slot to the occupied slots.
 	; This does NOT extend to regions that include this region, those will set the occupied slot, and are thus the only way to do so.
 	Field AllowMultiple%
