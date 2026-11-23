@@ -5771,9 +5771,11 @@ Function DrawGUI()
 				Case "scp714"
 					;[Block]
 					If SelectedItem\Picked = 2 Then
-						Msg = I_Loc\MessageItem_Scp714Off
-						Wearing714 = Wearing714 - 1
-						UnequipItem(SelectedItem)
+						If CanUseItem(SelectedItem, True) Then
+							Msg = I_Loc\MessageItem_Scp714Off
+							Wearing714 = Wearing714 - 1
+							UnequipItem(SelectedItem)
+						EndIf
 					Else If TryEquipItem(SelectedItem)
 						GiveAchievement(Achv714)
 						Msg = I_Loc\MessageItem_Scp714On
