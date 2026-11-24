@@ -3746,7 +3746,7 @@ Function MovePlayer()
 	If Injuries > 1.0 Then
 		temp2 = Bloodloss
 		BlurTimer = Max(Max(Sin(MilliSecs()/100.0)*Bloodloss*30.0,Bloodloss*2*(2.0-CrouchState)),BlurTimer)
-		If (Not I_427\Using And I_427\Timer < 70*360) Then
+		If ((Not I_427\Using) And I_427\Timer < 70*360) Then
 			Bloodloss = Min(Bloodloss + (Min(Injuries,3.5)/300.0)*FPSfactor,100)
 		EndIf
 		
@@ -4060,7 +4060,7 @@ Function MouseLook(handleInput% = True)
 					Stamina = Stamina - FPSfactor * 0.1
 				Case 3 ;appendicitis
 					;0.035/sec = 2.1/min
-					If (Not I_427\Using And I_427\Timer < 70*360) Then
+					If ((Not I_427\Using) And I_427\Timer < 70*360) Then
 						SCP1025state[i]=SCP1025state[i]+FPSfactor*0.0005
 					EndIf
 					If SCP1025state[i]>20.0 Then
@@ -4081,7 +4081,7 @@ Function MouseLook(handleInput% = True)
 						CurrSpeed = CurveValue(0, CurrSpeed, 10+Stamina*15)
 					EndIf
 				Case 5;cardiac arrest
-					If (Not I_427\Using And I_427\Timer < 70*360) Then
+					If ((Not I_427\Using) And I_427\Timer < 70*360) Then
 						SCP1025state[i]=SCP1025state[i]+FPSfactor*0.35
 					EndIf
 					;35/sec
@@ -10550,7 +10550,7 @@ Function UpdateInfect()
 		
 		If Infect < 93.0 Then
 			temp=Infect
-			If (Not I_427\Using And I_427\Timer < 70*360) Then
+			If ((Not I_427\Using) And I_427\Timer < 70*360) Then
 				Infect = Min(Infect+FPSfactor*0.002,100)
 			EndIf
 			
