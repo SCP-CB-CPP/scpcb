@@ -393,7 +393,7 @@ Function CreateCup%(drinkName$, x#, y#, z#)
 	If loc <> -1 Then
 		Local chn% = 0
 
-		strtemp$ = GetINIString2(iniStr, loc, "dispensesound")
+		Local strtemp$ = GetINIString2(iniStr, loc, "dispensesound")
 		If strtemp = "" Then strtemp = GetINIString2(iniStr, loc, "dispensersound")
 		If strtemp<>"" Then
 			chn = PlaySound_Strict (LoadTempSound(strtemp))
@@ -690,7 +690,7 @@ Function UpdateItems()
 					EndIf
 
 					If PlayerStepped Then
-						de.Decals = CreateDecal(0, EntityX(Collider),EntityY(Collider)-0.29,EntityZ(Collider), 90, Rand(360), 0)
+						Local de.Decals = CreateDecal(0, EntityX(Collider),EntityY(Collider)-0.29,EntityZ(Collider), 90, Rand(360), 0)
 						de\Size = 0.2 : de\SizeChange = 0.004 : de\timer = 90000 : EntityAlpha(de\obj, 0.8) : UpdateDecals() 											
 					EndIf
 					i\state = i\state + FPSfactor

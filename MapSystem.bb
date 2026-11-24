@@ -1401,7 +1401,7 @@ Function PlaceForestProps(parent%, hmap%, tempf3#, yscale#, treeMesh%, leafMesh%
 	Local width = TextureWidth(hmap)
 	Local buf% = TextureBuffer(hmap)
 	LockBuffer(buf)
-	tempf4# = (tempf3/Float(width))
+	Local tempf4# = (tempf3/Float(width))
 	For lx = 3 To width-2
 		For ly = 3 To width-2
 			Local red% = (ReadPixelFast(lx,width-ly,buf) And $FF0000) Shr 16
@@ -5605,8 +5605,8 @@ Function FillRoom(r.Rooms)
 			r\Objects[17] = CreatePivot(r\obj)
 			PositionEntity(r\Objects[17], -5 / RoomScale, 0.5 / RoomScale, 6.5 / RoomScale)
 		Case "halloweenpd"
-			count% = 0
-			tempIt.TempItems = r\RoomTemplate\FirstTempItem
+			Local count% = 0
+			Local tempIt.TempItems = r\RoomTemplate\FirstTempItem
 			While tempIt <> Null
 				If tempIt\Name = "bone" Then
 					r\Objects[count] = CreatePivot()

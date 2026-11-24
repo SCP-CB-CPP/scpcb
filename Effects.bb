@@ -62,7 +62,7 @@ Function RenderEffectQuad(effect%, buffer%, technique$, blend% = 0)
 End Function
 
 Function CreateFullscreenQuad%(Parent% = 0)
-	Quad = CreateSprite(Parent)
+	Local Quad = CreateSprite(Parent)
 	ScaleSprite(Quad, 1.0, (Float(GraphicHeight) / Float(GraphicWidth)))
 	
 	MoveEntity(Quad, -PixelWidth, PixelHeight, 1.0001)

@@ -6472,7 +6472,7 @@ Function DrawGUI()
 								PositionEntity(SelectedItem\collider, 0, 0, 0)
 								ResetEntity(SelectedItem\collider)
 
-								de.Decals = CreateDecal(0, EntityX(Collider), EntityY(Collider)-0.29, EntityZ(Collider), 90, Rand(360), 0)
+								Local de.Decals = CreateDecal(0, EntityX(Collider), EntityY(Collider)-0.29, EntityZ(Collider), 90, Rand(360), 0)
 								de\Size = 0.05 : de\SizeChange = 0.001 : EntityAlpha(de\obj, 0.8) : UpdateDecals
 								PlaySound_Strict(DecaySFX(0))
 							Else
@@ -6699,14 +6699,12 @@ Function TeleportFromHalloweenRoom%()
 			Return True
 		EndIf
 	Next
-	If Not found Then
-		For r.Rooms = Each Rooms
-			If r\RoomTemplate\Name = "room2testroom2" Then
-				Teleport(r)
-				Return True
-			EndIf
-		Next
-	EndIf
+	For r.Rooms = Each Rooms
+		If r\RoomTemplate\Name = "room2testroom2" Then
+			Teleport(r)
+			Return True
+		EndIf
+	Next
 	Return False
 End Function
 

@@ -20,6 +20,7 @@ Function ExecuteConsoleCommand(cmd$, quiet% = False)
     ConsoleReissue = Null
     ConsoleScroll = 0
     CreateConsoleMsg(cmd,255,255,0,True)
+    Local StrTemp$, StrTemp2$, StrTemp3$
     If Instr(cmd, " ") > 0 Then
         StrTemp$ = Lower(Left(cmd, Instr(cmd, " ") - 1))
     Else
@@ -457,7 +458,7 @@ Function ExecuteConsoleCommand(cmd$, quiet% = False)
                 CreateConsoleMsg("To spawn SCP-294 drinks, use the spawncup command.",255,150,0)
             Else
                 CreateConsoleMsg(itt\displayname + " spawned.")
-                it.Items = CreateItem(itt\name, EntityX(Collider), EntityY(Camera,True), EntityZ(Collider))
+                Local it.Items = CreateItem(itt\name, EntityX(Collider), EntityY(Camera,True), EntityZ(Collider))
             End If
             ;[End Block]
         Case "giveitem"

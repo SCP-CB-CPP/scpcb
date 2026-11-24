@@ -7822,7 +7822,7 @@ Function UpgradeNPC914(n.NPCs, setting$, x#, y#, z#)
 			Select setting
 				Case "rough"
 					; yeah, he bleeds blood, what about it?
-					de.Decals = CreateDecal(2, x, 8 * RoomScale + 0.005, z, 90, Rand(360), 0)
+					Local de.Decals = CreateDecal(2, x, 8 * RoomScale + 0.005, z, 90, Rand(360), 0)
 					de\Size = 0.4 : ScaleSprite(de\obj, de\Size, de\Size)
 					RemoveNPC(n) : n = Null
 				Case "coarse"

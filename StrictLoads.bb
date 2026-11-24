@@ -429,8 +429,6 @@ Function LoadAnimTexture_Strict(File$,flags%,columns%,rows%,start%,count%)
 				tmp = LoadAnimTextureGrid(modPath, flags, columns, rows, start, count)
 				If tmp <> 0 Then
 					Return tmp
-				Else If DebugResourcePacks Then
-					RuntimeErrorExt("Failed to load animated texture " + Chr(34) + modPath + Chr(34) + ".")
 				EndIf
 			EndIf
 		Next

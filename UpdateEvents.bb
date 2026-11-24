@@ -8630,8 +8630,8 @@ Function UpdateEvents()
 
 						x# = EntityX(Curr106\obj, True)
 						z# = EntityZ(Curr106\obj, True)
-						px# = EntityX(Collider, True)
-						pz# = EntityZ(Collider, True)
+						Local px# = EntityX(Collider, True)
+						Local pz# = EntityZ(Collider, True)
 						count% = 0
 						For w.WayPoints = Each WayPoints
 							Local wx# = EntityX(w\obj, True), wz# = EntityZ(w\obj, True)
