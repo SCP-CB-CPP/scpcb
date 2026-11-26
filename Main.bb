@@ -3905,12 +3905,12 @@ Function MouseLook(handleInput% = True)
 			
 			If KillAnim = 0 Then 
 				MoveEntity Head, 0, 0, HeadDropSpeed * FPSfactor
-				RotateEntity(Head, CurveAngle(-90.0, EntityPitch(Head), 20.0), EntityYaw(Head), EntityRoll(Head))
-				RotateEntity(Camera, CurveAngle(EntityPitch(Head) - 40.0, EntityPitch(Camera), 40.0), EntityYaw(Camera), EntityRoll(Camera))
+				RotateEntity(Head, CurveAngle(-85.0, EntityPitch(Head), 20.0), EntityYaw(Head), EntityRoll(Head))
+				RotateEntity(Camera, CurveAngle(Max(EntityPitch(Head) - 40.0, -85.0), EntityPitch(Camera), 20.0), EntityYaw(Camera), EntityRoll(Camera))
 			Else
 				MoveEntity Head, 0, 0, -HeadDropSpeed * FPSfactor
-				RotateEntity(Head, CurveAngle(90.0, EntityPitch(Head), 20.0), EntityYaw(Head), EntityRoll(Head))
-				RotateEntity(Camera, CurveAngle(EntityPitch(Head) + 40.0, EntityPitch(Camera), 40.0), EntityYaw(Camera), EntityRoll(Camera))
+				RotateEntity(Head, CurveAngle(85.0, EntityPitch(Head), 20.0), EntityYaw(Head), EntityRoll(Head))
+				RotateEntity(Camera, CurveAngle(Min(EntityPitch(Head) + 40.0, 85.0), EntityPitch(Camera), 20.0), EntityYaw(Camera), EntityRoll(Camera))
 			EndIf
 			
 			HeadDropSpeed# = HeadDropSpeed - 0.002 * FPSfactor
@@ -7919,7 +7919,7 @@ Function LoadEntities()
 	
 	Head = CreatePivot()
 	EntityRadius Head, 0.15
-	EntityType Head, HIT_PLAYER
+	EntityType Head, HIT_DEAD
 	
 	
 	LiquidObj = LoadMesh_Strict("GFX\items\cupliquid.x") ;optimized the cups dispensed by 294
