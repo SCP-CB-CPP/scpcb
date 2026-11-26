@@ -4967,7 +4967,7 @@ Function UpdateEvents()
 					Else
 						
 						If e\Sound=0 Then LoadEventSound(e,"SFX\Music\012Golgotha.ogg")
-						e\SoundCHN = LoopSound2(e\Sound, e\SoundCHN, Camera, e\room\Objects[3], 5.0)
+						e\SoundCHN = LoopSound2(e\Sound, e\SoundCHN, Camera, e\room\Objects[3], 5.0, Min(Max((0.3 - EntityY(Collider)) / 3.0, 0.0), 1.0))
 						
 						If e\Sound2=0 Then LoadEventSound(e,"SFX\Music\012.ogg",1)
 						
