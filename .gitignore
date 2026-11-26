@@ -8,6 +8,7 @@ MapSystem.bb.rej
 UpdateEvents.bb.rej
 *.bb_bak*
 Saves/*
+Data/seeds.txt
 error_log_*
 .vscode
 updates/
