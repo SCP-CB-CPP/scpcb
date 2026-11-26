@@ -17,6 +17,11 @@ Global UsedConsole
 
 Global AchievementsMenu%
 Global AchvMSGenabled% = GetOptionInt("general", "achievement popup enabled")
+Global ShowAchvViewer% = GetOptionInt("general", "show achievement viewer")
+Global AchvMiniSize% = Max(12, Int(22 * GraphicHeight / 768.0))
+Dim AchvMini%(MAXACHIEVEMENTS)
+Dim AchvMiniDim%(MAXACHIEVEMENTS)
+Dim AchvViewOrder%(MAXACHIEVEMENTS)
 Dim AchievementStrings$(MAXACHIEVEMENTS)
 Dim AchievementDescs$(MAXACHIEVEMENTS)
 Dim AchvIMG%(MAXACHIEVEMENTS)
@@ -29,7 +34,42 @@ For i = 0 To MAXACHIEVEMENTS-1
 	
 	AchvIMG(i) = LoadImage_Strict("GFX\menu\achievements\"+image+".jpg")
 	ResizeImage(AchvIMG(i),ImageWidth(AchvIMG(i))*GraphicHeight/768.0,ImageHeight(AchvIMG(i))*GraphicHeight/768.0)
+
+	AchvMini(i) = LoadImage_Strict("GFX\menu\achievements\"+image+".jpg")
+	AchvMiniDim(i) = CopyImage(AchvMini(i))
+	DimImage(AchvMiniDim(i), 0.4)
+	ResizeImage(AchvMini(i), AchvMiniSize, AchvMiniSize)
+	ResizeImage(AchvMiniDim(i), AchvMiniSize, AchvMiniSize)
 Next
+
+BuildAchvViewOrder()
+
+; Fills AchvViewOrder: every achievement in ID order, except Fair Play, 055 and the
+; Keter achievements, which are moved to the end in that order.
+Function BuildAchvViewOrder()
+	Local moved%[3], flagged%[MAXACHIEVEMENTS]
+	Local i%, n% = 0, m%
+	
+	moved[0] = AchvConsole
+	moved[1] = Achv055
+	moved[2] = AchvKeter
+	
+	For m = 0 To 2
+		If moved[m] >= 0 Then flagged[moved[m]] = True
+	Next
+	For i = 0 To MAXACHIEVEMENTS - 1
+		If flagged[i] = False Then
+			AchvViewOrder(n) = i
+			n = n + 1
+		EndIf
+	Next
+	For m = 0 To 2
+		If moved[m] >= 0 Then
+			AchvViewOrder(n) = moved[m]
+			n = n + 1
+		EndIf
+	Next
+End Function
 
 Global AchvLocked = LoadImage_Strict("GFX\menu\achievements\achvlocked.jpg")
 ResizeImage(AchvLocked,ImageWidth(AchvLocked)*GraphicHeight/768.0,ImageHeight(AchvLocked)*GraphicHeight/768.0)
@@ -107,6 +147,23 @@ Function DrawAchvIMG(x%, y%, achvno%)
 	Color 50,50,50
 	
 	Rect((x+(row*SeparationConst2)), y, 64*scale, 64*scale, False)
+End Function
+
+; Darkens every pixel of an image in place (factor 1.0 = unchanged, 0.0 = black)
+Function DimImage(img%, factor#)
+	Local buf% = ImageBuffer(img)
+	Local xx%, yy%, argb%, r%, g%, b%
+	LockBuffer buf
+	For yy = 0 To ImageHeight(img) - 1
+		For xx = 0 To ImageWidth(img) - 1
+			argb = ReadPixelFast(xx, yy, buf)
+			r = ((argb Shr 16) And $FF) * factor
+			g = ((argb Shr 8) And $FF) * factor
+			b = (argb And $FF) * factor
+			WritePixelFast(xx, yy, $FF000000 Or (r Shl 16) Or (g Shl 8) Or b, buf)
+		Next
+	Next
+	UnlockBuffer buf
 End Function
 
 Global CurrAchvMSGID% = 0
