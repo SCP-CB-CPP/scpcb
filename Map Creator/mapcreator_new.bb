@@ -2,13 +2,13 @@ Global ResWidth% = 910
 Global ResHeight% = 660
 Global versionnumber$ = "2.1"
 
-Loadingwindow=CreateWindow("", GraphicsWidth()/2-160,GraphicsHeight()/2-120,320,260,winhandle,8)
+Loadingwindow = CreateWindow("", GraphicsWidth()/2-160,GraphicsHeight()/2-120,320,260,winhandle,8)
 panelloading = CreatePanel(0,0,320,260,Loadingwindow,0)
 SetPanelImage(panelloading,"Assets\map_logo.jpg")
 
 ; create a window to put the toolbar in
-WinHandle=CreateWindow("SCP-CB Map Creator "+versionnumber,GraphicsWidth()/2-ResWidth/2, GraphicsHeight()/2-ResHeight/2,ResWidth,ResHeight,0, 13) 
-Global MainHwnd = GetActiveWindow();User32.dll
+WinHandle = CreateWindow("SCP-CB Map Creator "+versionnumber,GraphicsWidth()/2-ResWidth/2, GraphicsHeight()/2-ResHeight/2,ResWidth,ResHeight,0, 13) 
+Global MainHwnd = api_GetActiveWindow();User32.dll
 HideGadget WinHandle
 
 Global FileLocation$ = "..\Data\rooms.ini"
@@ -281,14 +281,14 @@ SetStatusText(Loadingwindow, "Executing 3D viewer...")
 ExecFile("window3d.exe")
 
 Repeat
-	vwprt = FindWindow("Blitz Runtime Class" , "MapCreator 3d view");User32.dll
+	vwprt = api_FindWindow("Blitz Runtime Class" , "MapCreator 3d view");User32.dll
 	ShowGadget Loadingwindow
 Until vwprt <> 0
 SetStatusText(Loadingwindow, "Creating 3D scene...")
 
-SetParent(vwprt,MainHwnd);User32.dll				
+api_SetParent(vwprt,MainHwnd);User32.dll				
 api_SetWindowPos( vwprt , 0 , 5 , 30 , 895 , 560 , 1);User32.dll
-ShowWindow% (vwprt ,0) ;User32.dll
+api_ShowWindow% (vwprt ,0) ;User32.dll
 
 HideGadget Loadingwindow
 ShowGadget WinHandle
@@ -353,7 +353,7 @@ Repeat
 				SetGadgetText event_prob_label, ""
 				SetSliderValue event_prob,99
 				DisableGadget event_prob
-				GridGadgetText="Name: "+Map(Grid_SelectedX,Grid_SelectedY)\Name+Chr(13)+"Angle: "+MapAngle(Grid_SelectedX,Grid_SelectedY)+"°"
+				GridGadgetText="Name: "+Map(Grid_SelectedX,Grid_SelectedY)\Name+Chr(13)+"Angle: "+MapAngle(Grid_SelectedX,Grid_SelectedY)+"ï¿½"
 			Else
 				EnableGadget combobox
 				If MapEvent(Grid_SelectedX,Grid_SelectedY)<>"" And MapEvent(Grid_SelectedX,Grid_SelectedY)<>"[none]"
@@ -370,12 +370,12 @@ Repeat
 					SetGadgetText event_prob_label, "Event chance: "+Int(MapEventProb(Grid_SelectedX,Grid_SelectedY)*100)+"%"
 					SetSliderValue event_prob,Int(MapEventProb(Grid_SelectedX,Grid_SelectedY)*100)-1
 					EnableGadget event_prob
-					GridGadgetText="Name: "+Map(Grid_SelectedX,Grid_SelectedY)\Name+Chr(13)+"Angle: "+MapAngle(Grid_SelectedX,Grid_SelectedY)+"°"+Chr(13)+"Event: "+MapEvent(Grid_SelectedX,Grid_SelectedY)+Chr(13)+"Event Chance: "+Int(MapEventProb(Grid_SelectedX,Grid_SelectedY)*100)+"%"
+					GridGadgetText="Name: "+Map(Grid_SelectedX,Grid_SelectedY)\Name+Chr(13)+"Angle: "+MapAngle(Grid_SelectedX,Grid_SelectedY)+"ï¿½"+Chr(13)+"Event: "+MapEvent(Grid_SelectedX,Grid_SelectedY)+Chr(13)+"Event Chance: "+Int(MapEventProb(Grid_SelectedX,Grid_SelectedY)*100)+"%"
 				Else
 					SetGadgetText event_prob_label, ""
 					SetSliderValue event_prob,99
 					DisableGadget event_prob
-					GridGadgetText="Name: "+Map(Grid_SelectedX,Grid_SelectedY)\Name+Chr(13)+"Angle: "+MapAngle(Grid_SelectedX,Grid_SelectedY)+"°"
+					GridGadgetText="Name: "+Map(Grid_SelectedX,Grid_SelectedY)\Name+Chr(13)+"Angle: "+MapAngle(Grid_SelectedX,Grid_SelectedY)+"ï¿½"
 				EndIf
 			EndIf
 			
@@ -400,7 +400,7 @@ Repeat
 			SetGadgetText event_prob_label, ""
 			SetSliderValue event_prob,99
 			DisableGadget event_prob
-			GridGadgetText="Name: "+ForestPlace(Grid_SelectedX,Grid_SelectedY)\Name+Chr(13)+"Angle: "+ForestPlaceAngle(Grid_SelectedX,Grid_SelectedY)+"°"
+			GridGadgetText="Name: "+ForestPlace(Grid_SelectedX,Grid_SelectedY)\Name+Chr(13)+"Angle: "+ForestPlaceAngle(Grid_SelectedX,Grid_SelectedY)+"ï¿½"
 		Else
 			For rt.RoomTemplates = Each RoomTemplates
 				If rt = MTRoom(Grid_SelectedX,Grid_SelectedY)
@@ -414,7 +414,7 @@ Repeat
 			SetGadgetText event_prob_label, ""
 			SetSliderValue event_prob,99
 			DisableGadget event_prob
-			GridGadgetText="Name: "+MTRoom(Grid_SelectedX,Grid_SelectedY)\Name+Chr(13)+"Angle: "+MTRoomAngle(Grid_SelectedX,Grid_SelectedY)+"°"
+			GridGadgetText="Name: "+MTRoom(Grid_SelectedX,Grid_SelectedY)\Name+Chr(13)+"Angle: "+MTRoomAngle(Grid_SelectedX,Grid_SelectedY)+"ï¿½"
 		EndIf
 		
 		CloseFile f
@@ -642,10 +642,10 @@ Repeat
 							If PrevSelectedX<>Grid_SelectedX Or PrevSelectedY<>Grid_SelectedY
 								ChangeGridGadget = True
 								If MapEvent(x,y)<>"" And MapEvent(x,y)<>"[none]"
-									GridGadgetText = "Name: "+Map(x,y)\Name+Chr(13)+"Angle: "+MapAngle(x,y)+"°"+Chr(13)+"Event: "+MapEvent(x,y)+Chr(13)+"Event Chance: "+Int(MapEventProb(x,y)*100)+"%"
+									GridGadgetText = "Name: "+Map(x,y)\Name+Chr(13)+"Angle: "+MapAngle(x,y)+"ï¿½"+Chr(13)+"Event: "+MapEvent(x,y)+Chr(13)+"Event Chance: "+Int(MapEventProb(x,y)*100)+"%"
 									SetSliderValue(event_prob,Int(MapEventProb(x,y)*100)-1)
 								Else
-									GridGadgetText = "Name: "+Map(x,y)\Name+Chr(13)+"Angle: "+MapAngle(x,y)+"°"
+									GridGadgetText = "Name: "+Map(x,y)\Name+Chr(13)+"Angle: "+MapAngle(x,y)+"ï¿½"
 									;SetSliderValue(event_prob,99)
 								EndIf
 								If GadgetText(event_prob_label)<>""
@@ -686,9 +686,9 @@ Repeat
 								If prevAngle<>MapAngle(Grid_SelectedX,Grid_SelectedY)
 									ChangeGridGadget = True
 									If MapEvent(Grid_SelectedX,Grid_SelectedY)<>"" And MapEvent(Grid_SelectedX,Grid_SelectedY)<>"[none]"
-										GridGadgetText="Name: "+Map(Grid_SelectedX,Grid_SelectedY)\Name+Chr(13)+"Angle: "+MapAngle(Grid_SelectedX,Grid_SelectedY)+"°"+Chr(13)+"Event: "+MapEvent(Grid_SelectedX,Grid_SelectedY)+Chr(13)+"Event Chance: "+Int(MapEventProb(Grid_SelectedX,Grid_SelectedY)*100)+"%"
+										GridGadgetText="Name: "+Map(Grid_SelectedX,Grid_SelectedY)\Name+Chr(13)+"Angle: "+MapAngle(Grid_SelectedX,Grid_SelectedY)+"ï¿½"+Chr(13)+"Event: "+MapEvent(Grid_SelectedX,Grid_SelectedY)+Chr(13)+"Event Chance: "+Int(MapEventProb(Grid_SelectedX,Grid_SelectedY)*100)+"%"
 									Else
-										GridGadgetText="Name: "+Map(Grid_SelectedX,Grid_SelectedY)\Name+Chr(13)+"Angle: "+MapAngle(Grid_SelectedX,Grid_SelectedY)+"°"
+										GridGadgetText="Name: "+Map(Grid_SelectedX,Grid_SelectedY)\Name+Chr(13)+"Angle: "+MapAngle(Grid_SelectedX,Grid_SelectedY)+"ï¿½"
 									EndIf
 								EndIf
 							EndIf
@@ -828,7 +828,7 @@ Repeat
 						If Grid_SelectedX=x And Grid_SelectedY=y
 							If PrevSelectedX<>Grid_SelectedX Or PrevSelectedY<>Grid_SelectedY
 								ChangeGridGadget = True
-								GridGadgetText = "Name: "+ForestPlace(x,y)\Name+Chr(13)+"Angle: "+ForestPlaceAngle(x,y)+"°"
+								GridGadgetText = "Name: "+ForestPlace(x,y)\Name+Chr(13)+"Angle: "+ForestPlaceAngle(x,y)+"ï¿½"
 							EndIf
 						EndIf
 					EndIf
@@ -862,7 +862,7 @@ Repeat
 							DrawImage Arrows(Floor(ForestPlaceAngle(Grid_SelectedX,Grid_SelectedY)/90)),Float(width-1)/Float(ForestGridSize+1)*Grid_SelectedX+width2,Float(height-1)/Float(ForestGridSize+1)*Grid_SelectedY+height2
 							If prevAngle<>ForestPlaceAngle(Grid_SelectedX,Grid_SelectedY)
 								ChangeGridGadget = True
-								GridGadgetText="Name: "+ForestPlace(Grid_SelectedX,Grid_SelectedY)\Name+Chr(13)+"Angle: "+ForestPlaceAngle(Grid_SelectedX,Grid_SelectedY)+"°"
+								GridGadgetText="Name: "+ForestPlace(Grid_SelectedX,Grid_SelectedY)\Name+Chr(13)+"Angle: "+ForestPlaceAngle(Grid_SelectedX,Grid_SelectedY)+"ï¿½"
 							EndIf
 						EndIf
 					EndIf
@@ -980,7 +980,7 @@ Repeat
 						If Grid_SelectedX=x And Grid_SelectedY=y
 							If PrevSelectedX<>Grid_SelectedX Or PrevSelectedY<>Grid_SelectedY
 								ChangeGridGadget = True
-								GridGadgetText = "Name: "+MTRoom(x,y)\Name+Chr(13)+"Angle: "+MTRoomAngle(x,y)+"°"
+								GridGadgetText = "Name: "+MTRoom(x,y)\Name+Chr(13)+"Angle: "+MTRoomAngle(x,y)+"ï¿½"
 							EndIf
 						EndIf
 					EndIf
@@ -1014,7 +1014,7 @@ Repeat
 							DrawImage Arrows(Floor(MTRoomAngle(Grid_SelectedX,Grid_SelectedY)/90)),Float(width)/Float(MT_GridSize+1)*Grid_SelectedX+width2,Float(height)/Float(MT_GridSize+1)*Grid_SelectedY+height2
 							If prevAngle<>MTRoomAngle(Grid_SelectedX,Grid_SelectedY)
 								ChangeGridGadget = True
-								GridGadgetText="Name: "+MTRoom(Grid_SelectedX,Grid_SelectedY)\Name+Chr(13)+"Angle: "+MTRoomAngle(Grid_SelectedX,Grid_SelectedY)+"°"
+								GridGadgetText="Name: "+MTRoom(Grid_SelectedX,Grid_SelectedY)\Name+Chr(13)+"Angle: "+MTRoomAngle(Grid_SelectedX,Grid_SelectedY)+"ï¿½"
 							EndIf
 						EndIf
 					EndIf
@@ -1032,12 +1032,12 @@ Repeat
 				If event_name$<>"" And event_name$<>"[none]"
 					MapEvent(Grid_SelectedX,Grid_SelectedY)=event_name
 					MapEventProb(Grid_SelectedX,Grid_SelectedY)=Float((SliderValue(event_prob)+1)/100.0)
-					GridGadgetText="Name: "+Map(Grid_SelectedX,Grid_SelectedY)\Name+Chr(13)+"Angle: "+MapAngle(Grid_SelectedX,Grid_SelectedY)+"°"+Chr(13)+"Event: "+MapEvent(Grid_SelectedX,Grid_SelectedY)+Chr(13)+"Event Chance: "+Int(MapEventProb(Grid_SelectedX,Grid_SelectedY)*100)+"%"
+					GridGadgetText="Name: "+Map(Grid_SelectedX,Grid_SelectedY)\Name+Chr(13)+"Angle: "+MapAngle(Grid_SelectedX,Grid_SelectedY)+"ï¿½"+Chr(13)+"Event: "+MapEvent(Grid_SelectedX,Grid_SelectedY)+Chr(13)+"Event Chance: "+Int(MapEventProb(Grid_SelectedX,Grid_SelectedY)*100)+"%"
 					ChangeGridGadget=True
 				Else
 					MapEvent(Grid_SelectedX,Grid_SelectedY)=event_name
 					MapEventProb(Grid_SelectedX,Grid_SelectedY)=0.0
-					GridGadgetText="Name: "+Map(Grid_SelectedX,Grid_SelectedY)\Name+Chr(13)+"Angle: "+MapAngle(Grid_SelectedX,Grid_SelectedY)+"°"
+					GridGadgetText="Name: "+Map(Grid_SelectedX,Grid_SelectedY)\Name+Chr(13)+"Angle: "+MapAngle(Grid_SelectedX,Grid_SelectedY)+"ï¿½"
 					ChangeGridGadget=True
 				EndIf
 			EndIf
@@ -1160,7 +1160,7 @@ Repeat
             ;also in Abhangigkeit des Gadgets zeigen und verstecken
 			Select EventData()
 				Case 0
-                 	ShowWindow% (vwprt ,0)
+                 	api_ShowWindow% (vwprt ,0)
                   	ShowGadget listbox 
 					ShowGadget event_desc 
 					ShowGadget txtbox 
@@ -1176,7 +1176,7 @@ Repeat
 					SetGadgetShape(tab, 0,5,ResWidth/4+20,ResHeight-60)
 					ShowGrid = True
 				Case 1
-					ShowWindow% (vwprt ,1) ;User32.dll
+					api_ShowWindow% (vwprt ,1) ;User32.dll
               		HideGadget listbox 
 					HideGadget event_desc 
 					HideGadget txtbox 
@@ -1408,7 +1408,7 @@ Repeat
 				y=Grid_SelectedY
 				MapEventProb(x,y)=Float((SliderValue(event_prob)+1)/100.0)
 				If MapEvent(x,y)<>""
-					GridGadgetText = "Name: "+Map(x,y)\Name+Chr(13)+"Angle: "+MapAngle(x,y)+"°"+Chr(13)+"Event: "+MapEvent(x,y)+Chr(13)+"Event Chance: "+Int(MapEventProb(x,y)*100)+"%"
+					GridGadgetText = "Name: "+Map(x,y)\Name+Chr(13)+"Angle: "+MapAngle(x,y)+"ï¿½"+Chr(13)+"Event: "+MapEvent(x,y)+Chr(13)+"Event Chance: "+Int(MapEventProb(x,y)*100)+"%"
 				EndIf
 				SetGadgetText grid_room_info, GridGadgetText
 			EndIf
