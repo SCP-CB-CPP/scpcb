@@ -1071,6 +1071,28 @@ Function ExecuteConsoleCommand(cmd$, quiet% = False)
 
             If i <> -1 Then CreateConsoleMsg("Achievement with ID "+searched+" doesn't exist.",255,150,0)
             ;[End Block]
+        Case "revokeachievement"
+            ;[Block]
+            If Instr(cmd, " ")<>0 Then
+                StrTemp$ = Lower(Right(cmd, Len(cmd) - Instr(cmd, " ")))
+            Else
+                StrTemp$ = ""
+            EndIf
+            
+            i% = 0
+            Local searched2% = Int(StrTemp)
+            For a.Achievements = Each Achievements
+                If i = searched2%
+                    a\Unlocked = False
+                    CreateConsoleMsg("Achievement "+a\LocalName+" revoked.")
+                    i = -1
+                    Exit
+                EndIf
+                i = i + 1
+            Next
+
+            If i <> -1 Then CreateConsoleMsg("Achievement with ID "+searched2+" doesn't exist.",255,150,0)
+            ;[End Block]
         Case "427state"
             ;[Block]
             StrTemp$ = Lower(Right(cmd, Len(cmd) - Instr(cmd, " ")))
